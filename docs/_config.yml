@@ -1,0 +1,9 @@
+title: BLOQLY
+
+description: Consensus engine with smart contracts
+
+site.github.repository_url: https://github.com/slavasn/bloqly
+
+theme: jekyll-theme-cayman
+
+google_analytics: UA-118763286-1
