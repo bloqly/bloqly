@@ -1,6 +1,7 @@
 # Bloqly
 
 This is a work in progress/prototype.
+[![Build Status](https://travis-ci.org/slavasn/bloqly.svg?branch=master)](https://travis-ci.org/slavasn/bloqly)
 
 ## Consensus engine prototype, functional smart contracts
 
