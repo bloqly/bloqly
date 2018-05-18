@@ -1,6 +1,6 @@
 # Bloqly
 
-This is a work in progress/prototype.
+JavaScript Smart Contracts Engine on PBFT blockchain. This is a work in progress/prototype.
 
 [![Build Status](https://travis-ci.org/slavasn/bloqly.svg?branch=master)](https://travis-ci.org/slavasn/bloqly)
 
