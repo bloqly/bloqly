@@ -4,7 +4,7 @@ import org.bloqly.machine.component.CryptoService
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.decodeFromString
+import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
 
@@ -43,10 +43,10 @@ class BlockService(
                     )
             )
 
-            val privateKey = decodeFromString(proposer.privateKey)
+            val privateKey = decodeFromString16(proposer.privateKey)
             val signature = cryptoService.sign(privateKey, dataToSign)
             val blockHash = cryptoService.digest(signature)
-            val blockId = EncodingUtils.encodeToString(blockHash)
+            val blockId = EncodingUtils.encodeToString16(blockHash)
 
             Block(
                     id = blockId,

@@ -8,7 +8,7 @@ import org.bloqly.machine.model.VoteId
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.decodeFromString
+import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.ZoneOffset
@@ -39,7 +39,7 @@ class VoteService(
         )
 
         val dataHash = cryptoService.digest(dataToSign)
-        val privateKey = decodeFromString(validator.privateKey)
+        val privateKey = decodeFromString16(validator.privateKey)
         val signature = cryptoService.sign(privateKey, dataHash)
 
         val vote = Vote(

@@ -53,7 +53,7 @@ class SerializationService(
 
         val signature = transactionVO.signature.toByteArray()
         val publicKeyHash = cryptoService.digest(signature)
-        val origin = EncodingUtils.encodeToString(publicKeyHash)
+        val origin = EncodingUtils.encodeToString16(publicKeyHash)
         val transactionType = TransactionType.valueOf(transactionVO.transactionType.name)
 
         return Transaction(
@@ -64,7 +64,7 @@ class SerializationService(
                 destination = transactionVO.destination,
                 self = transactionVO.self,
                 key = transactionVO.key,
-                value = transactionVO.value.toByteArray(),
+                value = EncodingUtils.decodeFromString64(transactionVO.value),
                 transactionType = transactionType,
                 referencedBlockId = transactionVO.referencedBlockId,
                 timestamp = transactionVO.timestamp,
@@ -81,11 +81,11 @@ class SerializationService(
                 destination = transaction.destination,
                 self = transaction.self,
                 key = transaction.key,
-                value = EncodingUtils.encodeToString(transaction.value),
+                value = EncodingUtils.encodeToString64(transaction.value),
                 transactionType = transaction.transactionType,
                 referencedBlockId = transaction.referencedBlockId,
                 timestamp = transaction.timestamp,
-                signature = EncodingUtils.encodeToString(transaction.signature),
+                signature = EncodingUtils.encodeToString16(transaction.signature),
                 publicKey = transaction.publicKey
         )
     }
@@ -106,7 +106,7 @@ class SerializationService(
                 height = vote.id.height,
                 blockId = vote.blockId,
                 timestamp = vote.timestamp,
-                signature = EncodingUtils.encodeToString(vote.signature)
+                signature = EncodingUtils.encodeToString16(vote.signature)
         )
     }
 
@@ -122,7 +122,7 @@ class SerializationService(
                 id = voteId,
                 blockId = voteVO.blockId,
                 timestamp = voteVO.timestamp,
-                signature = EncodingUtils.decodeFromString(voteVO.signature)
+                signature = EncodingUtils.decodeFromString16(voteVO.signature)
         )
     }
 
@@ -135,9 +135,9 @@ class SerializationService(
                 timestamp = block.timestamp,
                 parentHash = block.parentHash,
                 proposerId = block.proposerId,
-                txHash = EncodingUtils.encodeToString(block.txHash),
-                validatorTxHash = EncodingUtils.encodeToString(block.validatorTxHash),
-                signature = EncodingUtils.encodeToString(block.signature)
+                txHash = EncodingUtils.encodeToString16(block.txHash),
+                validatorTxHash = EncodingUtils.encodeToString16(block.validatorTxHash),
+                signature = EncodingUtils.encodeToString16(block.signature)
         )
     }
 

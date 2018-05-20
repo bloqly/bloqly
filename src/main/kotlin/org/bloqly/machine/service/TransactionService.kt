@@ -7,8 +7,8 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.decodeFromString
-import org.bloqly.machine.util.EncodingUtils.encodeToString
+import org.bloqly.machine.util.EncodingUtils.decodeFromString16
+import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.springframework.stereotype.Service
 
 @Service
@@ -41,7 +41,7 @@ class TransactionService(
                 EncodingUtils.longToBytes(timestamp)
         )
 
-        val privateKey = decodeFromString(origin.privateKey)
+        val privateKey = decodeFromString16(origin.privateKey)
 
         val signature = cryptoService.sign(
                 privateKey,
@@ -49,7 +49,7 @@ class TransactionService(
         )
 
         val txHash = cryptoService.digest(signature)
-        val transactionId = encodeToString(txHash)
+        val transactionId = encodeToString16(txHash)
 
         return Transaction(
                 id = transactionId,

@@ -11,7 +11,7 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.encodeToString
+import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.bloqly.machine.util.ParameterUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -52,12 +52,12 @@ class AccountService(
         val privateKey = cryptoService.generatePrivateKey()
         val publicKey = cryptoService.getPublicFor(privateKey)
         val publicKeyHash = cryptoService.digest(publicKey)
-        val accountId = EncodingUtils.encodeToString(publicKeyHash)
+        val accountId = EncodingUtils.encodeToString16(publicKeyHash)
 
         return Account(
                 id = accountId,
-                publicKey = encodeToString(publicKey),
-                privateKey = encodeToString(privateKey)
+                publicKey = encodeToString16(publicKey),
+                privateKey = encodeToString16(privateKey)
         )
     }
 
@@ -87,9 +87,9 @@ class AccountService(
 
     fun importAccount(publicKey: String, privateKey: String?): Account {
 
-        val publicKeyBytes = EncodingUtils.decodeFromString(publicKey)
+        val publicKeyBytes = EncodingUtils.decodeFromString16(publicKey)
         val publicKeyHash = cryptoService.digest(publicKeyBytes)
-        val accountId = EncodingUtils.encodeToString(publicKeyHash)
+        val accountId = EncodingUtils.encodeToString16(publicKeyHash)
 
         val account = Account(
                 id = accountId,

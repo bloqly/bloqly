@@ -37,13 +37,9 @@ class NodeQueryService(
         log.info("Query host $server for nodes")
 
         val nodeList = try {
-
             restTemplate.getForObject(path, NodeListVO::class.java)
-
         } catch (e: Exception) {
-
             log.info("Could not query path $path for nodes. ${e.message}")
-
             NodeListVO(nodes = emptyList())
         }
 
@@ -63,11 +59,8 @@ class NodeQueryService(
         val path = "http://$server/transactions"
 
         try {
-
             restTemplate.postForObject(path, HttpEntity(transactionListVO), Void.TYPE)
-
         } catch (e: Exception) {
-
             log.error("Could not send transactions to $server. ${e.message}", e.message)
         }
     }

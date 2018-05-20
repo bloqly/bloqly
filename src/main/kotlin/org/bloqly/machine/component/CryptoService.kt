@@ -19,7 +19,7 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.decodeFromString
+import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
@@ -126,7 +126,7 @@ class CryptoService {
 
         val txHash = digest(transaction.signature)
 
-        val transactionId = EncodingUtils.encodeToString(txHash)
+        val transactionId = EncodingUtils.encodeToString16(txHash)
 
         if (transactionId != transaction.id) {
             return false
@@ -135,7 +135,7 @@ class CryptoService {
         return verify(
                 message = digest(dataToVerify),
                 signature = transaction.signature,
-                publicKey = decodeFromString(transaction.publicKey)
+                publicKey = decodeFromString16(transaction.publicKey)
         )
     }
 
@@ -151,7 +151,7 @@ class CryptoService {
 
         val dataHash = digest(dataToVerify)
 
-        val publicKey = decodeFromString(validator.publicKey)
+        val publicKey = decodeFromString16(validator.publicKey)
 
         return verify(dataHash, vote.signature, publicKey)
     }

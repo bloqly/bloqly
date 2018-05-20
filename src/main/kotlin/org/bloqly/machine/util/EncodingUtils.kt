@@ -6,15 +6,23 @@ import java.nio.ByteBuffer
 object EncodingUtils {
 
     private val ENCODER16 = BaseEncoding.base16()
+    private val ENCODER64 = BaseEncoding.base64()
 
     const val LONG_BYTES = 8
 
-    fun encodeToString(data: ByteArray?): String {
+    fun encodeToString64(data: ByteArray?): String {
+        data ?: throw IllegalArgumentException()
+        return ENCODER64.encode(data)
+    }
+
+    fun encodeToString16(data: ByteArray?): String {
         data ?: throw IllegalArgumentException()
         return ENCODER16.encode(data)
     }
 
-    fun decodeFromString(data: String?): ByteArray = ENCODER16.decode(data ?: throw RuntimeException())
+    fun decodeFromString16(data: String?): ByteArray = ENCODER16.decode(data ?: throw RuntimeException())
+
+    fun decodeFromString64(data: String?): ByteArray = ENCODER64.decode(data ?: throw RuntimeException())
 
     fun longToBytes(value: Long): ByteArray {
 
