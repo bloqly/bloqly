@@ -35,12 +35,16 @@ class SchedulerService(
 
         val transactions = transactionService.getNewTransactions()
 
-        log.info("Found ${transactions.size} transactions to send")
-
         if (transactions.isNotEmpty()) {
+
+            log.info("Found ${transactions.size} transactions to send")
 
             val transactionVOs = serializationService.transactionsToVO(transactions)
             eventSenderService.sendTransactions(transactionVOs);
+
+        } else {
+
+            log.info("There are no transactions to send, skipping")
         }
     }
 

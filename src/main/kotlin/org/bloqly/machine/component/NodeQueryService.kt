@@ -42,16 +42,18 @@ class NodeQueryService(
 
         } catch (e: Exception) {
 
-            log.error("Could not query path $path for nodes. ${e.message}")
+            log.info("Could not query path $path for nodes. ${e.message}")
 
             NodeListVO(nodes = emptyList())
         }
 
-        log.info("Node $server returned  ${nodeList.nodes.size} nodes")
+        if (nodeList.nodes.isNotEmpty()) {
+            log.info("Node $server returned  ${nodeList.nodes.size} nodes")
 
-        nodeList.nodes.forEach {
-            nodeService.addNode(
-                    serializationService.nodeFromVO(it))
+            nodeList.nodes.forEach {
+                nodeService.addNode(
+                        serializationService.nodeFromVO(it))
+            }
         }
     }
 
