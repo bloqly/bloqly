@@ -12,6 +12,7 @@ import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.vo.BlockDataVO
 import org.bloqly.machine.vo.BlockVO
 import org.bloqly.machine.vo.NodeVO
+import org.bloqly.machine.vo.TransactionListVO
 import org.bloqly.machine.vo.TransactionVO
 import org.bloqly.machine.vo.VoteVO
 import org.springframework.stereotype.Component
@@ -86,6 +87,14 @@ class SerializationService(
                 timestamp = transaction.timestamp,
                 signature = EncodingUtils.encodeToString(transaction.signature),
                 publicKey = transaction.publicKey
+        )
+    }
+
+    fun transactionsToVO(transactions: List<Transaction>): TransactionListVO {
+        return TransactionListVO(
+                transactions = transactions.map {
+                    transactionToVO(it)
+                }
         )
     }
 

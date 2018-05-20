@@ -1,8 +1,6 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.model.Node
-import org.bloqly.machine.service.NodeService
-import org.slf4j.LoggerFactory
+import org.bloqly.machine.service.TransactionService
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -13,33 +11,26 @@ import org.springframework.stereotype.Component
 class SchedulerService(
 
     private val nodeQueryService: NodeQueryService,
-    private val nodeService: NodeService) {
+    private val transactionService: TransactionService,
+    private val eventSenderService: EventSenderService,
+    private val serializationService: SerializationService
 
-    private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
+) {
 
     @Scheduled(fixedDelay = 5000)
     fun queryForNodes() {
 
-        val nodes = getNodes()
-
-        log.debug("Found ${nodes.size} hosts, start querying for nodes list")
-
-        nodes.forEach {
-            nodeQueryService.queryForNodes(it)
-        }
+        nodeQueryService.queryForNodes()
     }
 
     @Scheduled(fixedDelay = 5000)
-    fun queryForTransactions() {
+    fun sendTransactions() {
 
-        val nodes = getNodes()
+        val transactions = transactionService.getNewTransactions()
 
-        log.debug("Found ${nodes.size} hosts, start querying for transactions")
+        val transactionVOs = serializationService.transactionsToVO(transactions)
 
-        nodes.forEach { nodeQueryService.queryForTransactions(it) }
+        eventSenderService.sendTransactions(transactionVOs);
     }
 
-    private fun getNodes(): List<Node> {
-        return nodeService.getNodesToQuery()
-    }
 }

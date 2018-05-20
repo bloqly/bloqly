@@ -1,16 +1,17 @@
 package org.bloqly.machine
 
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.junit.runner.RunWith
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventSenderService
 import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.vo.TransactionListVO
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
@@ -48,9 +49,11 @@ class TestWorkflow {
     @Test
     fun testSingleRound() {
 
-        val transaction = testService.newTransaction()
+        val transactionVO = testService.newTransaction()
 
-        eventSenderService.sendTransactions(listOf(transaction))
+        eventSenderService.sendTransactions(
+                TransactionListVO(transactions = listOf(transactionVO))
+        )
 
         sendVotes()
 
