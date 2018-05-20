@@ -26,10 +26,7 @@ object Shell {
         if (commandLine.hasOption("command")) {
             try {
                 val command = commandLine.getOptionValue("command")
-                println("command: $command")
-
                 shell.execute(command)
-                println("OK")
             } catch (e: Exception) {
                 log.error("Error executing command", e)
             }
