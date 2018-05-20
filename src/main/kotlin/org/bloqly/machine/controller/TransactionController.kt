@@ -4,7 +4,6 @@ import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.vo.TransactionListVO
-import org.bloqly.machine.vo.TransactionVO
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -20,10 +19,10 @@ class TransactionController(
     private val transactionService: TransactionService,
     private val serializationService: SerializationService) {
 
-    @PostMapping
-    fun onTransaction(@RequestBody transactionVO: TransactionVO) {
+    @PostMapping(consumes = ["application/x-yaml", "application/json"])
+    fun onTransaction(@RequestBody transactionVOs: TransactionListVO) {
 
-        eventReceiverService.receiveTransactions(listOf(transactionVO))
+        eventReceiverService.receiveTransactions(transactionVOs.transactions)
     }
 
     @GetMapping

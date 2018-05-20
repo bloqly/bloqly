@@ -25,10 +25,15 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'application'
 apply plugin: 'kotlin-allopen'
 apply plugin: 'kotlin-jpa'
+apply plugin: 'kotlin-noarg'
 
 allOpen {
     annotation('org.springframework.boot.autoconfigure.SpringBootApplication')
     annotation('org.springframework.stereotype.Component')
+}
+
+noArg {
+    annotation("org.bloqly.machine.annotation.ValueObject")
 }
 
 bootJar {

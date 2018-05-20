@@ -1,7 +1,9 @@
 package org.bloqly.machine.vo
 
+import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.TransactionType
 
+@ValueObject
 data class TransactionVO(
     val id: String,
     val space: String,

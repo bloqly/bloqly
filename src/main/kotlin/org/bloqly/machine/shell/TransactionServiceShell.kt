@@ -62,4 +62,12 @@ class TransactionServiceShell(
     fun count(): String {
         return transactionRepository.count().toString()
     }
+
+    fun list(): String {
+
+        val transactions = serializationService.transactionsToVO(
+                transactionRepository.findAll().toList())
+
+        return "\n" + objectWriter.writeValueAsString(transactions)
+    }
 }
