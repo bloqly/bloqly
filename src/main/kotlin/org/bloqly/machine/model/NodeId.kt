@@ -4,7 +4,7 @@ import java.io.Serializable
 import javax.persistence.Embeddable
 
 @Embeddable
-class NodeId(
+data class NodeId(
 
     val host: String,
 

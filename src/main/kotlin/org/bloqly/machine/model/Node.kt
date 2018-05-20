@@ -4,7 +4,7 @@ import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 
 @Entity
-class Node(
+data class Node(
 
     @EmbeddedId
     val id: NodeId,

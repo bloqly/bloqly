@@ -4,6 +4,13 @@ bloq.init('main','./src/test/resources/blocks/currency-js')
 ./release/run.sh -database db2 -command "bloq.init('main','../src/test/resources/blocks/currency-js')"
 ./release/run.sh -database db3 -command "bloq.init('main','../src/test/resources/blocks/currency-js')"
 
+./release/run.sh -database db3 -command "txs.createTransaction('9EB1858D8BBBDD10BA3E4EE83BE51EEF1BCB95CAFDA89FA57E5AE8342AB97A3F','475653C1BB33E7AC09AD1C98FF4EE9B1A9084AA4B15D2E8A39FEC06227DE7986','1')"
+
+./release/run.sh -database db1 -command "txs.count()"
+./release/run.sh -database db2 -command "txs.count()"
+./release/run.sh -database db3 -command "txs.count()"
+
+./release/run.sh -database db3 -command "txs.list()"
 
 ./release/run.sh -database db1 -server -port 9901 -nodes localhost:9902,localhost:9903 -validators A3DDB47B4849BF1DD90580604405ABC91DECCFF68F6E787BDBEACED3F640B669
 ./release/run.sh -database db2 -server -port 9902 -nodes localhost:9901,localhost:9903 -validators 32AC890D2E3ECA40888749A099524E23458598B764CAA752EF07A773AE479E91

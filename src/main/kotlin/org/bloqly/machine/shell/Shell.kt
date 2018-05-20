@@ -15,11 +15,13 @@ object Shell {
 
         val accountServiceShell = context.getBean("accountServiceShell")
         val blockServiceShell = context.getBean("blockServiceShell")
+        val transactionServiceShell = context.getBean("transactionServiceShell")
 
         val binding = Binding()
 
         binding.setProperty("account", accountServiceShell)
         binding.setProperty("bloq", blockServiceShell)
+        binding.setProperty("txs", transactionServiceShell)
 
         val shell = Groovysh(binding, IO())
 

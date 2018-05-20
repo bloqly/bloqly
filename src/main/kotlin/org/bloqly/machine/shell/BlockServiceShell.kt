@@ -43,4 +43,5 @@ class BlockServiceShell(
 
         return "\n" + objectWriter.writeValueAsString(validators)
     }
+
 }
