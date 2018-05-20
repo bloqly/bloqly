@@ -22,6 +22,10 @@ object ApplicationUtils {
         properties["server.port"] = commandLine.getOptionValue("port", Application.DEFAULT_PORT)
         properties["nodes"] = commandLine.getOptionValue("nodes", "")
 
+        if (commandLine.hasOption("validators")) {
+            properties["validators"] = commandLine.getOptionValue("validators")
+        }
+
         val appBuilder = SpringApplicationBuilder()
                 .profiles("server")
                 .properties(properties)

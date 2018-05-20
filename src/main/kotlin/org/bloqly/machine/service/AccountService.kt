@@ -13,6 +13,7 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.encodeToString
 import org.bloqly.machine.util.ParameterUtils
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
 import java.math.BigInteger
@@ -26,7 +27,8 @@ class AccountService(
     private val accountRepository: AccountRepository,
     private val propertyRepository: PropertyRepository,
     private val blockRepository: BlockRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    @Value("\${validators:}") private val validators: Array<String>
 
 ) {
 
@@ -64,7 +66,8 @@ class AccountService(
         val powerProperties = propertyRepository.findBySpaceAndKey(space, POWER_KEY)
         val accountIds = powerProperties.map { it.id.target }
 
-        return accountRepository.findAllById(accountIds).toList()
+        return accountRepository.findAllById(accountIds)
+                .filter { validators.isEmpty() || validators.contains(it.id) }
     }
 
     fun getAccountPower(space: String, accountId: String): BigInteger {
