@@ -16,6 +16,7 @@ class BlockServiceShell(
 
     fun init(space: String, baseDir: String): String {
 
+        println("HERE.init")
         eventProcessorService.createBlockchain(space, baseDir)
 
         return "OK"
