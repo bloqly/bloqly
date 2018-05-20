@@ -16,7 +16,7 @@ class AccountServiceShell(
 
         val account = accountService.newAccount()
 
-        return objectWriter.writeValueAsString(account).replace("---", "")
+        return objectWriter.writeValueAsString(account)
     }
 
 }

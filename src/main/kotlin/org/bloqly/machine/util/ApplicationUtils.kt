@@ -52,6 +52,6 @@ object ApplicationUtils {
                 .build()
                 .run()
 
-        Shell.run(context)
+        Shell.run(context, commandLine)
     }
 }

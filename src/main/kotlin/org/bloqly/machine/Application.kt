@@ -29,7 +29,7 @@ class Application {
 
                 ApplicationUtils.startServer(properties, commandLine)
 
-            } else if (commandLine.hasOption("console")) {
+            } else if (commandLine.hasOption("console") || commandLine.hasOption("command")) {
 
                 ApplicationUtils.startConsole(properties, commandLine)
 

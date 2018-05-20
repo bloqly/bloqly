@@ -11,6 +11,7 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
+import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.ParameterUtils.writeLong
@@ -34,6 +35,7 @@ class TestService(
     private val accountService: AccountService,
     private val eventProcessorService: EventProcessorService,
     private val transactionService: TransactionService,
+    private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val serializationService: SerializationService
 
@@ -53,6 +55,7 @@ class TestService(
         propertyRepository.deleteAll()
         blockRepository.deleteAll()
         spaceRepository.deleteAll()
+        transactionRepository.deleteAll()
     }
 
     fun getRoot(): Account = accounts.first()

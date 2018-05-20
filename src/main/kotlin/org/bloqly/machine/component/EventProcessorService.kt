@@ -40,7 +40,9 @@ class EventProcessorService(
     private val accountRepository: AccountRepository,
     private val voteRepository: VoteRepository,
     private val transactionRepository: TransactionRepository,
-    private val propertyService: PropertyService) {
+    private val propertyService: PropertyService
+
+) {
 
     private val newProposals: MutableSet<BlockData> = mutableSetOf()
 

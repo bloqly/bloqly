@@ -15,7 +15,8 @@ object OptionUtils {
         options.addOption("port", true, "server port")
         options.addOption("database", true, "database name")
         options.addOption("nodes", true, "list of nodes")
-        options.addOption("validators", false, "list of active validators")
+        options.addOption("validators", true, "list of active validators")
+        options.addOption("command", true, "command to execute")
 
         return DefaultParser().parse(options, args)
     }

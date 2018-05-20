@@ -24,6 +24,7 @@ class ApplicationConfiguration {
         val yamlFactory = YAMLFactory()
 
         yamlFactory.enable(YAMLGenerator.Feature.INDENT_ARRAYS)
+        yamlFactory.disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
 
         return ObjectMapper(yamlFactory)
     }

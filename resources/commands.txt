@@ -1,0 +1,3 @@
+
+
+./release/run.sh -database db1 -command "bloq.init('main', '../src/test/resources/blocks/currency-js')"
