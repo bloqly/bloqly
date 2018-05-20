@@ -5,8 +5,6 @@ bloq.init('main','./src/test/resources/blocks/currency-js')
 ./release/run.sh -database db3 -command "bloq.init('main','../src/test/resources/blocks/currency-js')"
 
 
-./release/run.sh -database db1 -server -validators A3DDB47B4849BF1DD90580604405ABC91DECCFF68F6E787BDBEACED3F640B669
-./release/run.sh -database db2 -server -validators 32AC890D2E3ECA40888749A099524E23458598B764CAA752EF07A773AE479E91
-./release/run.sh -database db3 -server -validators 9EB1858D8BBBDD10BA3E4EE83BE51EEF1BCB95CAFDA89FA57E5AE8342AB97A3F
-
-
+./release/run.sh -database db1 -server -port 9901 -nodes localhost:9902,localhost:9903 -validators A3DDB47B4849BF1DD90580604405ABC91DECCFF68F6E787BDBEACED3F640B669
+./release/run.sh -database db2 -server -port 9902 -nodes localhost:9901,localhost:9903 -validators 32AC890D2E3ECA40888749A099524E23458598B764CAA752EF07A773AE479E91
+./release/run.sh -database db3 -server -port 9903 -nodes localhost:9901,localhost:9902 -validators 9EB1858D8BBBDD10BA3E4EE83BE51EEF1BCB95CAFDA89FA57E5AE8342AB97A3F

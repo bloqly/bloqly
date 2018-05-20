@@ -5,6 +5,7 @@ import org.bloqly.machine.component.NodeQueryService
 import org.bloqly.machine.vo.BlockDataVO
 import org.bloqly.machine.vo.TransactionListVO
 import org.bloqly.machine.vo.VoteVO
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 
@@ -17,6 +18,8 @@ class NetworkEventSenderService(
 
 ) : EventSenderService {
 
+    private val log = LoggerFactory.getLogger(NetworkEventSenderService::class.simpleName)
+
     override fun sendVotes(votes: List<VoteVO>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -25,6 +28,9 @@ class NetworkEventSenderService(
         val nodes = nodeService.getNodesToQuery()
 
         nodes.forEach { node ->
+
+            log.info("Send transactions to node $node")
+
             nodeQueryService.sendTransactions(node, transactionListVO)
         }
     }

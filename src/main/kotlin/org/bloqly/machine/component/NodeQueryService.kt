@@ -24,7 +24,7 @@ class NodeQueryService(
 
         val nodes = nodeService.getNodesToQuery()
 
-        log.debug("Found ${nodes.size} hosts, start querying for nodes list")
+        log.info("Found ${nodes.size} hosts, start querying for nodes list")
 
         nodes.forEach { queryForNodes(it) }
     }
@@ -34,7 +34,7 @@ class NodeQueryService(
         val server = node.getServer()
         val path = "http://$server/nodes"
 
-        log.debug("Query host $server for nodes")
+        log.info("Query host $server for nodes")
 
         val nodeList = try {
 
@@ -42,12 +42,12 @@ class NodeQueryService(
 
         } catch (e: Exception) {
 
-            log.error("Could not query path $path for nodes", e)
+            log.error("Could not query path $path for nodes. ${e.message}")
 
             NodeListVO(nodes = emptyList())
         }
 
-        log.debug("Node $server returned  ${nodeList.nodes.size} nodes")
+        log.info("Node $server returned  ${nodeList.nodes.size} nodes")
 
         nodeList.nodes.forEach {
             nodeService.addNode(
@@ -66,7 +66,7 @@ class NodeQueryService(
 
         } catch (e: Exception) {
 
-            log.error("Could not send transactions to $server", e)
+            log.error("Could not send transactions to $server. ${e.message}", e.message)
         }
     }
 }
