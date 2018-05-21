@@ -51,20 +51,23 @@ class SerializationService(
 
     fun transactionFromVO(transactionVO: TransactionVO): Transaction {
 
-        val signature = transactionVO.signature.toByteArray()
-        val publicKeyHash = cryptoService.digest(signature)
+        val value = EncodingUtils.decodeFromString64(transactionVO.value)
+        val signature = EncodingUtils.decodeFromString64(transactionVO.signature)
+
+        val publicKeyBytes = EncodingUtils.decodeFromString16(transactionVO.publicKey)
+        val publicKeyHash = cryptoService.digest(publicKeyBytes)
         val origin = EncodingUtils.encodeToString16(publicKeyHash)
+
         val transactionType = TransactionType.valueOf(transactionVO.transactionType.name)
 
         return Transaction(
-
                 id = transactionVO.id,
                 space = transactionVO.space,
                 origin = origin,
                 destination = transactionVO.destination,
                 self = transactionVO.self,
                 key = transactionVO.key,
-                value = EncodingUtils.decodeFromString64(transactionVO.value),
+                value = value,
                 transactionType = transactionType,
                 referencedBlockId = transactionVO.referencedBlockId,
                 timestamp = transactionVO.timestamp,
@@ -75,17 +78,20 @@ class SerializationService(
 
     fun transactionToVO(transaction: Transaction): TransactionVO {
 
+        val value = EncodingUtils.encodeToString64(transaction.value)
+        val signature = EncodingUtils.encodeToString64(transaction.signature)
+
         return TransactionVO(
                 id = transaction.id,
                 space = transaction.space,
                 destination = transaction.destination,
                 self = transaction.self,
                 key = transaction.key,
-                value = EncodingUtils.encodeToString64(transaction.value),
+                value = value,
                 transactionType = transaction.transactionType,
                 referencedBlockId = transaction.referencedBlockId,
                 timestamp = transaction.timestamp,
-                signature = EncodingUtils.encodeToString16(transaction.signature),
+                signature = signature,
                 publicKey = transaction.publicKey
         )
     }

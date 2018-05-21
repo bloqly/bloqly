@@ -3,6 +3,7 @@ package org.bloqly.machine.service
 import org.bloqly.machine.component.CryptoService
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.repository.AccountRepository
+import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.springframework.stereotype.Service
@@ -13,7 +14,8 @@ import javax.transaction.Transactional
 class BlockService(
 
     private val cryptoService: CryptoService,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val blockRepository: BlockRepository
 
 ) {
 
@@ -60,5 +62,9 @@ class BlockService(
                     signature = signature
             )
         }.orElseThrow()
+    }
+
+    fun getLastBlockForSpace(space: String): Block {
+        return blockRepository.findFirstBySpaceOrderByHeightDesc(space)
     }
 }

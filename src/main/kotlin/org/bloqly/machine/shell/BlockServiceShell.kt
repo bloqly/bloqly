@@ -2,8 +2,10 @@ package org.bloqly.machine.shell
 
 import com.fasterxml.jackson.databind.ObjectWriter
 import org.bloqly.machine.component.EventProcessorService
+import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.AccountService
+import org.bloqly.machine.service.BlockService
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,7 +14,7 @@ class BlockServiceShell(
     private val eventProcessorService: EventProcessorService,
     private val spaceRepository: SpaceRepository,
     private val objectWriter: ObjectWriter,
-    private val accountService: AccountService
+    private val blockService: BlockService
 
 ) {
 
@@ -30,18 +32,10 @@ class BlockServiceShell(
         return objectWriter.writeValueAsString(spaces)
     }
 
-    fun validators(space: String): String {
+    fun last(space: String): String {
+        val lastBlock = blockService.getLastBlockForSpace(space)
 
-        val validators = accountService.getValidatorsForSpace(space)
-
-        validators.forEach { validator ->
-
-            validator.privateKey?.let {
-                validator.privateKey = "hidden"
-            }
-        }
-
-        return "\n" + objectWriter.writeValueAsString(validators)
+        return lastBlock.id
     }
 
 }

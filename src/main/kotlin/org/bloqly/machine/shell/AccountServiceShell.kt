@@ -19,4 +19,18 @@ class AccountServiceShell(
         return objectWriter.writeValueAsString(account)
     }
 
+    fun validators(space: String): String {
+
+        val validators = accountService.getValidatorsForSpace(space)
+
+        validators.forEach { validator ->
+
+            validator.privateKey?.let {
+                validator.privateKey = "hidden"
+            }
+        }
+
+        return "\n" + objectWriter.writeValueAsString(validators)
+    }
+
 }
