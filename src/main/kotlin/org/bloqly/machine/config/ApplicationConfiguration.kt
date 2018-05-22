@@ -1,5 +1,6 @@
 package org.bloqly.machine.config
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.ObjectWriter
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
@@ -26,7 +27,11 @@ class ApplicationConfiguration {
         yamlFactory.enable(YAMLGenerator.Feature.INDENT_ARRAYS)
         yamlFactory.disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
 
-        return ObjectMapper(yamlFactory)
+        val mapper = ObjectMapper(yamlFactory)
+
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        return mapper
     }
 
     @Bean

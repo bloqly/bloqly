@@ -23,7 +23,6 @@ class TestWorkflow {
     @Autowired
     private lateinit var eventProcessorService: EventProcessorService
 
-
     @Autowired
     private lateinit var eventSenderService: EventSenderService
 
