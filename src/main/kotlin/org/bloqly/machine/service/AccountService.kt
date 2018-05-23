@@ -15,7 +15,6 @@ import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.bloqly.machine.util.ParameterUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.io.File
 import java.math.BigInteger
 import javax.transaction.Transactional
 
@@ -31,16 +30,6 @@ class AccountService(
     @Value("\${validators:}") private val validators: Array<String>
 
 ) {
-
-    fun readAccounts(baseDir: String): List<Account> {
-
-        val accountsString = File("$baseDir/accounts.yaml").readText()
-
-        val accountsListType = objectMapper.typeFactory.constructCollectionType(
-                List::class.java, Account::class.java)
-
-        return objectMapper.readValue(accountsString, accountsListType)
-    }
 
     fun createAccount(): Account {
 

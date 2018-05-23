@@ -43,7 +43,6 @@ class TransactionControllerTest {
 
     @Before
     fun init() {
-
         testService.createBlockchain()
     }
 
@@ -63,7 +62,7 @@ class TransactionControllerTest {
                 TransactionListVO(transactions = listOf(transactionVO)))
 
         val headers = HttpHeaders()
-        headers.contentType = MediaType.parseMediaType("application/x-yaml")
+        headers.contentType = MediaType.APPLICATION_JSON
 
         val entity = HttpEntity<String>(transactionPayload, headers)
 
@@ -73,6 +72,5 @@ class TransactionControllerTest {
 
         assertEquals(1, transactionRepository.count())
         assertTrue(transactionRepository.existsById(transactionVO.id))
-
     }
 }

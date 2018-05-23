@@ -128,7 +128,5 @@ dependencies {
     compile group: "org.codehaus.groovy", name: "groovy-groovysh", version: "2.4.15"
 
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: '2.9.5'
-
+    
 }

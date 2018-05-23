@@ -100,16 +100,16 @@ class EventProcessorServiceTest {
 
         val validatorsIds = validators.map { it.id }
 
+        assertTrue(validatorsIds.contains(testService.getValidator(0).id))
         assertTrue(validatorsIds.contains(testService.getValidator(1).id))
         assertTrue(validatorsIds.contains(testService.getValidator(2).id))
-        assertTrue(validatorsIds.contains(testService.getValidator(3).id))
     }
 
     @Test
     fun testValidatorsPowerValues() {
+        assertEquals(BigInteger.ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(0).id))
         assertEquals(BigInteger.ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(1).id))
         assertEquals(BigInteger.ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(2).id))
-        assertEquals(BigInteger.ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(3).id))
     }
 
     @Test
@@ -120,7 +120,6 @@ class EventProcessorServiceTest {
         } catch (e: Exception) {
             assertTrue(e.cause is SpaceAlreadyExistsException)
         }
-
     }
 
     @Test

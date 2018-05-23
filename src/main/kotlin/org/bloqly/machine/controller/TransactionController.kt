@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController
 
 @Profile("server")
 @RestController
-@RequestMapping("/transactions", produces = ["application/x-yaml", "application/json"])
+@RequestMapping("/transactions")
 class TransactionController(
     private val eventReceiverService: EventReceiverService,
     private val transactionService: TransactionService,
     private val serializationService: SerializationService) {
 
-    @PostMapping(consumes = ["application/x-yaml", "application/json"])
+    @PostMapping
     fun onTransaction(@RequestBody transactionVOs: TransactionListVO) {
 
         eventReceiverService.receiveTransactions(transactionVOs.transactions)

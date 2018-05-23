@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.Node
@@ -9,6 +10,7 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
 import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.vo.AccountVO
 import org.bloqly.machine.vo.BlockDataVO
 import org.bloqly.machine.vo.BlockVO
 import org.bloqly.machine.vo.NodeVO
@@ -177,6 +179,14 @@ class SerializationService(
                 block = blockFromVO(blockDataVO.block),
                 transactions = blockDataVO.transactions.map { transactionFromVO(it) },
                 votes = blockDataVO.votes.map { voteFromVO(it) }
+        )
+    }
+
+    fun accountFromVO(accountVO: AccountVO): Account {
+        return Account(
+                id = accountVO.id,
+                publicKey = accountVO.publicKey,
+                privateKey = accountVO.privateKey
         )
     }
 }

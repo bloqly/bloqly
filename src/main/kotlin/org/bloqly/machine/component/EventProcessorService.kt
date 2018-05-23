@@ -1,6 +1,7 @@
 package org.bloqly.machine.component
 
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.exception.SpaceAlreadyExistsException
@@ -20,6 +21,7 @@ import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.FileUtils
+import org.bloqly.machine.vo.GenesisVO
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.ZoneOffset
@@ -29,7 +31,6 @@ import javax.transaction.Transactional
 @Component
 @Transactional
 class EventProcessorService(
-
     private val contractService: ContractService,
     private val blockRepository: BlockRepository,
     private val blockService: BlockService,
@@ -40,9 +41,9 @@ class EventProcessorService(
     private val accountRepository: AccountRepository,
     private val voteRepository: VoteRepository,
     private val transactionRepository: TransactionRepository,
-    private val propertyService: PropertyService
-
-) {
+    private val propertyService: PropertyService,
+    private val objectMapper: ObjectMapper,
+    private val serializationService: SerializationService) {
 
     private val newProposals: MutableSet<BlockData> = mutableSetOf()
 
@@ -50,9 +51,9 @@ class EventProcessorService(
 
         ensureSpaceEmpty(space)
 
-        val accounts = accountService.readAccounts(baseDir)
+        val genesis = readGenesis(baseDir)
 
-        accounts.forEach {
+        (listOf(genesis.root) + genesis.validators + genesis.users).forEach {
             accountService.importAccount(
                     publicKey = it.publicKey,
                     privateKey = it.privateKey
@@ -64,33 +65,29 @@ class EventProcessorService(
                     it.endsWith(".js")
                 }
                 .map { fileName ->
-
                     val source = File("$baseDir/$fileName").readText()
-
                     val extension = fileName.substringAfterLast(".")
-
                     val header = FileUtils.getResourceAsString("/headers/header.$extension")
-
                     header + source
-
                 }.reduce { str, acc -> str + acc }
 
-        var i = 1
+        var i = 0
 
         do {
-            val placeholder = "{{address$i}}"
+            val placeholder = "{{validator$i}}"
 
             if (!scriptSource.contains(placeholder)) {
                 break
             }
 
-            scriptSource = scriptSource.replace(placeholder, accounts[i].id)
+            scriptSource = scriptSource.replace(placeholder, genesis.validators[i].id)
 
             i++
 
         } while (true)
 
-        onCreate(accounts.first(), space, scriptSource)
+        val root = serializationService.accountFromVO(genesis.root);
+        onCreate(root, space, scriptSource)
     }
 
     private fun onCreate(root: Account,
@@ -295,5 +292,12 @@ class EventProcessorService(
 
             bestProposal
         }
+    }
+
+    fun readGenesis(baseDir: String): GenesisVO {
+
+        val accountsString = File("$baseDir/genesis.json").readText()
+
+        return objectMapper.readValue(accountsString, GenesisVO::class.java)
     }
 }

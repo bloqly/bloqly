@@ -12,11 +12,10 @@ import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.ParameterUtils.writeLong
-import org.bloqly.machine.util.TestUtils
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
+import org.bloqly.machine.vo.GenesisVO
 import org.bloqly.machine.vo.TransactionVO
 import org.springframework.stereotype.Component
 import java.time.ZoneOffset
@@ -27,27 +26,23 @@ import javax.transaction.Transactional
 @Component
 @Transactional
 class TestService(
-
     private val contractRepository: ContractRepository,
     private val propertyRepository: PropertyRepository,
     private val blockRepository: BlockRepository,
     private val spaceRepository: SpaceRepository,
-    private val accountService: AccountService,
     private val eventProcessorService: EventProcessorService,
     private val transactionService: TransactionService,
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
-    private val serializationService: SerializationService
+    private val serializationService: SerializationService) {
 
-) {
-
-    private lateinit var accounts: List<Account>
+    private lateinit var genesis: GenesisVO
 
     @PostConstruct
     @Suppress("unused")
     fun init() {
 
-        accounts = accountService.readAccounts(TEST_BLOCK_BASE_DIR)
+        genesis = eventProcessorService.readGenesis(TEST_BLOCK_BASE_DIR)
     }
 
     fun cleanup() {
@@ -58,11 +53,11 @@ class TestService(
         transactionRepository.deleteAll()
     }
 
-    fun getRoot(): Account = accounts.first()
+    fun getRoot(): Account = serializationService.accountFromVO(genesis.root)
 
-    fun getUser(): Account = accounts.last()
+    fun getUser(): Account = serializationService.accountFromVO(genesis.users.first())
 
-    fun getValidator(n: Int): Account = accounts[n]
+    fun getValidator(n: Int): Account = serializationService.accountFromVO(genesis.validators[n])
 
     fun createBlockchain() {
         eventProcessorService.createBlockchain(Application.DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
@@ -73,23 +68,15 @@ class TestService(
         val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(DEFAULT_SPACE)
 
         val root = accountRepository.findByPublicKey(getRoot().publicKey).orElseThrow()
-
         val user = accountRepository.findByPublicKey(getUser().publicKey).orElseThrow()
 
         val transaction = transactionService.newTransaction(
-
                 space = DEFAULT_SPACE,
-
                 origin = root,
-
                 destination = user,
-
                 value = writeLong("1"),
-
                 transactionType = TransactionType.CALL,
-
                 referencedBlockId = lastBlock.id,
-
                 timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
         )
 

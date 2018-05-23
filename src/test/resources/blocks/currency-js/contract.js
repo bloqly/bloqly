@@ -36,13 +36,13 @@ function init(ctx) {
         { target: 'caller', balance: maxSupply.subtract(new BigInteger('3')) },
 
         // target = validator's id
-        { target: '{{address1}}', balance: validatorAmount },
-        { target: '{{address2}}', balance: validatorAmount },
-        { target: '{{address3}}', balance: validatorAmount },
+        { target: '{{validator0}}', balance: validatorAmount },
+        { target: '{{validator1}}', balance: validatorAmount },
+        { target: '{{validator2}}', balance: validatorAmount },
 
-        { target: '{{address1}}', power: validatorPower },
-        { target: '{{address2}}', power: validatorPower },
-        { target: '{{address3}}', power: validatorPower },
+        { target: '{{validator0}}', power: validatorPower },
+        { target: '{{validator1}}', power: validatorPower },
+        { target: '{{validator2}}', power: validatorPower },
 
 
         // quorum requirement for active validators group
