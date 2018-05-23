@@ -5,6 +5,7 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.TransactionListVO
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -44,6 +45,11 @@ class TransactionControllerTest {
     fun init() {
 
         testService.createBlockchain()
+    }
+
+    @After
+    fun tearDown() {
+        testService.cleanup()
     }
 
     @Test
