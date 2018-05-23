@@ -1,9 +1,9 @@
 package org.bloqly.machine.service
 
-import org.bloqly.machine.component.CryptoService
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.springframework.stereotype.Service
@@ -12,12 +12,8 @@ import javax.transaction.Transactional
 @Service
 @Transactional
 class BlockService(
-
-    private val cryptoService: CryptoService,
     private val accountRepository: AccountRepository,
-    private val blockRepository: BlockRepository
-
-) {
+    private val blockRepository: BlockRepository) {
 
     fun newBlock(space: String,
                  height: Long,
@@ -33,7 +29,7 @@ class BlockService(
 
         return accountOpt.map { proposer ->
 
-            val dataToSign = cryptoService.digest(
+            val dataToSign = CryptoUtils.digest(
                     arrayOf(
                             space.toByteArray(),
                             EncodingUtils.longToBytes(height),
@@ -46,8 +42,8 @@ class BlockService(
             )
 
             val privateKey = decodeFromString16(proposer.privateKey)
-            val signature = cryptoService.sign(privateKey, dataToSign)
-            val blockHash = cryptoService.digest(signature)
+            val signature = CryptoUtils.sign(privateKey, dataToSign)
+            val blockHash = CryptoUtils.digest(signature)
             val blockId = EncodingUtils.encodeToString16(blockHash)
 
             Block(

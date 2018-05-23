@@ -1,5 +1,13 @@
 package org.bloqly.machine.service
 
+import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Vote
+import org.bloqly.machine.repository.VoteRepository
+import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.CryptoUtils.verifyVote
+import org.bloqly.machine.util.TestUtils.FAKE_DATA
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -7,14 +15,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.bloqly.machine.Application
-import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.component.CryptoService
-import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.Vote
-import org.bloqly.machine.repository.VoteRepository
-import org.bloqly.machine.test.TestService
-import org.bloqly.machine.util.TestUtils.FAKE_DATA
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
@@ -22,9 +22,6 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class VoteServiceTest {
-
-    @Autowired
-    private lateinit var cryptoService: CryptoService
 
     @Autowired
     private lateinit var voteService: VoteService
@@ -74,7 +71,7 @@ class VoteServiceTest {
     @Test
     fun testVerifyVote() {
 
-        assertTrue(cryptoService.verifyVote(validator, vote))
+        assertTrue(verifyVote(validator, vote))
     }
 
 
@@ -82,10 +79,8 @@ class VoteServiceTest {
     fun testVerifyVoteBlockWrongFails() {
 
         assertFalse(
-                cryptoService.verifyVote(
-
+                verifyVote(
                         validator,
-
                         vote.copy(blockId = FAKE_DATA)
                 )
         )
@@ -95,10 +90,8 @@ class VoteServiceTest {
     fun testVerifyVoteTimestampWrongFails() {
 
         assertFalse(
-                cryptoService.verifyVote(
-
+                verifyVote(
                         validator,
-
                         vote.copy(timestamp = System.currentTimeMillis() + 1)
                 )
         )
@@ -108,10 +101,8 @@ class VoteServiceTest {
     fun testVerifyVoteSignatureWrongFails() {
 
         assertFalse(
-                cryptoService.verifyVote(
-
+                verifyVote(
                         validator,
-
                         vote.copy(signature = ByteArray(0))
                 )
         )
@@ -123,10 +114,8 @@ class VoteServiceTest {
         val newId = vote.id.copy(validatorId = FAKE_DATA)
 
         assertFalse(
-                cryptoService.verifyVote(
-
+                verifyVote(
                         validator,
-
                         vote.copy(id = newId)
                 )
         )
@@ -138,10 +127,8 @@ class VoteServiceTest {
         val newId = vote.id.copy(space = FAKE_DATA)
 
         assertFalse(
-                cryptoService.verifyVote(
-
+                verifyVote(
                         validator,
-
                         vote.copy(id = newId)
                 )
         )
@@ -153,10 +140,8 @@ class VoteServiceTest {
         val newId = vote.id.copy(height = vote.id.height + 1)
 
         assertFalse(
-                cryptoService.verifyVote(
-
+                verifyVote(
                         validator,
-
                         vote.copy(id = newId)
                 )
         )

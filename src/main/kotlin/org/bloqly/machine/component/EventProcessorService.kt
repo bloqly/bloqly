@@ -20,6 +20,7 @@ import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.VoteService
+import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.vo.GenesisVO
 import org.springframework.stereotype.Component
@@ -34,7 +35,6 @@ class EventProcessorService(
     private val contractService: ContractService,
     private val blockRepository: BlockRepository,
     private val blockService: BlockService,
-    private val cryptoService: CryptoService,
     private val accountService: AccountService,
     private val spaceRepository: SpaceRepository,
     private val voteService: VoteService,
@@ -86,7 +86,7 @@ class EventProcessorService(
 
         } while (true)
 
-        val root = serializationService.accountFromVO(genesis.root);
+        val root = serializationService.accountFromVO(genesis.root)
         onCreate(root, space, scriptSource)
     }
 
@@ -162,7 +162,7 @@ class EventProcessorService(
         // TODO: check also timestamp
 
         if (
-                !cryptoService.verifyTransaction(transaction) ||
+                !CryptoUtils.verifyTransaction(transaction) ||
                 transactionRepository.existsById(transaction.id) ||
                 !blockRepository.existsById(transaction.referencedBlockId)) {
             return
@@ -199,7 +199,7 @@ class EventProcessorService(
 
         validatorOpt.ifPresent { validator ->
 
-            if (!cryptoService.verifyVote(validator, vote)) {
+            if (!CryptoUtils.verifyVote(validator, vote)) {
                 throw IllegalArgumentException("Could not verify vote $vote")
             }
 
@@ -230,8 +230,8 @@ class EventProcessorService(
                         timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond(),
                         parentHash = lastBlock.id,
                         proposerId = validator.id,
-                        txHash = cryptoService.digestTransactions(transactions),
-                        validatorTxHash = cryptoService.digestVotes(votes)
+                        txHash = CryptoUtils.digestTransactions(transactions),
+                        validatorTxHash = CryptoUtils.digestVotes(votes)
                 )
             }
 

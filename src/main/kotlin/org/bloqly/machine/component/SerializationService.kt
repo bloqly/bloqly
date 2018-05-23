@@ -9,6 +9,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
+import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.vo.AccountVO
 import org.bloqly.machine.vo.BlockDataVO
@@ -20,9 +21,7 @@ import org.bloqly.machine.vo.VoteVO
 import org.springframework.stereotype.Component
 
 @Component
-class SerializationService(
-
-    private val cryptoService: CryptoService) {
+class SerializationService {
 
     fun nodeFromVO(nodeVO: NodeVO): Node {
 
@@ -57,7 +56,7 @@ class SerializationService(
         val signature = EncodingUtils.decodeFromString64(transactionVO.signature)
 
         val publicKeyBytes = EncodingUtils.decodeFromString16(transactionVO.publicKey)
-        val publicKeyHash = cryptoService.digest(publicKeyBytes)
+        val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
         val origin = EncodingUtils.encodeToString16(publicKeyHash)
 
         val transactionType = TransactionType.valueOf(transactionVO.transactionType.name)

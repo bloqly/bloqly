@@ -1,6 +1,10 @@
-package org.bloqly.machine.component
+package org.bloqly.machine.util
 
 import com.google.common.primitives.Bytes
+import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.model.Vote
+import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.bouncycastle.asn1.ASN1InputStream
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequenceGenerator
@@ -15,22 +19,29 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters
 import org.bouncycastle.crypto.signers.ECDSASigner
 import org.bouncycastle.crypto.signers.HMacDSAKCalculator
 import org.slf4j.LoggerFactory
-import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.model.Vote
-import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.decodeFromString16
-import org.springframework.stereotype.Component
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.SecureRandom
 
-@Component
-class CryptoService {
+object CryptoUtils {
+
+    private val LOG = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
 
     private val sha256Digest: MessageDigest = MessageDigest.getInstance("SHA-256")
+
     private val generator: ECKeyPairGenerator = ECKeyPairGenerator()
+
+    private const val CURVE_NAME = "secp256k1"
+
+    private val CURVE = SECNamedCurves.getByName(CURVE_NAME)
+
+    private val DOMAIN = ECDomainParameters(
+            CURVE.curve,
+            CURVE.g,
+            CURVE.n,
+            CURVE.h
+    )
 
     init {
         val secureRandom = SecureRandom.getInstance("SHA1PRNG")
@@ -181,20 +192,4 @@ class CryptoService {
         }
     }
 
-
-    companion object {
-
-        private const val CURVE_NAME = "secp256k1"
-
-        private val LOG = LoggerFactory.getLogger(CryptoService::class.java)
-
-        private val CURVE = SECNamedCurves.getByName(CURVE_NAME)
-
-        private val DOMAIN = ECDomainParameters(
-                CURVE.curve,
-                CURVE.g,
-                CURVE.n,
-                CURVE.h
-        )
-    }
 }

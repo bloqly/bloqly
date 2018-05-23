@@ -1,11 +1,11 @@
 package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes.concat
-import org.bloqly.machine.component.CryptoService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.TransactionRepository
+import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.bloqly.machine.util.EncodingUtils.encodeToString16
@@ -13,11 +13,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class TransactionService(
-
-    private val cryptoService: CryptoService,
-    private val transactionRepository: TransactionRepository
-
-) {
+    private val transactionRepository: TransactionRepository) {
 
     fun newTransaction(space: String,
                        origin: Account,
@@ -43,12 +39,12 @@ class TransactionService(
 
         val privateKey = decodeFromString16(origin.privateKey)
 
-        val signature = cryptoService.sign(
+        val signature = CryptoUtils.sign(
                 privateKey,
-                cryptoService.digest(dataToSign)
+                CryptoUtils.digest(dataToSign)
         )
 
-        val txHash = cryptoService.digest(signature)
+        val txHash = CryptoUtils.digest(signature)
         val transactionId = encodeToString16(txHash)
 
         return Transaction(
@@ -69,6 +65,6 @@ class TransactionService(
 
     fun getNewTransactions(): List<Transaction> {
         // TODO: restrict by time
-        return transactionRepository.findByContainingBlockIdIsNull();
+        return transactionRepository.findByContainingBlockIdIsNull()
     }
 }

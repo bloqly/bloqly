@@ -1,16 +1,16 @@
 package org.bloqly.machine.service
 
+import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.model.TransactionType
+import org.bloqly.machine.util.CryptoUtils.verifyTransaction
+import org.bloqly.machine.util.TestUtils.FAKE_DATA
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.bloqly.machine.Application
-import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.component.CryptoService
-import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.model.TransactionType
-import org.bloqly.machine.util.TestUtils.FAKE_DATA
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
@@ -26,9 +26,6 @@ class TransactionServiceTest {
 
     @Autowired
     private lateinit var accountService: AccountService
-
-    @Autowired
-    private lateinit var cryptoService: CryptoService
 
     private lateinit var transaction: Transaction
 
@@ -63,13 +60,13 @@ class TransactionServiceTest {
     @Test
     fun testVerifyOK() {
 
-        assertTrue(cryptoService.verifyTransaction(transaction))
+        assertTrue(verifyTransaction(transaction))
     }
 
     @Test
     fun testVerifyDestinationWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(destination = FAKE_DATA)
         ))
     }
@@ -77,7 +74,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyOriginWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(origin = FAKE_DATA)
         ))
     }
@@ -85,7 +82,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyReferencedBlockIdWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(referencedBlockId = FAKE_DATA)
         ))
     }
@@ -94,7 +91,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyTxTypeWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(transactionType = TransactionType.CALL)
         ))
     }
@@ -102,7 +99,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyAmountWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(value = FAKE_DATA.toByteArray())
         ))
     }
@@ -110,7 +107,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyTimestampWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(timestamp = System.currentTimeMillis() + 1)
         ))
     }
@@ -118,7 +115,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyIdWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(id = FAKE_DATA)
         ))
     }
@@ -126,7 +123,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifySignatureWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(signature = transaction.signature.reversed().toByteArray())
         ))
     }
@@ -134,7 +131,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyPubKeyWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(publicKey = transaction.publicKey.reversed())
         ))
     }
@@ -142,7 +139,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifySpaceWrong() {
 
-        assertFalse(cryptoService.verifyTransaction(
+        assertFalse(verifyTransaction(
                 transaction.copy(space = FAKE_DATA)
         ))
     }
