@@ -27,7 +27,7 @@ object ApplicationUtils {
         }
 
         val appBuilder = SpringApplicationBuilder()
-                .profiles("server")
+                .profiles("server", "scheduler")
                 .properties(properties)
                 .bannerMode(Banner.Mode.OFF)
                 .sources(Application::class.java)

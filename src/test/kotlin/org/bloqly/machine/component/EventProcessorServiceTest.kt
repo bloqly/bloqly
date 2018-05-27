@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 import java.math.BigInteger
+import java.math.BigInteger.ONE
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
@@ -107,9 +108,9 @@ class EventProcessorServiceTest {
 
     @Test
     fun testValidatorsPowerValues() {
-        assertEquals(BigInteger.ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(0).id))
-        assertEquals(BigInteger.ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(1).id))
-        assertEquals(BigInteger.ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(2).id))
+        assertEquals(ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(0).id))
+        assertEquals(ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(1).id))
+        assertEquals(ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(2).id))
     }
 
     @Test

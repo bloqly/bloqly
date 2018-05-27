@@ -1,4 +1,16 @@
 
+#root
+./release/run.sh -database db1 -command "account.import('78CA9AE2A589CB7D0E151E153F2CCCC760CBDAA05FE74C802FBAC6B0CDDCA534')"
+
+#validator1
+./release/run.sh -database db1 -command "account.import('7869F85C5F8138512E75C2E8469DDDA0A6A4EFBCD5FE3F068EECD9B0439601C9')"
+
+#validator2
+./release/run.sh -database db2 -command "account.import('00B8898555BE47960016E3B5E37D83520188E442BADF3397E4D7CD07D9D54099F4')"
+
+#validator3
+./release/run.sh -database db3 -command "account.import('3890ACF98A004E166A864F1444F4425003275DBD1BF84DFCA9F55847BF5E84B4')"
+
 ./release/run.sh -database db1 -command "bloq.init('main','../src/test/resources/blocks/currency-js')"
 
 ./release/run.sh -database db3 -command "txs.createTransaction('9EB1858D8BBBDD10BA3E4EE83BE51EEF1BCB95CAFDA89FA57E5AE8342AB97A3F','475653C1BB33E7AC09AD1C98FF4EE9B1A9084AA4B15D2E8A39FEC06227DE7986','1')"
