@@ -6,7 +6,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.exception.SpaceAlreadyExistsException
 import org.bloqly.machine.model.BlockData
-import org.bloqly.machine.model.Genesis
+import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
@@ -262,10 +262,10 @@ class EventProcessorService(
         }
     }
 
-    fun readGenesis(baseDir: String): Genesis {
+    fun readGenesis(baseDir: String): GenesisParameters {
 
         val accountsString = File("$baseDir/genesis.json").readText()
 
-        return objectMapper.readValue(accountsString, Genesis::class.java)
+        return objectMapper.readValue(accountsString, GenesisParameters::class.java)
     }
 }

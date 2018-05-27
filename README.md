@@ -41,19 +41,19 @@ function contract(context, amount) {
     ];
 }
 
-function init(context, genesis) {
+function init(context, genesisParameters) {
 
     return [
         { target: 'caller', balance: new BigInteger('999997') },
 
         // target = validator's id
-        { target: genesis.validators[0].id, balance: validatorAmount },
-        { target: genesis.validators[1].id, balance: validatorAmount },
-        { target: genesis.validators[2].id, balance: validatorAmount },
+        { target: genesisParameters.validators[0].id, balance: validatorAmount },
+        { target: genesisParameters.validators[1].id, balance: validatorAmount },
+        { target: genesisParameters.validators[2].id, balance: validatorAmount },
         
-        { target: genesis.validators[0].id, power: validatorAmount },
-        { target: genesis.validators[1].id, power: validatorAmount },
-        { target: genesis.validators[2].id, power: validatorAmount },
+        { target: genesisParameters.validators[0].id, power: validatorAmount },
+        { target: genesisParameters.validators[1].id, power: validatorAmount },
+        { target: genesisParameters.validators[2].id, power: validatorAmount },
 
         // quorum requirement for active validators group
         { target: 'self', quorum: 2 },

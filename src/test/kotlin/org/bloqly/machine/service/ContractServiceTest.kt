@@ -8,7 +8,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.Genesis
+import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.PropertyRepository
@@ -47,7 +47,7 @@ class ContractServiceTest {
 
     private val callee = "callee id"
 
-    private val genesis = Genesis(root = Account(id = creator, publicKey = ""))
+    private val genesis = GenesisParameters(root = Account(id = creator, publicKey = ""))
 
     @After
     fun tearDown() {

@@ -5,7 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.Genesis
+import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
@@ -36,13 +36,13 @@ class TestService(
     private val accountRepository: AccountRepository,
     private val serializationService: SerializationService) {
 
-    private lateinit var genesis: Genesis
+    private lateinit var genesisParameters: GenesisParameters
 
     @PostConstruct
     @Suppress("unused")
     fun init() {
 
-        genesis = eventProcessorService.readGenesis(TEST_BLOCK_BASE_DIR)
+        genesisParameters = eventProcessorService.readGenesis(TEST_BLOCK_BASE_DIR)
     }
 
     fun cleanup() {
@@ -54,11 +54,11 @@ class TestService(
         accountRepository.deleteAll()
     }
 
-    fun getRoot(): Account = genesis.root
+    fun getRoot(): Account = genesisParameters.root
 
-    fun getUser(): Account = genesis.users!!.first()
+    fun getUser(): Account = genesisParameters.users!!.first()
 
-    fun getValidator(n: Int): Account = genesis.validators!![n]
+    fun getValidator(n: Int): Account = genesisParameters.validators!![n]
 
     fun createBlockchain() {
         eventProcessorService.createBlockchain(Application.DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)

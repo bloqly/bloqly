@@ -5,7 +5,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.StringUtils;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.Contract;
-import org.bloqly.machine.model.Genesis;
+import org.bloqly.machine.model.GenesisParameters;
 import org.bloqly.machine.model.Property;
 import org.bloqly.machine.model.PropertyId;
 import org.bloqly.machine.repository.ContractRepository;
@@ -58,7 +58,7 @@ public class ContractService {
         };
     }
 
-    private Set<Property> invokeFunction(ContractInvocationContext context, Genesis genesis, byte[] arg) {
+    private Set<Property> invokeFunction(ContractInvocationContext context, GenesisParameters genesisParameters, byte[] arg) {
 
         try {
 
@@ -79,8 +79,8 @@ public class ContractService {
 
             List<Object> args = Lists.newArrayList(context);
 
-            if (genesis != null) {
-                args.add(genesis);
+            if (genesisParameters != null) {
+                args.add(genesisParameters);
             }
 
             args.addAll(Arrays.asList(params));
@@ -149,7 +149,7 @@ public class ContractService {
     @Transactional
     public void createContract(String space,
                                String self,
-                               Genesis genesis,
+                               GenesisParameters genesisParameters,
                                String body) {
 
         if (StringUtils.isEmpty(body)) {
@@ -159,13 +159,14 @@ public class ContractService {
         var contract = new Contract(
                 self,
                 space,
-                genesis.getRoot().getId(),
+                genesisParameters.getRoot().getId(),
                 body
         );
 
-        var invocationContext = new ContractInvocationContext("init", genesis.getRoot().getId(), self, contract);
+        var invocationContext = new ContractInvocationContext("init", genesisParameters.getRoot().getId(), self, contract);
 
-        var properties = invokeFunction(invocationContext, genesis, new byte[0]);
+        var properties = invokeFunction(invocationContext, genesisParameters, new byte[0]);
+
         processResults(properties);
 
         contractRepository.save(contract);

@@ -1,5 +1,6 @@
 package org.bloqly.machine.model
 
+import org.bloqly.machine.util.EncodingUtils
 import java.util.Arrays
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
@@ -31,4 +32,9 @@ data class Property(
         result = 31 * result + Arrays.hashCode(value)
         return result
     }
+
+    override fun toString(): String {
+        return "Property(id=$id, value=${EncodingUtils.encodeToString64(value)})"
+    }
+
 }
