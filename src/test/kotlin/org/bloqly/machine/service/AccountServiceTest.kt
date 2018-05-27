@@ -31,7 +31,7 @@ class AccountServiceTest {
     fun setup() {
         account = accountService.newAccount()
 
-        accountService.importAccount(account)
+        accountService.importAccount(account.privateKey!!)
     }
 
     @After
@@ -55,7 +55,7 @@ class AccountServiceTest {
     @Test
     fun testImportAccountTwiceFails() {
         try {
-            accountService.importAccount(account)
+            accountService.importAccount(account.privateKey!!)
             fail()
         } catch (e: Exception) {
             Assert.assertTrue(e.cause is AccountAlreadyExistsException)

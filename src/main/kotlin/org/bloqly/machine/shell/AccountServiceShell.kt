@@ -1,22 +1,25 @@
 package org.bloqly.machine.shell
 
-import com.fasterxml.jackson.databind.ObjectWriter
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.bloqly.machine.annotation.ValueObject
+import org.bloqly.machine.model.Account
 import org.bloqly.machine.service.AccountService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
 class AccountServiceShell(
-
     private val accountService: AccountService,
-    private val objectWriter: ObjectWriter
+    private val objectMapper: ObjectMapper) {
 
-) {
+    private val log: Logger = LoggerFactory.getLogger(AccountServiceShell::class.simpleName)
 
     fun new(): String {
 
         val account = accountService.newAccount()
 
-        return objectWriter.writeValueAsString(account)
+        return objectMapper.writeValueAsString(account)
     }
 
     fun validators(space: String): String {
@@ -30,7 +33,19 @@ class AccountServiceShell(
             }
         }
 
-        return "\n" + objectWriter.writeValueAsString(validators)
+        return "\n" + objectMapper.writeValueAsString(validators)
     }
+
+    fun import(privateKey: String): String {
+
+        accountService.importAccount(privateKey)
+
+        return "OK"
+    }
+
+    @ValueObject
+    data class Accounts(
+        val accounts: List<Account>
+    )
 
 }

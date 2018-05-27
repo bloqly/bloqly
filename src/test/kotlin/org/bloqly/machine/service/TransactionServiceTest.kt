@@ -38,7 +38,7 @@ class TransactionServiceTest {
 
                 space = DEFAULT_SPACE,
 
-                origin = root,
+                originId = root.id,
 
                 destinationId = root.id,
 

@@ -69,21 +69,24 @@ class AccountService(
                 .orElseThrow()
     }
 
-    fun importAccount(account: Account): Account {
+    fun importAccount(privateKey: String): Account {
 
-        val publicKeyBytes = EncodingUtils.decodeFromString16(account.publicKey)
+        val privateKeyBytes = EncodingUtils.decodeFromString16(privateKey)
+        val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
         val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
         val accountId = EncodingUtils.encodeToString16(publicKeyHash)
-
-        if (accountId != account.id) {
-            throw IllegalStateException("Invalid account data $account")
-        }
 
         if (accountRepository.existsById(accountId)) {
             throw AccountAlreadyExistsException("Could not import account: $accountId, account already exists.")
         }
 
-        return accountRepository.save(account)
+        val publicKey = EncodingUtils.encodeToString16(publicKeyBytes)
+
+        return accountRepository.save(Account(
+                id = accountId,
+                publicKey = publicKey,
+                privateKey = privateKey
+        ))
     }
 
     fun getRoot(space: String): Account {

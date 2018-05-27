@@ -55,10 +55,6 @@ class EventProcessorService(
 
         val genesis = readGenesis(baseDir)
 
-        (listOf(genesis.root) + (genesis.validators ?: emptyList()) + (genesis.users ?: emptyList())).forEach {
-            accountService.importAccount(it)
-        }
-
         val contractBody = File(baseDir).list()
                 .filter {
                     it.endsWith(".js")
@@ -100,7 +96,7 @@ class EventProcessorService(
 
         val transaction = transactionService.newTransaction(
                 space = space,
-                origin = genesis.root,
+                originId = genesis.root.id,
                 destinationId = DEFAULT_SELF,
                 self = DEFAULT_SELF,
                 key = null,

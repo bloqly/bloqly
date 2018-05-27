@@ -21,10 +21,7 @@ class TransactionServiceShell(
     private val transactionService: TransactionService,
     private val transactionRepository: TransactionRepository,
     private val serializationService: SerializationService,
-    private val objectWriter: ObjectWriter
-
-) {
-
+    private val objectWriter: ObjectWriter) {
 
     fun createTransaction(originId: String, destinationId: String, amount: String): String {
 
@@ -38,7 +35,7 @@ class TransactionServiceShell(
 
                 space = Application.DEFAULT_SPACE,
 
-                origin = origin,
+                originId = origin.id,
 
                 destinationId = destination.id,
 

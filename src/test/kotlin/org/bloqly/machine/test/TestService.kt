@@ -1,7 +1,9 @@
 package org.bloqly.machine.test
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.model.Account
@@ -13,7 +15,9 @@ import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
+import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.TransactionService
+import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.vo.TransactionVO
@@ -34,6 +38,8 @@ class TestService(
     private val transactionService: TransactionService,
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
+    private val accountService: AccountService,
+    private val objectMapper: ObjectMapper,
     private val serializationService: SerializationService) {
 
     private lateinit var genesisParameters: GenesisParameters
@@ -61,6 +67,15 @@ class TestService(
     fun getValidator(n: Int): Account = genesisParameters.validators!![n]
 
     fun createBlockchain() {
+
+        val accountsString = FileUtils.getResourceAsString("/accounts.json")
+
+        val accountsObject = objectMapper.readValue(accountsString, Accounts::class.java)
+
+        accountsObject.accounts.forEach { account ->
+            accountService.importAccount(account.privateKey!!)
+        }
+
         eventProcessorService.createBlockchain(Application.DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
     }
 
@@ -68,12 +83,12 @@ class TestService(
 
         val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(DEFAULT_SPACE)
 
-        val root = accountRepository.findByPublicKey(getRoot().publicKey).orElseThrow()
-        val user = accountRepository.findByPublicKey(getUser().publicKey).orElseThrow()
+        val root = accountRepository.findById(getRoot().id).orElseThrow()
+        val user = accountRepository.findById(getUser().id).orElseThrow()
 
         val transaction = transactionService.newTransaction(
                 space = DEFAULT_SPACE,
-                origin = root,
+                originId = root.id,
                 destinationId = user.id,
                 value = writeLong("1"),
                 transactionType = TransactionType.CALL,
@@ -83,4 +98,7 @@ class TestService(
 
         return serializationService.transactionToVO(transaction)
     }
+
+    @ValueObject
+    private data class Accounts(val accounts: List<Account>)
 }

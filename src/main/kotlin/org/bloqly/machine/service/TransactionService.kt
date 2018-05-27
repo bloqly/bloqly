@@ -1,9 +1,9 @@
 package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes.concat
-import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
+import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
@@ -12,10 +12,12 @@ import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.springframework.stereotype.Service
 
 @Service
-class TransactionService(private val transactionRepository: TransactionRepository) {
+class TransactionService(
+    private val accountRepository: AccountRepository,
+    private val transactionRepository: TransactionRepository) {
 
     fun newTransaction(space: String,
-                       origin: Account,
+                       originId: String,
                        destinationId: String,
                        self: String? = null,
                        key: String? = null,
@@ -26,13 +28,15 @@ class TransactionService(private val transactionRepository: TransactionRepositor
 
         val dataToSign = concat(
                 space.toByteArray(),
-                origin.id.toByteArray(),
+                originId.toByteArray(),
                 destinationId.toByteArray(),
                 value,
                 referencedBlockId.toByteArray(),
                 transactionType.name.toByteArray(),
                 EncodingUtils.longToBytes(timestamp)
         )
+
+        val origin = accountRepository.findById(originId).orElseThrow()
 
         val privateKey = decodeFromString16(origin.privateKey)
 

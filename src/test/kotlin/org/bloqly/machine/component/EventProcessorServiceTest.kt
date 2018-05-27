@@ -124,9 +124,6 @@ class EventProcessorServiceTest {
 
     @Test
     fun testInitTwiceWithDifferentSpaceOK() {
-
-        accountRepository.deleteAll()
-
         eventProcessorService.createBlockchain("space1", TEST_BLOCK_BASE_DIR)
     }
 
