@@ -40,7 +40,7 @@ class TransactionServiceShell(
 
                 origin = origin,
 
-                destination = destination,
+                destinationId = destination.id,
 
                 value = ParameterUtils.writeLong(amount),
 

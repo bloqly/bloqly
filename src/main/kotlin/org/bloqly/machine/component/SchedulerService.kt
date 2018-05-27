@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 
 @Component
-@Profile("server")
+@Profile("scheduler")
 class SchedulerService(
 
     private val nodeQueryService: NodeQueryService,

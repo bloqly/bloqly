@@ -6,7 +6,7 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.TransactionListVO
 import org.junit.After
-import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -66,11 +66,10 @@ class TransactionControllerTest {
 
         val entity = HttpEntity<String>(transactionPayload, headers)
 
-        assertEquals(0, transactionRepository.count())
+        assertFalse(transactionRepository.existsById(transactionVO.id))
 
         restTemplate.postForObject(url, entity, Void.TYPE)
 
-        assertEquals(1, transactionRepository.count())
         assertTrue(transactionRepository.existsById(transactionVO.id))
     }
 }

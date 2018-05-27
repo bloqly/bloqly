@@ -40,9 +40,9 @@ class TransactionServiceTest {
 
                 origin = root,
 
-                destination = root,
+                destinationId = root.id,
 
-                self = root,
+                self = root.id,
 
                 key = null,
 

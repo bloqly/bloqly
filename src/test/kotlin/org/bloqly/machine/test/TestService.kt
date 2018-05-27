@@ -74,7 +74,7 @@ class TestService(
         val transaction = transactionService.newTransaction(
                 space = DEFAULT_SPACE,
                 origin = root,
-                destination = user,
+                destinationId = user.id,
                 value = writeLong("1"),
                 transactionType = TransactionType.CALL,
                 referencedBlockId = lastBlock.id,

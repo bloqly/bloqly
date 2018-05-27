@@ -9,6 +9,7 @@ import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
@@ -19,11 +20,13 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.springframework.stereotype.Component
 import java.io.File
+import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import javax.transaction.Transactional
@@ -41,6 +44,7 @@ class EventProcessorService(
     private val voteRepository: VoteRepository,
     private val transactionRepository: TransactionRepository,
     private val propertyService: PropertyService,
+    private val transactionService: TransactionService,
     private val objectMapper: ObjectMapper) {
 
     private val newProposals: MutableSet<BlockData> = mutableSetOf()
@@ -77,9 +81,10 @@ class EventProcessorService(
 
         spaceRepository.save(Space(id = space, creatorId = rootId))
 
+        val timestamp = Instant.now().toEpochMilli()
+
         val parentHash = "" // there is no parent
         val height = 0L
-        val timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
         val txHash = ByteArray(0)
         val validatorTxHash = ByteArray(0)
 
@@ -92,6 +97,20 @@ class EventProcessorService(
                 txHash = txHash,
                 validatorTxHash = validatorTxHash
         )
+
+        val transaction = transactionService.newTransaction(
+                space = space,
+                origin = genesis.root,
+                destinationId = DEFAULT_SELF,
+                self = DEFAULT_SELF,
+                key = null,
+                value = contractBody.toByteArray(),
+                transactionType = TransactionType.CREATE,
+                referencedBlockId = firstBlock.id,
+                timestamp = timestamp
+        )
+
+        transactionRepository.save(transaction)
 
         blockRepository.save(firstBlock)
     }

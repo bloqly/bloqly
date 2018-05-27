@@ -16,20 +16,18 @@ class TransactionService(private val transactionRepository: TransactionRepositor
 
     fun newTransaction(space: String,
                        origin: Account,
-                       destination: Account,
-                       self: Account? = null,
+                       destinationId: String,
+                       self: String? = null,
                        key: String? = null,
                        value: ByteArray,
                        transactionType: TransactionType,
                        referencedBlockId: String,
-                       timestamp: Long
-
-    ): Transaction {
+                       timestamp: Long): Transaction {
 
         val dataToSign = concat(
                 space.toByteArray(),
                 origin.id.toByteArray(),
-                destination.id.toByteArray(),
+                destinationId.toByteArray(),
                 value,
                 referencedBlockId.toByteArray(),
                 transactionType.name.toByteArray(),
@@ -50,8 +48,8 @@ class TransactionService(private val transactionRepository: TransactionRepositor
                 id = transactionId,
                 space = space,
                 origin = origin.id,
-                destination = destination.id,
-                self = self?.id,
+                destination = destinationId,
+                self = self,
                 key = key,
                 value = value,
                 transactionType = transactionType,

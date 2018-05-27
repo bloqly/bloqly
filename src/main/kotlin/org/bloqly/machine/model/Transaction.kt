@@ -2,6 +2,7 @@ package org.bloqly.machine.model
 
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.Lob
 
 @Entity
 data class Transaction(
@@ -11,17 +12,18 @@ data class Transaction(
 
     val space: String,
 
-        // TODO not really needed
     val origin: String,
 
     val destination: String,
 
     var self: String? = null,
 
-        // default key is "contract"
     var key: String? = null,
 
+    @Lob
     val value: ByteArray,
+
+    val output: ByteArray? = null,
 
     val transactionType: TransactionType,
 
