@@ -30,10 +30,6 @@ function contract(context, amount) {
     ];
 }
 
-function getPower(target) {
-    return getProperty(target, 'balance', zero);
-}
-
 function init(context, genesis) {
 
     return [

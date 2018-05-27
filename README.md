@@ -41,10 +41,6 @@ function contract(context, amount) {
     ];
 }
 
-function getPower(target) {
-    return getProperty(target, 'balance', zero);
-}
-
 function init(context, genesis) {
 
     return [
@@ -54,6 +50,10 @@ function init(context, genesis) {
         { target: genesis.validators[0].id, balance: validatorAmount },
         { target: genesis.validators[1].id, balance: validatorAmount },
         { target: genesis.validators[2].id, balance: validatorAmount },
+        
+        { target: genesis.validators[0].id, power: validatorAmount },
+        { target: genesis.validators[1].id, power: validatorAmount },
+        { target: genesis.validators[2].id, power: validatorAmount },
 
         // quorum requirement for active validators group
         { target: 'self', quorum: 2 },
