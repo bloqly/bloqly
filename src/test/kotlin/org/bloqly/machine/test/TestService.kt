@@ -51,13 +51,14 @@ class TestService(
         blockRepository.deleteAll()
         spaceRepository.deleteAll()
         transactionRepository.deleteAll()
+        accountRepository.deleteAll()
     }
 
     fun getRoot(): Account = genesis.root
 
-    fun getUser(): Account = genesis.users.first()
+    fun getUser(): Account = genesis.users!!.first()
 
-    fun getValidator(n: Int): Account = genesis.validators[n]
+    fun getValidator(n: Int): Account = genesis.validators!![n]
 
     fun createBlockchain() {
         eventProcessorService.createBlockchain(Application.DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)

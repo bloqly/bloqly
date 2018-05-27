@@ -51,7 +51,7 @@ class EventProcessorService(
 
         val genesis = readGenesis(baseDir)
 
-        (listOf(genesis.root) + genesis.validators + genesis.users).forEach {
+        (listOf(genesis.root) + (genesis.validators ?: emptyList()) + (genesis.users ?: emptyList())).forEach {
             accountService.importAccount(
                     publicKey = it.publicKey,
                     privateKey = it.privateKey
@@ -74,7 +74,7 @@ class EventProcessorService(
         contractService.createContract(
                 space,
                 DEFAULT_SELF,
-                rootId, // owner
+                genesis,
                 contractBody
         )
 

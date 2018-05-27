@@ -5,6 +5,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.StringUtils;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.Contract;
+import org.bloqly.machine.model.Genesis;
 import org.bloqly.machine.model.Property;
 import org.bloqly.machine.model.PropertyId;
 import org.bloqly.machine.repository.ContractRepository;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import javax.script.Invocable;
 import javax.script.ScriptEngineManager;
 import javax.transaction.Transactional;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -55,7 +58,7 @@ public class ContractService {
         };
     }
 
-    public Set<Property> invokeFunction(ContractInvocationContext context, byte[] arg) {
+    private Set<Property> invokeFunction(ContractInvocationContext context, Genesis genesis, byte[] arg) {
 
         try {
 
@@ -74,7 +77,13 @@ public class ContractService {
 
             var params = ParameterUtils.INSTANCE.readParams(arg);
 
-            var args = Lists.asList(context, params);
+            List<Object> args = Lists.newArrayList(context);
+
+            if (genesis != null) {
+                args.add(genesis);
+            }
+
+            args.addAll(Arrays.asList(params));
 
             var results = (ScriptObjectMirror) invocable.invokeFunction(context.getFunctionName(), args.toArray());
 
@@ -138,7 +147,10 @@ public class ContractService {
     }
 
     @Transactional
-    public void createContract(String space, String self, String creator, String body) {
+    public void createContract(String space,
+                               String self,
+                               Genesis genesis,
+                               String body) {
 
         if (StringUtils.isEmpty(body)) {
             throw new IllegalArgumentException("Contract body can not be empty");
@@ -147,13 +159,13 @@ public class ContractService {
         var contract = new Contract(
                 self,
                 space,
-                creator,
+                genesis.getRoot().getId(),
                 body
         );
 
-        var invocationContext = new ContractInvocationContext("init", creator, self, contract);
+        var invocationContext = new ContractInvocationContext("init", genesis.getRoot().getId(), self, contract);
 
-        var properties = invokeFunction(invocationContext, new byte[0]);
+        var properties = invokeFunction(invocationContext, genesis, new byte[0]);
         processResults(properties);
 
         contractRepository.save(contract);
@@ -166,7 +178,7 @@ public class ContractService {
 
             var invocationContext = new ContractInvocationContext(functionName, caller, callee, contract);
 
-            var properties = invokeFunction(invocationContext, arg);
+            var properties = invokeFunction(invocationContext, null, arg);
             processResults(properties);
 
         });

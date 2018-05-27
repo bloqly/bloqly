@@ -40,9 +40,13 @@ function init(context, genesis) {
         { target: 'caller', balance: new BigInteger('999997') },
 
         // target = validator's id
-        { target: genesis.validators[0], balance: validatorAmount },
-        { target: genesis.validators[1], balance: validatorAmount },
-        { target: genesis.validators[2], balance: validatorAmount },
+        { target: genesis.validators[0].id, balance: validatorAmount },
+        { target: genesis.validators[1].id, balance: validatorAmount },
+        { target: genesis.validators[2].id, balance: validatorAmount },
+
+        { target: genesis.validators[0].id, power: validatorAmount },
+        { target: genesis.validators[1].id, power: validatorAmount },
+        { target: genesis.validators[2].id, power: validatorAmount },
 
         // quorum requirement for active validators group
         { target: 'self', quorum: 2 },

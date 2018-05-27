@@ -2,16 +2,13 @@ package org.bloqly.machine.service
 
 
 import org.assertj.core.util.Sets
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
-import org.junit.runner.RunWith
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Genesis
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.PropertyRepository
@@ -22,6 +19,11 @@ import org.bloqly.machine.util.ParameterUtils.writeBoolean
 import org.bloqly.machine.util.ParameterUtils.writeInteger
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.ParameterUtils.writeString
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
@@ -45,6 +47,8 @@ class ContractServiceTest {
 
     private val callee = "callee id"
 
+    private val genesis = Genesis(root = Account(id = creator, publicKey = ""))
+
     @After
     fun tearDown() {
 
@@ -53,7 +57,7 @@ class ContractServiceTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun testCreateContractWithEmptyBodyFails() {
-        contractService.createContract(DEFAULT_SPACE, DEFAULT_SELF, creator, "")
+        contractService.createContract(DEFAULT_SPACE, DEFAULT_SELF, genesis, "")
     }
 
     @Test
@@ -61,7 +65,8 @@ class ContractServiceTest {
 
         assertEquals(0, propertyRepository.count())
 
-        contractService.createContract(DEFAULT_SPACE, DEFAULT_SELF, creator, FileUtils.getResourceAsString("/scripts/test.js"))
+        contractService.createContract(
+                DEFAULT_SPACE, DEFAULT_SELF, genesis, FileUtils.getResourceAsString("/scripts/test.js"))
 
         assertTrue(Sets.newHashSet(propertyRepository.findAll()).containsAll(
                 listOf(

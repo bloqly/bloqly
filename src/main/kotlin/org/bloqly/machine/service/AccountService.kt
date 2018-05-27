@@ -75,7 +75,7 @@ class AccountService(
         val accountId = EncodingUtils.encodeToString16(publicKeyHash)
 
         if (accountRepository.existsById(accountId)) {
-            throw IllegalStateException("Could not import account: ${accountId}, account already exists.")
+            throw IllegalStateException("Could not import account: $accountId, account already exists.")
         }
 
         val account = Account(
