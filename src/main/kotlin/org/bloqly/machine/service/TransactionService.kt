@@ -12,8 +12,7 @@ import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.springframework.stereotype.Service
 
 @Service
-class TransactionService(
-    private val transactionRepository: TransactionRepository) {
+class TransactionService(private val transactionRepository: TransactionRepository) {
 
     fun newTransaction(space: String,
                        origin: Account,

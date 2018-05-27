@@ -1,4 +1,4 @@
-package org.bloqly.machine.service
+package org.bloqly.machine.model
 
 import org.bloqly.machine.model.Contract
 

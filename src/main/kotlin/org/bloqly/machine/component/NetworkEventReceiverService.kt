@@ -1,8 +1,5 @@
-package org.bloqly.machine.service
+package org.bloqly.machine.component
 
-import org.bloqly.machine.component.EventProcessorService
-import org.bloqly.machine.component.EventReceiverService
-import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.vo.BlockDataVO
 import org.bloqly.machine.vo.TransactionVO
 import org.bloqly.machine.vo.VoteVO

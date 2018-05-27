@@ -5,6 +5,7 @@ import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.StringUtils;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.Contract;
+import org.bloqly.machine.model.ContractInvocationContext;
 import org.bloqly.machine.model.GenesisParameters;
 import org.bloqly.machine.model.Property;
 import org.bloqly.machine.model.PropertyId;
