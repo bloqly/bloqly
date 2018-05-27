@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.POWER_KEY
+import org.bloqly.machine.exception.AccountAlreadyExistsException
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
@@ -68,21 +69,19 @@ class AccountService(
                 .orElseThrow()
     }
 
-    fun importAccount(publicKey: String, privateKey: String?): Account {
+    fun importAccount(account: Account): Account {
 
-        val publicKeyBytes = EncodingUtils.decodeFromString16(publicKey)
+        val publicKeyBytes = EncodingUtils.decodeFromString16(account.publicKey)
         val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
         val accountId = EncodingUtils.encodeToString16(publicKeyHash)
 
-        if (accountRepository.existsById(accountId)) {
-            throw IllegalStateException("Could not import account: $accountId, account already exists.")
+        if (accountId != account.id) {
+            throw IllegalStateException("Invalid account data $account")
         }
 
-        val account = Account(
-                id = accountId,
-                publicKey = publicKey,
-                privateKey = privateKey
-        )
+        if (accountRepository.existsById(accountId)) {
+            throw AccountAlreadyExistsException("Could not import account: $accountId, account already exists.")
+        }
 
         return accountRepository.save(account)
     }

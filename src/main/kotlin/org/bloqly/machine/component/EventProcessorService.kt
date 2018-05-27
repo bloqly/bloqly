@@ -52,10 +52,7 @@ class EventProcessorService(
         val genesis = readGenesis(baseDir)
 
         (listOf(genesis.root) + (genesis.validators ?: emptyList()) + (genesis.users ?: emptyList())).forEach {
-            accountService.importAccount(
-                    publicKey = it.publicKey,
-                    privateKey = it.privateKey
-            )
+            accountService.importAccount(it)
         }
 
         val contractBody = File(baseDir).list()
