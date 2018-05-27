@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.exception.SpaceAlreadyExistsException
-import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.BlockData
+import org.bloqly.machine.model.Genesis
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
@@ -22,7 +22,6 @@ import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
-import org.bloqly.machine.vo.GenesisVO
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.ZoneOffset
@@ -42,8 +41,7 @@ class EventProcessorService(
     private val voteRepository: VoteRepository,
     private val transactionRepository: TransactionRepository,
     private val propertyService: PropertyService,
-    private val objectMapper: ObjectMapper,
-    private val serializationService: SerializationService) {
+    private val objectMapper: ObjectMapper) {
 
     private val newProposals: MutableSet<BlockData> = mutableSetOf()
 
@@ -60,7 +58,7 @@ class EventProcessorService(
             )
         }
 
-        var scriptSource = File(baseDir).list()
+        val contractBody = File(baseDir).list()
                 .filter {
                     it.endsWith(".js")
                 }
@@ -71,46 +69,19 @@ class EventProcessorService(
                     header + source
                 }.reduce { str, acc -> str + acc }
 
-        var i = 0
-
-        do {
-            val placeholder = "{{validator$i}}"
-
-            if (!scriptSource.contains(placeholder)) {
-                break
-            }
-
-            scriptSource = scriptSource.replace(placeholder, genesis.validators[i].id)
-
-            i++
-
-        } while (true)
-
-        val root = serializationService.accountFromVO(genesis.root)
-        onCreate(root, space, scriptSource)
-    }
-
-    private fun onCreate(root: Account,
-                         space: String,
-                         defaultContractBody: String) {
+        val rootId = genesis.root.id
 
         contractService.createContract(
                 space,
                 DEFAULT_SELF,
-                root.id, // owner
-                defaultContractBody
+                rootId, // owner
+                contractBody
         )
 
-        spaceRepository.save(
-                Space(
-                        id = space,
-                        creatorId = root.id
-                )
-        )
+        spaceRepository.save(Space(id = space, creatorId = rootId))
 
         val parentHash = "" // there is no parent
         val height = 0L
-        val proposerId = root.id
         val timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
         val txHash = ByteArray(0)
         val validatorTxHash = ByteArray(0)
@@ -120,7 +91,7 @@ class EventProcessorService(
                 height = height,
                 timestamp = timestamp,
                 parentHash = parentHash,
-                proposerId = proposerId,
+                proposerId = rootId,
                 txHash = txHash,
                 validatorTxHash = validatorTxHash
         )
@@ -294,10 +265,10 @@ class EventProcessorService(
         }
     }
 
-    fun readGenesis(baseDir: String): GenesisVO {
+    fun readGenesis(baseDir: String): Genesis {
 
         val accountsString = File("$baseDir/genesis.json").readText()
 
-        return objectMapper.readValue(accountsString, GenesisVO::class.java)
+        return objectMapper.readValue(accountsString, Genesis::class.java)
     }
 }

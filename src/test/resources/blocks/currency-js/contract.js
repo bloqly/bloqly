@@ -16,7 +16,7 @@ const zero = new BigInteger('0');
  * @return {Object}  Array of properties to set after function execution
  */
 
-function contract(ctx, amount) {
+function contract(context, amount) {
 
     var callerBalance = getProperty('caller', 'balance', zero);
     var calleeBalance = getProperty('callee', 'balance', zero);
@@ -30,26 +30,25 @@ function contract(ctx, amount) {
     ];
 }
 
-function init(ctx) {
+function getPower(target) {
+    return getProperty(target, 'balance', zero);
+}
+
+function init(context, genesis) {
 
     return [
-        { target: 'caller', balance: maxSupply.subtract(new BigInteger('3')) },
+        { target: 'caller', balance: new BigInteger('999997') },
 
         // target = validator's id
-        { target: '{{validator0}}', balance: validatorAmount },
-        { target: '{{validator1}}', balance: validatorAmount },
-        { target: '{{validator2}}', balance: validatorAmount },
-
-        { target: '{{validator0}}', power: validatorPower },
-        { target: '{{validator1}}', power: validatorPower },
-        { target: '{{validator2}}', power: validatorPower },
-
+        { target: genesis.validators[0], balance: validatorAmount },
+        { target: genesis.validators[1], balance: validatorAmount },
+        { target: genesis.validators[2], balance: validatorAmount },
 
         // quorum requirement for active validators group
-        { target: 'self', 'quorum': 2 },
+        { target: 'self', quorum: 2 },
 
         // active validators group size
-        { target: 'self', 'validators': 3 }
+        { target: 'self', validators: 3 }
 
     ];
 }

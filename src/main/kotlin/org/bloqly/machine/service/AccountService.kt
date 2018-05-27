@@ -74,6 +74,10 @@ class AccountService(
         val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
         val accountId = EncodingUtils.encodeToString16(publicKeyHash)
 
+        if (accountRepository.existsById(accountId)) {
+            throw IllegalStateException("Could not import account: ${accountId}, account already exists.")
+        }
+
         val account = Account(
                 id = accountId,
                 publicKey = publicKey,

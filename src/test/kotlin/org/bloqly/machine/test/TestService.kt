@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Genesis
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
@@ -15,7 +16,6 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
-import org.bloqly.machine.vo.GenesisVO
 import org.bloqly.machine.vo.TransactionVO
 import org.springframework.stereotype.Component
 import java.time.ZoneOffset
@@ -36,7 +36,7 @@ class TestService(
     private val accountRepository: AccountRepository,
     private val serializationService: SerializationService) {
 
-    private lateinit var genesis: GenesisVO
+    private lateinit var genesis: Genesis
 
     @PostConstruct
     @Suppress("unused")
@@ -53,11 +53,11 @@ class TestService(
         transactionRepository.deleteAll()
     }
 
-    fun getRoot(): Account = serializationService.accountFromVO(genesis.root)
+    fun getRoot(): Account = genesis.root
 
-    fun getUser(): Account = serializationService.accountFromVO(genesis.users.first())
+    fun getUser(): Account = genesis.users.first()
 
-    fun getValidator(n: Int): Account = serializationService.accountFromVO(genesis.validators[n])
+    fun getValidator(n: Int): Account = genesis.validators[n]
 
     fun createBlockchain() {
         eventProcessorService.createBlockchain(Application.DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
