@@ -5,7 +5,6 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
-import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.TransactionType
@@ -39,8 +38,7 @@ class TestService(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
-    private val objectMapper: ObjectMapper,
-    private val serializationService: SerializationService) {
+    private val objectMapper: ObjectMapper) {
 
     private lateinit var genesisParameters: GenesisParameters
 
@@ -96,7 +94,7 @@ class TestService(
                 timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
         )
 
-        return serializationService.transactionToVO(transaction)
+        return transaction.toVO()
     }
 
     @ValueObject

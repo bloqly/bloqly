@@ -47,7 +47,7 @@ class AccountServiceTest {
             val account = accountService.newAccount();
 
             println("id: ${account.id}")
-            println("pub: ${account.publicKey}")
+            println("pub: ${account.publicKey.toLowerCase()}")
             println("priv: ${account.privateKey}")
         }
     }

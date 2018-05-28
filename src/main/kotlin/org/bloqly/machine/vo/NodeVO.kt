@@ -1,6 +1,8 @@
 package org.bloqly.machine.vo
 
 import org.bloqly.machine.annotation.ValueObject
+import org.bloqly.machine.model.Node
+import org.bloqly.machine.model.NodeId
 
 @ValueObject
 data class NodeVO(
@@ -9,5 +11,17 @@ data class NodeVO(
     val addedTime: Long,
     val lastSuccessTime: Long?,
     val lastErrorTime: Long?,
-    val bannedTime: Long?
-)
+    val bannedTime: Long?) {
+
+    fun toModel(): Node {
+
+        return Node(
+                id = NodeId(host = host, port = port),
+
+                addedTime = addedTime,
+                lastErrorTime = lastErrorTime,
+                lastSuccessTime = lastSuccessTime,
+                bannedTime = bannedTime
+        )
+    }
+}

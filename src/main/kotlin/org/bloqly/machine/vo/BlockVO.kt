@@ -1,6 +1,7 @@
 package org.bloqly.machine.vo
 
 import org.bloqly.machine.annotation.ValueObject
+import org.bloqly.machine.model.Block
 
 @ValueObject
 data class BlockVO(
@@ -12,5 +13,20 @@ data class BlockVO(
     val proposerId: String,
     val txHash: String,
     val validatorTxHash: String,
-    val signature: String
-)
+    val signature: String) {
+
+    fun toModel(): Block {
+
+        return Block(
+                id = id,
+                space = space,
+                height = height,
+                timestamp = timestamp,
+                parentHash = parentHash,
+                proposerId = proposerId,
+                txHash = txHash.toByteArray(),
+                validatorTxHash = validatorTxHash.toByteArray(),
+                signature = signature.toByteArray()
+        )
+    }
+}

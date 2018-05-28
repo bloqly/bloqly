@@ -1,6 +1,7 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.service.TransactionService
+import org.bloqly.machine.vo.TransactionListVO
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
@@ -13,10 +14,7 @@ class SchedulerService(
 
     private val nodeQueryService: NodeQueryService,
     private val transactionService: TransactionService,
-    private val eventSenderService: EventSenderService,
-    private val serializationService: SerializationService
-
-) {
+    private val eventSenderService: EventSenderService) {
 
     private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
 
@@ -39,7 +37,7 @@ class SchedulerService(
 
             log.info("Found ${transactions.size} transactions to send")
 
-            val transactionVOs = serializationService.transactionsToVO(transactions)
+            val transactionVOs = TransactionListVO.fromTransactions(transactions)
             eventSenderService.sendTransactions(transactionVOs);
 
         } else {

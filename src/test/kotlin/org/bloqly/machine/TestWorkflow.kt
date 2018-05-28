@@ -3,7 +3,6 @@ package org.bloqly.machine
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventSenderService
-import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.TransactionListVO
@@ -28,9 +27,6 @@ class TestWorkflow {
 
     @Autowired
     private lateinit var testService: TestService
-
-    @Autowired
-    private lateinit var serializationService: SerializationService
 
     @Autowired
     private lateinit var blockReceiverService: BlockRepository
@@ -69,13 +65,13 @@ class TestWorkflow {
 
     private fun sendVotes() {
 
-        val votes = eventProcessorService.onGetVote().map { serializationService.voteToVO(it) }
+        val votes = eventProcessorService.onGetVote().map { it.toVO() }
 
         eventSenderService.sendVotes(votes)
     }
 
     private fun sendProposals() {
-        val proposals = eventProcessorService.onGetProposals().map { serializationService.blockDataToVO(it) }
+        val proposals = eventProcessorService.onGetProposals().map { it.toVO() }
 
         eventSenderService.sendProposals(proposals)
     }

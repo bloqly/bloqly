@@ -1,5 +1,7 @@
 package org.bloqly.machine.model
 
+import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.vo.TransactionVO
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.Lob
@@ -35,9 +37,27 @@ data class Transaction(
 
     val signature: ByteArray,
 
-    val publicKey: String
+    val publicKey: String) {
 
-) {
+    fun toVO(): TransactionVO {
+
+        val value = EncodingUtils.encodeToString64(value)
+        val signature = EncodingUtils.encodeToString64(signature)
+
+        return TransactionVO(
+                id = id,
+                space = space,
+                destination = destination,
+                self = self,
+                key = key,
+                value = value,
+                transactionType = transactionType,
+                referencedBlockId = referencedBlockId,
+                timestamp = timestamp,
+                signature = signature,
+                publicKey = publicKey
+        )
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

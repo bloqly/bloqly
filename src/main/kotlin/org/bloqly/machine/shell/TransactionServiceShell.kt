@@ -2,13 +2,13 @@ package org.bloqly.machine.shell
 
 import com.fasterxml.jackson.databind.ObjectWriter
 import org.bloqly.machine.Application
-import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.ParameterUtils
+import org.bloqly.machine.vo.TransactionListVO
 import org.springframework.stereotype.Service
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
@@ -20,7 +20,6 @@ class TransactionServiceShell(
     private val accountRepository: AccountRepository,
     private val transactionService: TransactionService,
     private val transactionRepository: TransactionRepository,
-    private val serializationService: SerializationService,
     private val objectWriter: ObjectWriter) {
 
     fun createTransaction(originId: String, destinationId: String, amount: String): String {
@@ -50,11 +49,10 @@ class TransactionServiceShell(
 
         transactionRepository.save(transaction)
 
-        val transactionVO = serializationService.transactionToVO(transaction)
+        val transactionVO = transaction.toVO()
 
         return "\n" + objectWriter.writeValueAsString(transactionVO)
     }
-
 
     fun count(): String {
         return transactionRepository.count().toString()
@@ -62,7 +60,7 @@ class TransactionServiceShell(
 
     fun list(): String {
 
-        val transactions = serializationService.transactionsToVO(
+        val transactions = TransactionListVO.fromTransactions(
                 transactionRepository.findAll().toList())
 
         return "\n" + objectWriter.writeValueAsString(transactions)

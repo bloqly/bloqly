@@ -11,12 +11,8 @@ import org.springframework.web.client.RestTemplate
 
 @Component
 class NodeQueryService(
-
-    private val serializationService: SerializationService,
     private val nodeService: NodeService,
-    private val restTemplate: RestTemplate
-
-) {
+    private val restTemplate: RestTemplate) {
 
     private val log = LoggerFactory.getLogger(NodeQueryService::class.simpleName)
 
@@ -46,10 +42,7 @@ class NodeQueryService(
         if (nodeList.nodes.isNotEmpty()) {
             log.info("Node $server returned  ${nodeList.nodes.size} nodes")
 
-            nodeList.nodes.forEach {
-                nodeService.addNode(
-                        serializationService.nodeFromVO(it))
-            }
+            nodeList.nodes.forEach { nodeService.addNode(it.toModel()) }
         }
     }
 

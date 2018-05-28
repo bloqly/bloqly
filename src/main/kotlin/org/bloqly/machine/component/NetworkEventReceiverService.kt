@@ -8,17 +8,11 @@ import org.springframework.stereotype.Service
 
 @Service
 @Profile("production")
-class NetworkEventReceiverService(
-    private val eventProcessorService: EventProcessorService,
-    private val serializationService: SerializationService
-) : EventReceiverService {
+class NetworkEventReceiverService(private val eventProcessorService: EventProcessorService) : EventReceiverService {
 
     override fun receiveTransactions(transactionVOs: List<TransactionVO>) {
 
-        transactionVOs.forEach { transactionVO ->
-            eventProcessorService.onTransaction(
-                    serializationService.transactionFromVO(transactionVO))
-        }
+        transactionVOs.forEach { eventProcessorService.onTransaction(it.toModel()) }
     }
 
     override fun receiveVotes(voteVOs: List<VoteVO>) {

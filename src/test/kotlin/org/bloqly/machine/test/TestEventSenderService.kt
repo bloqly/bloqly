@@ -1,7 +1,6 @@
 package org.bloqly.machine.test
 
 import org.bloqly.machine.component.EventSenderService
-import org.bloqly.machine.component.SerializationService
 import org.bloqly.machine.vo.BlockDataVO
 import org.bloqly.machine.vo.TransactionListVO
 import org.bloqly.machine.vo.VoteVO
@@ -10,12 +9,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @Profile("test")
-class TestEventSenderService(
-
-    private val eventReceiver: TestEventReceiverService,
-    private val serializationService: SerializationService
-
-) : EventSenderService {
+class TestEventSenderService(private val eventReceiver: TestEventReceiverService) : EventSenderService {
 
     override fun sendTransactions(transactionListVO: TransactionListVO) {
 

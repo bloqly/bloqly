@@ -1,5 +1,7 @@
 package org.bloqly.machine.model
 
+import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.vo.BlockVO
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -32,9 +34,22 @@ data class Block(
     var validatorTxHash: ByteArray,
 
     @Column(nullable = false)
-    var signature: ByteArray
+    var signature: ByteArray) {
 
-) {
+    fun toVO(): BlockVO {
+
+        return BlockVO(
+                id = id,
+                space = space,
+                height = height,
+                timestamp = timestamp,
+                parentHash = parentHash,
+                proposerId = proposerId,
+                txHash = EncodingUtils.encodeToString16(txHash),
+                validatorTxHash = EncodingUtils.encodeToString16(validatorTxHash),
+                signature = EncodingUtils.encodeToString16(signature)
+        )
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

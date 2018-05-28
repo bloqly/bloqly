@@ -1,5 +1,6 @@
 package org.bloqly.machine.model
 
+import org.bloqly.machine.vo.NodeVO
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 
@@ -19,5 +20,17 @@ data class Node(
 
     fun getServer(): String {
         return "${this.id.host}:${this.id.port}"
+    }
+
+    fun toVO(): NodeVO {
+
+        return NodeVO(
+                host = id.host,
+                port = id.port,
+                addedTime = addedTime,
+                lastSuccessTime = lastSuccessTime,
+                lastErrorTime = lastErrorTime,
+                bannedTime = bannedTime
+        )
     }
 }
