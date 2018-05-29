@@ -81,7 +81,6 @@ class EventProcessorService(
 
         val parentHash = "" // there is no parent
         val height = 0L
-        val txHash = ByteArray(0)
         val validatorTxHash = ByteArray(0)
 
         val firstBlock = blockService.newBlock(
@@ -90,7 +89,7 @@ class EventProcessorService(
             timestamp = timestamp,
             parentHash = parentHash,
             proposerId = rootId,
-            txHash = txHash,
+            txHash = null,
             validatorTxHash = validatorTxHash
         )
 
@@ -108,6 +107,8 @@ class EventProcessorService(
         )
 
         transactionRepository.save(transaction)
+
+        firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
 
         blockRepository.save(firstBlock)
     }

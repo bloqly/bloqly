@@ -22,26 +22,26 @@ class BlockService(
         timestamp: Long,
         parentHash: String,
         proposerId: String,
-        txHash: ByteArray,
+        txHash: ByteArray? = null,
         validatorTxHash: ByteArray
     ): Block {
 
         val accountOpt = accountRepository
-                .findById(proposerId)
-                .filter { it.privateKey != null }
+            .findById(proposerId)
+            .filter { it.privateKey != null }
 
         return accountOpt.map { proposer ->
 
             val dataToSign = CryptoUtils.digest(
-                    arrayOf(
-                            space.toByteArray(),
-                            EncodingUtils.longToBytes(height),
-                            EncodingUtils.longToBytes(timestamp),
-                            parentHash.toByteArray(),
-                            proposerId.toByteArray(),
-                            txHash,
-                            validatorTxHash
-                    )
+                arrayOf(
+                    space.toByteArray(),
+                    EncodingUtils.longToBytes(height),
+                    EncodingUtils.longToBytes(timestamp),
+                    parentHash.toByteArray(),
+                    proposerId.toByteArray(),
+                    txHash ?: ByteArray(0),
+                    validatorTxHash
+                )
             )
 
             val privateKey = decodeFromString16(proposer.privateKey)
@@ -50,15 +50,15 @@ class BlockService(
             val blockId = EncodingUtils.encodeToString16(blockHash)
 
             Block(
-                    id = blockId,
-                    space = space,
-                    height = height,
-                    timestamp = timestamp,
-                    parentHash = parentHash,
-                    proposerId = proposerId,
-                    txHash = txHash,
-                    validatorTxHash = validatorTxHash,
-                    signature = signature
+                id = blockId,
+                space = space,
+                height = height,
+                timestamp = timestamp,
+                parentHash = parentHash,
+                proposerId = proposerId,
+                txHash = txHash,
+                validatorTxHash = validatorTxHash,
+                signature = signature
             )
         }.orElseThrow()
     }

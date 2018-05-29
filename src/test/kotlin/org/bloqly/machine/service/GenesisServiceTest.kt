@@ -50,6 +50,5 @@ class GenesisServiceTest {
 
         assertEquals(1, genesis.transactions.size)
 
-        println(genesisString)
     }
 }
