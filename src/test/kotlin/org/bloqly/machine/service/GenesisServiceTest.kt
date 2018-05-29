@@ -47,8 +47,13 @@ class GenesisServiceTest {
 
     @Test
     fun testExportGenesis() {
+        assertEquals(1, genesis.transactions.size)
+    }
 
+    @Test
+    fun testImportGenesis() {
         assertEquals(1, genesis.transactions.size)
 
+        genesisService.importGenesis(genesisString)
     }
 }

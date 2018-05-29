@@ -22,10 +22,25 @@ class GenesisService(
         val transactions = transactionRepository.findByContainingBlockId(firstBlock.id)
 
         val genesis = GenesisVO(
-                block = firstBlock.toVO(),
-                transactions = transactions.map { it.toVO() }
+            block = firstBlock.toVO(),
+            transactions = transactions.map { it.toVO() }
         )
 
         return objectMapper.writeValueAsString(genesis)
+    }
+
+    fun importGenesis(genesisString: String) {
+
+        // TODO CHECK!
+
+        val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
+
+        val block = genesis.block.toModel()
+
+        val transactions = genesis.transactions.map { it.toModel() }
+
+        blockRepository.save(block)
+
+        transactionRepository.saveAll(transactions)
     }
 }
