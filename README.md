@@ -1,9 +1,19 @@
-# Bloqly
 
-JavaScript Smart Contracts Engine on PBFT blockchain. This is a work in progress/prototype.
+<p align="center">
+<img src="https://raw.githubusercontent.com/slavasn/bloqly/master/resources/logo.png"/>
+</p>    
+<p align="center">JavaScript Smart Contracts Engine on PBFT blockchain.</p>
 
-[![Build Status](https://travis-ci.org/slavasn/bloqly.svg?branch=master)](https://travis-ci.org/slavasn/bloqly)
-[![ktlint](https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg)](https://ktlint.github.io/)
+
+---  
+<p align="center">
+<a href="https://travis-ci.org/slavasn/bloqly"><img src="https://travis-ci.org/slavasn/bloqly.svg?branch=master" alt="Build Status"></a>
+<a href="https://ktlint.github.io/"><img src="https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg" alt="Build Status"></a>
+</p>    
+
+<p align="center">
+This is a work in progress/prototype.
+</p>     
 
 ## Consensus engine prototype, functional smart contracts
 
