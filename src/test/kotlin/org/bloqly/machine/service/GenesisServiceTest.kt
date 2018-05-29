@@ -1,9 +1,11 @@
 package org.bloqly.machine.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import junit.framework.Assert.assertEquals
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.vo.GenesisVO
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -25,9 +27,17 @@ class GenesisServiceTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    private lateinit var genesisString: String
+
+    private lateinit var genesis: GenesisVO
+
     @Before
     fun init() {
         testService.createBlockchain()
+
+        genesisString = genesisService.exportGenesis(DEFAULT_SPACE)
+
+        genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
     }
 
     @After
@@ -37,7 +47,8 @@ class GenesisServiceTest {
 
     @Test
     fun testExportGenesis() {
-        val genesisString = genesisService.exportGenesis(DEFAULT_SPACE)
+
+        assertEquals(1, genesis.transactions.size)
 
         println(genesisString)
     }

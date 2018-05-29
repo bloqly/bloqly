@@ -56,23 +56,23 @@ class EventProcessorService(
         val genesis = readGenesis(baseDir)
 
         val contractBody = File(baseDir).list()
-                .filter {
-                    it.endsWith(".js")
-                }
-                .map { fileName ->
-                    val source = File("$baseDir/$fileName").readText()
-                    val extension = fileName.substringAfterLast(".")
-                    val header = FileUtils.getResourceAsString("/headers/header.$extension")
-                    header + source
-                }.reduce { str, acc -> str + acc }
+            .filter {
+                it.endsWith(".js")
+            }
+            .map { fileName ->
+                val source = File("$baseDir/$fileName").readText()
+                val extension = fileName.substringAfterLast(".")
+                val header = FileUtils.getResourceAsString("/headers/header.$extension")
+                header + source
+            }.reduce { str, acc -> str + acc }
 
         val rootId = genesis.root.id
 
         contractService.createContract(
-                space,
-                DEFAULT_SELF,
-                genesis,
-                contractBody
+            space,
+            DEFAULT_SELF,
+            genesis,
+            contractBody
         )
 
         spaceRepository.save(Space(id = space, creatorId = rootId))
@@ -85,25 +85,26 @@ class EventProcessorService(
         val validatorTxHash = ByteArray(0)
 
         val firstBlock = blockService.newBlock(
-                space = space,
-                height = height,
-                timestamp = timestamp,
-                parentHash = parentHash,
-                proposerId = rootId,
-                txHash = txHash,
-                validatorTxHash = validatorTxHash
+            space = space,
+            height = height,
+            timestamp = timestamp,
+            parentHash = parentHash,
+            proposerId = rootId,
+            txHash = txHash,
+            validatorTxHash = validatorTxHash
         )
 
         val transaction = transactionService.newTransaction(
-                space = space,
-                originId = genesis.root.id,
-                destinationId = DEFAULT_SELF,
-                self = DEFAULT_SELF,
-                key = null,
-                value = contractBody.toByteArray(),
-                transactionType = TransactionType.CREATE,
-                referencedBlockId = firstBlock.id,
-                timestamp = timestamp
+            space = space,
+            originId = genesis.root.id,
+            destinationId = DEFAULT_SELF,
+            self = DEFAULT_SELF,
+            key = null,
+            value = contractBody.toByteArray(),
+            transactionType = TransactionType.CREATE,
+            referencedBlockId = firstBlock.id,
+            containingBlockId = firstBlock.id,
+            timestamp = timestamp
         )
 
         transactionRepository.save(transaction)
@@ -145,9 +146,10 @@ class EventProcessorService(
         // TODO: check also timestamp
 
         if (
-                !CryptoUtils.verifyTransaction(transaction) ||
-                transactionRepository.existsById(transaction.id) ||
-                !blockRepository.existsById(transaction.referencedBlockId)) {
+            !CryptoUtils.verifyTransaction(transaction) ||
+            transactionRepository.existsById(transaction.id) ||
+            !blockRepository.existsById(transaction.referencedBlockId)
+        ) {
             return
         }
 
@@ -167,8 +169,8 @@ class EventProcessorService(
             val validators = accountService.getValidatorsForSpace(space)
 
             validators
-                    .filter { it.privateKey != null }
-                    .map { validator -> voteService.createVote(space, validator) }
+                .filter { it.privateKey != null }
+                .map { validator -> voteService.createVote(space, validator) }
         }
     }
 
@@ -203,18 +205,18 @@ class EventProcessorService(
             val transactions = getNewTransactions(space)
             val votes = getNewVotes(space)
             val validators = accountService.getValidatorsForSpace(space)
-                    .filter { it.privateKey != null }
+                .filter { it.privateKey != null }
 
             val newBlocks = validators.map { validator ->
 
                 blockService.newBlock(
-                        space = space,
-                        height = lastBlock.height + 1,
-                        timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond(),
-                        parentHash = lastBlock.id,
-                        proposerId = validator.id,
-                        txHash = CryptoUtils.digestTransactions(transactions),
-                        validatorTxHash = CryptoUtils.digestVotes(votes)
+                    space = space,
+                    height = lastBlock.height + 1,
+                    timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond(),
+                    parentHash = lastBlock.id,
+                    proposerId = validator.id,
+                    txHash = CryptoUtils.digestTransactions(transactions),
+                    validatorTxHash = CryptoUtils.digestVotes(votes)
                 )
             }
 
@@ -256,14 +258,14 @@ class EventProcessorService(
             // TODO add validators schedule check
             // TODO how to count power?
             val bestProposal = newProposals
-                    .sortedWith(
-                            compareByDescending<BlockData> { it.votes.size }
-                                    .thenByDescending { it.transactions.size }
-                                    .thenByDescending { it.block.id }
-                    )
-                    .firstOrNull {
-                        it.block.space == space && it.votes.size >= quorum && it.block.height == lastBlock.height + 1
-                    }
+                .sortedWith(
+                    compareByDescending<BlockData> { it.votes.size }
+                        .thenByDescending { it.transactions.size }
+                        .thenByDescending { it.block.id }
+                )
+                .firstOrNull {
+                    it.block.space == space && it.votes.size >= quorum && it.block.height == lastBlock.height + 1
+                }
 
             bestProposal?.let {
                 transactionRepository.saveAll(it.transactions)

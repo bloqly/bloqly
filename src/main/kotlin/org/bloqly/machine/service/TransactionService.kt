@@ -26,17 +26,18 @@ class TransactionService(
         value: ByteArray,
         transactionType: TransactionType,
         referencedBlockId: String,
+        containingBlockId: String? = null,
         timestamp: Long
     ): Transaction {
 
         val dataToSign = concat(
-                space.toByteArray(),
-                originId.toByteArray(),
-                destinationId.toByteArray(),
-                value,
-                referencedBlockId.toByteArray(),
-                transactionType.name.toByteArray(),
-                EncodingUtils.longToBytes(timestamp)
+            space.toByteArray(),
+            originId.toByteArray(),
+            destinationId.toByteArray(),
+            value,
+            referencedBlockId.toByteArray(),
+            transactionType.name.toByteArray(),
+            EncodingUtils.longToBytes(timestamp)
         )
 
         val origin = accountRepository.findById(originId).orElseThrow()
@@ -44,26 +45,27 @@ class TransactionService(
         val privateKey = decodeFromString16(origin.privateKey)
 
         val signature = CryptoUtils.sign(
-                privateKey,
-                CryptoUtils.digest(dataToSign)
+            privateKey,
+            CryptoUtils.digest(dataToSign)
         )
 
         val txHash = CryptoUtils.digest(signature)
         val transactionId = encodeToString16(txHash)
 
         return Transaction(
-                id = transactionId,
-                space = space,
-                origin = origin.id,
-                destination = destinationId,
-                self = self,
-                key = key,
-                value = value,
-                transactionType = transactionType,
-                referencedBlockId = referencedBlockId,
-                timestamp = timestamp,
-                signature = signature,
-                publicKey = origin.publicKey
+            id = transactionId,
+            space = space,
+            origin = origin.id,
+            destination = destinationId,
+            self = self,
+            key = key,
+            value = value,
+            transactionType = transactionType,
+            referencedBlockId = referencedBlockId,
+            containingBlockId = containingBlockId,
+            timestamp = timestamp,
+            signature = signature,
+            publicKey = origin.publicKey
         )
     }
 

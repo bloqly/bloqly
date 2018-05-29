@@ -31,7 +31,7 @@ data class Transaction(
 
     val referencedBlockId: String,
 
-    val containingBlockId: String? = null,
+    var containingBlockId: String? = null,
 
     val timestamp: Long,
 
