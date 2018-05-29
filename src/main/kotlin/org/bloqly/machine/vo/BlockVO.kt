@@ -13,7 +13,8 @@ data class BlockVO(
     val proposerId: String,
     val txHash: String,
     val validatorTxHash: String,
-    val signature: String) {
+    val signature: String
+) {
 
     fun toModel(): Block {
 

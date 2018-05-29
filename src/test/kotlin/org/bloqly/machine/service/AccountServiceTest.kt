@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 
-
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class AccountServiceTest {
@@ -44,7 +43,7 @@ class AccountServiceTest {
 
         for (i in 0..4) {
 
-            val account = accountService.newAccount();
+            val account = accountService.newAccount()
 
             println("id: ${account.id}")
             println("pub: ${account.publicKey.toLowerCase()}")
@@ -61,5 +60,4 @@ class AccountServiceTest {
             Assert.assertTrue(e.cause is AccountAlreadyExistsException)
         }
     }
-
 }

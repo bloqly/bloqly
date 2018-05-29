@@ -24,7 +24,8 @@ class AccountService(
     private val accountRepository: AccountRepository,
     private val propertyRepository: PropertyRepository,
     private val blockRepository: BlockRepository,
-    @Value("\${validators:}") private val validators: Array<String>) {
+    @Value("\${validators:}") private val validators: Array<String>
+) {
 
     fun createAccount(): Account {
 

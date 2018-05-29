@@ -16,7 +16,8 @@ data class Node(
 
     val lastSuccessTime: Long? = null,
 
-    val bannedTime: Long? = null) {
+    val bannedTime: Long? = null
+) {
 
     fun getServer(): String {
         return "${this.id.host}:${this.id.port}"

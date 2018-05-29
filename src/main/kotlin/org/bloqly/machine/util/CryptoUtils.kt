@@ -104,7 +104,6 @@ object CryptoUtils {
         return digest(bos.toByteArray())
     }
 
-
     fun sign(privateKey: ByteArray, input: ByteArray): ByteArray {
 
         val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
@@ -185,11 +184,9 @@ object CryptoUtils {
             signer.init(false, pubParams)
 
             return signer.verifySignature(message, r.positiveValue, s.positiveValue)
-
         } catch (e: Exception) {
             LOG.error(String.format("Could not verify signature for message %s", String(message)), e)
             return false
         }
     }
-
 }

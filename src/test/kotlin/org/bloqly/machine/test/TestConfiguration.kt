@@ -12,5 +12,4 @@ class TestConfiguration {
     fun getRestTemplate(): RestTemplate {
         return Mockito.mock(RestTemplate::class.java)
     }
-
 }

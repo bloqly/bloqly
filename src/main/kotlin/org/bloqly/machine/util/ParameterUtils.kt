@@ -55,7 +55,6 @@ object ParameterUtils {
             4 -> readBoolean(bis)
             else -> throw IllegalArgumentException("Unsupported type $type")
         }
-
     }
 
     private fun readString(bis: ByteArrayInputStream): String {
@@ -174,7 +173,5 @@ object ParameterUtils {
             else -> throw IllegalArgumentException(
                     "Unsupported value $value of type ${value.javaClass.canonicalName}")
         }
-
     }
-
 }

@@ -30,7 +30,6 @@ class BInteger {
         assertValueInRange(this.value)
     }
 
-
     @Suppress("unused")
     fun add(another: BInteger): BInteger {
 

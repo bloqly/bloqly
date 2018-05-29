@@ -19,7 +19,5 @@ class CryptoUtilsTest {
         val verified = CryptoUtils.verify("test".toByteArray(), signature, pub)
 
         println("verified = $verified")
-
     }
-
 }

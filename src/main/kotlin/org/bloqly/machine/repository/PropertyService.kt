@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class PropertyService(
-        private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository
 ) {
     fun getQuorum(space: String): Int {
         val quorumProperty = propertyRepository.findById(

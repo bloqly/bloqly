@@ -32,7 +32,6 @@ object Shell {
             } catch (e: Exception) {
                 log.error("Error executing command", e)
             }
-
         } else {
             shell.run(null)
         }

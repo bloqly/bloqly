@@ -18,7 +18,8 @@ data class TransactionVO(
     val referencedBlockId: String,
     val timestamp: Long,
     val signature: String,
-    val publicKey: String) {
+    val publicKey: String
+) {
 
     fun toModel(): Transaction {
 

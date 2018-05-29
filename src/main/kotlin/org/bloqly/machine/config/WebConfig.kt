@@ -11,7 +11,6 @@ import org.springframework.web.servlet.config.annotation.ContentNegotiationConfi
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
-
 @Configuration
 @EnableWebMvc
 @Profile("server")
@@ -29,5 +28,4 @@ class WebConfig : WebMvcConfigurer {
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         return MappingJackson2HttpMessageConverter(mapper)
     }
-
 }

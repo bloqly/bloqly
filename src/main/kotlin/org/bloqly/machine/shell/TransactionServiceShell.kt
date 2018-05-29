@@ -20,7 +20,8 @@ class TransactionServiceShell(
     private val accountRepository: AccountRepository,
     private val transactionService: TransactionService,
     private val transactionRepository: TransactionRepository,
-    private val objectWriter: ObjectWriter) {
+    private val objectWriter: ObjectWriter
+) {
 
     fun createTransaction(originId: String, destinationId: String, amount: String): String {
 

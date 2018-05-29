@@ -11,5 +11,4 @@ interface EventReceiverService {
     fun receiveVotes(voteVOs: List<VoteVO>)
 
     fun receiveProposals(proposals: List<BlockDataVO>)
-
 }

@@ -38,7 +38,8 @@ class TestService(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
-    private val objectMapper: ObjectMapper) {
+    private val objectMapper: ObjectMapper
+) {
 
     private lateinit var genesisParameters: GenesisParameters
 
@@ -85,13 +86,13 @@ class TestService(
         val user = accountRepository.findById(getUser().id).orElseThrow()
 
         val transaction = transactionService.newTransaction(
-                space = DEFAULT_SPACE,
-                originId = root.id,
-                destinationId = user.id,
-                value = writeLong("1"),
-                transactionType = TransactionType.CALL,
-                referencedBlockId = lastBlock.id,
-                timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
+            space = DEFAULT_SPACE,
+            originId = root.id,
+            destinationId = user.id,
+            value = writeLong("1"),
+            transactionType = TransactionType.CALL,
+            referencedBlockId = lastBlock.id,
+            timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
         )
 
         return transaction.toVO()

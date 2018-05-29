@@ -12,5 +12,4 @@ interface PropertyRepository : CrudRepository<Property, PropertyId> {
 
     @Query("select p from Property p where p.id.key = ?1")
     fun findByKey(key: String): List<Property>
-
 }

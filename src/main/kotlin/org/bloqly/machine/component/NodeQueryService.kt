@@ -12,7 +12,8 @@ import org.springframework.web.client.RestTemplate
 @Component
 class NodeQueryService(
     private val nodeService: NodeService,
-    private val restTemplate: RestTemplate) {
+    private val restTemplate: RestTemplate
+) {
 
     private val log = LoggerFactory.getLogger(NodeQueryService::class.simpleName)
 

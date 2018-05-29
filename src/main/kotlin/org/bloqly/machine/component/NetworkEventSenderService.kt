@@ -20,7 +20,7 @@ class NetworkEventSenderService(
     private val log = LoggerFactory.getLogger(NetworkEventSenderService::class.simpleName)
 
     override fun sendVotes(votes: List<VoteVO>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun sendTransactions(transactionListVO: TransactionListVO) {
@@ -35,6 +35,6 @@ class NetworkEventSenderService(
     }
 
     override fun sendProposals(proposals: List<BlockDataVO>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 }

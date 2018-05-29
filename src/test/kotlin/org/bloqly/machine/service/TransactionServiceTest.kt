@@ -87,7 +87,6 @@ class TransactionServiceTest {
         ))
     }
 
-
     @Test
     fun testVerifyTxTypeWrong() {
 
@@ -143,5 +142,4 @@ class TransactionServiceTest {
                 transaction.copy(space = FAKE_DATA)
         ))
     }
-
 }

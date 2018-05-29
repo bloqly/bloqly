@@ -1,6 +1,8 @@
 package org.bloqly.machine.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.test.TestService
 import org.junit.After
 import org.junit.Before
@@ -20,11 +22,12 @@ class GenesisServiceTest {
     @Autowired
     private lateinit var testService: TestService
 
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
     @Before
     fun init() {
-
         testService.createBlockchain()
-
     }
 
     @After
@@ -34,7 +37,8 @@ class GenesisServiceTest {
 
     @Test
     fun testExportGenesis() {
-        //genesisService.exportGenesis();
-    }
+        val genesisString = genesisService.exportGenesis(DEFAULT_SPACE)
 
+        println(genesisString)
+    }
 }

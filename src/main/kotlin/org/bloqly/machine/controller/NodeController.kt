@@ -19,5 +19,4 @@ class NodeController(private val nodeService: NodeService) {
 
         return NodeListVO(nodes = nodes.map { it.toVO() })
     }
-
 }

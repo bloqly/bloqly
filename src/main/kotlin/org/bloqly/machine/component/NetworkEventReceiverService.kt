@@ -16,10 +16,10 @@ class NetworkEventReceiverService(private val eventProcessorService: EventProces
     }
 
     override fun receiveVotes(voteVOs: List<VoteVO>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun receiveProposals(proposals: List<BlockDataVO>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 }

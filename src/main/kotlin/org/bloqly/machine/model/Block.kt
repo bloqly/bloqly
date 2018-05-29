@@ -34,7 +34,8 @@ data class Block(
     var validatorTxHash: ByteArray,
 
     @Column(nullable = false)
-    var signature: ByteArray) {
+    var signature: ByteArray
+) {
 
     fun toVO(): BlockVO {
 

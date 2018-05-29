@@ -7,7 +7,8 @@ import org.bloqly.machine.model.BlockData
 data class BlockDataVO(
     val block: BlockVO,
     val transactions: List<TransactionVO>,
-    val votes: List<VoteVO>) {
+    val votes: List<VoteVO>
+) {
 
     fun toModel(): BlockData {
 

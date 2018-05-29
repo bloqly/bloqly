@@ -36,5 +36,4 @@ data class Property(
     override fun toString(): String {
         return "Property(id=$id, value=${EncodingUtils.encodeToString64(value)})"
     }
-
 }

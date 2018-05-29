@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.client.RestTemplate
 
-
 @Configuration
 class ApplicationConfiguration {
 
@@ -22,7 +21,7 @@ class ApplicationConfiguration {
 
         val mapper = ObjectMapper()
 
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
         return mapper
     }

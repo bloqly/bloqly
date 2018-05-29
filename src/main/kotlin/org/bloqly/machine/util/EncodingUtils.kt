@@ -28,5 +28,4 @@ object EncodingUtils {
 
         return ByteBuffer.allocate(LONG_BYTES).putLong(value).array()
     }
-
 }

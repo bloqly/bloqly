@@ -12,7 +12,8 @@ data class VoteVO(
     val height: Long,
     val blockId: String,
     val timestamp: Long,
-    val signature: String) {
+    val signature: String
+) {
 
     fun toModel(): Vote {
 

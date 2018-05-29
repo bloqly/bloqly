@@ -14,17 +14,20 @@ import org.springframework.stereotype.Service
 @Service
 class TransactionService(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository) {
+    private val transactionRepository: TransactionRepository
+) {
 
-    fun newTransaction(space: String,
-                       originId: String,
-                       destinationId: String,
-                       self: String? = null,
-                       key: String? = null,
-                       value: ByteArray,
-                       transactionType: TransactionType,
-                       referencedBlockId: String,
-                       timestamp: Long): Transaction {
+    fun newTransaction(
+        space: String,
+        originId: String,
+        destinationId: String,
+        self: String? = null,
+        key: String? = null,
+        value: ByteArray,
+        transactionType: TransactionType,
+        referencedBlockId: String,
+        timestamp: Long
+    ): Transaction {
 
         val dataToSign = concat(
                 space.toByteArray(),

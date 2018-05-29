@@ -1,6 +1,5 @@
 package org.bloqly.machine.component
 
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
@@ -45,7 +44,8 @@ class EventProcessorService(
     private val transactionRepository: TransactionRepository,
     private val propertyService: PropertyService,
     private val transactionService: TransactionService,
-    private val objectMapper: ObjectMapper) {
+    private val objectMapper: ObjectMapper
+) {
 
     private val newProposals: MutableSet<BlockData> = mutableSetOf()
 
@@ -219,7 +219,6 @@ class EventProcessorService(
             }
 
             newBlocks.map { newBlock -> BlockData(newBlock, transactions, votes) }
-
         }.toSet()
 
         newProposals.addAll(proposals)
@@ -265,7 +264,6 @@ class EventProcessorService(
                     .firstOrNull {
                         it.block.space == space && it.votes.size >= quorum && it.block.height == lastBlock.height + 1
                     }
-
 
             bestProposal?.let {
                 transactionRepository.saveAll(it.transactions)

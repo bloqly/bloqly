@@ -9,7 +9,6 @@ data class TransactionListVO(val transactions: List<TransactionVO>) {
     companion object {
 
         fun fromTransactions(transactions: List<Transaction>): TransactionListVO {
-
             return TransactionListVO(transactions = transactions.map { it.toVO() })
         }
     }

@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/transactions")
 class TransactionController(
     private val eventReceiverService: EventReceiverService,
-    private val transactionService: TransactionService) {
+    private val transactionService: TransactionService
+) {
 
     @PostMapping
     fun onTransaction(@RequestBody transactionVOs: TransactionListVO) {
@@ -33,5 +34,4 @@ class TransactionController(
                 transactions = transactions.map { it.toVO() }
         )
     }
-
 }

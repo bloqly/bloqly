@@ -7,5 +7,4 @@ import org.springframework.data.repository.CrudRepository
 interface VoteRepository : CrudRepository<Vote, VoteId> {
 
     fun findByBlockId(blockId: String): List<Vote>
-
 }

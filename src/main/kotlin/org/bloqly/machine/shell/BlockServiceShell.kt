@@ -2,9 +2,7 @@ package org.bloqly.machine.shell
 
 import com.fasterxml.jackson.databind.ObjectWriter
 import org.bloqly.machine.component.EventProcessorService
-import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.SpaceRepository
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.springframework.stereotype.Service
 
@@ -37,5 +35,4 @@ class BlockServiceShell(
 
         return lastBlock.id
     }
-
 }

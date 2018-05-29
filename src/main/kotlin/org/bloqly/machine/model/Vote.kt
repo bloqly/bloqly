@@ -19,7 +19,8 @@ data class Vote(
     val timestamp: Long,
 
     @Column(nullable = false)
-    val signature: ByteArray) {
+    val signature: ByteArray
+) {
 
     fun toVO(): VoteVO {
 

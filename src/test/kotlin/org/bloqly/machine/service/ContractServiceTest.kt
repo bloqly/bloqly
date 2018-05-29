@@ -1,6 +1,5 @@
 package org.bloqly.machine.service
 
-
 import org.assertj.core.util.Sets
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
@@ -87,6 +86,5 @@ class ContractServiceTest {
                         Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value4"), writeLong("124"))
                 )
         ))
-
     }
 }

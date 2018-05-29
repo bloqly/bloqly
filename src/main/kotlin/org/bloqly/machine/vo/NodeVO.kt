@@ -11,7 +11,8 @@ data class NodeVO(
     val addedTime: Long,
     val lastSuccessTime: Long?,
     val lastErrorTime: Long?,
-    val bannedTime: Long?) {
+    val bannedTime: Long?
+) {
 
     fun toModel(): Node {
 

@@ -74,7 +74,6 @@ class VoteServiceTest {
         assertTrue(verifyVote(validator, vote))
     }
 
-
     @Test
     fun testVerifyVoteBlockWrongFails() {
 
@@ -146,5 +145,4 @@ class VoteServiceTest {
                 )
         )
     }
-
 }

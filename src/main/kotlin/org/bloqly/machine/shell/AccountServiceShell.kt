@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service
 @Service
 class AccountServiceShell(
     private val accountService: AccountService,
-    private val objectMapper: ObjectMapper) {
+    private val objectMapper: ObjectMapper
+) {
 
     private val log: Logger = LoggerFactory.getLogger(AccountServiceShell::class.simpleName)
 
@@ -47,5 +48,4 @@ class AccountServiceShell(
     data class Accounts(
         val accounts: List<Account>
     )
-
 }

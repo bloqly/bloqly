@@ -7,14 +7,14 @@ import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
-
 @Component
 @Profile("scheduler")
 class SchedulerService(
 
     private val nodeQueryService: NodeQueryService,
     private val transactionService: TransactionService,
-    private val eventSenderService: EventSenderService) {
+    private val eventSenderService: EventSenderService
+) {
 
     private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
 
@@ -38,12 +38,10 @@ class SchedulerService(
             log.info("Found ${transactions.size} transactions to send")
 
             val transactionVOs = TransactionListVO.fromTransactions(transactions)
-            eventSenderService.sendTransactions(transactionVOs);
-
+            eventSenderService.sendTransactions(transactionVOs)
         } else {
 
             log.info("There are no transactions to send, skipping")
         }
     }
-
 }

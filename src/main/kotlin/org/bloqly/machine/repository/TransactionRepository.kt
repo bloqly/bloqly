@@ -8,5 +8,5 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
     fun findBySpaceAndContainingBlockIdIsNull(space: String): List<Transaction>
 
     fun findByContainingBlockIdIsNull(): List<Transaction>
-
+    fun findByContainingBlockId(id: String): List<Transaction>
 }

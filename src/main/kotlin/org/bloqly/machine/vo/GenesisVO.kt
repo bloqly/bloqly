@@ -1,4 +1,9 @@
 package org.bloqly.machine.vo
 
-class GenesisVO {
-}
+import org.bloqly.machine.annotation.ValueObject
+
+@ValueObject
+data class GenesisVO(
+    val block: BlockVO,
+    val transactions: List<TransactionVO>
+)

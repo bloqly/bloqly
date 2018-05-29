@@ -13,15 +13,18 @@ import javax.transaction.Transactional
 @Transactional
 class BlockService(
     private val accountRepository: AccountRepository,
-    private val blockRepository: BlockRepository) {
+    private val blockRepository: BlockRepository
+) {
 
-    fun newBlock(space: String,
-                 height: Long,
-                 timestamp: Long,
-                 parentHash: String,
-                 proposerId: String,
-                 txHash: ByteArray,
-                 validatorTxHash: ByteArray): Block {
+    fun newBlock(
+        space: String,
+        height: Long,
+        timestamp: Long,
+        parentHash: String,
+        proposerId: String,
+        txHash: ByteArray,
+        validatorTxHash: ByteArray
+    ): Block {
 
         val accountOpt = accountRepository
                 .findById(proposerId)

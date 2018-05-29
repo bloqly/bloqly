@@ -14,7 +14,8 @@ data class Account(
     var publicKey: String,
 
     @Column
-    var privateKey: String? = null) {
+    var privateKey: String? = null
+) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

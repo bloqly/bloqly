@@ -11,5 +11,4 @@ interface EventSenderService {
     fun sendTransactions(transactionListVO: TransactionListVO)
 
     fun sendProposals(proposals: List<BlockDataVO>)
-
 }

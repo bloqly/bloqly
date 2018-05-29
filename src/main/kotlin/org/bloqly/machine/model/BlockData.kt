@@ -8,7 +8,8 @@ data class BlockData(
 
     val transactions: List<Transaction>,
 
-    val votes: List<Vote>) {
+    val votes: List<Vote>
+) {
 
     fun toVO(): BlockDataVO {
 

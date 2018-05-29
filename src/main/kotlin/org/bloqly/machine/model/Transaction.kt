@@ -37,7 +37,8 @@ data class Transaction(
 
     val signature: ByteArray,
 
-    val publicKey: String) {
+    val publicKey: String
+) {
 
     fun toVO(): TransactionVO {
 

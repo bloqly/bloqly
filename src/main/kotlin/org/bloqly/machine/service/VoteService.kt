@@ -18,7 +18,8 @@ import java.time.ZonedDateTime
 @Transactional
 class VoteService(
     private val voteRepository: VoteRepository,
-    private val blockRepository: BlockRepository) {
+    private val blockRepository: BlockRepository
+) {
 
     fun createVote(space: String, validator: Account): Vote {
 
