@@ -122,7 +122,7 @@ object CryptoUtils {
         return bos.toByteArray()
     }
 
-    fun verifyTransaction(transaction: Transaction): Boolean {
+    fun isTransactionValid(transaction: Transaction): Boolean {
 
         val dataToVerify = Bytes.concat(
                 transaction.space.toByteArray(),

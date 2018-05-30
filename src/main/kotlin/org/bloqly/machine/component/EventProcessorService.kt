@@ -147,7 +147,7 @@ class EventProcessorService(
         // TODO: check also timestamp
 
         if (
-            !CryptoUtils.verifyTransaction(transaction) ||
+            !CryptoUtils.isTransactionValid(transaction) ||
             transactionRepository.existsById(transaction.id) ||
             !blockRepository.existsById(transaction.referencedBlockId)
         ) {

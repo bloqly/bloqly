@@ -4,7 +4,7 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
-import org.bloqly.machine.util.CryptoUtils.verifyTransaction
+import org.bloqly.machine.util.CryptoUtils.isTransactionValid
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -60,13 +60,13 @@ class TransactionServiceTest {
     @Test
     fun testVerifyOK() {
 
-        assertTrue(verifyTransaction(transaction))
+        assertTrue(isTransactionValid(transaction))
     }
 
     @Test
     fun testVerifyDestinationWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(destination = FAKE_DATA)
         ))
     }
@@ -74,7 +74,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyOriginWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(origin = FAKE_DATA)
         ))
     }
@@ -82,7 +82,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyReferencedBlockIdWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(referencedBlockId = FAKE_DATA)
         ))
     }
@@ -90,7 +90,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyTxTypeWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(transactionType = TransactionType.CALL)
         ))
     }
@@ -98,7 +98,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyAmountWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(value = FAKE_DATA.toByteArray())
         ))
     }
@@ -106,7 +106,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyTimestampWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(timestamp = System.currentTimeMillis() + 1)
         ))
     }
@@ -114,7 +114,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyIdWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(id = FAKE_DATA)
         ))
     }
@@ -122,7 +122,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifySignatureWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(signature = transaction.signature.reversed().toByteArray())
         ))
     }
@@ -130,7 +130,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifyPubKeyWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(publicKey = transaction.publicKey.reversed())
         ))
     }
@@ -138,7 +138,7 @@ class TransactionServiceTest {
     @Test
     fun testVerifySpaceWrong() {
 
-        assertFalse(verifyTransaction(
+        assertFalse(isTransactionValid(
                 transaction.copy(space = FAKE_DATA)
         ))
     }
