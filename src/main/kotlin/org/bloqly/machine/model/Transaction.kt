@@ -54,6 +54,7 @@ data class Transaction(
                 value = value,
                 transactionType = transactionType,
                 referencedBlockId = referencedBlockId,
+                containingBlockId = containingBlockId,
                 timestamp = timestamp,
                 signature = signature,
                 publicKey = publicKey

@@ -46,8 +46,8 @@ class GenesisService(
         require(CryptoUtils.isTransactionValid(transaction))
         { "Transaction in genesis is invalid." }
 
-        //require(transaction.containingBlockId == block.id)
-        //{ "Transaction has invalid containingBlockId" }
+        require(transaction.containingBlockId == block.id)
+        { "Transaction has invalid containingBlockId" }
 
         require(transaction.referencedBlockId == block.id)
         { "Transaction has invalid referencedBlockId" }

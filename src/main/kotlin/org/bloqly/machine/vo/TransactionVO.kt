@@ -16,6 +16,7 @@ data class TransactionVO(
     val value: String,
     val transactionType: TransactionType,
     val referencedBlockId: String,
+    val containingBlockId: String? = null,
     val timestamp: Long,
     val signature: String,
     val publicKey: String
@@ -33,18 +34,19 @@ data class TransactionVO(
         val transactionType = TransactionType.valueOf(transactionType.name)
 
         return Transaction(
-                id = id,
-                space = space,
-                origin = origin,
-                destination = destination,
-                self = self,
-                key = key,
-                value = value,
-                transactionType = transactionType,
-                referencedBlockId = referencedBlockId,
-                timestamp = timestamp,
-                signature = signature,
-                publicKey = publicKey
+            id = id,
+            space = space,
+            origin = origin,
+            destination = destination,
+            self = self,
+            key = key,
+            value = value,
+            transactionType = transactionType,
+            referencedBlockId = referencedBlockId,
+            containingBlockId = containingBlockId,
+            timestamp = timestamp,
+            signature = signature,
+            publicKey = publicKey
         )
     }
 }
