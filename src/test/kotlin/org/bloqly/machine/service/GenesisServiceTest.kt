@@ -37,6 +37,8 @@ class GenesisServiceTest {
 
         genesisString = genesisService.exportGenesis(DEFAULT_SPACE)
 
+        println(genesisString)
+
         genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
     }
 
@@ -53,6 +55,8 @@ class GenesisServiceTest {
     @Test
     fun testImportGenesis() {
         assertEquals(1, genesis.transactions.size)
+
+        testService.cleanup()
 
         genesisService.importGenesis(genesisString)
     }
