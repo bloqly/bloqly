@@ -4,7 +4,6 @@ import org.assertj.core.util.Sets
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.exception.SpaceAlreadyExistsException
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
@@ -106,7 +105,7 @@ class EventProcessorServiceTest {
             eventProcessorService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
             fail()
         } catch (e: Exception) {
-            assertTrue(e.cause is SpaceAlreadyExistsException)
+
         }
     }
 

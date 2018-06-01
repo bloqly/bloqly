@@ -6,6 +6,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.GENESIS_KEY
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
@@ -112,14 +113,19 @@ class BlockService(
 
         val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
 
+        ensureSpaceEmpty(genesis.block.space)
+
         val block = genesis.block.toModel()
+
+        spaceRepository.save(
+            Space(
+                id = block.space,
+                creatorId = genesis.block.proposerId
+            )
+        )
 
         // TODO
         //require(CryptoUtils.isBlockValid())
-
-        require(!spaceRepository.existsById(block.space)) {
-            "Space ${block.space} already exists."
-        }
 
         require(block.height == 0L) {
             "Genesis block should have height 0, found ${block.height} instead."
@@ -180,5 +186,16 @@ class BlockService(
         blockRepository.save(block)
 
         transactionRepository.saveAll(transactions)
+    }
+
+    fun ensureSpaceEmpty(space: String) {
+
+        require(!blockRepository.existsBySpace(space)) {
+            "Blockchain already initialized for space '$space'"
+        }
+
+        require(!spaceRepository.existsById(space)) {
+            "Space '$space' already exists"
+        }
     }
 }

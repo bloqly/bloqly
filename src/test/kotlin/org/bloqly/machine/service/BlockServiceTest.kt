@@ -58,7 +58,7 @@ class BlockServiceTest {
         blockString.importFirst(genesisString)
 
         //testService.testPropertiesAreCreated()
-        //testService.testSpaceCreated()
+        testService.testSpaceCreated()
         //testService.testValidatorsInitialized()
         //testService.testValidatorsPowerValues()
     }

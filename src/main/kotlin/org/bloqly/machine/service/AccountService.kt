@@ -2,7 +2,6 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.POWER_KEY
-import org.bloqly.machine.exception.AccountAlreadyExistsException
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
@@ -40,9 +39,9 @@ class AccountService(
         val accountId = EncodingUtils.encodeToString16(publicKeyHash)
 
         return Account(
-                id = accountId,
-                publicKey = encodeToString16(publicKey),
-                privateKey = encodeToString16(privateKey)
+            id = accountId,
+            publicKey = encodeToString16(publicKey),
+            privateKey = encodeToString16(privateKey)
         )
     }
 
@@ -52,22 +51,22 @@ class AccountService(
         val accountIds = powerProperties.map { it.id.target }
 
         return accountRepository.findAllById(accountIds)
-                .filter { validators.isEmpty() || validators.contains(it.id) }
+            .filter { validators.isEmpty() || validators.contains(it.id) }
     }
 
     fun getAccountPower(space: String, accountId: String): BigInteger {
 
         val propertyKey = PropertyId(
-                space = space,
-                self = DEFAULT_SELF,
-                target = accountId,
-                key = POWER_KEY
+            space = space,
+            self = DEFAULT_SELF,
+            target = accountId,
+            key = POWER_KEY
         )
 
         return propertyRepository.findById(propertyKey)
-                .map { ParameterUtils.readValue(it.value) as BInteger }
-                .map { it.value }
-                .orElseThrow()
+            .map { ParameterUtils.readValue(it.value) as BInteger }
+            .map { it.value }
+            .orElseThrow()
     }
 
     fun importAccount(privateKey: String): Account {
@@ -77,17 +76,19 @@ class AccountService(
         val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
         val accountId = EncodingUtils.encodeToString16(publicKeyHash)
 
-        if (accountRepository.existsById(accountId)) {
-            throw AccountAlreadyExistsException("Could not import account: $accountId, account already exists.")
+        require(!accountRepository.existsById(accountId)) {
+            "Could not import account: $accountId, account already exists."
         }
 
         val publicKey = EncodingUtils.encodeToString16(publicKeyBytes)
 
-        return accountRepository.save(Account(
+        return accountRepository.save(
+            Account(
                 id = accountId,
                 publicKey = publicKey,
                 privateKey = privateKey
-        ))
+            )
+        )
     }
 
     fun getRoot(space: String): Account {

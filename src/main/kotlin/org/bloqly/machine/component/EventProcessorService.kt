@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
-import org.bloqly.machine.exception.SpaceAlreadyExistsException
 import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.GenesisParametersSource
@@ -55,7 +54,7 @@ class EventProcessorService(
 
     fun createBlockchain(space: String, baseDir: String) {
 
-        ensureSpaceEmpty(space)
+        blockService.ensureSpaceEmpty(space)
 
         val genesisParametersSource = readGenesis(baseDir)
 
@@ -133,14 +132,6 @@ class EventProcessorService(
         blockRepository.save(firstBlock)
     }
 
-    private fun ensureSpaceEmpty(space: String) {
-
-        val blocksExists = blockRepository.existsBySpace(space)
-
-        if (blocksExists) {
-            throw SpaceAlreadyExistsException("Blockchain already initialized for space $space")
-        }
-    }
 
     fun processTransaction(transaction: Transaction) {
 
