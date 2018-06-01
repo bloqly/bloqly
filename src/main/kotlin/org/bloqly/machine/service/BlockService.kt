@@ -77,7 +77,7 @@ class BlockService(
         return blockRepository.findFirstBySpaceOrderByHeightDesc(space)
     }
 
-    fun exportGenesis(space: String): String {
+    fun exportFirst(space: String): String {
 
         val firstBlock = blockRepository.findGenesisBlockBySpace(space)
 
@@ -91,7 +91,7 @@ class BlockService(
         return objectMapper.writeValueAsString(genesis)
     }
 
-    fun importGenesis(genesisString: String) {
+    fun importFirst(genesisString: String) {
 
         val now = Instant.now().toEpochMilli()
 

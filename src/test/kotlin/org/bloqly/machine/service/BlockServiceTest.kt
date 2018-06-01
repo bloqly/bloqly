@@ -38,7 +38,7 @@ class BlockServiceTest {
 
     @Test
     fun testExportGenesis() {
-        val genesisString = blockString.exportGenesis(Application.DEFAULT_SPACE)
+        val genesisString = blockString.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
 
@@ -47,7 +47,7 @@ class BlockServiceTest {
 
     @Test
     fun testImportGenesis() {
-        val genesisString = blockString.exportGenesis(Application.DEFAULT_SPACE)
+        val genesisString = blockString.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
 
@@ -55,6 +55,6 @@ class BlockServiceTest {
 
         testService.cleanup()
 
-        blockString.importGenesis(genesisString)
+        blockString.importFirst(genesisString)
     }
 }
