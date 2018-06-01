@@ -18,7 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner
 class BlockServiceTest {
 
     @Autowired
-    private lateinit var blockString: BlockService
+    private lateinit var blockService: BlockService
 
     @Autowired
     private lateinit var testService: TestService
@@ -38,7 +38,7 @@ class BlockServiceTest {
 
     @Test
     fun testExportGenesis() {
-        val genesisString = blockString.exportFirst(Application.DEFAULT_SPACE)
+        val genesisString = blockService.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
 
@@ -47,7 +47,7 @@ class BlockServiceTest {
 
     @Test
     fun testImportGenesis() {
-        val genesisString = blockString.exportFirst(Application.DEFAULT_SPACE)
+        val genesisString = blockService.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
 
@@ -55,9 +55,9 @@ class BlockServiceTest {
 
         testService.cleanup()
 
-        blockString.importFirst(genesisString)
+        blockService.importFirst(genesisString)
 
-        //testService.testPropertiesAreCreated()
+        testService.testPropertiesAreCreated()
         testService.testSpaceCreated()
         //testService.testValidatorsInitialized()
         //testService.testValidatorsPowerValues()
