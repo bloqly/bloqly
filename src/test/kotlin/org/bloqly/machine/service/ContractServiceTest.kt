@@ -46,7 +46,7 @@ class ContractServiceTest {
 
     private val callee = "callee id"
 
-    private val genesis = GenesisParameters(root = Account(id = creator, publicKey = ""))
+    private val genesis = GenesisParameters(root = Account(id = creator, publicKey = ""), source = "")
 
     @After
     fun tearDown() {

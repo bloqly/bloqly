@@ -2,10 +2,14 @@ package org.bloqly.machine.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.Application.Companion.GENESIS_KEY
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
@@ -23,7 +27,8 @@ class BlockService(
     private val blockRepository: BlockRepository,
     private val transactionRepository: TransactionRepository,
     private val objectMapper: ObjectMapper,
-    private val spaceRepository: SpaceRepository
+    private val spaceRepository: SpaceRepository,
+    private val propertyRepository: PropertyRepository
 ) {
 
     fun newBlock(
@@ -83,9 +88,19 @@ class BlockService(
 
         val transactions = transactionRepository.findByContainingBlockId(firstBlock.id)
 
+        val genesisSource = propertyRepository.findById(
+            PropertyId(
+                space = space,
+                self = DEFAULT_SELF,
+                target = DEFAULT_SELF,
+                key = GENESIS_KEY
+            )
+        ).orElseThrow()
+
         val genesis = GenesisVO(
             block = firstBlock.toVO(),
-            transactions = transactions.map { it.toVO() }
+            transactions = transactions.map { it.toVO() },
+            source = EncodingUtils.encodeToString64(genesisSource.value)
         )
 
         return objectMapper.writeValueAsString(genesis)
@@ -114,8 +129,12 @@ class BlockService(
             "We don't accept blocks from the future, timestamp: ${block.timestamp}."
         }
 
-        require(block.parentHash.isEmpty()) {
-            "Genesis block parentHash should be empty, found ${block.parentHash} instead."
+        val genesisSourceBytes = EncodingUtils.decodeFromString64(genesis.source)
+
+        val genesisHash = CryptoUtils.digest(genesisSourceBytes)
+
+        require(block.parentHash == EncodingUtils.encodeToString16(genesisHash)) {
+            "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."
         }
 
         val transactions = genesis.transactions.map { it.toModel() }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectWriter
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.BlockService
+import org.bloqly.machine.util.EncodingUtils
 import org.springframework.stereotype.Service
 
 @Service
@@ -36,12 +37,16 @@ class BlockServiceShell(
 
     fun exportFirst(space: String): String {
 
-        return blockService.exportFirst(space)
+        val firstBlockJSON = blockService.exportFirst(space)
+
+        return EncodingUtils.encodeToString16(firstBlockJSON.toByteArray())
     }
 
-    fun importFirst(blockJSON: String): String {
+    fun importFirst(blockEncoded: String): String {
 
-        blockService.importFirst(blockJSON)
+        val firsBlockJSON = EncodingUtils.decodeFromString16(blockEncoded).toString()
+
+        blockService.importFirst(firsBlockJSON)
 
         return "OK"
     }

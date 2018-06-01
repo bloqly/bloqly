@@ -4,6 +4,7 @@ import org.bloqly.machine.util.EncodingUtils
 import java.util.Arrays
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
+import javax.persistence.Lob
 
 @Entity
 data class Property(
@@ -11,8 +12,8 @@ data class Property(
     @EmbeddedId
     val id: PropertyId,
 
+    @Lob
     val value: ByteArray
-
 ) {
 
     override fun equals(other: Any?): Boolean {

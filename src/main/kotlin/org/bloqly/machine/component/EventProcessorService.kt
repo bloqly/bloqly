@@ -1,11 +1,13 @@
 package org.bloqly.machine.component
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.exception.SpaceAlreadyExistsException
 import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.GenesisParameters
+import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -22,6 +24,7 @@ import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.FileUtils
 import org.springframework.stereotype.Component
 import java.io.File
@@ -55,6 +58,16 @@ class EventProcessorService(
 
         val genesis = readGenesis(baseDir)
 
+        propertyService.saveGenesis(
+            PropertyId(
+                space = space,
+                self = DEFAULT_SELF,
+                target = DEFAULT_SELF,
+                key = Application.GENESIS_KEY
+            ),
+            genesis.source
+        )
+
         val contractBody = File(baseDir).list()
             .filter {
                 it.endsWith(".js")
@@ -79,7 +92,9 @@ class EventProcessorService(
 
         val timestamp = Instant.now().toEpochMilli()
 
-        val parentHash = "" // there is no parent
+        val genesisHash = CryptoUtils.digest(genesis.source.toByteArray())
+
+        val parentHash = EncodingUtils.encodeToString16(genesisHash)
         val height = 0L
         val validatorTxHash = ByteArray(0)
 
@@ -280,8 +295,12 @@ class EventProcessorService(
 
     fun readGenesis(baseDir: String): GenesisParameters {
 
-        val accountsString = File("$baseDir/genesis.json").readText()
+        val source = File("$baseDir/genesis.json").readText()
 
-        return objectMapper.readValue(accountsString, GenesisParameters::class.java)
+        val genesisParameters = objectMapper.readValue(source, GenesisParameters::class.java)
+
+        genesisParameters.source = source
+
+        return genesisParameters
     }
 }
