@@ -7,6 +7,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.exception.SpaceAlreadyExistsException
 import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.GenesisParameters
+import org.bloqly.machine.model.GenesisParametersSource
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
@@ -56,7 +57,11 @@ class EventProcessorService(
 
         ensureSpaceEmpty(space)
 
-        val genesis = readGenesis(baseDir)
+        val genesisParametersSource = readGenesis(baseDir)
+
+        val genesisParameters = genesisParametersSource.genesisParameters
+
+        val genesisSource = genesisParametersSource.source
 
         propertyService.saveGenesis(
             PropertyId(
@@ -65,7 +70,7 @@ class EventProcessorService(
                 target = DEFAULT_SELF,
                 key = Application.GENESIS_KEY
             ),
-            genesis.source
+            genesisSource
         )
 
         val contractBody = File(baseDir).list()
@@ -79,12 +84,12 @@ class EventProcessorService(
                 header + source
             }.reduce { str, acc -> str + acc }
 
-        val rootId = genesis.root.id
+        val rootId = genesisParameters.root.id
 
         contractService.createContract(
             space,
             DEFAULT_SELF,
-            genesis,
+            genesisParameters,
             contractBody
         )
 
@@ -92,7 +97,7 @@ class EventProcessorService(
 
         val timestamp = Instant.now().toEpochMilli()
 
-        val genesisHash = CryptoUtils.digest(genesis.source.toByteArray())
+        val genesisHash = CryptoUtils.digest(genesisSource.toByteArray())
 
         val parentHash = EncodingUtils.encodeToString16(genesisHash)
         val height = 0L
@@ -110,7 +115,7 @@ class EventProcessorService(
 
         val transaction = transactionService.newTransaction(
             space = space,
-            originId = genesis.root.id,
+            originId = genesisParameters.root.id,
             destinationId = DEFAULT_SELF,
             self = DEFAULT_SELF,
             key = null,
@@ -293,14 +298,15 @@ class EventProcessorService(
         }
     }
 
-    fun readGenesis(baseDir: String): GenesisParameters {
+    fun readGenesis(baseDir: String): GenesisParametersSource {
 
         val source = File("$baseDir/genesis.json").readText()
 
         val genesisParameters = objectMapper.readValue(source, GenesisParameters::class.java)
 
-        genesisParameters.source = source
-
-        return genesisParameters
+        return GenesisParametersSource(
+            genesisParameters = genesisParameters,
+            source = source
+        )
     }
 }

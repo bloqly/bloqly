@@ -56,5 +56,10 @@ class BlockServiceTest {
         testService.cleanup()
 
         blockString.importFirst(genesisString)
+
+        //testService.testPropertiesAreCreated()
+        //testService.testSpaceCreated()
+        //testService.testValidatorsInitialized()
+        //testService.testValidatorsPowerValues()
     }
 }

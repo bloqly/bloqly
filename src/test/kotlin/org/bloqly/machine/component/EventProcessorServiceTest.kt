@@ -20,7 +20,6 @@ import org.bloqly.machine.util.TestUtils
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -30,7 +29,6 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
-import java.math.BigInteger.ONE
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
@@ -84,32 +82,22 @@ class EventProcessorServiceTest {
 
     @Test
     fun testPropertiesAreCreated() {
-        assertEquals(2, propertyService.getQuorum(DEFAULT_SPACE))
+        testService.testPropertiesAreCreated()
     }
 
     @Test
     fun testSpaceCreated() {
-        assertTrue(spaceRepository.existsById(DEFAULT_SPACE))
+        testService.testSpaceCreated()
     }
 
     @Test
     fun testValidatorsInitialized() {
-        val validators = accountService.getValidatorsForSpace(DEFAULT_SPACE)
-
-        assertEquals(3, validators.size)
-
-        val validatorsIds = validators.map { it.id }
-
-        assertTrue(validatorsIds.contains(testService.getValidator(0).id))
-        assertTrue(validatorsIds.contains(testService.getValidator(1).id))
-        assertTrue(validatorsIds.contains(testService.getValidator(2).id))
+        testService.testValidatorsInitialized()
     }
 
     @Test
     fun testValidatorsPowerValues() {
-        assertEquals(ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(0).id))
-        assertEquals(ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(1).id))
-        assertEquals(ONE, accountService.getAccountPower(DEFAULT_SPACE, testService.getValidator(2).id))
+        testService.testValidatorsPowerValues()
     }
 
     @Test
@@ -130,9 +118,11 @@ class EventProcessorServiceTest {
     @Test
     fun testInitDefaultContract() {
 
-        assertTrue(Sets.newHashSet(propertyRepository.findAll()).contains(
+        assertTrue(
+            Sets.newHashSet(propertyRepository.findAll()).contains(
                 Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.id, "balance"), writeLong("999997"))
-        ))
+            )
+        )
     }
 
     @Test
@@ -142,9 +132,9 @@ class EventProcessorServiceTest {
         val userBalanceId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, user.id, "balance")
 
         val transaction = TestUtils.createTransaction(
-                origin = root.id,
-                destination = user.id,
-                value = writeLong("1")
+            origin = root.id,
+            destination = user.id,
+            value = writeLong("1")
         )
 
         eventProcessorService.processTransaction(transaction)

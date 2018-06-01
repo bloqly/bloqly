@@ -6,12 +6,13 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.GenesisParameters
+import org.bloqly.machine.model.GenesisParametersSource
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.AccountService
@@ -20,7 +21,9 @@ import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.vo.TransactionVO
+import org.junit.Assert
 import org.springframework.stereotype.Component
+import java.math.BigInteger
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
 import javax.annotation.PostConstruct
@@ -38,16 +41,17 @@ class TestService(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val propertyService: PropertyService
 ) {
 
-    private lateinit var genesisParameters: GenesisParameters
+    private lateinit var genesisParametersSource: GenesisParametersSource
 
     @PostConstruct
     @Suppress("unused")
     fun init() {
 
-        genesisParameters = eventProcessorService.readGenesis(TEST_BLOCK_BASE_DIR)
+        genesisParametersSource = eventProcessorService.readGenesis(TEST_BLOCK_BASE_DIR)
     }
 
     fun cleanup() {
@@ -59,11 +63,11 @@ class TestService(
         accountRepository.deleteAll()
     }
 
-    fun getRoot(): Account = genesisParameters.root
+    fun getRoot(): Account = genesisParametersSource.genesisParameters.root
 
-    fun getUser(): Account = genesisParameters.users!!.first()
+    fun getUser(): Account = genesisParametersSource.genesisParameters.users!!.first()
 
-    fun getValidator(n: Int): Account = genesisParameters.validators!![n]
+    fun getValidator(n: Int): Account = genesisParametersSource.genesisParameters.validators!![n]
 
     fun createBlockchain() {
 
@@ -96,6 +100,41 @@ class TestService(
         )
 
         return transaction.toVO()
+    }
+
+    fun testPropertiesAreCreated() {
+        Assert.assertEquals(2, propertyService.getQuorum(DEFAULT_SPACE))
+    }
+
+    fun testSpaceCreated() {
+        Assert.assertTrue(spaceRepository.existsById(DEFAULT_SPACE))
+    }
+
+    fun testValidatorsInitialized() {
+        val validators = accountService.getValidatorsForSpace(DEFAULT_SPACE)
+
+        Assert.assertEquals(3, validators.size)
+
+        val validatorsIds = validators.map { it.id }
+
+        Assert.assertTrue(validatorsIds.contains(getValidator(0).id))
+        Assert.assertTrue(validatorsIds.contains(getValidator(1).id))
+        Assert.assertTrue(validatorsIds.contains(getValidator(2).id))
+    }
+
+    fun testValidatorsPowerValues() {
+        Assert.assertEquals(
+            BigInteger.ONE,
+            accountService.getAccountPower(DEFAULT_SPACE, getValidator(0).id)
+        )
+        Assert.assertEquals(
+            BigInteger.ONE,
+            accountService.getAccountPower(DEFAULT_SPACE, getValidator(1).id)
+        )
+        Assert.assertEquals(
+            BigInteger.ONE,
+            accountService.getAccountPower(DEFAULT_SPACE, getValidator(2).id)
+        )
     }
 
     @ValueObject
