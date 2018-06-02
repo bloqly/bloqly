@@ -7,6 +7,7 @@ import org.bloqly.machine.Application.Companion.GENESIS_KEY
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
+import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
@@ -109,7 +110,7 @@ class BlockService(
 
     fun importFirst(genesisString: String) {
 
-        val now = Instant.now().toEpochMilli()
+        val now = Instant.now()
 
         val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
 
@@ -131,7 +132,7 @@ class BlockService(
             "Genesis block should have height 0, found ${block.height} instead."
         }
 
-        require(block.timestamp < now) {
+        require(block.timestamp < now.toEpochMilli()) {
             "We don't accept blocks from the future, timestamp: ${block.timestamp}."
         }
 
@@ -149,8 +150,14 @@ class BlockService(
             "Genesis block can contain only 1 transaction."
         }
 
-        val transaction = transactions.first()
+        validateGenesisTransaction(transactions.first(), block, now)
 
+        blockRepository.save(block)
+
+        transactionRepository.saveAll(transactions)
+    }
+
+    private fun validateGenesisTransaction(transaction: Transaction, block: Block, now: Instant) {
         require(CryptoUtils.isTransactionValid(transaction)) {
             "Transaction in genesis is invalid."
         }
@@ -176,16 +183,12 @@ class BlockService(
         }
 
         require(transaction.transactionType == TransactionType.CREATE) {
-            "Genesis transaction type shpould be ${TransactionType.CREATE}, not ${transaction.transactionType}"
+            "Genesis transaction type should be ${TransactionType.CREATE}, not ${transaction.transactionType}"
         }
 
-        require(transaction.timestamp < now) {
+        require(transaction.timestamp < now.toEpochMilli()) {
             "We don't accept transactions from the future, timestamp: ${transaction.timestamp}"
         }
-
-        blockRepository.save(block)
-
-        transactionRepository.saveAll(transactions)
     }
 
     fun ensureSpaceEmpty(space: String) {
