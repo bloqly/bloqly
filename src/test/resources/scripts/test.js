@@ -10,12 +10,3 @@ function contract(ctx, arg1, arg2, arg3, arg4) {
         { target: 'self', value4: arg4.add(new BigInteger("1")) }
     ];
 }
-
-function init(ctx) {
-
-    return [
-        { target: 'caller', value1: 'test1'},
-
-        { target: 'self', value3: false }
-    ];
-}

@@ -8,6 +8,7 @@ import org.bloqly.machine.util.EncodingUtils
 import org.springframework.stereotype.Service
 
 @Service
+@Suppress("unused")
 class BlockServiceShell(
     private val eventProcessorService: EventProcessorService,
     private val spaceRepository: SpaceRepository,

@@ -3,4 +3,8 @@ package org.bloqly.machine.model
 import org.bloqly.machine.annotation.ValueObject
 
 @ValueObject
-data class GenesisParameters(val parameters: List<GenesisParameter>)
+data class GenesisParameter(
+    val target: String,
+    val key: String,
+    val value: Any
+)

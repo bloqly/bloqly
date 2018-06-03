@@ -6,7 +6,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.math.BInteger
-import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.GenesisParameter
 import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
@@ -46,7 +46,13 @@ class ContractServiceTest {
 
     private val callee = "callee id"
 
-    private val genesis = GenesisParameters(root = Account(id = creator, publicKey = ""))
+    private val genesis = GenesisParameters(
+        parameters = listOf(
+            GenesisParameter(target = DEFAULT_SELF, key = "root", value = creator),
+            GenesisParameter(target = "caller", key = "value1", value = "test1"),
+            GenesisParameter(target = DEFAULT_SELF, key = "value3", value = false)
+        )
+    )
 
     @After
     fun tearDown() {
@@ -56,7 +62,7 @@ class ContractServiceTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun testCreateContractWithEmptyBodyFails() {
-        contractService.createContract(DEFAULT_SPACE, DEFAULT_SELF, genesis, "")
+        contractService.createContract(DEFAULT_SPACE, DEFAULT_SELF, "", genesis.parameters)
     }
 
     @Test
@@ -65,26 +71,37 @@ class ContractServiceTest {
         assertEquals(0, propertyRepository.count())
 
         contractService.createContract(
-                DEFAULT_SPACE, DEFAULT_SELF, genesis, FileUtils.getResourceAsString("/scripts/test.js"))
+            DEFAULT_SPACE, DEFAULT_SELF, FileUtils.getResourceAsString("/scripts/test.js"), genesis.parameters
+        )
 
-        assertTrue(Sets.newHashSet(propertyRepository.findAll()).containsAll(
+        assertTrue(
+            Sets.newHashSet(propertyRepository.findAll()).containsAll(
                 listOf(
-                        Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, creator, "value1"), writeString("test1")),
-                        Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value3"), writeBoolean("false"))
+                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, creator, "value1"), writeString("test1")),
+                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value3"), writeBoolean("false"))
                 )
-        ))
+            )
+        )
 
         val params = arrayOf("test", 22, true, BInteger(123))
 
-        contractService.invokeContract(DEFAULT_FUNCTION_NAME, DEFAULT_SELF, caller, callee, ParameterUtils.writeParams(params))
+        contractService.invokeContract(
+            DEFAULT_FUNCTION_NAME,
+            DEFAULT_SELF,
+            caller,
+            callee,
+            ParameterUtils.writeParams(params)
+        )
 
-        assertTrue(Sets.newHashSet(propertyRepository.findAll()).containsAll(
+        assertTrue(
+            Sets.newHashSet(propertyRepository.findAll()).containsAll(
                 listOf(
-                        Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, caller, "value1"), writeString("test")),
-                        Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, caller, "value2"), writeInteger("22")),
-                        Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value3"), writeBoolean("true")),
-                        Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value4"), writeLong("124"))
+                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, caller, "value1"), writeString("test")),
+                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, caller, "value2"), writeInteger("22")),
+                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value3"), writeBoolean("true")),
+                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value4"), writeLong("124"))
                 )
-        ))
+            )
+        )
     }
 }

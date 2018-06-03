@@ -30,7 +30,7 @@ const zero = new BigInteger('0');
 /**
  * Move balance contract
  *
- * Simplified implementation of a cryptocurrency  defining  functional  smart contract
+ * Simplified implementation of a cryptocurrency
  *
  * @param {Object}      ctx        Execution context
  * @param {BigInteger}  amount     Amount to move
@@ -49,29 +49,6 @@ function contract(context, amount) {
     return [
         { target: 'caller', balance: newCallerBalance },
         { target: 'callee', balance: newCalleeBalance },
-    ];
-}
-
-function init(context, genesisParameters) {
-
-    return [
-        { target: 'caller', balance: new BigInteger('999997') },
-
-        // target = validator's id
-        { target: genesisParameters.validators[0].id, balance: validatorAmount },
-        { target: genesisParameters.validators[1].id, balance: validatorAmount },
-        { target: genesisParameters.validators[2].id, balance: validatorAmount },
-        
-        { target: genesisParameters.validators[0].id, power: validatorAmount },
-        { target: genesisParameters.validators[1].id, power: validatorAmount },
-        { target: genesisParameters.validators[2].id, power: validatorAmount },
-
-        // quorum requirement for active validators group
-        { target: 'self', quorum: 2 },
-
-        // active validators group size
-        { target: 'self', validators: 3 }
-
     ];
 }
 

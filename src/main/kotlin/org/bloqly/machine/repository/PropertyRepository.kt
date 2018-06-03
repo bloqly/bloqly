@@ -9,7 +9,4 @@ interface PropertyRepository : CrudRepository<Property, PropertyId> {
 
     @Query("select p from Property p where p.id.space = ?1 and p.id.key = ?2")
     fun findBySpaceAndKey(space: String, key: String): List<Property>
-
-    @Query("select p from Property p where p.id.key = ?1")
-    fun findByKey(key: String): List<Property>
 }

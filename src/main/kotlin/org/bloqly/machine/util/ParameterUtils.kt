@@ -7,6 +7,7 @@ import org.apache.commons.lang3.Validate
 import org.bloqly.machine.math.BInteger
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.util.ArrayList
 
@@ -149,6 +150,17 @@ object ParameterUtils {
         }
     }
 
+    fun writeLong(value: BigInteger): ByteArray {
+
+        ByteArrayOutputStream().use {
+            it.write(3)
+
+            it.write(EncodingUtils.longToBytes(value.toLong()))
+
+            return it.toByteArray()
+        }
+    }
+
     fun writeBoolean(value: String): ByteArray {
 
         ByteArrayOutputStream().use { bos ->
@@ -159,19 +171,39 @@ object ParameterUtils {
         }
     }
 
-    fun writeValue(value: Any): ByteArray {
+    fun writeBoolean(value: Boolean): ByteArray {
 
-        return when (value) {
-            is String -> writeString(
-                    value.toString())
-            is Int -> writeInteger(
-                    value.toString())
-            is BInteger -> writeLong(
-                    value.toString())
-            is Boolean -> writeBoolean(
-                    value.toString())
+        ByteArrayOutputStream().use { bos ->
+            bos.write(4)
+            bos.write(if (value) 1 else 0)
+
+            return bos.toByteArray()
+        }
+    }
+
+    private fun processString(value: String): ByteArray {
+        val regex = """^BigInteger\((\d+)\)$""".toRegex()
+
+        val result = regex.find(value)
+
+        return if (result != null) {
+            writeLong(result.groupValues.last())
+        } else {
+            writeString(value)
+        }
+    }
+
+    fun writeValue(input: Any): ByteArray {
+
+        return when (input) {
+            is String ->
+                processString(input.toString())
+            is Int -> writeInteger(input.toString())
+            is BInteger -> writeLong(input.value)
+            is Boolean -> writeBoolean(input)
             else -> throw IllegalArgumentException(
-                    "Unsupported value $value of type ${value.javaClass.canonicalName}")
+                "Unsupported input $input of type ${input.javaClass.canonicalName}"
+            )
         }
     }
 }

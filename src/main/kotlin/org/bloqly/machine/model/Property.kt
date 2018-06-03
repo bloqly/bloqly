@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.ParameterUtils
 import java.util.Arrays
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
@@ -35,6 +35,6 @@ data class Property(
     }
 
     override fun toString(): String {
-        return "Property(id=$id, value=${EncodingUtils.encodeToString64(value)})"
+        return "Property(id=$id, value=${ParameterUtils.readValue(value)})"
     }
 }

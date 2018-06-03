@@ -29,6 +29,6 @@ class PropertyService(
             "Genesis for key $propertyId already exists."
         }
 
-        propertyRepository.save(Property(id = propertyId, value = source.toByteArray()))
+        propertyRepository.save(Property(id = propertyId, value = ParameterUtils.writeValue(source)))
     }
 }

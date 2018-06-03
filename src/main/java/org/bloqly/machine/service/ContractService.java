@@ -3,12 +3,9 @@ package org.bloqly.machine.service;
 import com.google.common.collect.Lists;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.bloqly.machine.function.GetPropertyFunction;
-import org.bloqly.machine.model.Contract;
-import org.bloqly.machine.model.ContractInvocationContext;
-import org.bloqly.machine.model.GenesisParameters;
-import org.bloqly.machine.model.Property;
-import org.bloqly.machine.model.PropertyId;
+import org.bloqly.machine.model.*;
 import org.bloqly.machine.repository.ContractRepository;
 import org.bloqly.machine.repository.PropertyRepository;
 import org.bloqly.machine.util.ParameterUtils;
@@ -59,7 +56,7 @@ public class ContractService {
         };
     }
 
-    private Set<Property> invokeFunction(ContractInvocationContext context, GenesisParameters genesisParameters, byte[] arg) {
+    private Set<Property> invokeFunction(ContractInvocationContext context, byte[] arg) {
 
         try {
 
@@ -79,10 +76,6 @@ public class ContractService {
             var params = ParameterUtils.INSTANCE.readParams(arg);
 
             List<Object> args = Lists.newArrayList(context);
-
-            if (genesisParameters != null) {
-                args.add(genesisParameters);
-            }
 
             args.addAll(Arrays.asList(params));
 
@@ -150,23 +143,30 @@ public class ContractService {
     @Transactional
     public void createContract(String space,
                                String self,
-                               GenesisParameters genesisParameters,
-                               String body) {
+                               String body,
+                               List<GenesisParameter> parameters) {
 
-        if (StringUtils.isEmpty(body)) {
-            throw new IllegalArgumentException("Contract body can not be empty");
-        }
+        Validate.isTrue(StringUtils.isNotEmpty(body), "Contract body can not be empty");
 
-        var contract = new Contract(
-                self,
-                space,
-                genesisParameters.getRoot().getId(),
-                body
-        );
+        var owner = parameters.stream()
+                .filter(parameter -> parameter.getKey().equals("root"))
+                .findFirst()
+                .orElseThrow();
 
-        var invocationContext = new ContractInvocationContext("init", genesisParameters.getRoot().getId(), self, contract);
+        var contract = new Contract(self, space, owner.getValue().toString(), body);
 
-        var properties = invokeFunction(invocationContext, genesisParameters, new byte[0]);
+        var invocationContext = new ContractInvocationContext("contract", owner.getValue().toString(), self, contract);
+
+        var properties = parameters.stream().map(parameter -> new Property(
+                        new PropertyId(
+                                space,
+                                self,
+                                getTarget(parameter.getTarget(), invocationContext),
+                                parameter.getKey()
+                        ),
+                        ParameterUtils.INSTANCE.writeValue(parameter.getValue())
+                )
+        ).collect(toSet());
 
         processResults(properties);
 
@@ -180,20 +180,12 @@ public class ContractService {
 
             var invocationContext = new ContractInvocationContext(functionName, caller, callee, contract);
 
-            var properties = invokeFunction(invocationContext, null, arg);
-            processResults(properties);
+            processResults(invokeFunction(invocationContext, arg));
 
         });
     }
 
     private void processResults(Set<Property> properties) {
-
-        properties.forEach(property -> propertyRepository.save(property));
-    }
-
-    @Transactional
-    public Contract findById(String self) {
-
-        return contractRepository.findById(self).orElseThrow(RuntimeException::new);
+        properties.forEach(propertyRepository::save);
     }
 }

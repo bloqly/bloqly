@@ -105,7 +105,7 @@ class EventProcessorServiceTest {
             eventProcessorService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
             fail()
         } catch (e: Exception) {
-
+            // pass
         }
     }
 

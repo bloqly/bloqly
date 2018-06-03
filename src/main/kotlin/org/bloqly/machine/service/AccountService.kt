@@ -6,7 +6,6 @@ import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.AccountRepository
-import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
@@ -22,7 +21,6 @@ import javax.transaction.Transactional
 class AccountService(
     private val accountRepository: AccountRepository,
     private val propertyRepository: PropertyRepository,
-    private val blockRepository: BlockRepository,
     @Value("\${validators:}") private val validators: Array<String>
 ) {
 
@@ -89,12 +87,5 @@ class AccountService(
                 privateKey = privateKey
             )
         )
-    }
-
-    fun getRoot(space: String): Account {
-
-        val firstBlock = blockRepository.findGenesisBlockBySpace(space)
-
-        return accountRepository.findById(firstBlock.proposerId).orElseThrow()
     }
 }

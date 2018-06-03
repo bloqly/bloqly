@@ -58,7 +58,9 @@ class EventProcessorService(
 
         val genesisParametersSource = readGenesis(baseDir)
 
-        val genesisParameters = genesisParametersSource.genesisParameters
+        val parameters = genesisParametersSource.genesisParameters.parameters
+
+        val rootId = parameters.find { it.key == "root" }!!.value.toString()
 
         val genesisSource = genesisParametersSource.source
 
@@ -83,13 +85,11 @@ class EventProcessorService(
                 header + source
             }.reduce { str, acc -> str + acc }
 
-        val rootId = genesisParameters.root.id
-
         contractService.createContract(
             space,
             DEFAULT_SELF,
-            genesisParameters,
-            contractBody
+            contractBody,
+            parameters
         )
 
         spaceRepository.save(Space(id = space, creatorId = rootId))
@@ -114,7 +114,7 @@ class EventProcessorService(
 
         val transaction = transactionService.newTransaction(
             space = space,
-            originId = genesisParameters.root.id,
+            originId = rootId,
             destinationId = DEFAULT_SELF,
             self = DEFAULT_SELF,
             key = null,
@@ -131,7 +131,6 @@ class EventProcessorService(
 
         blockRepository.save(firstBlock)
     }
-
 
     fun processTransaction(transaction: Transaction) {
 

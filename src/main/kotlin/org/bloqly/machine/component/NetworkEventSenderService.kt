@@ -11,10 +11,8 @@ import org.springframework.stereotype.Service
 @Service
 @Profile("production")
 class NetworkEventSenderService(
-
     private val nodeService: NodeService,
     private val nodeQueryService: NodeQueryService
-
 ) : EventSenderService {
 
     private val log = LoggerFactory.getLogger(NetworkEventSenderService::class.simpleName)

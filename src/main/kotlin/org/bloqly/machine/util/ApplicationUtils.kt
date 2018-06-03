@@ -3,15 +3,12 @@ package org.bloqly.machine.util
 import org.apache.commons.cli.CommandLine
 import org.bloqly.machine.Application
 import org.bloqly.machine.shell.Shell
-import org.slf4j.LoggerFactory
 import org.springframework.boot.Banner
 import org.springframework.boot.WebApplicationType
 import org.springframework.boot.builder.SpringApplicationBuilder
 import java.util.Properties
 
 object ApplicationUtils {
-
-    private val log = LoggerFactory.getLogger(ApplicationUtils::class.simpleName)
 
     fun startServer(properties: Properties, commandLine: CommandLine) {
 
@@ -27,14 +24,14 @@ object ApplicationUtils {
         }
 
         val appBuilder = SpringApplicationBuilder()
-                .profiles("server", "scheduler")
-                .properties(properties)
-                .bannerMode(Banner.Mode.OFF)
-                .sources(Application::class.java)
+            .profiles("server", "scheduler")
+            .properties(properties)
+            .bannerMode(Banner.Mode.OFF)
+            .sources(Application::class.java)
 
         appBuilder
-                .build()
-                .run()
+            .build()
+            .run()
     }
 
     fun startConsole(properties: Properties, commandLine: CommandLine) {
@@ -44,13 +41,13 @@ object ApplicationUtils {
         // System.err.close()
 
         val context = SpringApplicationBuilder()
-                .logStartupInfo(false)
-                .properties(properties)
-                .bannerMode(Banner.Mode.OFF)
-                .web(WebApplicationType.NONE)
-                .sources(Application::class.java)
-                .build()
-                .run()
+            .logStartupInfo(false)
+            .properties(properties)
+            .bannerMode(Banner.Mode.OFF)
+            .web(WebApplicationType.NONE)
+            .sources(Application::class.java)
+            .build()
+            .run()
 
         Shell.run(context, commandLine)
     }

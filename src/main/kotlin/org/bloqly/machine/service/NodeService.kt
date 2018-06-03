@@ -10,7 +10,6 @@ import javax.annotation.PostConstruct
 
 @Service
 class NodeService(
-
     private val nodeRepository: NodeRepository,
     @Value("\${nodes:}") private val nodes: Array<String>,
     @Value("\${server.port:9900}") private val serverPort: Long

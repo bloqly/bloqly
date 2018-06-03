@@ -9,6 +9,7 @@ class BInteger {
 
     val value: BigInteger
 
+    @Suppress("unused")
     constructor(valueStr: String) {
 
         this.value = BigInteger(valueStr)
@@ -57,7 +58,7 @@ class BInteger {
 
     override fun toString(): String {
 
-        return value.toString()
+        return "BInteger($value)"
     }
 
     companion object {

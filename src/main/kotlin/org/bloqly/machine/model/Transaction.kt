@@ -46,18 +46,18 @@ data class Transaction(
         val signature = EncodingUtils.encodeToString64(signature)
 
         return TransactionVO(
-                id = id,
-                space = space,
-                destination = destination,
-                self = self,
-                key = key,
-                value = value,
-                transactionType = transactionType,
-                referencedBlockId = referencedBlockId,
-                containingBlockId = containingBlockId,
-                timestamp = timestamp,
-                signature = signature,
-                publicKey = publicKey
+            id = id,
+            space = space,
+            destination = destination,
+            self = self,
+            key = key,
+            value = value,
+            transactionType = transactionType,
+            referencedBlockId = referencedBlockId,
+            containingBlockId = containingBlockId,
+            timestamp = timestamp,
+            signature = signature,
+            publicKey = publicKey
         )
     }
 
@@ -75,6 +75,4 @@ data class Transaction(
     override fun hashCode(): Int {
         return id.hashCode()
     }
-
-
 }

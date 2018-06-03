@@ -4,17 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.service.AccountService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
+@Suppress("unused")
 class AccountServiceShell(
     private val accountService: AccountService,
     private val objectMapper: ObjectMapper
 ) {
-
-    private val log: Logger = LoggerFactory.getLogger(AccountServiceShell::class.simpleName)
 
     fun new(): String {
 

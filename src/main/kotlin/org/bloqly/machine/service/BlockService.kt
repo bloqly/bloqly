@@ -17,6 +17,7 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
+import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.GenesisVO
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -99,10 +100,12 @@ class BlockService(
             )
         ).orElseThrow()
 
+        val genesisSourceValue = ParameterUtils.readValue(genesisSource.value).toString()
+
         val genesis = GenesisVO(
             block = firstBlock.toVO(),
             transactions = transactions.map { it.toVO() },
-            source = EncodingUtils.encodeToString64(genesisSource.value)
+            source = EncodingUtils.encodeToString64(genesisSourceValue.toByteArray())
         )
 
         return objectMapper.writeValueAsString(genesis)
@@ -126,7 +129,7 @@ class BlockService(
         )
 
         // TODO
-        //require(CryptoUtils.isBlockValid())
+        // require(CryptoUtils.isBlockValid())
 
         require(block.height == 0L) {
             "Genesis block should have height 0, found ${block.height} instead."
