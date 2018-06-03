@@ -11,6 +11,9 @@
 <a href="https://ktlint.github.io/"><img src="https://img.shields.io/badge/code%20style-%E2%9D%A4-FF4081.svg" alt="Build Status"></a>
 </p>    
 
+[Chat](https://riot.im/app/#/room/#bloqly:matrix.org)  
+[Twitter](https://twitter.com/slava_snezhkov)
+
 <p align="center">
 This is a work in progress/prototype.
 </p>     
@@ -106,6 +109,3 @@ Corresponding genesis configuration:
   ]
 }
 ```
-
-[Chat](https://riot.im/app/#/room/#bloqly:matrix.org)
-[Twitter](https://twitter.com/slava_snezhkov)
