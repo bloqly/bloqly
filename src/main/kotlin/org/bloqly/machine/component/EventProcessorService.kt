@@ -29,8 +29,6 @@ import org.bloqly.machine.util.FileUtils
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.Instant
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import javax.transaction.Transactional
 
 @Component
@@ -223,7 +221,7 @@ class EventProcessorService(
                 blockService.newBlock(
                     space = space,
                     height = lastBlock.height + 1,
-                    timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond(),
+                    timestamp = Instant.now().toEpochMilli(),
                     parentHash = lastBlock.id,
                     proposerId = validator.id,
                     txHash = CryptoUtils.digestTransactions(transactions),

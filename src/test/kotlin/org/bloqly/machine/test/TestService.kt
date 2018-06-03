@@ -23,8 +23,7 @@ import org.bloqly.machine.vo.TransactionVO
 import org.junit.Assert
 import org.springframework.stereotype.Component
 import java.math.BigInteger
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import java.time.Instant
 import javax.annotation.PostConstruct
 import javax.transaction.Transactional
 
@@ -97,7 +96,7 @@ class TestService(
             value = writeLong("1"),
             transactionType = TransactionType.CALL,
             referencedBlockId = lastBlock.id,
-            timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
+            timestamp = Instant.now().toEpochMilli()
         )
 
         return transaction.toVO()

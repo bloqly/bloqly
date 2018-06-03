@@ -10,8 +10,7 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.TransactionListVO
 import org.springframework.stereotype.Service
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import java.time.Instant
 
 @Service
 @Suppress("unused")
@@ -34,19 +33,19 @@ class TransactionServiceShell(
 
         val transaction = transactionService.newTransaction(
 
-                space = Application.DEFAULT_SPACE,
+            space = Application.DEFAULT_SPACE,
 
-                originId = origin.id,
+            originId = origin.id,
 
-                destinationId = destination.id,
+            destinationId = destination.id,
 
-                value = ParameterUtils.writeLong(amount),
+            value = ParameterUtils.writeLong(amount),
 
-                transactionType = TransactionType.CALL,
+            transactionType = TransactionType.CALL,
 
-                referencedBlockId = lastBlock.id,
+            referencedBlockId = lastBlock.id,
 
-                timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
+            timestamp = Instant.now().toEpochMilli()
         )
 
         transactionRepository.save(transaction)
@@ -63,7 +62,8 @@ class TransactionServiceShell(
     fun list(): String {
 
         val transactions = TransactionListVO.fromTransactions(
-                transactionRepository.findAll().toList())
+            transactionRepository.findAll().toList()
+        )
 
         return "\n" + objectWriter.writeValueAsString(transactions)
     }

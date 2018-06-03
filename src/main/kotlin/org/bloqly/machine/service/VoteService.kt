@@ -11,8 +11,7 @@ import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import java.time.Instant
 
 @Service
 @Transactional
@@ -24,15 +23,15 @@ class VoteService(
     fun createVote(space: String, validator: Account): Vote {
 
         val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
-        val timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
+        val timestamp = Instant.now().toEpochMilli()
 
         val dataToSign = Bytes.concat(
 
-                validator.id.toByteArray(),
-                space.toByteArray(),
-                EncodingUtils.longToBytes(lastBlock.height),
-                lastBlock.id.toByteArray(),
-                EncodingUtils.longToBytes(timestamp)
+            validator.id.toByteArray(),
+            space.toByteArray(),
+            EncodingUtils.longToBytes(lastBlock.height),
+            lastBlock.id.toByteArray(),
+            EncodingUtils.longToBytes(timestamp)
         )
 
         val dataHash = CryptoUtils.digest(dataToSign)
@@ -40,15 +39,15 @@ class VoteService(
         val signature = CryptoUtils.sign(privateKey, dataHash)
 
         val vote = Vote(
-                VoteId(
-                        validatorId = validator.id,
-                        space = space,
-                        height = lastBlock.height
-                ),
+            VoteId(
+                validatorId = validator.id,
+                space = space,
+                height = lastBlock.height
+            ),
 
-                blockId = lastBlock.id,
-                timestamp = timestamp,
-                signature = signature
+            blockId = lastBlock.id,
+            timestamp = timestamp,
+            signature = signature
         )
 
         return voteRepository.save(vote)

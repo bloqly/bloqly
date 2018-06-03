@@ -14,8 +14,7 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
+import java.time.Instant
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
@@ -36,23 +35,23 @@ class TransactionServiceTest {
 
         transaction = transactionService.newTransaction(
 
-                space = DEFAULT_SPACE,
+            space = DEFAULT_SPACE,
 
-                originId = root.id,
+            originId = root.id,
 
-                destinationId = root.id,
+            destinationId = root.id,
 
-                self = root.id,
+            self = root.id,
 
-                key = null,
+            key = null,
 
-                value = "true".toByteArray(),
+            value = "true".toByteArray(),
 
-                transactionType = TransactionType.CREATE,
+            transactionType = TransactionType.CREATE,
 
-                referencedBlockId = "",
+            referencedBlockId = "",
 
-                timestamp = ZonedDateTime.now(ZoneOffset.UTC).toEpochSecond()
+            timestamp = Instant.now().toEpochMilli()
 
         )
     }
@@ -66,80 +65,100 @@ class TransactionServiceTest {
     @Test
     fun testVerifyDestinationWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(destination = FAKE_DATA)
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifyOriginWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(origin = FAKE_DATA)
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifyReferencedBlockIdWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(referencedBlockId = FAKE_DATA)
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifyTxTypeWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(transactionType = TransactionType.CALL)
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifyAmountWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(value = FAKE_DATA.toByteArray())
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifyTimestampWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(timestamp = System.currentTimeMillis() + 1)
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifyIdWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(id = FAKE_DATA)
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifySignatureWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(signature = transaction.signature.reversed().toByteArray())
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifyPubKeyWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(publicKey = transaction.publicKey.reversed())
-        ))
+            )
+        )
     }
 
     @Test
     fun testVerifySpaceWrong() {
 
-        assertFalse(isTransactionValid(
+        assertFalse(
+            isTransactionValid(
                 transaction.copy(space = FAKE_DATA)
-        ))
+            )
+        )
     }
 }
