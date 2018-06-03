@@ -39,7 +39,7 @@ class Application {
         const val POWER_KEY = "power"
         const val GENESIS_KEY = "genesis"
         const val DEFAULT_SPACE = "main"
-        const val DEFAULT_SELF = "_self"
+        const val DEFAULT_SELF = "self"
         const val QUORUM_KEY = "quorum"
         const val DEFAULT_FUNCTION_NAME = "contract"
     }

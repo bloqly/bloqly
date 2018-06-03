@@ -34,11 +34,11 @@ Smart contract code sample:
 
 function contract(context, orig, dest, amount) {
 
-    var origBalance = getProperty(orig, 'balance', zero);
-    var destBalance = getProperty(dest, 'balance', zero);
+    let origBalance = getProperty(orig, 'balance', zero);
+    let destBalance = getProperty(dest, 'balance', zero);
 
-    var newOrigBalance = origBalance.subtract(amount);
-    var newDestBalance = destBalance.add(amount);
+    let newOrigBalance = origBalance.subtract(amount);
+    let newDestBalance = destBalance.add(amount);
 
     return [
         { target: orig, balance: newOrigBalance },

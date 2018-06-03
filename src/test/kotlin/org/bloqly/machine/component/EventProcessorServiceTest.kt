@@ -9,9 +9,7 @@ import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
@@ -40,16 +38,10 @@ class EventProcessorServiceTest {
     private lateinit var eventProcessorService: EventProcessorService
 
     @Autowired
-    private lateinit var accountService: AccountService
-
-    @Autowired
     private lateinit var accountRepository: AccountRepository
 
     @Autowired
     private lateinit var spaceRepository: SpaceRepository
-
-    @Autowired
-    private lateinit var propertyService: PropertyService
 
     @Autowired
     private lateinit var testService: TestService

@@ -33,9 +33,7 @@ public class ContractService {
 
     private GetPropertyFunction getPropertyFunction(ContractInvocationContext context) {
 
-        return (targetString, key, defaultValue) -> {
-
-            String target = getTarget(targetString, context);
+        return (target, key, defaultValue) -> {
 
             var propertyKey = new PropertyId(
                     context.getContract().getSpace(),
@@ -75,7 +73,7 @@ public class ContractService {
 
             var params = ParameterUtils.INSTANCE.readParams(arg);
 
-            List<Object> args = Lists.newArrayList(context);
+            List<Object> args = Lists.newArrayList(context, context.getCaller(), context.getCallee());
 
             args.addAll(Arrays.asList(params));
 
@@ -97,7 +95,7 @@ public class ContractService {
                 .findFirst()
                 .orElseThrow(IllegalStateException::new);
 
-        String target = getTarget(item.get("target").toString(), context);
+        String target = item.get("target").toString();
 
         var contract = Objects.requireNonNull(context.getContract());
         // TODO: check isolation
@@ -110,34 +108,6 @@ public class ContractService {
                 ),
                 ParameterUtils.INSTANCE.writeValue(command.getValue())
         );
-    }
-
-    private String getTarget(String targetString, ContractInvocationContext context) {
-
-        String target;
-
-        switch (targetString) {
-
-            case "self":
-                target = context.getContract().getId();
-                break;
-
-            case "owner":
-                target = context.getContract().getOwner();
-                break;
-
-            case "caller":
-                target = context.getCaller();
-                break;
-
-            case "callee":
-                target = context.getCallee();
-                break;
-
-            default:
-                target = targetString;
-        }
-        return target;
     }
 
     @Transactional
@@ -155,13 +125,11 @@ public class ContractService {
 
         var contract = new Contract(self, space, owner.getValue().toString(), body);
 
-        var invocationContext = new ContractInvocationContext("contract", owner.getValue().toString(), self, contract);
-
         var properties = parameters.stream().map(parameter -> new Property(
                         new PropertyId(
                                 space,
                                 self,
-                                getTarget(parameter.getTarget(), invocationContext),
+                                parameter.getTarget(),
                                 parameter.getKey()
                         ),
                         ParameterUtils.INSTANCE.writeValue(parameter.getValue())

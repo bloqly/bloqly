@@ -1,6 +1,5 @@
 package org.bloqly.machine.service
 
-import org.assertj.core.util.Sets
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
@@ -49,7 +48,7 @@ class ContractServiceTest {
     private val genesis = GenesisParameters(
         parameters = listOf(
             GenesisParameter(target = DEFAULT_SELF, key = "root", value = creator),
-            GenesisParameter(target = "caller", key = "value1", value = "test1"),
+            GenesisParameter(target = creator, key = "value1", value = "test1"),
             GenesisParameter(target = DEFAULT_SELF, key = "value3", value = false)
         )
     )
@@ -74,13 +73,19 @@ class ContractServiceTest {
             DEFAULT_SPACE, DEFAULT_SELF, FileUtils.getResourceAsString("/scripts/test.js"), genesis.parameters
         )
 
+        val propertiesBefore = propertyRepository.findAll()
+
         assertTrue(
-            Sets.newHashSet(propertyRepository.findAll()).containsAll(
-                listOf(
-                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, creator, "value1"), writeString("test1")),
-                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value3"), writeBoolean("false"))
-                )
-            )
+            Property(
+                PropertyId(DEFAULT_SPACE, DEFAULT_SELF, creator, "value1"),
+                writeString("test1")
+            ) in propertiesBefore
+        )
+        assertTrue(
+            Property(
+                PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value3"),
+                writeBoolean("false")
+            ) in propertiesBefore
         )
 
         val params = arrayOf("test", 22, true, BInteger(123))
@@ -93,15 +98,31 @@ class ContractServiceTest {
             ParameterUtils.writeParams(params)
         )
 
+        val propertiesAfter = propertyRepository.findAll()
+
         assertTrue(
-            Sets.newHashSet(propertyRepository.findAll()).containsAll(
-                listOf(
-                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, caller, "value1"), writeString("test")),
-                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, caller, "value2"), writeInteger("22")),
-                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value3"), writeBoolean("true")),
-                    Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value4"), writeLong("124"))
-                )
-            )
+            Property(
+                PropertyId(DEFAULT_SPACE, DEFAULT_SELF, caller, "value1"),
+                writeString("test")
+            ) in propertiesAfter
+        )
+        assertTrue(
+            Property(
+                PropertyId(DEFAULT_SPACE, DEFAULT_SELF, callee, "value2"),
+                writeInteger("22")
+            ) in propertiesAfter
+        )
+        assertTrue(
+            Property(
+                PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value3"),
+                writeBoolean("true")
+            ) in propertiesAfter
+        )
+        assertTrue(
+            Property(
+                PropertyId(DEFAULT_SPACE, DEFAULT_SELF, DEFAULT_SELF, "value4"),
+                writeLong("124")
+            ) in propertiesAfter
         )
     }
 }
