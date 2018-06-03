@@ -1,6 +1,6 @@
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/slavasn/bloqly/master/resources/logo.png"/>
+<img src="resources/logo.svg" width="40%"/>
 </p>    
 <p align="center">JavaScript Smart Contracts Engine on PBFT blockchain.</p>
 
