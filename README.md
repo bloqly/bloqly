@@ -21,12 +21,6 @@ Smart contract code sample:
 
 ```JavaScript
 
-const maxSupply = new BigInteger('1000000');
-const validatorAmount = new BigInteger('1');
-const validatorPower = validatorAmount;
-
-const zero = new BigInteger('0');
-
 /**
  * Move balance contract
  *
@@ -38,17 +32,17 @@ const zero = new BigInteger('0');
  * @return {Object}  Array of properties to set after function execution
  */
 
-function contract(context, amount) {
+function contract(context, orig, dest, amount) {
 
-    var callerBalance = getProperty('caller', 'balance', zero);
-    var calleeBalance = getProperty('callee', 'balance', zero);
+    var origBalance = getProperty(orig, 'balance', zero);
+    var destBalance = getProperty(dest, 'balance', zero);
 
-    var newCallerBalance = callerBalance.subtract(amount);
-    var newCalleeBalance = calleeBalance.add(amount);
+    var newOrigBalance = origBalance.subtract(amount);
+    var newDestBalance = origBalance.add(amount);
 
     return [
-        { target: 'caller', balance: newCallerBalance },
-        { target: 'callee', balance: newCalleeBalance },
+        { target: orig, balance: newOrigBalance },
+        { target: dest, balance: newDestBalance },
     ];
 }
 
