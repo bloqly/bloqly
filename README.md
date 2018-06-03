@@ -38,7 +38,7 @@ function contract(context, orig, dest, amount) {
     var destBalance = getProperty(dest, 'balance', zero);
 
     var newOrigBalance = origBalance.subtract(amount);
-    var newDestBalance = origBalance.add(amount);
+    var newDestBalance = destBalance.add(amount);
 
     return [
         { target: orig, balance: newOrigBalance },
