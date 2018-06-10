@@ -2,7 +2,7 @@ package org.bloqly.machine
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
-import org.bloqly.machine.component.EventSenderService
+import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.TransactionListVO
@@ -23,7 +23,7 @@ class TestWorkflow {
     private lateinit var eventProcessorService: EventProcessorService
 
     @Autowired
-    private lateinit var eventSenderService: EventSenderService
+    private lateinit var eventReceiverService: EventReceiverService
 
     @Autowired
     private lateinit var testService: TestService
@@ -46,9 +46,7 @@ class TestWorkflow {
 
         val transactionVO = testService.newTransaction()
 
-        eventSenderService.sendTransactions(
-                TransactionListVO(transactions = listOf(transactionVO))
-        )
+        sendTransactions(TransactionListVO(listOf(transactionVO)))
 
         sendVotes()
 
@@ -63,17 +61,21 @@ class TestWorkflow {
         assertEquals(1, lastBlock.height)
     }
 
+    private fun sendTransactions(transactionListVO: TransactionListVO) {
+        eventReceiverService.receiveTransactions(transactionListVO.transactions)
+    }
+
     private fun sendVotes() {
 
         val votes = eventProcessorService.onGetVote().map { it.toVO() }
 
-        eventSenderService.sendVotes(votes)
+        eventReceiverService.receiveVotes(votes)
     }
 
     private fun sendProposals() {
         val proposals = eventProcessorService.onGetProposals().map { it.toVO() }
 
-        eventSenderService.sendProposals(proposals)
+        eventReceiverService.receiveProposals(proposals)
     }
 
     private fun selectBestProposal() {

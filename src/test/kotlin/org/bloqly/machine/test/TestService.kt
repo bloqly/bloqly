@@ -10,6 +10,8 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.ContractRepository
+import org.bloqly.machine.repository.EntityEventRepository
+import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
@@ -40,7 +42,9 @@ class TestService(
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
     private val objectMapper: ObjectMapper,
-    private val propertyService: PropertyService
+    private val propertyService: PropertyService,
+    private val nodeRepository: NodeRepository,
+    private val entityEventRepository: EntityEventRepository
 ) {
 
     private lateinit var accounts: List<Account>
@@ -61,6 +65,8 @@ class TestService(
         spaceRepository.deleteAll()
         transactionRepository.deleteAll()
         accountRepository.deleteAll()
+        nodeRepository.deleteAll()
+        entityEventRepository.deleteAll()
     }
 
     fun getRoot(): Account = accounts.first()
@@ -83,7 +89,7 @@ class TestService(
     }
 
     fun newTransaction(): TransactionVO {
-        
+
         val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(DEFAULT_SPACE)
 
         val root = accountRepository.findById(getRoot().id).orElseThrow()

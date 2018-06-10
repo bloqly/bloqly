@@ -10,4 +10,9 @@ data class NodeId(
 
     val port: Long
 
-) : Serializable
+) : Serializable {
+
+    override fun toString(): String {
+        return "$host:$port"
+    }
+}
