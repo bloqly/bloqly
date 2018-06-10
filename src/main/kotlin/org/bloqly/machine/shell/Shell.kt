@@ -13,14 +13,16 @@ object Shell {
 
     fun run(context: ApplicationContext, commandLine: CommandLine) {
 
-        val accountServiceShell = context.getBean("accountServiceShell")
-        val blockServiceShell = context.getBean("blockServiceShell")
-        val transactionServiceShell = context.getBean("transactionServiceShell")
+        val accountServiceShell = context.getBean(AccountServiceShell::class.java)
+        val blockServiceShell = context.getBean(BlockServiceShell::class.java)
+        val transactionServiceShell = context.getBean(TransactionServiceShell::class.java)
+        val chainServiceShell = context.getBean(ChainServiceShell::class.java)
 
         val binding = Binding()
 
         binding.setProperty("account", accountServiceShell)
-        binding.setProperty("bloq", blockServiceShell)
+        binding.setProperty("block", blockServiceShell)
+        binding.setProperty("chain", chainServiceShell)
         binding.setProperty("txs", transactionServiceShell)
 
         val shell = Groovysh(binding, IO())

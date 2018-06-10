@@ -7,7 +7,6 @@ import org.bloqly.machine.service.AccountService
 import org.springframework.stereotype.Service
 
 @Service
-@Suppress("unused")
 class AccountServiceShell(
     private val accountService: AccountService,
     private val objectMapper: ObjectMapper

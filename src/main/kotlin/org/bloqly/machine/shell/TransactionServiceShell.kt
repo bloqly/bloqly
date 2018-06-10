@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 @Service
-@Suppress("unused")
 class TransactionServiceShell(
 
     private val blockRepository: BlockRepository,
