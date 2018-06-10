@@ -83,7 +83,7 @@ class TestService(
     }
 
     fun newTransaction(): TransactionVO {
-
+        
         val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(DEFAULT_SPACE)
 
         val root = accountRepository.findById(getRoot().id).orElseThrow()

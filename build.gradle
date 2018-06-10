@@ -1,7 +1,7 @@
 buildscript {
     // TODO move all the versions out
     ext.kotlin_version = '1.2.41'
-    ext.spring_boot_version='2.0.2.RELEASE'
+    ext.spring_boot_version = '2.0.2.RELEASE'
 
     repositories {
         mavenCentral()
@@ -128,5 +128,5 @@ dependencies {
     compile group: "org.codehaus.groovy", name: "groovy-groovysh", version: "2.4.15"
 
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-    
+
 }

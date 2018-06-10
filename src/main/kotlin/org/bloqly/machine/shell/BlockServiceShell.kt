@@ -24,7 +24,7 @@ class BlockServiceShell(
 
     fun importFirst(blockEncoded: String): String {
 
-        val firsBlockJSON = EncodingUtils.decodeFromString16(blockEncoded).toString()
+        val firsBlockJSON = String(EncodingUtils.decodeFromString16(blockEncoded))
 
         blockService.importFirst(firsBlockJSON)
 

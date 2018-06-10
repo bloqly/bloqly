@@ -14,8 +14,6 @@ object ApplicationUtils {
 
         println("Starting server.")
 
-        // System.err.close()
-
         properties["server.port"] = commandLine.getOptionValue("port", Application.DEFAULT_PORT)
         properties["nodes"] = commandLine.getOptionValue("nodes", "")
 
@@ -35,10 +33,6 @@ object ApplicationUtils {
     }
 
     fun startConsole(properties: Properties, commandLine: CommandLine) {
-
-        println("Starting console.")
-
-        // System.err.close()
 
         val context = SpringApplicationBuilder()
             .logStartupInfo(false)

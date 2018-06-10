@@ -17,6 +17,9 @@ class Application {
         @JvmStatic
         fun main(args: Array<String>) {
 
+            System.err.close()
+            System.setErr(System.out)
+
             val properties = Properties()
 
             val commandLine = OptionUtils.parseCommandLine(args)

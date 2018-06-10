@@ -28,15 +28,13 @@ class TransactionServiceShell(
 
         val origin = accountRepository.findById(originId).orElseThrow()
 
-        val destination = accountRepository.findById(destinationId).orElseThrow()
-
         val transaction = transactionService.newTransaction(
 
             space = Application.DEFAULT_SPACE,
 
             originId = origin.id,
 
-            destinationId = destination.id,
+            destinationId = destinationId,
 
             value = ParameterUtils.writeLong(amount),
 
