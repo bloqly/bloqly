@@ -5,7 +5,7 @@ import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.vo.TransactionListVO
+import org.bloqly.machine.vo.TransactionVO
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -46,7 +46,7 @@ class TestWorkflow {
 
         val transactionVO = testService.newTransaction()
 
-        sendTransactions(TransactionListVO(listOf(transactionVO)))
+        sendTransactions(listOf(transactionVO))
 
         sendVotes()
 
@@ -61,8 +61,8 @@ class TestWorkflow {
         assertEquals(1, lastBlock.height)
     }
 
-    private fun sendTransactions(transactionListVO: TransactionListVO) {
-        eventReceiverService.receiveTransactions(transactionListVO.transactions)
+    private fun sendTransactions(transactions: List<TransactionVO>) {
+        eventReceiverService.receiveTransactions(transactions)
     }
 
     private fun sendVotes() {

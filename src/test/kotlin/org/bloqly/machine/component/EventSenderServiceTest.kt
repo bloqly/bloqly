@@ -6,7 +6,6 @@ import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.vo.TransactionListVO
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -65,8 +64,6 @@ class EventSenderServiceTest {
     fun testSendTransactions() {
         val tx = testService.newTransaction()
 
-        val txs = TransactionListVO(listOf(tx))
-
-        eventSenderService.sendTransactions(txs)
+        eventSenderService.sendTransactions(listOf(tx))
     }
 }

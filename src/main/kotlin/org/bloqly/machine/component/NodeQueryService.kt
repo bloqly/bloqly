@@ -4,6 +4,7 @@ import org.bloqly.machine.model.Node
 import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.vo.NodeListVO
 import org.bloqly.machine.vo.TransactionListVO
+import org.bloqly.machine.vo.TransactionVO
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
@@ -48,13 +49,14 @@ class NodeQueryService(
         }
     }
 
-    fun sendTransactions(node: Node, transactionListVO: TransactionListVO) {
+    fun sendTransactions(node: Node, transactions: List<TransactionVO>) {
 
         val server = node.getServer()
         val path = "http://$server/transactions"
 
         try {
-            val res = restTemplate.postForEntity(path, HttpEntity(transactionListVO), Void.TYPE)
+            val entity = HttpEntity(TransactionListVO(transactions))
+            val res = restTemplate.postForEntity(path, entity, Void.TYPE)
 
             require(res.statusCode != HttpStatus.OK) {
                 "Expected status OK, received ${res.statusCode}"

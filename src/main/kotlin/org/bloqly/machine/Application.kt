@@ -29,10 +29,8 @@ class Application {
             properties["spring.datasource.url"] = "jdbc:h2:~/.bloqly/$database;AUTO_SERVER=TRUE"
 
             if (commandLine.hasOption("server")) {
-
                 ApplicationUtils.startServer(properties, commandLine)
             } else if (commandLine.hasOption("console") || commandLine.hasOption("command")) {
-
                 ApplicationUtils.startConsole(properties, commandLine)
             }
         }

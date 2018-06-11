@@ -1,7 +1,6 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.service.TransactionService
-import org.bloqly.machine.vo.TransactionListVO
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
@@ -31,14 +30,13 @@ class SchedulerService(
 
         log.info("Send transactions")
 
-        val transactions = transactionService.getNewTransactions()
+        val transactions = transactionService.getNewTransactions().map { it.toVO() }
 
         if (transactions.isNotEmpty()) {
 
             log.info("Found ${transactions.size} transactions to send")
 
-            val transactionVOs = TransactionListVO.fromTransactions(transactions)
-            eventSenderService.sendTransactions(transactionVOs)
+            eventSenderService.sendTransactions(transactions)
         } else {
 
             log.info("There are no transactions to send, skipping")

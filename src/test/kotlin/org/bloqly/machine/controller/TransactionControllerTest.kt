@@ -58,7 +58,8 @@ class TransactionControllerTest {
         val transactionVO = testService.newTransaction()
 
         val transactionPayload = objectMapper.writeValueAsString(
-                TransactionListVO(transactions = listOf(transactionVO)))
+            TransactionListVO(listOf(transactionVO))
+        )
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
