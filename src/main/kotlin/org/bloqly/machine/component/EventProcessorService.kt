@@ -170,7 +170,7 @@ class EventProcessorService(
      * Step 1.2, vote for previous block
      *
      */
-    fun onGetVote(): List<Vote> {
+    fun onGetVotes(): List<Vote> {
 
         val spaces = spaceRepository.findAll().map { it.id }
 

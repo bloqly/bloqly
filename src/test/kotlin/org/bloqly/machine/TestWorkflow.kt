@@ -67,7 +67,7 @@ class TestWorkflow {
 
     private fun sendVotes() {
 
-        val votes = eventProcessorService.onGetVote().map { it.toVO() }
+        val votes = eventProcessorService.onGetVotes().map { it.toVO() }
 
         eventReceiverService.receiveVotes(votes)
     }

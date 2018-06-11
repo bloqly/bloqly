@@ -2,9 +2,10 @@ package org.bloqly.machine.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
-import org.bloqly.machine.repository.TransactionRepository
+import org.bloqly.machine.component.EventProcessorService
+import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.vo.TransactionList
+import org.bloqly.machine.vo.VoteList
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -23,7 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
-class TransactionControllerTest {
+class VoteControllerTest {
 
     @Autowired
     private lateinit var testService: TestService
@@ -35,7 +36,10 @@ class TransactionControllerTest {
     private lateinit var restTemplate: TestRestTemplate
 
     @Autowired
-    private lateinit var transactionRepository: TransactionRepository
+    private lateinit var voteRepository: VoteRepository
+
+    @Autowired
+    private lateinit var eventProcessorService: EventProcessorService
 
     @LocalServerPort
     private var port: Int = 0
@@ -51,25 +55,29 @@ class TransactionControllerTest {
     }
 
     @Test
-    fun testReceiveTransactions() {
+    fun testReceiveVotes() {
 
-        val url = "http://localhost:$port/transactions"
+        val url = "http://localhost:$port/votes"
 
-        val transaction = testService.newTransaction()
+        val votes = eventProcessorService.onGetVotes()
 
-        val transactionPayload = objectMapper.writeValueAsString(
-            TransactionList.fromTransactions(listOf(transaction))
+        val votesPayload = objectMapper.writeValueAsString(
+            VoteList.fromVotes(votes)
         )
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
-        val entity = HttpEntity<String>(transactionPayload, headers)
+        val entity = HttpEntity<String>(votesPayload, headers)
 
-        assertFalse(transactionRepository.existsById(transaction.id))
+        val vote = votes.first()
+
+        voteRepository.deleteById(vote.id)
+
+        assertFalse(voteRepository.existsById(vote.id))
 
         restTemplate.postForObject(url, entity, Void.TYPE)
 
-        assertTrue(transactionRepository.existsById(transaction.id))
+        assertTrue(voteRepository.existsById(vote.id))
     }
 }

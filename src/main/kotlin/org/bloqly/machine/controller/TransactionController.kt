@@ -2,7 +2,7 @@ package org.bloqly.machine.controller
 
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.service.TransactionService
-import org.bloqly.machine.vo.TransactionListVO
+import org.bloqly.machine.vo.TransactionList
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -19,19 +19,16 @@ class TransactionController(
 ) {
 
     @PostMapping
-    fun onTransaction(@RequestBody transactionVOs: TransactionListVO) {
+    fun onTransactions(@RequestBody transactionsList: TransactionList) {
 
-        eventReceiverService.receiveTransactions(transactionVOs.transactions)
+        eventReceiverService.receiveTransactions(transactionsList.transactions)
     }
 
     @GetMapping
-    fun getTransactions(): TransactionListVO {
+    fun getTransactions(): TransactionList {
 
         val transactions = transactionService.getNewTransactions()
 
-        // TODO: move to serialization service
-        return TransactionListVO(
-                transactions = transactions.map { it.toVO() }
-        )
+        return TransactionList.fromTransactions(transactions)
     }
 }

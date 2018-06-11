@@ -8,7 +8,7 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.ParameterUtils
-import org.bloqly.machine.vo.TransactionListVO
+import org.bloqly.machine.vo.TransactionList
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -58,7 +58,7 @@ class TransactionServiceShell(
 
     fun list(): String {
 
-        val transactions = TransactionListVO.fromTransactions(
+        val transactions = TransactionList.fromTransactions(
             transactionRepository.findAll().toList()
         )
 

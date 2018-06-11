@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component
 @Component
 @Profile("scheduler")
 class SchedulerService(
-
     private val nodeQueryService: NodeQueryService,
     private val transactionService: TransactionService,
-    private val eventSenderService: EventSenderService
+    private val eventSenderService: EventSenderService,
+    private val eventProcessorService: EventProcessorService
 ) {
 
     private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
@@ -29,9 +29,21 @@ class SchedulerService(
 
         if (transactions.isNotEmpty()) {
 
-            log.info("Found ${transactions.size} transactions to send")
+            log.info("Sending ${transactions.size} transactions.")
 
             eventSenderService.sendTransactions(transactions)
+        }
+    }
+
+    @Scheduled(fixedDelay = 5000)
+    fun sendVotes() {
+        val votes = eventProcessorService.onGetVotes()
+
+        if (votes.isNotEmpty()) {
+
+            log.info("Sending ${votes.size} votes.")
+
+            eventSenderService.sendVotes(votes)
         }
     }
 }

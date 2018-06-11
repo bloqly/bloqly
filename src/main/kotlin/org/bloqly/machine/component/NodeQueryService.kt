@@ -2,9 +2,11 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.vo.NodeListVO
-import org.bloqly.machine.vo.TransactionListVO
+import org.bloqly.machine.vo.TransactionList
+import org.bloqly.machine.vo.VoteList
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
@@ -55,14 +57,33 @@ class NodeQueryService(
         val path = "http://$server/transactions"
 
         try {
-            val entity = HttpEntity(TransactionListVO.fromTransactions(transactions))
+            val entity = HttpEntity(TransactionList.fromTransactions(transactions))
             val res = restTemplate.postForEntity(path, entity, Void.TYPE)
 
             require(res.statusCode != HttpStatus.OK) {
                 "Expected status OK, received ${res.statusCode}"
             }
         } catch (e: Exception) {
-            log.error("Could not send transactions to $server. ${e.message}", e.message)
+            log.error("Could not send transactions to $server. ${e.message}")
+        }
+    }
+
+    fun sendVotes(node: Node, votes: List<Vote>) {
+
+        val server = node.getServer()
+        val path = "http://$server/votes"
+
+        try {
+
+            val entity = HttpEntity(VoteList.fromVotes(votes))
+
+            val res = restTemplate.postForEntity(path, entity, Void.TYPE)
+
+            require(res.statusCode != HttpStatus.OK) {
+                "Expected status OK, received ${res.statusCode}"
+            }
+        } catch (e: Exception) {
+            log.error("Could not send votes to $server. ${e.message}")
         }
     }
 }

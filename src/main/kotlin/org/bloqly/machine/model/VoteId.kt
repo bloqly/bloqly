@@ -16,4 +16,9 @@ data class VoteId(
     @Column(nullable = false)
     val height: Long
 
-) : Serializable
+) : Serializable {
+
+    override fun toString(): String {
+        return "$validatorId:$space:$height"
+    }
+}

@@ -9,7 +9,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.vo.TransactionListVO
+import org.bloqly.machine.vo.TransactionList
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -89,7 +89,7 @@ class EventSenderServiceTest {
 
         assertFalse(entityEventRepository.existsById(eventId))
 
-        val entity = HttpEntity(TransactionListVO.fromTransactions(transactions))
+        val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
         val response = ResponseEntity<Void>(HttpStatus.OK)
 
