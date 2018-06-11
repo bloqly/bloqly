@@ -1,12 +1,18 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.model.EntityEvent
+import org.bloqly.machine.model.EntityEventId
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.vo.TransactionListVO
+import org.bloqly.machine.vo.TransactionVO
 import org.junit.After
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,6 +22,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.web.client.RestTemplate
 import java.time.Instant
@@ -46,13 +55,16 @@ class EventSenderServiceTest {
     @Autowired
     private lateinit var testService: TestService
 
+    @Autowired
+    private lateinit var restTemplate: RestTemplate
+
     private val node = Node(id = NodeId("127.0.0.1", 8080), addedTime = Instant.now().toEpochMilli())
+
+    private val path = "http://${node.id}/transactions"
 
     @Before
     fun init() {
         testService.createBlockchain()
-
-        nodeRepository.save(node)
     }
 
     @After
@@ -61,9 +73,52 @@ class EventSenderServiceTest {
     }
 
     @Test
-    fun testSendTransactions() {
-        val tx = testService.newTransaction()
+    fun testSendTransactionsNoNodes() {
 
-        eventSenderService.sendTransactions(listOf(tx))
+        eventSenderService.sendTransactions(getTransactions())
+
+        Mockito.verifyZeroInteractions(restTemplate)
     }
+
+    @Test
+    fun testSendTransactions() {
+
+        val transactions = getTransactions()
+
+        val eventId = EntityEventId(transactions.first().id, node.id.toString())
+
+        assertFalse(entityEventRepository.existsById(eventId))
+
+        val entity = HttpEntity(TransactionListVO(transactions))
+
+        val response = ResponseEntity<Void>(HttpStatus.OK)
+
+        Mockito.`when`(restTemplate.postForEntity(path, entity, Void.TYPE))
+            .thenReturn(response)
+
+        nodeRepository.save(node)
+
+        eventSenderService.sendTransactions(transactions)
+
+        Mockito.verify(restTemplate).postForEntity(path, entity, Void.TYPE)
+
+        assertTrue(entityEventRepository.existsById(eventId))
+    }
+
+    @Test
+    fun testSendTransactionsAlreadySent() {
+        val transactions = getTransactions()
+
+        val eventId = EntityEventId(transactions.first().id, node.id.toString())
+
+        nodeRepository.save(node)
+
+        entityEventRepository.save(EntityEvent(eventId, Instant.now().toEpochMilli()))
+
+        eventSenderService.sendTransactions(transactions)
+
+        Mockito.verifyZeroInteractions(restTemplate)
+    }
+
+    private fun getTransactions(): List<TransactionVO> = listOf(testService.newTransaction())
 }

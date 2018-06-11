@@ -31,13 +31,15 @@ class EventSenderService(
 
             log.info("Send transactions to node $node")
 
-            val transactions = transactions.filter { tx ->
+            val txs = transactions.filter { tx ->
                 !entityEventRepository.existsById(EntityEventId(tx.id, node.id.toString()))
             }
 
-            nodeQueryService.sendTransactions(node, transactions)
+            if (txs.isNotEmpty()) {
+                nodeQueryService.sendTransactions(node, txs)
+            }
 
-            transactions.forEach { tx ->
+            txs.forEach { tx ->
                 entityEventRepository.save(
                     EntityEvent(EntityEventId(tx.id, node.id.toString()), Instant.now().toEpochMilli())
                 )
