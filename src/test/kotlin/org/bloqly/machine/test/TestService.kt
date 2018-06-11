@@ -6,6 +6,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
@@ -21,7 +22,6 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
-import org.bloqly.machine.vo.TransactionVO
 import org.junit.Assert
 import org.springframework.stereotype.Component
 import java.math.BigInteger
@@ -88,7 +88,7 @@ class TestService(
         eventProcessorService.createBlockchain(Application.DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
     }
 
-    fun newTransaction(): TransactionVO {
+    fun newTransaction(): Transaction {
 
         val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(DEFAULT_SPACE)
 
@@ -105,7 +105,7 @@ class TestService(
             timestamp = Instant.now().toEpochMilli()
         )
 
-        return transaction.toVO()
+        return transaction
     }
 
     fun testPropertiesAreCreated() {

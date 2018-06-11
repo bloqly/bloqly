@@ -55,10 +55,10 @@ class TransactionControllerTest {
 
         val url = "http://localhost:$port/transactions"
 
-        val transactionVO = testService.newTransaction()
+        val transaction = testService.newTransaction()
 
         val transactionPayload = objectMapper.writeValueAsString(
-            TransactionListVO(listOf(transactionVO))
+            TransactionListVO.fromTransactions(listOf(transaction))
         )
 
         val headers = HttpHeaders()
@@ -66,10 +66,10 @@ class TransactionControllerTest {
 
         val entity = HttpEntity<String>(transactionPayload, headers)
 
-        assertFalse(transactionRepository.existsById(transactionVO.id))
+        assertFalse(transactionRepository.existsById(transaction.id))
 
         restTemplate.postForObject(url, entity, Void.TYPE)
 
-        assertTrue(transactionRepository.existsById(transactionVO.id))
+        assertTrue(transactionRepository.existsById(transaction.id))
     }
 }

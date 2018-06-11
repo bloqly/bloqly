@@ -5,11 +5,11 @@ import org.bloqly.machine.model.EntityEvent
 import org.bloqly.machine.model.EntityEventId
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
+import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.TransactionListVO
-import org.bloqly.machine.vo.TransactionVO
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -89,7 +89,7 @@ class EventSenderServiceTest {
 
         assertFalse(entityEventRepository.existsById(eventId))
 
-        val entity = HttpEntity(TransactionListVO(transactions))
+        val entity = HttpEntity(TransactionListVO.fromTransactions(transactions))
 
         val response = ResponseEntity<Void>(HttpStatus.OK)
 
@@ -120,5 +120,5 @@ class EventSenderServiceTest {
         Mockito.verifyZeroInteractions(restTemplate)
     }
 
-    private fun getTransactions(): List<TransactionVO> = listOf(testService.newTransaction())
+    private fun getTransactions(): List<Transaction> = listOf(testService.newTransaction())
 }

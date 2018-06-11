@@ -19,27 +19,19 @@ class SchedulerService(
 
     @Scheduled(fixedDelay = 5000)
     fun queryForNodes() {
-
-        log.info("Query for nodes")
-
         nodeQueryService.queryForNodes()
     }
 
     @Scheduled(fixedDelay = 5000)
     fun sendTransactions() {
 
-        log.info("Send transactions")
-
-        val transactions = transactionService.getNewTransactions().map { it.toVO() }
+        val transactions = transactionService.getNewTransactions()
 
         if (transactions.isNotEmpty()) {
 
             log.info("Found ${transactions.size} transactions to send")
 
             eventSenderService.sendTransactions(transactions)
-        } else {
-
-            log.info("There are no transactions to send, skipping")
         }
     }
 }

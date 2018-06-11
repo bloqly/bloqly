@@ -2,10 +2,10 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.model.EntityEvent
 import org.bloqly.machine.model.EntityEventId
+import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.vo.BlockDataVO
-import org.bloqly.machine.vo.TransactionVO
 import org.bloqly.machine.vo.VoteVO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -24,7 +24,7 @@ class EventSenderService(
         TODO("not implemented")
     }
 
-    fun sendTransactions(transactions: List<TransactionVO>) {
+    fun sendTransactions(transactions: List<Transaction>) {
         val nodes = nodeService.getNodesToQuery()
 
         nodes.forEach { node ->
