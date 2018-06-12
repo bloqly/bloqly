@@ -261,11 +261,7 @@ class EventProcessorService(
         return spaces.mapNotNull { space ->
             val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
 
-            val validators = accountService.getValidatorsForSpace(space)
-
-            val validatorIndex = validators.size % (lastBlock.height + 1)
-
-            val validator = validators.sortedBy { it.id }[validatorIndex.toInt()]
+            val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
 
             val bestBlockCandidate = blockCandidateService
                 .getBlockCandidate(space, lastBlock.height + 1, validator.id)

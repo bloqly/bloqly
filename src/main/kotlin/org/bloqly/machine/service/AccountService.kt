@@ -24,6 +24,14 @@ class AccountService(
     @Value("\${validators:}") private val validators: Array<String>
 ) {
 
+    fun getActiveValidator(space: String, height: Long): Account {
+        val validators = getValidatorsForSpace(space)
+
+        val validatorIndex = validators.size % (height + 1)
+
+        return validators.sortedBy { it.id }[validatorIndex.toInt()]
+    }
+
     fun createAccount(): Account {
 
         return accountRepository.save(newAccount())
