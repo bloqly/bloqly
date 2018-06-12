@@ -1,9 +1,11 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
+import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.NodeList
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
@@ -84,6 +86,25 @@ class NodeQueryService(
             }
         } catch (e: Exception) {
             log.error("Could not send votes to $server. ${e.message}")
+        }
+    }
+
+    fun sendProposals(node: Node, proposals: List<BlockData>) {
+
+        val server = node.getServer()
+        val path = "http://$server/blocks"
+
+        try {
+
+            val entity = HttpEntity(BlockDataList.fromBlocks(proposals))
+
+            val res = restTemplate.postForEntity(path, entity, Void.TYPE)
+
+            require(res.statusCode != HttpStatus.OK) {
+                "Expected status OK, received ${res.statusCode}"
+            }
+        } catch (e: Exception) {
+            log.error("Could not send proposals to $server. ${e.message}")
         }
     }
 }

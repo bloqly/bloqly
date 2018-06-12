@@ -1,12 +1,12 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.EntityEvent
 import org.bloqly.machine.model.EntityEventId
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.service.NodeService
-import org.bloqly.machine.vo.BlockDataVO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -66,7 +66,26 @@ class EventSenderService(
         }
     }
 
-    fun sendProposals(proposals: List<BlockDataVO>) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    fun sendProposals(proposals: List<BlockData>) {
+        val nodes = nodeService.getNodesToQuery()
+
+        nodes.forEach { node ->
+            log.info("Sending proposals to node $node")
+
+            val proposalsToSend = proposals.filter { proposal ->
+                !entityEventRepository.existsById(EntityEventId(proposal.block.id, node.id.toString()))
+            }
+
+            if (proposalsToSend.isNotEmpty()) {
+                nodeQueryService.sendProposals(node, proposalsToSend)
+            }
+
+            proposalsToSend.forEach { proposal ->
+                entityEventRepository.save(
+                    EntityEvent(EntityEventId(proposal.block.id, node.id.toString()), Instant.now().toEpochMilli())
+                )
+            }
+
+        }
     }
 }

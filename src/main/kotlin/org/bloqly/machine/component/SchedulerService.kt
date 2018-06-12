@@ -50,6 +50,13 @@ class SchedulerService(
     @Scheduled(fixedDelay = 5000)
     fun sendProposals() {
 
-        //val propos
+        val proposals = eventProcessorService.onGetProposals()
+
+        if (proposals.isNotEmpty()) {
+
+            log.info("Sending ${proposals.size} proposals.")
+
+            eventSenderService.sendProposals(proposals)
+        }
     }
 }
