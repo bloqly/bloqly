@@ -5,6 +5,7 @@ import org.bloqly.machine.vo.BlockVO
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.Lob
 
 @Entity
 data class Block(
@@ -33,6 +34,7 @@ data class Block(
     @Column(nullable = false)
     var validatorTxHash: ByteArray,
 
+    @Lob
     @Column(nullable = false)
     var signature: ByteArray
 ) {

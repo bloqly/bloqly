@@ -14,7 +14,6 @@ import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.repository.PropertyRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.AccountService
@@ -42,7 +41,6 @@ class TestService(
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
     private val objectMapper: ObjectMapper,
-    private val propertyService: PropertyService,
     private val nodeRepository: NodeRepository,
     private val entityEventRepository: EntityEventRepository
 ) {
@@ -109,7 +107,7 @@ class TestService(
     }
 
     fun testPropertiesAreCreated() {
-        Assert.assertEquals(2, propertyService.getQuorum(DEFAULT_SPACE))
+        Assert.assertEquals(2, propertyRepository.getQuorum(DEFAULT_SPACE))
     }
 
     fun testSpaceCreated() {

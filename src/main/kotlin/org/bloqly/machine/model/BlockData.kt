@@ -1,7 +1,9 @@
 package org.bloqly.machine.model
 
+import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.vo.BlockDataVO
 
+@ValueObject
 data class BlockData(
 
     val block: Block,

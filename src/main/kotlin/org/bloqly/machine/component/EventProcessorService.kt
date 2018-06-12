@@ -19,6 +19,7 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
+import org.bloqly.machine.service.BlockCandidateService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
@@ -45,10 +46,9 @@ class EventProcessorService(
     private val transactionRepository: TransactionRepository,
     private val propertyService: PropertyService,
     private val transactionService: TransactionService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val blockCandidateService: BlockCandidateService
 ) {
-
-    private val newProposals: MutableSet<BlockData> = mutableSetOf()
 
     fun createBlockchain(space: String, baseDir: String) {
 
@@ -232,7 +232,7 @@ class EventProcessorService(
             newBlocks.map { newBlock -> BlockData(newBlock, transactions, votes) }
         }.toList()
 
-        newProposals.addAll(proposals)
+        blockCandidateService.saveAll(proposals)
 
         return proposals
     }
@@ -251,7 +251,7 @@ class EventProcessorService(
 
     fun onProposals(proposals: List<BlockData>) {
 
-        newProposals.addAll(proposals)
+        blockCandidateService.saveAll(proposals)
     }
 
     fun onSelectBestProposal(): List<BlockData> {
@@ -259,30 +259,22 @@ class EventProcessorService(
         val spaces = spaceRepository.findAll().map { it.id }
 
         return spaces.mapNotNull { space ->
-
-            val quorum = propertyService.getQuorum(space)
             val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
 
-            // TODO add sort
-            // TODO add validators schedule check
-            // TODO how to count power?
-            val bestProposal = newProposals
-                .sortedWith(
-                    compareByDescending<BlockData> { it.votes.size }
-                        .thenByDescending { it.transactions.size }
-                        .thenByDescending { it.block.id }
-                )
-                .firstOrNull {
-                    it.block.space == space && it.votes.size >= quorum && it.block.height == lastBlock.height + 1
-                }
+            val validators = accountService.getValidatorsForSpace(space)
 
-            bestProposal?.let {
-                transactionRepository.saveAll(it.transactions)
-                blockRepository.save(it.block)
-                voteRepository.saveAll(it.votes)
+            val validatorIndex = validators.size % (lastBlock.height + 1)
+
+            val validator = validators.sortedBy { it.id }[validatorIndex.toInt()]
+
+            val bestBlockCandidate = blockCandidateService
+                .getBlockCandidate(space, lastBlock.height + 1, validator.id)
+
+            bestBlockCandidate?.let {
+                blockRepository.save(bestBlockCandidate.block)
             }
 
-            bestProposal
+            bestBlockCandidate
         }
     }
 

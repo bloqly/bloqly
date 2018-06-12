@@ -29,7 +29,7 @@ class TestWorkflow {
     private lateinit var testService: TestService
 
     @Autowired
-    private lateinit var blockReceiverService: BlockRepository
+    private lateinit var blockRepository: BlockRepository
 
     @Before
     fun init() {
@@ -56,7 +56,7 @@ class TestWorkflow {
 
         // END
 
-        val lastBlock = blockReceiverService.findFirstBySpaceOrderByHeightDesc(DEFAULT_SPACE)
+        val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(DEFAULT_SPACE)
 
         assertEquals(1, lastBlock.height)
     }
