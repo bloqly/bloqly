@@ -3,6 +3,6 @@ package org.bloqly.machine.vo
 import org.bloqly.machine.annotation.ValueObject
 
 @ValueObject
-data class NodeListVO(
+data class NodeList(
     val nodes: List<NodeVO>
 )

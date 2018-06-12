@@ -1,7 +1,7 @@
 package org.bloqly.machine.controller
 
 import org.bloqly.machine.service.NodeService
-import org.bloqly.machine.vo.NodeListVO
+import org.bloqly.machine.vo.NodeList
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController
 class NodeController(private val nodeService: NodeService) {
 
     @GetMapping
-    fun getNodes(): NodeListVO {
+    fun getNodes(): NodeList {
 
         val nodes = nodeService.getAllNodes()
 
-        return NodeListVO(nodes = nodes.map { it.toVO() })
+        return NodeList(nodes = nodes.map { it.toVO() })
     }
 }

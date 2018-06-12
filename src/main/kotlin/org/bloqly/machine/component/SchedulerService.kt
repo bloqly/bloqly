@@ -46,4 +46,10 @@ class SchedulerService(
             eventSenderService.sendVotes(votes)
         }
     }
+
+    @Scheduled(fixedDelay = 5000)
+    fun sendProposals() {
+
+        //val propos
+    }
 }

@@ -4,7 +4,7 @@ import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
-import org.bloqly.machine.vo.NodeListVO
+import org.bloqly.machine.vo.NodeList
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
 import org.slf4j.LoggerFactory
@@ -38,10 +38,10 @@ class NodeQueryService(
         log.info("Query host $server for nodes")
 
         val nodeList = try {
-            restTemplate.getForObject(path, NodeListVO::class.java)
+            restTemplate.getForObject(path, NodeList::class.java)
         } catch (e: Exception) {
             log.info("Could not query path $path for nodes. ${e.message}")
-            NodeListVO(nodes = emptyList())
+            NodeList(nodes = emptyList())
         }
 
         if (nodeList.nodes.isNotEmpty()) {

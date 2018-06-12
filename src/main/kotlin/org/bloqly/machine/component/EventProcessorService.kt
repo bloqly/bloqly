@@ -204,7 +204,7 @@ class EventProcessorService(
     /**
      * Step 2, get next block proposal
      */
-    fun onGetProposals(): Set<BlockData> {
+    fun onGetProposals(): List<BlockData> {
 
         val spaces = spaceRepository.findAll().map { it.id }
 
@@ -230,7 +230,7 @@ class EventProcessorService(
             }
 
             newBlocks.map { newBlock -> BlockData(newBlock, transactions, votes) }
-        }.toSet()
+        }.toList()
 
         newProposals.addAll(proposals)
 
