@@ -4,7 +4,7 @@ import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.BlockData
 
 @ValueObject
-class BlockDataList(
+data class BlockDataList(
     val blocks: List<BlockDataVO>
 ) {
     companion object {

@@ -1,6 +1,7 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.EntityEvent
 import org.bloqly.machine.model.EntityEventId
 import org.bloqly.machine.model.Node
@@ -10,6 +11,7 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
 import org.junit.After
@@ -74,6 +76,63 @@ class EventSenderServiceTest {
     @After
     fun tearDown() {
         testService.cleanup()
+    }
+
+    @Test
+    fun testSendProposalsNoNodes() {
+
+        eventSenderService.sendProposals(getProposals())
+
+        Mockito.verifyZeroInteractions(restTemplate)
+    }
+
+    @Test
+    fun testSendProposals() {
+
+        val path = "http://${node.id}/blocks"
+
+        val proposals = getProposals()
+
+        val eventId = EntityEventId(proposals.first().block.id, node.id.toString())
+
+        assertFalse(entityEventRepository.existsById(eventId))
+
+        val entity = HttpEntity(BlockDataList.fromBlocks(proposals))
+
+        val response = ResponseEntity<Void>(OK)
+
+        Mockito.`when`(restTemplate.postForEntity(path, entity, Void.TYPE))
+            .thenReturn(response)
+
+        nodeRepository.save(node)
+
+        eventSenderService.sendProposals(proposals)
+
+        Mockito.verify(restTemplate).postForEntity(path, entity, Void.TYPE)
+
+        assertTrue(entityEventRepository.existsById(eventId))
+    }
+
+    @Test
+    fun testSendProposalsAlreadySent() {
+        val proposals = getProposals()
+
+        assertEquals(1, proposals.size)
+
+        val events = proposals.map {
+            EntityEvent(
+                entityEventId = EntityEventId(it.block.id, node.id.toString()),
+                timestamp = Instant.now().toEpochMilli()
+            )
+        }
+
+        nodeRepository.save(node)
+
+        entityEventRepository.saveAll(events)
+
+        eventSenderService.sendProposals(proposals)
+
+        Mockito.verifyZeroInteractions(restTemplate)
     }
 
     @Test
@@ -186,4 +245,6 @@ class EventSenderServiceTest {
     private fun getTransactions(): List<Transaction> = listOf(testService.newTransaction())
 
     private fun getVotes(): List<Vote> = eventProcessorService.onGetVotes()
+
+    private fun getProposals(): List<BlockData> = eventProcessorService.onGetProposals()
 }
