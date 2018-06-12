@@ -128,6 +128,8 @@ class BlockService(
             )
         )
 
+        //val genesisParameters = objectMapper.readValue(genesis.source, GenesisParametersSource::class.java)
+
         // TODO
         // require(CryptoUtils.isBlockValid())
 

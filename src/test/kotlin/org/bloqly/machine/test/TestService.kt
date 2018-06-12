@@ -21,7 +21,8 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.springframework.stereotype.Component
 import java.math.BigInteger
 import java.time.Instant
@@ -107,35 +108,35 @@ class TestService(
     }
 
     fun testPropertiesAreCreated() {
-        Assert.assertEquals(2, propertyRepository.getQuorum(DEFAULT_SPACE))
+        assertEquals(2, propertyRepository.getQuorum(DEFAULT_SPACE))
     }
 
     fun testSpaceCreated() {
-        Assert.assertTrue(spaceRepository.existsById(DEFAULT_SPACE))
+        assertTrue(spaceRepository.existsById(DEFAULT_SPACE))
     }
 
     fun testValidatorsInitialized() {
         val validators = accountService.getValidatorsForSpace(DEFAULT_SPACE)
 
-        Assert.assertEquals(3, validators.size)
+        assertEquals(3, validators.size)
 
         val validatorsIds = validators.map { it.id }
 
-        Assert.assertTrue(validatorsIds.contains(getValidator(0).id))
-        Assert.assertTrue(validatorsIds.contains(getValidator(1).id))
-        Assert.assertTrue(validatorsIds.contains(getValidator(2).id))
+        assertTrue(validatorsIds.contains(getValidator(0).id))
+        assertTrue(validatorsIds.contains(getValidator(1).id))
+        assertTrue(validatorsIds.contains(getValidator(2).id))
     }
 
     fun testValidatorsPowerValues() {
-        Assert.assertEquals(
+        assertEquals(
             BigInteger.ONE,
             accountService.getAccountPower(DEFAULT_SPACE, getValidator(0).id)
         )
-        Assert.assertEquals(
+        assertEquals(
             BigInteger.ONE,
             accountService.getAccountPower(DEFAULT_SPACE, getValidator(1).id)
         )
-        Assert.assertEquals(
+        assertEquals(
             BigInteger.ONE,
             accountService.getAccountPower(DEFAULT_SPACE, getValidator(2).id)
         )

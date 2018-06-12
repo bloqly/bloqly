@@ -4,6 +4,7 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.GenesisParameter
 import org.bloqly.machine.model.GenesisParameters
@@ -34,6 +35,9 @@ class ContractServiceTest {
     private lateinit var contractService: ContractService
 
     @Autowired
+    private lateinit var transactionProcessor: TransactionProcessor
+
+    @Autowired
     private lateinit var propertyRepository: PropertyRepository
 
     @Autowired
@@ -61,7 +65,7 @@ class ContractServiceTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun testCreateContractWithEmptyBodyFails() {
-        contractService.createContract(DEFAULT_SPACE, DEFAULT_SELF, "", genesis.parameters)
+        transactionProcessor.createContract(DEFAULT_SPACE, DEFAULT_SELF, "", genesis.parameters)
     }
 
     @Test
@@ -69,7 +73,7 @@ class ContractServiceTest {
 
         assertEquals(0, propertyRepository.count())
 
-        contractService.createContract(
+        transactionProcessor.createContract(
             DEFAULT_SPACE, DEFAULT_SELF, FileUtils.getResourceAsString("/scripts/test.js"), genesis.parameters
         )
 

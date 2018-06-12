@@ -2,12 +2,13 @@ package org.bloqly.machine.service;
 
 import com.google.common.collect.Lists;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.bloqly.machine.function.GetPropertyFunction;
-import org.bloqly.machine.model.*;
+import org.bloqly.machine.model.ContractInvocationContext;
+import org.bloqly.machine.model.Property;
+import org.bloqly.machine.model.PropertyId;
 import org.bloqly.machine.repository.ContractRepository;
 import org.bloqly.machine.repository.PropertyRepository;
+import org.bloqly.machine.repository.PropertyService;
 import org.bloqly.machine.util.ParameterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,8 @@ import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ContractService {
@@ -30,6 +30,9 @@ public class ContractService {
 
     @Autowired
     private PropertyRepository propertyRepository;
+
+    @Autowired
+    private PropertyService propertyService;
 
     private GetPropertyFunction getPropertyFunction(ContractInvocationContext context) {
 
@@ -54,7 +57,7 @@ public class ContractService {
         };
     }
 
-    private Set<Property> invokeFunction(ContractInvocationContext context, byte[] arg) {
+    private List<Property> invokeFunction(ContractInvocationContext context, byte[] arg) {
 
         try {
 
@@ -81,7 +84,7 @@ public class ContractService {
 
             return results.values().stream()
                     .map(item -> prepareResults((ScriptObjectMirror) item, context))
-                    .collect(toSet());
+                    .collect(toList());
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -111,49 +114,16 @@ public class ContractService {
     }
 
     @Transactional
-    public void createContract(String space,
-                               String self,
-                               String body,
-                               List<GenesisParameter> parameters) {
-
-        Validate.isTrue(StringUtils.isNotEmpty(body), "Contract body can not be empty");
-
-        var owner = parameters.stream()
-                .filter(parameter -> parameter.getKey().equals("root"))
-                .findFirst()
-                .orElseThrow();
-
-        var contract = new Contract(self, space, owner.getValue().toString(), body);
-
-        var properties = parameters.stream().map(parameter -> new Property(
-                        new PropertyId(
-                                space,
-                                self,
-                                parameter.getTarget(),
-                                parameter.getKey()
-                        ),
-                        ParameterUtils.INSTANCE.writeValue(parameter.getValue())
-                )
-        ).collect(toSet());
-
-        processResults(properties);
-
-        contractRepository.save(contract);
-    }
-
-    @Transactional
     public void invokeContract(String functionName, String self, String caller, String callee, byte[] arg) {
 
         contractRepository.findById(self).ifPresent(contract -> {
 
             var invocationContext = new ContractInvocationContext(functionName, caller, callee, contract);
 
-            processResults(invokeFunction(invocationContext, arg));
+            var properties = invokeFunction(invocationContext, arg);
 
+            propertyService.updateProperties(properties);
         });
     }
 
-    private void processResults(Set<Property> properties) {
-        properties.forEach(propertyRepository::save);
-    }
 }

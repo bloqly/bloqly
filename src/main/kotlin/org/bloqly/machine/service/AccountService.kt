@@ -29,7 +29,9 @@ class AccountService(
 
         val validatorIndex = validators.size % (height + 1)
 
-        return validators.sortedBy { it.id }[validatorIndex.toInt()]
+        return validators
+            .sortedBy { it.id }
+            .filter { it.privateKey != null }[validatorIndex.toInt()]
     }
 
     fun createAccount(): Account {

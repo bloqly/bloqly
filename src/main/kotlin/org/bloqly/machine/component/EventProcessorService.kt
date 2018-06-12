@@ -47,7 +47,8 @@ class EventProcessorService(
     private val propertyService: PropertyService,
     private val transactionService: TransactionService,
     private val objectMapper: ObjectMapper,
-    private val blockCandidateService: BlockCandidateService
+    private val blockCandidateService: BlockCandidateService,
+    private val transactionProcessor: TransactionProcessor
 ) {
 
     fun createBlockchain(space: String, baseDir: String) {
@@ -83,7 +84,7 @@ class EventProcessorService(
                 header + source
             }.reduce { str, acc -> str + acc }
 
-        contractService.createContract(
+        transactionProcessor.createContract(
             space,
             DEFAULT_SELF,
             contractBody,

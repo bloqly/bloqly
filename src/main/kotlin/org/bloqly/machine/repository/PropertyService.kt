@@ -4,8 +4,10 @@ import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.util.ParameterUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class PropertyService(
     private val propertyRepository: PropertyRepository
 ) {
@@ -16,5 +18,9 @@ class PropertyService(
         }
 
         propertyRepository.save(Property(id = propertyId, value = ParameterUtils.writeValue(source)))
+    }
+
+    fun updateProperties(properties: List<Property>) {
+        properties.forEach { propertyRepository.save(it) }
     }
 }
