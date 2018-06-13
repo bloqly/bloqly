@@ -65,7 +65,7 @@ class TransactionService(
             containingBlockId = containingBlockId,
             timestamp = timestamp,
             signature = signature,
-            publicKey = origin.publicKey
+            publicKey = origin.publicKey!!
         )
     }
 

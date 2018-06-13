@@ -4,18 +4,16 @@ import org.apache.commons.lang3.StringUtils
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
+import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.ContractRepository
-import org.bloqly.machine.repository.PropertyService
-import org.bloqly.machine.service.TransactionService
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
 @Component
 @Transactional
 class TransactionProcessor(
-    private val transactionService: TransactionService,
-    private val propertyService: PropertyService,
-    private val contractRepository: ContractRepository
+    private val contractRepository: ContractRepository,
+    private val accountRepository: AccountRepository
 ) {
 
     fun createContract(
@@ -36,7 +34,12 @@ class TransactionProcessor(
 
     fun processTransaction(transaction: Transaction) {
 
+        accountRepository.insertAccountId(transaction.origin)
+        accountRepository.insertAccountId(transaction.destination)
+        accountRepository.insertAccountId(transaction.self)
+
         if (transaction.transactionType == TransactionType.CREATE) {
+
             createContract(
                 space = transaction.space,
                 self = transaction.self!!,

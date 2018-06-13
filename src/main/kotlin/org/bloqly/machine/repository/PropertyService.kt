@@ -12,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class PropertyService(
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val accountRepository: AccountRepository
 ) {
     fun saveGenesis(propertyId: PropertyId, source: String) {
 
@@ -25,7 +26,13 @@ class PropertyService(
 
     fun updateProperties(properties: List<Property>) {
 
-        properties.forEach { propertyRepository.save(it) }
+        properties.forEach { property ->
+
+            // TODO check public keys when processing transactions
+            accountRepository.insertAccountId(property.id.target)
+
+            propertyRepository.save(property)
+        }
     }
 
     fun updateProperties(parametersContainer: GenesisParameters) {
@@ -43,6 +50,9 @@ class PropertyService(
                 )
             }
 
-        properties.forEach { propertyRepository.save(it) }
+        properties.forEach { property ->
+            propertyRepository.save(property)
+            accountRepository.insertAccountId(property.id.target)
+        }
     }
 }

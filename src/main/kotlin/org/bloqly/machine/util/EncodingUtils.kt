@@ -28,4 +28,9 @@ object EncodingUtils {
 
         return ByteBuffer.allocate(LONG_BYTES).putLong(value).array()
     }
+
+    fun hashAndEncode16(input: ByteArray): String {
+        val hash = CryptoUtils.digest(input)
+        return EncodingUtils.encodeToString16(hash)
+    }
 }

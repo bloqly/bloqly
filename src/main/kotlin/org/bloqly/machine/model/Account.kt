@@ -10,8 +10,8 @@ data class Account(
     @Id
     var id: String,
 
-    @Column(nullable = false)
-    var publicKey: String,
+    @Column
+    var publicKey: String? = null,
 
     @Column
     var privateKey: String? = null

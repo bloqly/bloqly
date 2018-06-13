@@ -60,6 +60,6 @@ class BlockServiceTest {
         testService.testPropertiesAreCreated()
         testService.testSpaceCreated()
         testService.testValidatorsInitialized()
-        //testService.testValidatorsPowerValues()
+        testService.testValidatorsPowerValues()
     }
 }

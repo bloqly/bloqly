@@ -1,10 +1,10 @@
 package org.bloqly.machine.service
 
-import junit.framework.Assert.fail
 import org.bloqly.machine.Application
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.test.TestService
 import org.junit.After
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,7 +44,7 @@ class AccountServiceTest {
             val account = accountService.newAccount()
 
             println("id: ${account.id}")
-            println("pub: ${account.publicKey.toLowerCase()}")
+            println("pub: ${account.publicKey!!.toLowerCase()}")
             println("priv: ${account.privateKey}")
         }
     }

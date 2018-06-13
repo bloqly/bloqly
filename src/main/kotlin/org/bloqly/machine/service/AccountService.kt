@@ -10,6 +10,7 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.encodeToString16
+import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bloqly.machine.util.ParameterUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -43,11 +44,9 @@ class AccountService(
 
         val privateKey = CryptoUtils.generatePrivateKey()
         val publicKey = CryptoUtils.getPublicFor(privateKey)
-        val publicKeyHash = CryptoUtils.digest(publicKey)
-        val accountId = EncodingUtils.encodeToString16(publicKeyHash)
 
         return Account(
-            id = accountId,
+            id = hashAndEncode16(publicKey),
             publicKey = encodeToString16(publicKey),
             privateKey = encodeToString16(privateKey)
         )
