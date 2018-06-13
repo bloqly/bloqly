@@ -19,18 +19,22 @@ data class Vote(
     val timestamp: Long,
 
     @Column(nullable = false)
-    val signature: ByteArray
+    val signature: ByteArray,
+
+    @Column(nullable = false)
+    val publicKey: String
 ) {
 
     fun toVO(): VoteVO {
 
         return VoteVO(
-                validatorId = id.validatorId,
-                space = id.space,
-                height = id.height,
-                blockId = blockId,
-                timestamp = timestamp,
-                signature = EncodingUtils.encodeToString16(signature)
+            validatorId = id.validatorId,
+            space = id.space,
+            height = id.height,
+            blockId = blockId,
+            timestamp = timestamp,
+            signature = EncodingUtils.encodeToString16(signature),
+            publicKey = publicKey
         )
     }
 

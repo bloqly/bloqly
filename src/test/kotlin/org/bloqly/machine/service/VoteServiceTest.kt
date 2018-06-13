@@ -75,13 +75,19 @@ class VoteServiceTest {
     }
 
     @Test
+    fun testVerifyVoteNoValidatorPublicKey() {
+
+        assertTrue(verifyVote(validator.copy(publicKey = null), vote))
+    }
+
+    @Test
     fun testVerifyVoteBlockWrongFails() {
 
         assertFalse(
-                verifyVote(
-                        validator,
-                        vote.copy(blockId = FAKE_DATA)
-                )
+            verifyVote(
+                validator,
+                vote.copy(blockId = FAKE_DATA)
+            )
         )
     }
 
@@ -89,10 +95,10 @@ class VoteServiceTest {
     fun testVerifyVoteTimestampWrongFails() {
 
         assertFalse(
-                verifyVote(
-                        validator,
-                        vote.copy(timestamp = System.currentTimeMillis() + 1)
-                )
+            verifyVote(
+                validator,
+                vote.copy(timestamp = System.currentTimeMillis() + 1)
+            )
         )
     }
 
@@ -100,10 +106,10 @@ class VoteServiceTest {
     fun testVerifyVoteSignatureWrongFails() {
 
         assertFalse(
-                verifyVote(
-                        validator,
-                        vote.copy(signature = ByteArray(0))
-                )
+            verifyVote(
+                validator,
+                vote.copy(signature = ByteArray(0))
+            )
         )
     }
 
@@ -113,10 +119,10 @@ class VoteServiceTest {
         val newId = vote.id.copy(validatorId = FAKE_DATA)
 
         assertFalse(
-                verifyVote(
-                        validator,
-                        vote.copy(id = newId)
-                )
+            verifyVote(
+                validator,
+                vote.copy(id = newId)
+            )
         )
     }
 
@@ -126,10 +132,10 @@ class VoteServiceTest {
         val newId = vote.id.copy(space = FAKE_DATA)
 
         assertFalse(
-                verifyVote(
-                        validator,
-                        vote.copy(id = newId)
-                )
+            verifyVote(
+                validator,
+                vote.copy(id = newId)
+            )
         )
     }
 
@@ -139,10 +145,10 @@ class VoteServiceTest {
         val newId = vote.id.copy(height = vote.id.height + 1)
 
         assertFalse(
-                verifyVote(
-                        validator,
-                        vote.copy(id = newId)
-                )
+            verifyVote(
+                validator,
+                vote.copy(id = newId)
+            )
         )
     }
 }

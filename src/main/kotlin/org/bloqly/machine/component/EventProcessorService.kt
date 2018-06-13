@@ -192,8 +192,8 @@ class EventProcessorService(
 
         validatorOpt.ifPresent { validator ->
 
-            if (!CryptoUtils.verifyVote(validator, vote)) {
-                throw IllegalArgumentException("Could not verify vote $vote")
+            require(CryptoUtils.verifyVote(validator, vote)) {
+                "Could not verify vote $vote"
             }
 
             voteRepository.save(vote)

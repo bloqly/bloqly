@@ -161,7 +161,7 @@ object CryptoUtils {
 
         val dataHash = digest(dataToVerify)
 
-        val publicKey = decodeFromString16(validator.publicKey)
+        val publicKey = decodeFromString16(vote.publicKey)
 
         return verify(dataHash, vote.signature, publicKey)
     }

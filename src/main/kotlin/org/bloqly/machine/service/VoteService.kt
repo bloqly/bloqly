@@ -47,7 +47,8 @@ class VoteService(
 
             blockId = lastBlock.id,
             timestamp = timestamp,
-            signature = signature
+            signature = signature,
+            publicKey = validator.publicKey!!
         )
 
         return voteRepository.save(vote)
