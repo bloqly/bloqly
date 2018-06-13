@@ -5,6 +5,7 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
+import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bouncycastle.asn1.ASN1InputStream
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequenceGenerator
@@ -37,10 +38,10 @@ object CryptoUtils {
     private val CURVE = SECNamedCurves.getByName(CURVE_NAME)
 
     private val DOMAIN = ECDomainParameters(
-            CURVE.curve,
-            CURVE.g,
-            CURVE.n,
-            CURVE.h
+        CURVE.curve,
+        CURVE.g,
+        CURVE.n,
+        CURVE.h
     )
 
     init {
@@ -87,8 +88,8 @@ object CryptoUtils {
         val bos = ByteArrayOutputStream()
 
         transactions
-                .sortedBy { it.id }
-                .forEach { bos.write(it.signature) }
+            .sortedBy { it.id }
+            .forEach { bos.write(it.signature) }
 
         return digest(bos.toByteArray())
     }
@@ -98,8 +99,8 @@ object CryptoUtils {
         val bos = ByteArrayOutputStream()
 
         votes
-                .sortedBy { it.id.validatorId }
-                .forEach { bos.write(it.signature) }
+            .sortedBy { it.id.validatorId }
+            .forEach { bos.write(it.signature) }
 
         return digest(bos.toByteArray())
     }
@@ -125,13 +126,13 @@ object CryptoUtils {
     fun isTransactionValid(transaction: Transaction): Boolean {
 
         val dataToVerify = Bytes.concat(
-                transaction.space.toByteArray(),
-                transaction.origin.toByteArray(),
-                transaction.destination.toByteArray(),
-                transaction.value,
-                transaction.referencedBlockId.toByteArray(),
-                transaction.transactionType.name.toByteArray(),
-                EncodingUtils.longToBytes(transaction.timestamp)
+            transaction.space.toByteArray(),
+            transaction.origin.toByteArray(),
+            transaction.destination.toByteArray(),
+            transaction.value,
+            transaction.referencedBlockId.toByteArray(),
+            transaction.transactionType.name.toByteArray(),
+            EncodingUtils.longToBytes(transaction.timestamp)
         )
 
         val txHash = digest(transaction.signature)
@@ -143,25 +144,35 @@ object CryptoUtils {
         }
 
         return verify(
-                message = digest(dataToVerify),
-                signature = transaction.signature,
-                publicKey = decodeFromString16(transaction.publicKey)
+            message = digest(dataToVerify),
+            signature = transaction.signature,
+            publicKey = decodeFromString16(transaction.publicKey)
         )
     }
 
     fun verifyVote(validator: Account, vote: Vote): Boolean {
 
+        if (validator.id != vote.id.validatorId) {
+            return false
+        }
+
         val dataToVerify = Bytes.concat(
-                vote.id.validatorId.toByteArray(),
-                vote.id.space.toByteArray(),
-                EncodingUtils.longToBytes(vote.id.height),
-                vote.blockId.toByteArray(),
-                EncodingUtils.longToBytes(vote.timestamp)
+            vote.id.validatorId.toByteArray(),
+            vote.id.space.toByteArray(),
+            EncodingUtils.longToBytes(vote.id.height),
+            vote.blockId.toByteArray(),
+            EncodingUtils.longToBytes(vote.timestamp)
         )
 
         val dataHash = digest(dataToVerify)
 
         val publicKey = decodeFromString16(vote.publicKey)
+
+        val validatorId = hashAndEncode16(publicKey)
+
+        if (validator.id != validatorId) {
+            return false
+        }
 
         return verify(dataHash, vote.signature, publicKey)
     }
