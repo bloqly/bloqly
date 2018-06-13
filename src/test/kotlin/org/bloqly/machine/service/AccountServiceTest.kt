@@ -1,9 +1,11 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.test.TestService
 import org.junit.After
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
@@ -26,6 +28,8 @@ class AccountServiceTest {
 
     @Before
     fun setup() {
+        testService.createBlockchain()
+
         account = accountService.newAccount()
 
         accountService.importAccount(account.privateKey!!)
@@ -34,6 +38,14 @@ class AccountServiceTest {
     @After
     fun tearDown() {
         testService.cleanup()
+    }
+
+    @Test
+    fun testGetActiveValidator() {
+        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE, 1))
+        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE, 2))
+        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE, 3))
+        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE, 4))
     }
 
     @Test

@@ -26,9 +26,11 @@ class AccountService(
 ) {
 
     fun getActiveValidator(space: String, height: Long): Account {
+        require(height > 0)
+
         val validators = getValidatorsForSpace(space)
 
-        val validatorIndex = validators.size % (height + 1)
+        val validatorIndex = height % validators.size
 
         return validators
             .sortedBy { it.id }[validatorIndex.toInt()]
