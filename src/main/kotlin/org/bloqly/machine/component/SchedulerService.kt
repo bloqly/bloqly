@@ -22,7 +22,7 @@ class SchedulerService(
         nodeQueryService.queryForNodes()
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 5000, initialDelay = 1000)
     fun sendTransactions() {
 
         val transactions = transactionService.getNewTransactions()
@@ -35,7 +35,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 5000, initialDelay = 2000)
     fun sendVotes() {
         val votes = eventProcessorService.onGetVotes()
 
@@ -47,7 +47,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 5000, initialDelay = 3000)
     fun sendProposals() {
 
         val proposals = eventProcessorService.onGetProposals()
@@ -58,5 +58,10 @@ class SchedulerService(
 
             eventSenderService.sendProposals(proposals)
         }
+    }
+
+    @Scheduled(fixedDelay = 5000, initialDelay = 4000)
+    fun selectBestProposal() {
+        eventProcessorService.onSelectBestProposal()
     }
 }

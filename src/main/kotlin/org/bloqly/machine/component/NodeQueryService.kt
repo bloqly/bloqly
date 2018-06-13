@@ -11,7 +11,7 @@ import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpEntity
-import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 
@@ -60,13 +60,10 @@ class NodeQueryService(
 
         try {
             val entity = HttpEntity(TransactionList.fromTransactions(transactions))
-            val res = restTemplate.postForEntity(path, entity, Void.TYPE)
 
-            require(res.statusCode != HttpStatus.OK) {
-                "Expected status OK, received ${res.statusCode}"
-            }
+            checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
         } catch (e: Exception) {
-            log.error("Could not send transactions to $server. ${e.message}")
+            log.error("Could not send transactions to $server. Details: ${e.message}")
         }
     }
 
@@ -79,13 +76,9 @@ class NodeQueryService(
 
             val entity = HttpEntity(VoteList.fromVotes(votes))
 
-            val res = restTemplate.postForEntity(path, entity, Void.TYPE)
-
-            require(res.statusCode != HttpStatus.OK) {
-                "Expected status OK, received ${res.statusCode}"
-            }
+            checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
         } catch (e: Exception) {
-            log.error("Could not send votes to $server. ${e.message}")
+            log.error("Could not send votes to $server. Details: ${e.message}")
         }
     }
 
@@ -98,13 +91,15 @@ class NodeQueryService(
 
             val entity = HttpEntity(BlockDataList.fromBlocks(proposals))
 
-            val res = restTemplate.postForEntity(path, entity, Void.TYPE)
-
-            require(res.statusCode != HttpStatus.OK) {
-                "Expected status OK, received ${res.statusCode}"
-            }
+            checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
         } catch (e: Exception) {
-            log.error("Could not send proposals to $server. ${e.message}")
+            log.error("Could not send proposals to $server. Details: ${e.message}")
+        }
+    }
+
+    private fun checkResponse(response: ResponseEntity<String>) {
+        require(response.statusCode.is2xxSuccessful) {
+            "Received unexpected response $response."
         }
     }
 }
