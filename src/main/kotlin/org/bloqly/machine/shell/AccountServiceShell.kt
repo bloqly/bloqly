@@ -16,7 +16,9 @@ class AccountServiceShell(
 
         val account = accountService.newAccount()
 
-        return objectMapper.writeValueAsString(account)
+        return objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(account)
     }
 
     fun validators(space: String): String {
@@ -30,7 +32,9 @@ class AccountServiceShell(
             }
         }
 
-        return "\n" + objectMapper.writeValueAsString(validators)
+        return "\n" + objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .writeValueAsString(validators)
     }
 
     fun import(privateKey: String): String {

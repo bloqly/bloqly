@@ -31,8 +31,7 @@ class AccountService(
         val validatorIndex = validators.size % (height + 1)
 
         return validators
-            .sortedBy { it.id }
-            .filter { it.privateKey != null }[validatorIndex.toInt()]
+            .sortedBy { it.id }[validatorIndex.toInt()]
     }
 
     fun createAccount(): Account {
@@ -57,8 +56,10 @@ class AccountService(
         val powerProperties = propertyRepository.findBySpaceAndKey(space, POWER_KEY)
         val accountIds = powerProperties.map { it.id.target }
 
-        return accountRepository.findAllById(accountIds)
+        return accountRepository
+            .findAllById(accountIds)
             .filter { validators.isEmpty() || validators.contains(it.id) }
+            .sortedBy { it.id }
     }
 
     fun getAccountPower(space: String, accountId: String): BigInteger {

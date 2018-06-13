@@ -205,27 +205,32 @@ class EventProcessorService(
 
         val spaces = spaceRepository.findAll().map { it.id }
 
-        val proposals = spaces.map { space ->
+        val proposals = spaces.mapNotNull { space ->
 
             val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
             val transactions = getNewTransactions(space)
             val votes = getNewVotes(space)
             val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
 
-            val proposal = blockService.newBlock(
-                space = space,
-                height = lastBlock.height + 1,
-                timestamp = Instant.now().toEpochMilli(),
-                parentHash = lastBlock.id,
-                proposerId = validator.id,
-                txHash = CryptoUtils.digestTransactions(transactions),
-                validatorTxHash = CryptoUtils.digestVotes(votes)
-            )
+            validator.privateKey?.let {
 
-            BlockData(proposal, transactions, votes)
+                val proposal = blockService.newBlock(
+                    space = space,
+                    height = lastBlock.height + 1,
+                    timestamp = Instant.now().toEpochMilli(),
+                    parentHash = lastBlock.id,
+                    proposerId = validator.id,
+                    txHash = CryptoUtils.digestTransactions(transactions),
+                    validatorTxHash = CryptoUtils.digestVotes(votes)
+                )
+
+                BlockData(proposal, transactions, votes)
+            }
         }.toList()
 
-        blockCandidateService.saveAll(proposals)
+        if (proposals.isNotEmpty()) {
+            blockCandidateService.saveAll(proposals)
+        }
 
         return proposals
     }
