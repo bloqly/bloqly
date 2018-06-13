@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.GENESIS_KEY
+import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
@@ -12,6 +14,7 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
@@ -31,7 +34,9 @@ class BlockService(
     private val transactionRepository: TransactionRepository,
     private val objectMapper: ObjectMapper,
     private val spaceRepository: SpaceRepository,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val propertyService: PropertyService,
+    private val transactionProcessor: TransactionProcessor
 ) {
 
     fun newBlock(
@@ -128,8 +133,18 @@ class BlockService(
             )
         )
 
-        //val genesisParameters = objectMapper.readValue(genesis.source, GenesisParametersSource::class.java)
+        importProperties(genesis)
 
+        processImportGenesisBlock(genesis, block, now)
+
+        processImportGenesisTransactions(genesis, block, now)
+    }
+
+    private fun processImportGenesisBlock(
+        genesis: GenesisVO,
+        block: Block,
+        now: Instant
+    ) {
         // TODO
         // require(CryptoUtils.isBlockValid())
 
@@ -149,6 +164,14 @@ class BlockService(
             "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."
         }
 
+        blockRepository.save(block)
+    }
+
+    private fun processImportGenesisTransactions(
+        genesis: GenesisVO,
+        block: Block,
+        now: Instant
+    ) {
         val transactions = genesis.transactions.map { it.toModel() }
 
         require(transactions.size == 1) {
@@ -157,9 +180,20 @@ class BlockService(
 
         validateGenesisTransaction(transactions.first(), block, now)
 
-        blockRepository.save(block)
+        transactions.forEach { transactionProcessor.processTransaction(it) }
 
         transactionRepository.saveAll(transactions)
+    }
+
+    private fun importProperties(genesis: GenesisVO) {
+        val genesisParametersSource = EncodingUtils.decodeFromString64(genesis.source)
+
+        val genesisParameters = objectMapper.readValue(
+            genesisParametersSource,
+            GenesisParameters::class.java
+        )
+
+        propertyService.updateProperties(genesisParameters)
     }
 
     private fun validateGenesisTransaction(transaction: Transaction, block: Block, now: Instant) {
