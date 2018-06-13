@@ -99,16 +99,16 @@ class EventSenderServiceTest {
 
         val entity = HttpEntity(BlockDataList.fromBlocks(proposals))
 
-        val response = ResponseEntity<Void>(OK)
+        val response = ResponseEntity<String>(OK)
 
-        Mockito.`when`(restTemplate.postForEntity(path, entity, Void.TYPE))
+        Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
             .thenReturn(response)
 
         nodeRepository.save(node)
 
         eventSenderService.sendProposals(proposals)
 
-        Mockito.verify(restTemplate).postForEntity(path, entity, Void.TYPE)
+        Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
 
         assertTrue(entityEventRepository.existsById(eventId))
     }
@@ -156,16 +156,16 @@ class EventSenderServiceTest {
 
         val entity = HttpEntity(VoteList.fromVotes(votes))
 
-        val response = ResponseEntity<Void>(OK)
+        val response = ResponseEntity<String>(OK)
 
-        Mockito.`when`(restTemplate.postForEntity(path, entity, Void.TYPE))
+        Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
             .thenReturn(response)
 
         nodeRepository.save(node)
 
         eventSenderService.sendVotes(votes)
 
-        Mockito.verify(restTemplate).postForEntity(path, entity, Void.TYPE)
+        Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
 
         assertTrue(entityEventRepository.existsById(eventId))
     }
@@ -213,16 +213,16 @@ class EventSenderServiceTest {
 
         val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
-        val response = ResponseEntity<Void>(OK)
+        val response = ResponseEntity<String>(OK)
 
-        Mockito.`when`(restTemplate.postForEntity(path, entity, Void.TYPE))
+        Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
             .thenReturn(response)
 
         nodeRepository.save(node)
 
         eventSenderService.sendTransactions(transactions)
 
-        Mockito.verify(restTemplate).postForEntity(path, entity, Void.TYPE)
+        Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
 
         assertTrue(entityEventRepository.existsById(eventId))
     }
