@@ -84,13 +84,6 @@ class EventProcessorService(
                 header + source
             }.reduce { str, acc -> str + acc }
 
-        transactionProcessor.createContract(
-            space,
-            DEFAULT_SELF,
-            contractBody,
-            parameters
-        )
-
         spaceRepository.save(Space(id = space, creatorId = rootId))
 
         val timestamp = Instant.now().toEpochMilli()
@@ -124,7 +117,10 @@ class EventProcessorService(
             timestamp = timestamp
         )
 
+        transactionProcessor.processTransaction(transaction)
         transactionRepository.save(transaction)
+
+        propertyService.updateProperties(genesisParametersSource.genesisParameters)
 
         firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
 

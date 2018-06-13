@@ -1,5 +1,8 @@
 package org.bloqly.machine.repository
 
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.util.ParameterUtils
@@ -21,6 +24,25 @@ class PropertyService(
     }
 
     fun updateProperties(properties: List<Property>) {
+
+        properties.forEach { propertyRepository.save(it) }
+    }
+
+    fun updateProperties(parametersContainer: GenesisParameters) {
+
+        val properties = parametersContainer.parameters
+            .map { (target, key, value) ->
+                Property(
+                    id = PropertyId(
+                        space = DEFAULT_SPACE,
+                        self = DEFAULT_SELF,
+                        target = target,
+                        key = key
+                    ),
+                    value = ParameterUtils.writeValue(value)
+                )
+            }
+
         properties.forEach { propertyRepository.save(it) }
     }
 }

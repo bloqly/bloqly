@@ -1,11 +1,11 @@
 package org.bloqly.machine.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import junit.framework.Assert.assertEquals
 import org.bloqly.machine.Application
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.GenesisVO
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith

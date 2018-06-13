@@ -11,6 +11,7 @@ import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils
@@ -30,6 +31,9 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class ContractServiceTest {
+
+    @Autowired
+    private lateinit var propertyService: PropertyService
 
     @Autowired
     private lateinit var contractService: ContractService
@@ -65,7 +69,7 @@ class ContractServiceTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun testCreateContractWithEmptyBodyFails() {
-        transactionProcessor.createContract(DEFAULT_SPACE, DEFAULT_SELF, "", genesis.parameters)
+        transactionProcessor.createContract(DEFAULT_SPACE, DEFAULT_SELF, "", caller)
     }
 
     @Test
@@ -74,8 +78,12 @@ class ContractServiceTest {
         assertEquals(0, propertyRepository.count())
 
         transactionProcessor.createContract(
-            DEFAULT_SPACE, DEFAULT_SELF, FileUtils.getResourceAsString("/scripts/test.js"), genesis.parameters
+            DEFAULT_SPACE,
+            DEFAULT_SELF,
+            FileUtils.getResourceAsString("/scripts/test.js"),
+            caller
         )
+        propertyService.updateProperties(genesis)
 
         val propertiesBefore = propertyRepository.findAll()
 
