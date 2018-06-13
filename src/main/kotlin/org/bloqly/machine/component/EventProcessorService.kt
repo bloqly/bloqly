@@ -27,6 +27,7 @@ import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.FileUtils
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.Instant
@@ -50,6 +51,7 @@ class EventProcessorService(
     private val blockCandidateService: BlockCandidateService,
     private val transactionProcessor: TransactionProcessor
 ) {
+    private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
     fun createBlockchain(space: String, baseDir: String) {
 
@@ -265,7 +267,11 @@ class EventProcessorService(
                 .getBlockCandidate(space, lastBlock.height + 1, validator.id)
 
             bestBlockCandidate?.let {
-                blockRepository.save(bestBlockCandidate.block)
+                val block = bestBlockCandidate.block
+
+                log.info("Selected next block ${block.id} on height ${block.height}.")
+
+                blockRepository.save(block)
             }
 
             bestBlockCandidate
