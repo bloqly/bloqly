@@ -5,8 +5,10 @@ import org.bloqly.machine.vo.BlockDataVO
 import org.bloqly.machine.vo.TransactionVO
 import org.bloqly.machine.vo.VoteVO
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional
 class EventReceiverService(
     private val eventProcessorService: EventProcessorService,
     private val propertyRepository: PropertyRepository

@@ -94,7 +94,7 @@ class TestService(
         val root = accountRepository.findById(getRoot().id).orElseThrow()
         val user = accountRepository.findById(getUser().id).orElseThrow()
 
-        val transaction = transactionService.newTransaction(
+        return transactionService.newTransaction(
             space = DEFAULT_SPACE,
             originId = root.id,
             destinationId = user.id,
@@ -103,8 +103,6 @@ class TestService(
             referencedBlockId = lastBlock.id,
             timestamp = Instant.now().toEpochMilli()
         )
-
-        return transaction
     }
 
     fun testPropertiesAreCreated() {

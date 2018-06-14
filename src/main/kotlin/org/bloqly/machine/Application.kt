@@ -24,9 +24,9 @@ class Application {
 
             val commandLine = OptionUtils.parseCommandLine(args)
 
-            val database = commandLine.getOptionValue("database", "db")
+            val database = commandLine.getOptionValue("database", "bloqly_main")
 
-            properties["spring.datasource.url"] = "jdbc:h2:~/.bloqly/$database;AUTO_SERVER=TRUE"
+            properties["spring.datasource.url"] = "jdbc:postgresql:$database"
 
             if (commandLine.hasOption("server")) {
                 ApplicationUtils.startServer(properties, commandLine)
