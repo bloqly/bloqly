@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-#ktlint --color
+ktlint --color
 
 ktlint -F

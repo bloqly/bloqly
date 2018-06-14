@@ -39,7 +39,6 @@ class EventSenderService(
                     EntityEvent(EntityEventId(vote.id.toString(), node.id.toString()), Instant.now().toEpochMilli())
                 )
             }
-
         }
     }
 
@@ -85,7 +84,6 @@ class EventSenderService(
                     EntityEvent(EntityEventId(proposal.block.id, node.id.toString()), Instant.now().toEpochMilli())
                 )
             }
-
         }
     }
 }

@@ -43,8 +43,7 @@ noArg {
 }
 
 bootJar {
-    mainClassName = 'com.example.ExampleApplication'
-    baseName = 'bloqly-machine'
+    baseName = 'bloqly'
     version = '0.1.0'
 
     requiresUnpack "**/groovy-*.jar"
