@@ -1,18 +1,24 @@
 language: java
 
+sudo: false
 dist: trusty
+
+addons:
+  apt:
+    packages:
+      - postgresql-10
+      - postgresql-client-10
+  postgresql: 10
 
 services:
   - postgresql
 
-addons:
-  postgresql: "10"
+before_script:
+  - psql -c 'create database bloqly_test;' -U postgres
 
 before_install:
   - wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 
-before_script:
-  - psql -c 'create database bloqly_test;' -U postgres
   
 matrix:
   include:
