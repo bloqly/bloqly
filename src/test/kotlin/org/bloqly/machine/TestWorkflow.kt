@@ -4,7 +4,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.test.TestService
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -29,7 +29,7 @@ class TestWorkflow {
     private lateinit var testService: TestService
 
     @Autowired
-    private lateinit var blockRepository: BlockRepository
+    private lateinit var blockService: BlockService
 
     @Before
     fun init() {
@@ -56,7 +56,7 @@ class TestWorkflow {
 
         // END
 
-        val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
 
         assertEquals(1, lastBlock.height)
     }
