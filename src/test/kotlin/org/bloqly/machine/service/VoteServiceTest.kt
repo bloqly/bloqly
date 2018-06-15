@@ -9,6 +9,7 @@ import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.CryptoUtils.verifyVote
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -56,6 +57,12 @@ class VoteServiceTest {
     @After
     fun tearDown() {
         testService.cleanup()
+    }
+
+    @Test
+    fun testNoDoubleVoteCreated() {
+        val newVote = voteService.createVote(DEFAULT_SPACE, validator)
+        assertEquals(newVote, vote)
     }
 
     @Test
