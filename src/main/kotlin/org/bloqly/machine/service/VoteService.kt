@@ -23,34 +23,38 @@ class VoteService(
     fun createVote(space: String, validator: Account): Vote {
 
         val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
-        val timestamp = Instant.now().toEpochMilli()
 
-        val dataToSign = Bytes.concat(
-
-            validator.id.toByteArray(),
-            space.toByteArray(),
-            EncodingUtils.longToBytes(lastBlock.height),
-            lastBlock.id.toByteArray(),
-            EncodingUtils.longToBytes(timestamp)
+        val voteId = VoteId(
+            validatorId = validator.id,
+            space = space,
+            height = lastBlock.height
         )
 
-        val dataHash = CryptoUtils.digest(dataToSign)
-        val privateKey = decodeFromString16(validator.privateKey)
-        val signature = CryptoUtils.sign(privateKey, dataHash)
+        return voteRepository.findById(voteId).orElseGet {
+            val timestamp = Instant.now().toEpochMilli()
 
-        val vote = Vote(
-            VoteId(
-                validatorId = validator.id,
-                space = space,
-                height = lastBlock.height
-            ),
+            val dataToSign = Bytes.concat(
 
-            blockId = lastBlock.id,
-            timestamp = timestamp,
-            signature = signature,
-            publicKey = validator.publicKey!!
-        )
+                validator.id.toByteArray(),
+                space.toByteArray(),
+                EncodingUtils.longToBytes(lastBlock.height),
+                lastBlock.id.toByteArray(),
+                EncodingUtils.longToBytes(timestamp)
+            )
 
-        return voteRepository.save(vote)
+            val dataHash = CryptoUtils.digest(dataToSign)
+            val privateKey = decodeFromString16(validator.privateKey)
+            val signature = CryptoUtils.sign(privateKey, dataHash)
+
+            val vote = Vote(
+                id = voteId,
+                blockId = lastBlock.id,
+                timestamp = timestamp,
+                signature = signature,
+                publicKey = validator.publicKey!!
+            )
+
+            voteRepository.save(vote)
+        }
     }
 }

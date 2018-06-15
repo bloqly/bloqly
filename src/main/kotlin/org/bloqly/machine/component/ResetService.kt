@@ -8,6 +8,7 @@ import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
+import org.bloqly.machine.repository.VoteRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -21,7 +22,8 @@ class ResetService(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val nodeRepository: NodeRepository,
-    private val entityEventRepository: EntityEventRepository
+    private val entityEventRepository: EntityEventRepository,
+    private val voteRepository: VoteRepository
 ) {
 
     fun reset() {
@@ -33,5 +35,6 @@ class ResetService(
         accountRepository.deleteAll()
         nodeRepository.deleteAll()
         entityEventRepository.deleteAll()
+        voteRepository.deleteAll()
     }
 }
