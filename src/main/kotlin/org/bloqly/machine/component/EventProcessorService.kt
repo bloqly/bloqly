@@ -197,6 +197,7 @@ class EventProcessorService(
     /**
      * Step 2, get next block proposal
      */
+    // TODO limit only for a single proposal by space
     fun onGetProposals(): List<BlockData> {
 
         val spaces = spaceRepository.findAll().map { it.id }
