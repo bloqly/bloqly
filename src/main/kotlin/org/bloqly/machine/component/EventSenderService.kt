@@ -70,20 +70,24 @@ class EventSenderService(
         val nodes = nodeService.getNodesToQuery()
 
         nodes.forEach { node ->
-            log.info("Sending proposals to node $node")
+            try {
+                log.info("Sending proposals to node $node")
 
-            val proposalsToSend = proposals.filter { proposal ->
-                !entityEventRepository.existsById(EntityEventId(proposal.block.id, node.id.toString()))
-            }
+                val proposalsToSend = proposals.filter { proposal ->
+                    !entityEventRepository.existsById(EntityEventId(proposal.block.id, node.id.toString()))
+                }
 
-            if (proposalsToSend.isNotEmpty()) {
-                nodeQueryService.sendProposals(node, proposalsToSend)
-            }
+                if (proposalsToSend.isNotEmpty()) {
+                    nodeQueryService.sendProposals(node, proposalsToSend)
+                }
 
-            proposalsToSend.forEach { proposal ->
-                entityEventRepository.save(
-                    EntityEvent(EntityEventId(proposal.block.id, node.id.toString()), Instant.now().toEpochMilli())
-                )
+                proposalsToSend.forEach { proposal ->
+                    entityEventRepository.save(
+                        EntityEvent(EntityEventId(proposal.block.id, node.id.toString()), Instant.now().toEpochMilli())
+                    )
+                }
+            } catch (e: Exception) {
+                "Could not send proposals to $node. Details: ${e.message}"
             }
         }
     }

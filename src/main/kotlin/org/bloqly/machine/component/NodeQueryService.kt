@@ -4,8 +4,8 @@ import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
-import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
 import org.bloqly.machine.vo.NodeList
 import org.bloqly.machine.vo.TransactionList
@@ -88,14 +88,9 @@ class NodeQueryService(
         val server = node.getServer()
         val path = "http://$server/blocks"
 
-        try {
+        val entity = HttpEntity(BlockDataList(proposals))
 
-            val entity = HttpEntity(BlockDataList(proposals))
-
-            checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
-        } catch (e: Exception) {
-            log.error("Could not send proposals to $server. Details: ${e.message}")
-        }
+        checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
     }
 
     private fun checkResponse(response: ResponseEntity<String>) {

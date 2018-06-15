@@ -10,8 +10,8 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
 import org.junit.After
@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus.OK
+import org.springframework.http.HttpStatus.REQUEST_TIMEOUT
 import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.web.client.RestTemplate
@@ -71,6 +72,8 @@ class EventSenderServiceTest {
     @Before
     fun init() {
         testService.createBlockchain()
+
+        nodeRepository.save(node)
     }
 
     @After
@@ -80,6 +83,8 @@ class EventSenderServiceTest {
 
     @Test
     fun testSendProposalsNoNodes() {
+
+        nodeRepository.deleteAll()
 
         eventSenderService.sendProposals(getProposals())
 
@@ -104,13 +109,36 @@ class EventSenderServiceTest {
         Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
             .thenReturn(response)
 
-        nodeRepository.save(node)
-
         eventSenderService.sendProposals(proposals)
 
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
 
         assertTrue(entityEventRepository.existsById(eventId))
+    }
+
+    @Test
+    fun testSendProposalsFailed() {
+
+        val path = "http://${node.id}/blocks"
+
+        val proposals = getProposals()
+
+        val eventId = EntityEventId(proposals.first().block.id, node.id.toString())
+
+        assertFalse(entityEventRepository.existsById(eventId))
+
+        val entity = HttpEntity(BlockDataList(proposals))
+
+        val response = ResponseEntity<String>(REQUEST_TIMEOUT)
+
+        Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
+            .thenReturn(response)
+
+        eventSenderService.sendProposals(proposals)
+
+        Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
+
+        assertFalse(entityEventRepository.existsById(eventId))
     }
 
     @Test
@@ -126,8 +154,6 @@ class EventSenderServiceTest {
             )
         }
 
-        nodeRepository.save(node)
-
         entityEventRepository.saveAll(events)
 
         eventSenderService.sendProposals(proposals)
@@ -137,6 +163,8 @@ class EventSenderServiceTest {
 
     @Test
     fun testSendVotesNoNodes() {
+
+        nodeRepository.deleteAll()
 
         eventSenderService.sendVotes(getVotes())
 
@@ -161,8 +189,6 @@ class EventSenderServiceTest {
         Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
             .thenReturn(response)
 
-        nodeRepository.save(node)
-
         eventSenderService.sendVotes(votes)
 
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
@@ -183,8 +209,6 @@ class EventSenderServiceTest {
             )
         }
 
-        nodeRepository.save(node)
-
         entityEventRepository.saveAll(events)
 
         eventSenderService.sendVotes(votes)
@@ -194,6 +218,8 @@ class EventSenderServiceTest {
 
     @Test
     fun testSendTransactionsNoNodes() {
+
+        nodeRepository.deleteAll()
 
         eventSenderService.sendTransactions(getTransactions())
 
@@ -218,8 +244,6 @@ class EventSenderServiceTest {
         Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
             .thenReturn(response)
 
-        nodeRepository.save(node)
-
         eventSenderService.sendTransactions(transactions)
 
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
@@ -232,8 +256,6 @@ class EventSenderServiceTest {
         val transactions = getTransactions()
 
         val eventId = EntityEventId(transactions.first().id, node.id.toString())
-
-        nodeRepository.save(node)
 
         entityEventRepository.save(EntityEvent(eventId, Instant.now().toEpochMilli()))
 

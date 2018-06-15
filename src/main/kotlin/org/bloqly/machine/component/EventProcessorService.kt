@@ -176,6 +176,7 @@ class EventProcessorService(
 
             validators
                 .filter { it.privateKey != null }
+                // TODO use existing vote if available
                 .map { validator -> voteService.createVote(space, validator) }
         }
     }

@@ -59,6 +59,8 @@ class SchedulerService(
             log.info("Sending ${proposals.size} proposals.")
 
             eventSenderService.sendProposals(proposals)
+        } else {
+            log.warn("No new block proposals to send.")
         }
     }
 
@@ -67,7 +69,7 @@ class SchedulerService(
         eventProcessorService.onSelectBestProposal()
     }
 
-    @Scheduled(fixedDelay = 5000)
+    //@Scheduled(fixedDelay = 5000)
     fun checkDeltas() {
         val deltas = deltaService.getDeltas()
 

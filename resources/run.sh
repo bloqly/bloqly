@@ -2,4 +2,4 @@
 
 cd "$(dirname "$0")"
 
-./java/bin/java -jar ./lib/bloqly-machine.jar $@
+./java/bin/java -jar ./lib/bloqly.jar $@

@@ -21,8 +21,9 @@ class ChainServiceShell(
         return "OK"
     }
 
-    fun reset() {
+    fun reset():String {
         resetService.reset()
+        return "OK"
     }
 
     fun spaces(): String {

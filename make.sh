@@ -9,6 +9,6 @@ mkdir ./release/lib
 
 gradle clean assemble
 
-cp ./build/libs/bloqly-machine-*.jar ./release/lib/bloqly-machine.jar
+cp ./build/libs/bloqly-*.jar ./release/lib/bloqly.jar
 
 cp ./resources/run.sh ./release
