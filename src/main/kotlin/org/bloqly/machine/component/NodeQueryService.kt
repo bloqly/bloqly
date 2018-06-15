@@ -59,13 +59,9 @@ class NodeQueryService(
         val server = node.getServer()
         val path = "http://$server/transactions"
 
-        try {
-            val entity = HttpEntity(TransactionList.fromTransactions(transactions))
+        val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
-            checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
-        } catch (e: Exception) {
-            log.error("Could not send transactions to $server. Details: ${e.message}")
-        }
+        checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
     }
 
     fun sendVotes(node: Node, votes: List<Vote>) {
@@ -73,14 +69,9 @@ class NodeQueryService(
         val server = node.getServer()
         val path = "http://$server/votes"
 
-        try {
+        val entity = HttpEntity(VoteList.fromVotes(votes))
 
-            val entity = HttpEntity(VoteList.fromVotes(votes))
-
-            checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
-        } catch (e: Exception) {
-            log.error("Could not send votes to $server. Details: ${e.message}")
-        }
+        checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
     }
 
     fun sendProposals(node: Node, proposals: List<BlockData>) {

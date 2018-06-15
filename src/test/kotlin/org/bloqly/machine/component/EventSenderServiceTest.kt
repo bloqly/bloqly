@@ -197,6 +197,31 @@ class EventSenderServiceTest {
     }
 
     @Test
+    fun testSendVotesFailed() {
+
+        val path = "http://${node.id}/votes"
+
+        val votes = getVotes()
+
+        val eventId = EntityEventId(votes.first().id.toString(), node.id.toString())
+
+        assertFalse(entityEventRepository.existsById(eventId))
+
+        val entity = HttpEntity(VoteList.fromVotes(votes))
+
+        val response = ResponseEntity<String>(REQUEST_TIMEOUT)
+
+        Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
+            .thenReturn(response)
+
+        eventSenderService.sendVotes(votes)
+
+        Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
+
+        assertFalse(entityEventRepository.existsById(eventId))
+    }
+
+    @Test
     fun testSendVotesAlreadySent() {
         val votes = getVotes()
 
@@ -249,6 +274,31 @@ class EventSenderServiceTest {
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
 
         assertTrue(entityEventRepository.existsById(eventId))
+    }
+
+    @Test
+    fun testSendTransactionsFailed() {
+
+        val path = "http://${node.id}/transactions"
+
+        val transactions = getTransactions()
+
+        val eventId = EntityEventId(transactions.first().id, node.id.toString())
+
+        assertFalse(entityEventRepository.existsById(eventId))
+
+        val entity = HttpEntity(TransactionList.fromTransactions(transactions))
+
+        val response = ResponseEntity<String>(REQUEST_TIMEOUT)
+
+        Mockito.`when`(restTemplate.postForEntity(path, entity, String::class.java))
+            .thenReturn(response)
+
+        eventSenderService.sendTransactions(transactions)
+
+        Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
+
+        assertFalse(entityEventRepository.existsById(eventId))
     }
 
     @Test

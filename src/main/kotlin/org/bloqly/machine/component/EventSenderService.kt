@@ -25,20 +25,24 @@ class EventSenderService(
         val nodes = nodeService.getNodesToQuery()
 
         nodes.forEach { node ->
-            log.info("Sending votes to node $node")
+            try {
+                log.info("Sending votes to node $node")
 
-            val votesToSend = votes.filter { vote ->
-                !entityEventRepository.existsById(EntityEventId(vote.id.toString(), node.id.toString()))
-            }
+                val votesToSend = votes.filter { vote ->
+                    !entityEventRepository.existsById(EntityEventId(vote.id.toString(), node.id.toString()))
+                }
 
-            if (votesToSend.isNotEmpty()) {
-                nodeQueryService.sendVotes(node, votesToSend)
-            }
+                if (votesToSend.isNotEmpty()) {
+                    nodeQueryService.sendVotes(node, votesToSend)
+                }
 
-            votesToSend.forEach { vote ->
-                entityEventRepository.save(
-                    EntityEvent(EntityEventId(vote.id.toString(), node.id.toString()), Instant.now().toEpochMilli())
-                )
+                votesToSend.forEach { vote ->
+                    entityEventRepository.save(
+                        EntityEvent(EntityEventId(vote.id.toString(), node.id.toString()), Instant.now().toEpochMilli())
+                    )
+                }
+            } catch (e: Exception) {
+                log.error("Could not send votes to $node. Details: ${e.message}")
             }
         }
     }
@@ -47,21 +51,24 @@ class EventSenderService(
         val nodes = nodeService.getNodesToQuery()
 
         nodes.forEach { node ->
+            try {
+                log.info("Sending transactions to node $node")
 
-            log.info("Sending transactions to node $node")
+                val txs = transactions.filter { tx ->
+                    !entityEventRepository.existsById(EntityEventId(tx.id, node.id.toString()))
+                }
 
-            val txs = transactions.filter { tx ->
-                !entityEventRepository.existsById(EntityEventId(tx.id, node.id.toString()))
-            }
+                if (txs.isNotEmpty()) {
+                    nodeQueryService.sendTransactions(node, txs)
+                }
 
-            if (txs.isNotEmpty()) {
-                nodeQueryService.sendTransactions(node, txs)
-            }
-
-            txs.forEach { tx ->
-                entityEventRepository.save(
-                    EntityEvent(EntityEventId(tx.id, node.id.toString()), Instant.now().toEpochMilli())
-                )
+                txs.forEach { tx ->
+                    entityEventRepository.save(
+                        EntityEvent(EntityEventId(tx.id, node.id.toString()), Instant.now().toEpochMilli())
+                    )
+                }
+            } catch (e: Exception) {
+                log.error("Could not send transactions to $node. Details: ${e.message}")
             }
         }
     }
