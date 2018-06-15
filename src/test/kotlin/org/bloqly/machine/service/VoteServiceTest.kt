@@ -71,46 +71,25 @@ class VoteServiceTest {
     @Test
     fun testVerifyVote() {
 
-        assertTrue(verifyVote(validator, vote))
-    }
-
-    @Test
-    fun testVerifyVoteNoValidatorPublicKey() {
-
-        assertTrue(verifyVote(validator.copy(publicKey = null), vote))
+        assertTrue(verifyVote(vote))
     }
 
     @Test
     fun testVerifyVoteBlockWrongFails() {
 
-        assertFalse(
-            verifyVote(
-                validator,
-                vote.copy(blockId = FAKE_DATA)
-            )
-        )
+        assertFalse(verifyVote(vote.copy(blockId = FAKE_DATA)))
     }
 
     @Test
     fun testVerifyVoteTimestampWrongFails() {
 
-        assertFalse(
-            verifyVote(
-                validator,
-                vote.copy(timestamp = System.currentTimeMillis() + 1)
-            )
-        )
+        assertFalse(verifyVote(vote.copy(timestamp = System.currentTimeMillis() + 1)))
     }
 
     @Test
     fun testVerifyVoteSignatureWrongFails() {
 
-        assertFalse(
-            verifyVote(
-                validator,
-                vote.copy(signature = ByteArray(0))
-            )
-        )
+        assertFalse(verifyVote(vote.copy(signature = ByteArray(0))))
     }
 
     @Test
@@ -118,12 +97,7 @@ class VoteServiceTest {
 
         val newId = vote.id.copy(validatorId = FAKE_DATA)
 
-        assertFalse(
-            verifyVote(
-                validator,
-                vote.copy(id = newId)
-            )
-        )
+        assertFalse(verifyVote(vote.copy(id = newId)))
     }
 
     @Test
@@ -131,12 +105,7 @@ class VoteServiceTest {
 
         val newId = vote.id.copy(space = FAKE_DATA)
 
-        assertFalse(
-            verifyVote(
-                validator,
-                vote.copy(id = newId)
-            )
-        )
+        assertFalse(verifyVote(vote.copy(id = newId)))
     }
 
     @Test
@@ -144,11 +113,6 @@ class VoteServiceTest {
 
         val newId = vote.id.copy(height = vote.id.height + 1)
 
-        assertFalse(
-            verifyVote(
-                validator,
-                vote.copy(id = newId)
-            )
-        )
+        assertFalse(verifyVote(vote.copy(id = newId)))
     }
 }

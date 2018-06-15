@@ -12,7 +12,6 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
@@ -42,7 +41,6 @@ class EventProcessorService(
     private val accountService: AccountService,
     private val spaceRepository: SpaceRepository,
     private val voteService: VoteService,
-    private val accountRepository: AccountRepository,
     private val voteRepository: VoteRepository,
     private val transactionRepository: TransactionRepository,
     private val propertyService: PropertyService,
@@ -188,16 +186,11 @@ class EventProcessorService(
      */
     fun onVote(vote: Vote) {
 
-        val validatorOpt = accountRepository.findById(vote.id.validatorId)
-
-        validatorOpt.ifPresent { validator ->
-
-            require(CryptoUtils.verifyVote(validator, vote)) {
-                "Could not verify vote $vote"
-            }
-
-            voteRepository.save(vote)
+        require(CryptoUtils.verifyVote(vote)) {
+            "Could not verify vote $vote"
         }
+
+        voteRepository.save(vote)
     }
 
     /**

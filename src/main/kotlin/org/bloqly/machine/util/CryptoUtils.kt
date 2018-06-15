@@ -1,11 +1,9 @@
 package org.bloqly.machine.util
 
 import com.google.common.primitives.Bytes
-import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
-import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bouncycastle.asn1.ASN1InputStream
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequenceGenerator
@@ -150,11 +148,7 @@ object CryptoUtils {
         )
     }
 
-    fun verifyVote(validator: Account, vote: Vote): Boolean {
-
-        if (validator.id != vote.id.validatorId) {
-            return false
-        }
+    fun verifyVote(vote: Vote): Boolean {
 
         val dataToVerify = Bytes.concat(
             vote.id.validatorId.toByteArray(),
@@ -167,12 +161,6 @@ object CryptoUtils {
         val dataHash = digest(dataToVerify)
 
         val publicKey = decodeFromString16(vote.publicKey)
-
-        val validatorId = hashAndEncode16(publicKey)
-
-        if (validator.id != validatorId) {
-            return false
-        }
 
         return verify(dataHash, vote.signature, publicKey)
     }

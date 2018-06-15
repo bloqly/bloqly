@@ -5,7 +5,6 @@ import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
-import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.CryptoUtils
@@ -13,7 +12,6 @@ import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bloqly.machine.util.ParameterUtils
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import javax.transaction.Transactional
@@ -22,8 +20,7 @@ import javax.transaction.Transactional
 @Transactional
 class AccountService(
     private val accountRepository: AccountRepository,
-    private val propertyRepository: PropertyRepository,
-    @Value("\${validators:}") private val validators: Array<String>
+    private val propertyRepository: PropertyRepository
 ) {
 
     fun getActiveValidator(space: String, height: Long): Account {
@@ -54,10 +51,6 @@ class AccountService(
         )
     }
 
-    fun getLastVotes(): List<Vote> {
-        return listOf()
-    }
-
     fun getValidatorsForSpace(space: String): List<Account> {
 
         val powerProperties = propertyRepository.findBySpaceAndKey(space, POWER_KEY)
@@ -65,7 +58,6 @@ class AccountService(
 
         return accountRepository
             .findAllById(accountIds)
-            .filter { validators.isEmpty() || validators.contains(it.id) }
             .sortedBy { it.id }
     }
 
