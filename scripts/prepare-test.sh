@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+./release/run.sh -database bloqly_main -command "chain.reset()"
+./release/run.sh -database bloqly_second -command "chain.reset()"
+./release/run.sh -database bloqly_third -command "chain.reset()"
+
 #root
 ./release/run.sh -database bloqly_main -command "account.import('78CA9AE2A589CB7D0E151E153F2CCCC760CBDAA05FE74C802FBAC6B0CDDCA534')"
 

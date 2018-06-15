@@ -5,17 +5,14 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
+import org.bloqly.machine.component.ResetService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.ContractRepository
-import org.bloqly.machine.repository.EntityEventRepository
-import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
-import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.FileUtils
@@ -32,18 +29,15 @@ import javax.transaction.Transactional
 @Component
 @Transactional
 class TestService(
-    private val contractRepository: ContractRepository,
     private val propertyRepository: PropertyRepository,
     private val blockRepository: BlockRepository,
     private val spaceRepository: SpaceRepository,
     private val eventProcessorService: EventProcessorService,
     private val transactionService: TransactionService,
-    private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
     private val objectMapper: ObjectMapper,
-    private val nodeRepository: NodeRepository,
-    private val entityEventRepository: EntityEventRepository
+    private val resetService: ResetService
 ) {
 
     private lateinit var accounts: List<Account>
@@ -58,14 +52,7 @@ class TestService(
     }
 
     fun cleanup() {
-        contractRepository.deleteAll()
-        propertyRepository.deleteAll()
-        blockRepository.deleteAll()
-        spaceRepository.deleteAll()
-        transactionRepository.deleteAll()
-        accountRepository.deleteAll()
-        nodeRepository.deleteAll()
-        entityEventRepository.deleteAll()
+        resetService.reset()
     }
 
     fun getRoot(): Account = accounts.first()
