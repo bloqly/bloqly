@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.CryptoUtils
@@ -51,6 +52,10 @@ class AccountService(
             publicKey = encodeToString16(publicKey),
             privateKey = encodeToString16(privateKey)
         )
+    }
+
+    fun getLastVotes(): List<Vote> {
+        return listOf()
     }
 
     fun getValidatorsForSpace(space: String): List<Account> {
