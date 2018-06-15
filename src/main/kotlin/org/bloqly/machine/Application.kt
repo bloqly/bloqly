@@ -43,5 +43,6 @@ class Application {
         const val DEFAULT_SELF = "self"
         const val QUORUM_KEY = "quorum"
         const val DEFAULT_FUNCTION_NAME = "contract"
+        const val MAX_DELTA_SIZE = 1000
     }
 }

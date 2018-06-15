@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.GENESIS_KEY
+import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.GenesisParameters
@@ -17,14 +18,19 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
+import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.bloqly.machine.util.ParameterUtils
+import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.BlockDataList
+import org.bloqly.machine.vo.Delta
 import org.bloqly.machine.vo.Genesis
 import org.springframework.stereotype.Service
 import java.time.Instant
 import javax.transaction.Transactional
+import kotlin.math.min
 
 @Service
 @Transactional
@@ -36,7 +42,8 @@ class BlockService(
     private val spaceRepository: SpaceRepository,
     private val propertyRepository: PropertyRepository,
     private val propertyService: PropertyService,
-    private val transactionProcessor: TransactionProcessor
+    private val transactionProcessor: TransactionProcessor,
+    private val voteRepository: VoteRepository
 ) {
 
     fun newBlock(
@@ -239,5 +246,21 @@ class BlockService(
         require(!spaceRepository.existsById(space)) {
             "Space '$space' already exists"
         }
+    }
+
+    fun getBlockDataList(delta: Delta): BlockDataList {
+
+        val startHeight = delta.localHeight
+        val endHeight = min(delta.remoteHeight, startHeight + MAX_DELTA_SIZE)
+
+        val blocks = blockRepository.getBlocksDelta(delta.spaceId, startHeight, endHeight)
+
+        return BlockDataList(blocks.map { block ->
+
+            val transactions = transactionRepository.findByContainingBlockId(block.id)
+            val votes = voteRepository.findByBlockId(block.parentHash)
+
+            BlockData(block, transactions, votes)
+        })
     }
 }
