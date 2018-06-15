@@ -1,7 +1,7 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.repository.PropertyRepository
-import org.bloqly.machine.vo.BlockDataVO
+import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.TransactionVO
 import org.bloqly.machine.vo.VoteVO
 import org.springframework.stereotype.Service
@@ -22,13 +22,12 @@ class EventReceiverService(
         voteVOs.forEach { eventProcessorService.onVote(it.toModel()) }
     }
 
-    fun receiveProposals(proposals: List<BlockDataVO>) {
+    fun receiveProposals(proposals: List<BlockData>) {
         val validatedProposals = proposals
             .filter { proposal ->
                 val quorum = propertyRepository.getQuorum(proposal.block.space)
                 proposal.votes.size >= quorum
             }
-            .map { it.toModel() }
 
         eventProcessorService.onProposals(validatedProposals)
     }

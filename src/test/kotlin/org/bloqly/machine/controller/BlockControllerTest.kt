@@ -72,7 +72,7 @@ class BlockControllerTest {
         val blockDatas = eventProcessorService.onGetProposals()
 
         val proposalsPayload = objectMapper.writeValueAsString(
-            BlockDataList.fromBlocks(blockDatas)
+            BlockDataList(blockDatas)
         )
 
         val headers = HttpHeaders()

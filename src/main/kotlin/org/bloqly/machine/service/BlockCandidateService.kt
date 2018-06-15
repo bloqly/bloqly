@@ -3,11 +3,10 @@ package org.bloqly.machine.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.model.BlockCandidate
 import org.bloqly.machine.model.BlockCandidateId
-import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
-import org.bloqly.machine.vo.BlockDataVO
+import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -25,8 +24,11 @@ class BlockCandidateService(
 
         blocks.forEach { blockData ->
 
-            transactionRepository.saveAll(blockData.transactions)
-            voteRepository.saveAll(blockData.votes)
+            val transactions = blockData.transactions.map { it.toModel() }
+            val votes = blockData.votes.map { it.toModel() }
+
+            transactionRepository.saveAll(transactions)
+            voteRepository.saveAll(votes)
 
             val blockCandidate = BlockCandidate(
                 id = BlockCandidateId(
@@ -34,7 +36,7 @@ class BlockCandidateService(
                     height = blockData.block.height,
                     proposerId = blockData.block.proposerId
                 ),
-                data = objectMapper.writeValueAsString(blockData.toVO()),
+                data = objectMapper.writeValueAsString(blockData),
                 timeReceived = Instant.now().toEpochMilli()
             )
 
@@ -46,7 +48,7 @@ class BlockCandidateService(
         return blockCandidateRepository
             .findById(BlockCandidateId(space, height, proposerId))
             .map { blockCandidate ->
-                objectMapper.readValue(blockCandidate.data, BlockDataVO::class.java).toModel()
+                objectMapper.readValue(blockCandidate.data, BlockData::class.java)
             }
             .orElse(null)
     }

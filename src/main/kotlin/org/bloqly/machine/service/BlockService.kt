@@ -21,7 +21,7 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.bloqly.machine.util.ParameterUtils
-import org.bloqly.machine.vo.GenesisVO
+import org.bloqly.machine.vo.Genesis
 import org.springframework.stereotype.Service
 import java.time.Instant
 import javax.transaction.Transactional
@@ -107,7 +107,7 @@ class BlockService(
 
         val genesisSourceValue = ParameterUtils.readValue(genesisSource.value).toString()
 
-        val genesis = GenesisVO(
+        val genesis = Genesis(
             block = firstBlock.toVO(),
             transactions = transactions.map { it.toVO() },
             source = EncodingUtils.encodeToString64(genesisSourceValue.toByteArray())
@@ -120,7 +120,7 @@ class BlockService(
 
         val now = Instant.now()
 
-        val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
+        val genesis = objectMapper.readValue(genesisString, Genesis::class.java)
 
         ensureSpaceEmpty(genesis.block.space)
 
@@ -141,7 +141,7 @@ class BlockService(
     }
 
     private fun processImportGenesisBlock(
-        genesis: GenesisVO,
+        genesis: Genesis,
         block: Block,
         now: Instant
     ) {
@@ -168,7 +168,7 @@ class BlockService(
     }
 
     private fun processImportGenesisTransactions(
-        genesis: GenesisVO,
+        genesis: Genesis,
         block: Block,
         now: Instant
     ) {
@@ -185,7 +185,7 @@ class BlockService(
         transactionRepository.saveAll(transactions)
     }
 
-    private fun importProperties(genesis: GenesisVO) {
+    private fun importProperties(genesis: Genesis) {
         val genesisParametersSource = EncodingUtils.decodeFromString64(genesis.source)
 
         val genesisParameters = objectMapper.readValue(

@@ -88,7 +88,7 @@ class TestWorkflow {
     }
 
     private fun sendProposals() {
-        val proposals = eventProcessorService.onGetProposals().map { it.toVO() }
+        val proposals = eventProcessorService.onGetProposals()
 
         eventReceiverService.receiveProposals(proposals)
     }

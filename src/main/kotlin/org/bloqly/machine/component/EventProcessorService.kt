@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
-import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.GenesisParametersSource
 import org.bloqly.machine.model.PropertyId
@@ -26,6 +25,7 @@ import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.FileUtils
+import org.bloqly.machine.vo.BlockData
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.File
@@ -232,6 +232,7 @@ class EventProcessorService(
 
     private fun getNewTransactions(space: String): List<Transaction> {
 
+        // TODO check referenced block id
         return transactionRepository.findBySpaceAndContainingBlockIdIsNull(space)
     }
 
@@ -264,7 +265,7 @@ class EventProcessorService(
 
                 log.info("Selected next block ${block.id} on height ${block.height}.")
 
-                blockRepository.save(block)
+                blockRepository.save(block.toModel())
             }
 
             bestBlockCandidate

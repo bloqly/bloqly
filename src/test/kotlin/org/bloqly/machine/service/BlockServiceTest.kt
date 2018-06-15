@@ -3,7 +3,7 @@ package org.bloqly.machine.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.vo.GenesisVO
+import org.bloqly.machine.vo.Genesis
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -40,7 +40,7 @@ class BlockServiceTest {
     fun testExportGenesis() {
         val genesisString = blockService.exportFirst(Application.DEFAULT_SPACE)
 
-        val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
+        val genesis = objectMapper.readValue(genesisString, Genesis::class.java)
 
         assertEquals(1, genesis.transactions.size)
     }
@@ -49,7 +49,7 @@ class BlockServiceTest {
     fun testImportGenesis() {
         val genesisString = blockService.exportFirst(Application.DEFAULT_SPACE)
 
-        val genesis = objectMapper.readValue(genesisString, GenesisVO::class.java)
+        val genesis = objectMapper.readValue(genesisString, Genesis::class.java)
 
         assertEquals(1, genesis.transactions.size)
 

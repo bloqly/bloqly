@@ -1,6 +1,6 @@
 package org.bloqly.machine.service
 
-import org.bloqly.machine.model.Delta
+import org.bloqly.machine.vo.Delta
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.VoteRepository

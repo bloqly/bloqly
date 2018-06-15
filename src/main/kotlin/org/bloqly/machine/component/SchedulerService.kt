@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.service.TransactionService
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
@@ -12,7 +13,8 @@ class SchedulerService(
     private val nodeQueryService: NodeQueryService,
     private val transactionService: TransactionService,
     private val eventSenderService: EventSenderService,
-    private val eventProcessorService: EventProcessorService
+    private val eventProcessorService: EventProcessorService,
+    private val deltaService: DeltaService
 ) {
 
     private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
@@ -63,5 +65,19 @@ class SchedulerService(
     @Scheduled(fixedDelay = 5000, initialDelay = 4000)
     fun selectBestProposal() {
         eventProcessorService.onSelectBestProposal()
+    }
+
+    @Scheduled(fixedDelay = 5000)
+    fun checkDeltas() {
+        val deltas = deltaService.getDeltas()
+
+        deltas.forEach { delta ->
+            val blocks = eventSenderService.requestDelta(delta)
+
+            blocks?.forEach { block ->
+                eventProcessorService.onProposals(listOf(block))
+                eventProcessorService.onSelectBestProposal()
+            }
+        }
     }
 }

@@ -1,11 +1,12 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.vo.BlockDataList
+import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.Delta
 import org.bloqly.machine.vo.NodeList
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
@@ -89,7 +90,7 @@ class NodeQueryService(
 
         try {
 
-            val entity = HttpEntity(BlockDataList.fromBlocks(proposals))
+            val entity = HttpEntity(BlockDataList(proposals))
 
             checkResponse(restTemplate.postForEntity(path, entity, String::class.java))
         } catch (e: Exception) {
@@ -101,5 +102,23 @@ class NodeQueryService(
         require(response.statusCode.is2xxSuccessful) {
             "Received unexpected response $response."
         }
+    }
+
+    fun requestDelta(node: Node, delta: Delta): List<BlockData>? {
+        val server = node.getServer()
+        val path = "http://$server/deltas"
+
+        var result: List<BlockData>? = null
+
+        try {
+
+            val blockDataList = restTemplate.postForObject(path, delta, BlockDataList::class.java)
+
+            result = blockDataList?.blocks
+        } catch (e: Exception) {
+            log.error("Could not retrieve deltas from $server. Details: ${e.message}")
+        }
+
+        return result
     }
 }

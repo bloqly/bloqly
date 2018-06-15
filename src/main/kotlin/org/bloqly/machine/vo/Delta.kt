@@ -1,4 +1,4 @@
-package org.bloqly.machine.model
+package org.bloqly.machine.vo
 
 import org.bloqly.machine.annotation.ValueObject
 

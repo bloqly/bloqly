@@ -1,7 +1,6 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
-import org.bloqly.machine.model.BlockData
 import org.bloqly.machine.model.EntityEvent
 import org.bloqly.machine.model.EntityEventId
 import org.bloqly.machine.model.Node
@@ -12,6 +11,7 @@ import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.BlockDataList
+import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
 import org.junit.After
@@ -97,7 +97,7 @@ class EventSenderServiceTest {
 
         assertFalse(entityEventRepository.existsById(eventId))
 
-        val entity = HttpEntity(BlockDataList.fromBlocks(proposals))
+        val entity = HttpEntity(BlockDataList(proposals))
 
         val response = ResponseEntity<String>(OK)
 
