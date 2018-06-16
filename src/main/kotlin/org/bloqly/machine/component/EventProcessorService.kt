@@ -149,9 +149,10 @@ class EventProcessorService(
      */
     fun onTransaction(transaction: Transaction) {
 
-        // TODO: check also timestamp
+        val now = Instant.now().toEpochMilli()
 
         if (
+            transaction.timestamp > now ||
             !CryptoUtils.isTransactionValid(transaction) ||
             transactionRepository.existsById(transaction.id) ||
             !blockRepository.existsById(transaction.referencedBlockId)
@@ -159,7 +160,7 @@ class EventProcessorService(
             return
         }
 
-        // TODO verify transaction can be executed
+        // TODO verify transaction can be executed (do it when constructing a new proposal)
         transactionRepository.save(transaction)
     }
 
@@ -176,7 +177,6 @@ class EventProcessorService(
 
             validators
                 .filter { it.privateKey != null }
-                // TODO use existing vote if available
                 .map { validator -> voteService.createVote(space, validator) }
         }
     }
@@ -197,14 +197,14 @@ class EventProcessorService(
     /**
      * Step 2, get next block proposal
      */
-    // TODO limit only for a single proposal by space
+    // TODO return existing proposals if available
     fun onGetProposals(): List<BlockData> {
 
         val spaces = spaceRepository.findAll().map { it.id }
 
         val proposals = spaces.mapNotNull { space ->
 
-            val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
+            val lastBlock = blockRepository.getLastBlock(space)
             val transactions = getNewTransactions(space)
             val votes = getNewVotes(space)
             val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
@@ -234,13 +234,15 @@ class EventProcessorService(
 
     private fun getNewTransactions(space: String): List<Transaction> {
 
-        // TODO check referenced block id
+        val lastBlock = blockRepository.getLastBlock(space)
+        val height = lastBlock.height
+
         return transactionRepository.findBySpaceAndContainingBlockIdIsNull(space)
     }
 
     private fun getNewVotes(space: String): List<Vote> {
 
-        val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
+        val lastBlock = blockRepository.getLastBlock(space)
 
         return voteRepository.findByBlockId(lastBlock.id)
     }
@@ -255,7 +257,7 @@ class EventProcessorService(
         val spaces = spaceRepository.findAll().map { it.id }
 
         return spaces.mapNotNull { space ->
-            val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
+            val lastBlock = blockRepository.getLastBlock(space)
 
             val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
 

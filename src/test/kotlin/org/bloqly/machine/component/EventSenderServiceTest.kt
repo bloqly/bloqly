@@ -94,7 +94,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendProposals() {
 
-        val path = "http://${node.id}/blocks"
+        val path = "http://${node.id}/data/blocks"
 
         val proposals = getProposals()
 
@@ -119,7 +119,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendProposalsFailed() {
 
-        val path = "http://${node.id}/blocks"
+        val path = "http://${node.id}/data/blocks"
 
         val proposals = getProposals()
 
@@ -174,7 +174,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendVotes() {
 
-        val path = "http://${node.id}/votes"
+        val path = "http://${node.id}/data/votes"
 
         val votes = getVotes()
 
@@ -199,7 +199,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendVotesFailed() {
 
-        val path = "http://${node.id}/votes"
+        val path = "http://${node.id}/data/votes"
 
         val votes = getVotes()
 
@@ -254,7 +254,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendTransactions() {
 
-        val path = "http://${node.id}/transactions"
+        val path = "http://${node.id}/data/transactions"
 
         val transactions = getTransactions()
 
@@ -279,7 +279,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendTransactionsFailed() {
 
-        val path = "http://${node.id}/transactions"
+        val path = "http://${node.id}/data/transactions"
 
         val transactions = getTransactions()
 

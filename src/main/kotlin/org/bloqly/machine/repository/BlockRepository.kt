@@ -8,8 +8,8 @@ interface BlockRepository : CrudRepository<Block, String> {
 
     fun existsBySpace(space: String): Boolean
 
-    // TODO change to query
-    fun findFirstBySpaceOrderByHeightDesc(space: String): Block
+    @Query("select * from block where space = ?1 order by height desc limit 1", nativeQuery = true)
+    fun getLastBlock(space: String): Block
 
     @Query("select b from Block b where b.height = 0 and space = ?1")
     fun findGenesisBlockBySpace(space: String): Block

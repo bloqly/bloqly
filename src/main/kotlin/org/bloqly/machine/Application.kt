@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.scheduling.annotation.EnableScheduling
 import java.util.Properties
 
-@SpringBootApplication
 @EnableScheduling
 @EnableJpaRepositories("org.bloqly.machine.repository")
+@SpringBootApplication(scanBasePackages = ["org.bloqly.machine"])
 class Application {
 
     companion object {
@@ -44,5 +44,7 @@ class Application {
         const val QUORUM_KEY = "quorum"
         const val DEFAULT_FUNCTION_NAME = "contract"
         const val MAX_DELTA_SIZE = 1000
+        // TODO what should it be?
+        const val MAX_REFERENCED_BLOCK_DEPTH = 10
     }
 }

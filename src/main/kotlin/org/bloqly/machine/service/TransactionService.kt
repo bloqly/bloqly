@@ -70,7 +70,7 @@ class TransactionService(
     }
 
     fun getNewTransactions(): List<Transaction> {
-        // TODO: restrict by time
+        // TODO: restrict by referenced block id
         return transactionRepository.findByContainingBlockIdIsNull()
     }
 }

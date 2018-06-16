@@ -22,7 +22,7 @@ class VoteService(
 
     fun createVote(space: String, validator: Account): Vote {
 
-        val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space)
+        val lastBlock = blockRepository.getLastBlock(space)
 
         val voteId = VoteId(
             validatorId = validator.id,

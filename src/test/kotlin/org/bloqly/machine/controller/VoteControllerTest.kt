@@ -57,7 +57,7 @@ class VoteControllerTest {
     @Test
     fun testReceiveVotes() {
 
-        val url = "http://localhost:$port/votes"
+        val url = "http://localhost:$port/data/votes"
 
         val votes = eventProcessorService.onGetVotes()
 

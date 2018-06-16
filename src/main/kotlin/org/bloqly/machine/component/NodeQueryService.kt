@@ -36,7 +36,7 @@ class NodeQueryService(
     private fun queryForNodes(node: Node) {
 
         val server = node.getServer()
-        val path = "http://$server/nodes"
+        val path = "http://$server/data/nodes"
 
         log.info("Query host $server for nodes")
 
@@ -57,7 +57,7 @@ class NodeQueryService(
     fun sendTransactions(node: Node, transactions: List<Transaction>) {
 
         val server = node.getServer()
-        val path = "http://$server/transactions"
+        val path = "http://$server/data/transactions"
 
         val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
@@ -67,7 +67,7 @@ class NodeQueryService(
     fun sendVotes(node: Node, votes: List<Vote>) {
 
         val server = node.getServer()
-        val path = "http://$server/votes"
+        val path = "http://$server/data/votes"
 
         val entity = HttpEntity(VoteList.fromVotes(votes))
 
@@ -77,7 +77,7 @@ class NodeQueryService(
     fun sendProposals(node: Node, proposals: List<BlockData>) {
 
         val server = node.getServer()
-        val path = "http://$server/blocks"
+        val path = "http://$server/data/blocks"
 
         val entity = HttpEntity(BlockDataList(proposals))
 
@@ -92,7 +92,7 @@ class NodeQueryService(
 
     fun requestDelta(node: Node, delta: Delta): List<BlockData>? {
         val server = node.getServer()
-        val path = "http://$server/deltas"
+        val path = "http://$server/data/deltas"
 
         var result: List<BlockData>? = null
 

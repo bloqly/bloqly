@@ -24,7 +24,7 @@ class TransactionServiceShell(
 
     fun createTransaction(originId: String, destinationId: String, amount: String): String {
 
-        val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(Application.DEFAULT_SPACE)
+        val lastBlock = blockRepository.getLastBlock(Application.DEFAULT_SPACE)
 
         val origin = accountRepository.findById(originId).orElseThrow()
 

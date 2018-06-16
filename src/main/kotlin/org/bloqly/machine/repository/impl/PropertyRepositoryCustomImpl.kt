@@ -24,7 +24,6 @@ class PropertyRepositoryCustomImpl(
             )
         )
 
-        // TODO check that 'quorum' property exists
         return ParameterUtils.readValue(quorumProperty.value) as Int
     }
 }

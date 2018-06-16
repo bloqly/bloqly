@@ -21,7 +21,7 @@ class DeltaService(
         return spaces
             .map { space ->
                 val vote = voteRepository.findLastForSpace(space.id)
-                val lastBlock = blockRepository.findFirstBySpaceOrderByHeightDesc(space.id)
+                val lastBlock = blockRepository.getLastBlock(space.id)
 
                 Delta(
                     spaceId = space.id,

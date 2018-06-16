@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Profile("server")
 @RestController
-@RequestMapping("/transactions")
+@RequestMapping("/data/transactions")
 class TransactionController(
     private val eventReceiverService: EventReceiverService,
     private val transactionService: TransactionService

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Profile("server")
 @RestController()
-@RequestMapping("/deltas")
+@RequestMapping("/data/deltas")
 class DeltaController(
     private val blockService: BlockService
 ) {

@@ -67,7 +67,7 @@ class BlockControllerTest {
     @Test
     fun testReceiveBlocks() {
 
-        val url = "http://localhost:$port/blocks"
+        val url = "http://localhost:$port/data/blocks"
 
         val blockDatas = eventProcessorService.onGetProposals()
 

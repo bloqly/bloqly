@@ -53,7 +53,7 @@ class TransactionControllerTest {
     @Test
     fun testReceiveTransactions() {
 
-        val url = "http://localhost:$port/transactions"
+        val url = "http://localhost:$port/data/transactions"
 
         val transaction = testService.newTransaction()
 

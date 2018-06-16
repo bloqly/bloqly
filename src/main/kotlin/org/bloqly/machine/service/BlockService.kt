@@ -94,7 +94,7 @@ class BlockService(
     }
 
     fun getLastBlockForSpace(space: String): Block {
-        return blockRepository.findFirstBySpaceOrderByHeightDesc(space)
+        return blockRepository.getLastBlock(space)
     }
 
     fun exportFirst(space: String): String {
