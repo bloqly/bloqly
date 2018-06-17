@@ -3,7 +3,7 @@ package org.bloqly.machine.service;
 import com.google.common.collect.Lists;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.bloqly.machine.function.GetPropertyFunction;
-import org.bloqly.machine.model.ContractInvocationContext;
+import org.bloqly.machine.model.InvocationContext;
 import org.bloqly.machine.model.Property;
 import org.bloqly.machine.model.PropertyId;
 import org.bloqly.machine.repository.ContractRepository;
@@ -34,7 +34,7 @@ public class ContractService {
     @Autowired
     private PropertyService propertyService;
 
-    private GetPropertyFunction getPropertyFunction(ContractInvocationContext context) {
+    private GetPropertyFunction getPropertyFunction(InvocationContext context) {
 
         return (target, key, defaultValue) -> {
 
@@ -57,28 +57,27 @@ public class ContractService {
         };
     }
 
-    private List<Property> invokeFunction(ContractInvocationContext context, byte[] arg) {
+    private List<Property> invokeFunction(InvocationContext context, byte[] arg) {
 
         try {
 
-            System.setProperty("nashorn.args", "--language=es6");
-
             var contract = context.getContract();
-
-            var engine = new ScriptEngineManager().getEngineByName("nashorn");
-
-            engine.put("getProperty",
-                    getPropertyFunction(context));
-
-            engine.eval(contract.getBody());
-
-            var invocable = (Invocable) engine;
 
             var params = ParameterUtils.INSTANCE.readParams(arg);
 
             List<Object> args = Lists.newArrayList(context, context.getCaller(), context.getCallee());
 
             args.addAll(Arrays.asList(params));
+
+            System.setProperty("nashorn.args", "--language=es6");
+
+            var engine = new ScriptEngineManager().getEngineByName("nashorn");
+
+            engine.put("getProperty", getPropertyFunction(context));
+
+            engine.eval(contract.getBody());
+
+            var invocable = (Invocable) engine;
 
             var results = (ScriptObjectMirror) invocable.invokeFunction(context.getFunctionName(), args.toArray());
 
@@ -91,7 +90,7 @@ public class ContractService {
         }
     }
 
-    private Property prepareResults(ScriptObjectMirror item, ContractInvocationContext context) {
+    private Property prepareResults(ScriptObjectMirror item, InvocationContext context) {
 
         var command = item.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals("target"))
@@ -118,7 +117,7 @@ public class ContractService {
 
         contractRepository.findById(self).ifPresent(contract -> {
 
-            var invocationContext = new ContractInvocationContext(functionName, caller, callee, contract);
+            var invocationContext = new InvocationContext(functionName, caller, callee, contract);
 
             var properties = invokeFunction(invocationContext, arg);
 

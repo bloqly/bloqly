@@ -7,7 +7,6 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.test.TestService
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -38,13 +37,10 @@ class TestWorkflow {
 
     @Before
     fun init() {
+        testService.cleanup()
         testService.createBlockchain()
     }
 
-    @After
-    fun tearDown() {
-        testService.cleanup()
-    }
 
     @Test
     fun testNoDelta() {

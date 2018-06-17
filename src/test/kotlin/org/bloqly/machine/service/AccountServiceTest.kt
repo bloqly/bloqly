@@ -4,7 +4,6 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.test.TestService
-import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Before
@@ -28,16 +27,12 @@ class AccountServiceTest {
 
     @Before
     fun setup() {
+        testService.cleanup()
         testService.createBlockchain()
 
         account = accountService.newAccount()
 
         accountService.importAccount(account.privateKey!!)
-    }
-
-    @After
-    fun tearDown() {
-        testService.cleanup()
     }
 
     @Test

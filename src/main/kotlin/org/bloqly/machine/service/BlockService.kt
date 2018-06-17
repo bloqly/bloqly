@@ -2,27 +2,20 @@ package org.bloqly.machine.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
-import org.bloqly.machine.Application.Companion.DEFAULT_SELF
-import org.bloqly.machine.Application.Companion.GENESIS_KEY
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.model.GenesisParameters
-import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.PropertyRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
-import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
@@ -40,8 +33,6 @@ class BlockService(
     private val transactionRepository: TransactionRepository,
     private val objectMapper: ObjectMapper,
     private val spaceRepository: SpaceRepository,
-    private val propertyRepository: PropertyRepository,
-    private val propertyService: PropertyService,
     private val transactionProcessor: TransactionProcessor,
     private val voteRepository: VoteRepository
 ) {
@@ -103,21 +94,9 @@ class BlockService(
 
         val transactions = transactionRepository.findByContainingBlockId(firstBlock.id)
 
-        val genesisSource = propertyRepository.findById(
-            PropertyId(
-                space = space,
-                self = DEFAULT_SELF,
-                target = DEFAULT_SELF,
-                key = GENESIS_KEY
-            )
-        ).orElseThrow()
-
-        val genesisSourceValue = ParameterUtils.readValue(genesisSource.value).toString()
-
         val genesis = Genesis(
             block = firstBlock.toVO(),
-            transactions = transactions.map { it.toVO() },
-            source = EncodingUtils.encodeToString64(genesisSourceValue.toByteArray())
+            transactions = transactions.map { it.toVO() }
         )
 
         return objectMapper.writeValueAsString(genesis)
@@ -140,8 +119,6 @@ class BlockService(
             )
         )
 
-        importProperties(genesis)
-
         processImportGenesisBlock(genesis, block, now)
 
         processImportGenesisTransactions(genesis, block, now)
@@ -163,13 +140,11 @@ class BlockService(
             "We don't accept blocks from the future, timestamp: ${block.timestamp}."
         }
 
-        val genesisSourceBytes = EncodingUtils.decodeFromString64(genesis.source)
-
-        val genesisHash = CryptoUtils.digest(genesisSourceBytes)
-
+        /* TODO
         require(block.parentHash == EncodingUtils.encodeToString16(genesisHash)) {
             "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."
         }
+        */
 
         blockRepository.save(block)
     }
@@ -190,17 +165,6 @@ class BlockService(
         transactions.forEach { transactionProcessor.processTransaction(it) }
 
         transactionRepository.saveAll(transactions)
-    }
-
-    private fun importProperties(genesis: Genesis) {
-        val genesisParametersSource = EncodingUtils.decodeFromString64(genesis.source)
-
-        val genesisParameters = objectMapper.readValue(
-            genesisParametersSource,
-            GenesisParameters::class.java
-        )
-
-        propertyService.updateProperties(genesisParameters)
     }
 
     private fun validateGenesisTransaction(transaction: Transaction, block: Block, now: Instant) {

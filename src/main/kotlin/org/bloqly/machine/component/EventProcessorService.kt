@@ -1,18 +1,12 @@
 package org.bloqly.machine.component
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
-import org.bloqly.machine.model.GenesisParameters
-import org.bloqly.machine.model.GenesisParametersSource
-import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -43,9 +37,7 @@ class EventProcessorService(
     private val voteService: VoteService,
     private val voteRepository: VoteRepository,
     private val transactionRepository: TransactionRepository,
-    private val propertyService: PropertyService,
     private val transactionService: TransactionService,
-    private val objectMapper: ObjectMapper,
     private val blockCandidateService: BlockCandidateService,
     private val transactionProcessor: TransactionProcessor
 ) {
@@ -53,25 +45,9 @@ class EventProcessorService(
 
     fun createBlockchain(space: String, baseDir: String) {
 
+        val rootId = "0A83C9CD3F1CA7DC1CA8AFA1727D64E9B1FAC66321403136EB2F1CB86DC93736"
+
         blockService.ensureSpaceEmpty(space)
-
-        val genesisParametersSource = readGenesis(baseDir)
-
-        val parameters = genesisParametersSource.genesisParameters.parameters
-
-        val rootId = parameters.find { it.key == "root" }!!.value.toString()
-
-        val genesisSource = genesisParametersSource.source
-
-        propertyService.saveGenesis(
-            PropertyId(
-                space = space,
-                self = DEFAULT_SELF,
-                target = DEFAULT_SELF,
-                key = Application.GENESIS_KEY
-            ),
-            genesisSource
-        )
 
         val contractBody = File(baseDir).list()
             .filter {
@@ -82,23 +58,23 @@ class EventProcessorService(
                 val extension = fileName.substringAfterLast(".")
                 val header = FileUtils.getResourceAsString("/headers/header.$extension")
                 header + source
-            }.reduce { str, acc -> str + acc }
+            }.reduce { str, acc -> str + "\n" + acc }
 
         spaceRepository.save(Space(id = space, creatorId = rootId))
 
         val timestamp = Instant.now().toEpochMilli()
 
-        val genesisHash = CryptoUtils.digest(genesisSource.toByteArray())
-
-        val parentHash = EncodingUtils.encodeToString16(genesisHash)
         val height = 0L
         val validatorTxHash = ByteArray(0)
+        val contractBodyHash = EncodingUtils.encodeToString16(
+            CryptoUtils.digest(contractBody)
+        )
 
         val firstBlock = blockService.newBlock(
             space = space,
             height = height,
             timestamp = timestamp,
-            parentHash = parentHash,
+            parentHash = contractBodyHash,
             proposerId = rootId,
             txHash = null,
             validatorTxHash = validatorTxHash
@@ -119,8 +95,6 @@ class EventProcessorService(
 
         transactionProcessor.processTransaction(transaction)
         transactionRepository.save(transaction)
-
-        propertyService.updateProperties(genesisParametersSource.genesisParameters)
 
         firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
 
@@ -205,7 +179,7 @@ class EventProcessorService(
         val proposals = spaces.mapNotNull { space ->
 
             val lastBlock = blockRepository.getLastBlock(space)
-            val transactions = getNewTransactions(space)
+            val transactions = getPendingTransactions(space)
             val votes = getNewVotes(space)
             val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
 
@@ -232,10 +206,11 @@ class EventProcessorService(
         return proposals
     }
 
-    private fun getNewTransactions(space: String): List<Transaction> {
+    private fun getPendingTransactions(space: String): List<Transaction> {
 
         val lastBlock = blockRepository.getLastBlock(space)
         val height = lastBlock.height
+        // TODO
 
         return transactionRepository.findBySpaceAndContainingBlockIdIsNull(space)
     }
@@ -274,17 +249,5 @@ class EventProcessorService(
 
             bestBlockCandidate
         }
-    }
-
-    fun readGenesis(baseDir: String): GenesisParametersSource {
-
-        val source = File("$baseDir/genesis.json").readText()
-
-        val genesisParameters = objectMapper.readValue(source, GenesisParameters::class.java)
-
-        return GenesisParametersSource(
-            genesisParameters = genesisParameters,
-            source = source
-        )
     }
 }

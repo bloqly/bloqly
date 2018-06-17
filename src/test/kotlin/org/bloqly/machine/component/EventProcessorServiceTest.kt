@@ -15,7 +15,6 @@ import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
-import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -54,6 +53,7 @@ class EventProcessorServiceTest {
 
     @Before
     fun setup() {
+        testService.cleanup()
 
         assertFalse(spaceRepository.existsById(DEFAULT_SPACE))
 
@@ -63,12 +63,6 @@ class EventProcessorServiceTest {
         user = accountRepository.findById(testService.getUser().id).get()
 
         contractBody = FileUtils.getResourceAsString("/scripts/test.js")
-    }
-
-    @After
-    fun tearDown() {
-
-        testService.cleanup()
     }
 
     @Test
@@ -121,6 +115,12 @@ class EventProcessorServiceTest {
 
         val rootBalanceId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.id, "balance")
         val userBalanceId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, user.id, "balance")
+
+        val rootBalanceBefore = propertyRepository.findById(rootBalanceId).orElseThrow()
+        val userBalanceBefore = propertyRepository.findById(userBalanceId)
+
+        assertArrayEquals(writeLong("999997"), rootBalanceBefore.value)
+        assertFalse(userBalanceBefore.isPresent)
 
         val transaction = TestUtils.createTransaction(
             origin = root.id,
