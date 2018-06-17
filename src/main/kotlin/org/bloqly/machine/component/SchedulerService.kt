@@ -69,7 +69,7 @@ class SchedulerService(
         eventProcessorService.onSelectBestProposal()
     }
 
-    //@Scheduled(fixedDelay = 5000)
+    // @Scheduled(fixedDelay = 5000)
     fun checkDeltas() {
         val deltas = deltaService.getDeltas()
 

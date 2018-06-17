@@ -17,7 +17,7 @@ class DeltaController(
 ) {
 
     @PostMapping
-    fun getDelta(@RequestBody delta: Delta) : BlockDataList{
+    fun getDelta(@RequestBody delta: Delta): BlockDataList {
 
         return blockService.getBlockDataList(delta)
     }
