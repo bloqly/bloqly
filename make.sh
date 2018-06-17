@@ -5,7 +5,7 @@ rm -rf  ./release
 mkdir ./release
 mkdir ./release/lib
 
-./link.sh
+scripts/link.sh
 
 gradle clean assemble
 
