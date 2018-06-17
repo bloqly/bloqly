@@ -21,7 +21,7 @@ class ChainServiceShell(
         return "OK"
     }
 
-    fun reset():String {
+    fun reset(): String {
         resetService.reset()
         return "OK"
     }

@@ -41,7 +41,6 @@ class TestWorkflow {
         testService.createBlockchain()
     }
 
-
     @Test
     fun testNoDelta() {
 
