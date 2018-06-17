@@ -2,12 +2,13 @@ package org.bloqly.machine.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.model.TransactionType
+import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.SpaceRepository
@@ -119,13 +120,12 @@ class BlockService(
             )
         )
 
-        processImportGenesisBlock(genesis, block, now)
+        processImportGenesisBlock(block, now)
 
         processImportGenesisTransactions(genesis, block, now)
     }
 
     private fun processImportGenesisBlock(
-        genesis: Genesis,
         block: Block,
         now: Instant
     ) {
@@ -185,15 +185,15 @@ class BlockService(
         }
 
         require(transaction.destination == Application.DEFAULT_SELF) {
-            "Genesis transaction destination should be ${Application.DEFAULT_SELF}, not ${transaction.destination}."
+            "Genesis transaction destination should be $DEFAULT_SELF, not ${transaction.destination}."
         }
 
         require(transaction.self == Application.DEFAULT_SELF) {
-            "Genesis transaction 'self' should be ${Application.DEFAULT_SELF}, not ${transaction.self}."
+            "Genesis transaction 'self' should be $DEFAULT_SELF, not ${transaction.self}."
         }
 
-        require(transaction.transactionType == TransactionType.CREATE) {
-            "Genesis transaction type should be ${TransactionType.CREATE}, not ${transaction.transactionType}"
+        require(transaction.transactionType == CREATE) {
+            "Genesis transaction type should be $CREATE, not ${transaction.transactionType}"
         }
 
         require(transaction.timestamp < now.toEpochMilli()) {
