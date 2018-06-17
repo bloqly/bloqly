@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.Genesis
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -28,12 +27,8 @@ class BlockServiceTest {
 
     @Before
     fun init() {
-        testService.createBlockchain()
-    }
-
-    @After
-    fun tearDown() {
         testService.cleanup()
+        testService.createBlockchain()
     }
 
     @Test

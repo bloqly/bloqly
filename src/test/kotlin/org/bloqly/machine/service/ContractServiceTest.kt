@@ -19,9 +19,9 @@ import org.bloqly.machine.util.ParameterUtils.writeBoolean
 import org.bloqly.machine.util.ParameterUtils.writeInteger
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.ParameterUtils.writeString
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -61,9 +61,8 @@ class ContractServiceTest {
         )
     )
 
-    @After
-    fun tearDown() {
-
+    @Before
+    fun setup() {
         testService.cleanup()
     }
 

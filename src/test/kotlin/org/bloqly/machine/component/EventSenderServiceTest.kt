@@ -14,7 +14,6 @@ import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -71,14 +70,11 @@ class EventSenderServiceTest {
 
     @Before
     fun init() {
+        testService.cleanup()
+
         testService.createBlockchain()
 
         nodeRepository.save(node)
-    }
-
-    @After
-    fun tearDown() {
-        testService.cleanup()
     }
 
     @Test

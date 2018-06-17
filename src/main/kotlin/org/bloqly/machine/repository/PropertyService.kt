@@ -15,14 +15,6 @@ class PropertyService(
     private val propertyRepository: PropertyRepository,
     private val accountRepository: AccountRepository
 ) {
-    fun saveGenesis(propertyId: PropertyId, source: String) {
-
-        require(!propertyRepository.existsById(propertyId)) {
-            "Genesis for key $propertyId already exists."
-        }
-
-        propertyRepository.save(Property(id = propertyId, value = ParameterUtils.writeValue(source)))
-    }
 
     fun updateProperties(properties: List<Property>) {
 

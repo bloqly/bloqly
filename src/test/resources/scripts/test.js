@@ -10,3 +10,7 @@ function contract(context, orig, dest, arg1, arg2, arg3, arg4) {
         { target: context.contract.id, value4: arg4.add(new BigInteger("1")) }
     ];
 }
+
+function init() {
+    return [];
+}

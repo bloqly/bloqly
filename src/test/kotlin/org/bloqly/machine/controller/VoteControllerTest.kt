@@ -6,7 +6,6 @@ import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.VoteList
-import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -46,12 +45,8 @@ class VoteControllerTest {
 
     @Before
     fun init() {
-        testService.createBlockchain()
-    }
-
-    @After
-    fun tearDown() {
         testService.cleanup()
+        testService.createBlockchain()
     }
 
     @Test

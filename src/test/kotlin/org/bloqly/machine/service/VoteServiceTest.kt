@@ -8,7 +8,6 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.CryptoUtils.verifyVote
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -44,7 +43,7 @@ class VoteServiceTest {
 
     @Before
     fun init() {
-
+        testService.cleanup()
         testService.createBlockchain()
 
         validators = accountService.getValidatorsForSpace(DEFAULT_SPACE)
@@ -52,11 +51,6 @@ class VoteServiceTest {
         validator = validators.first()
 
         vote = voteService.createVote(DEFAULT_SPACE, validator)
-    }
-
-    @After
-    fun tearDown() {
-        testService.cleanup()
     }
 
     @Test

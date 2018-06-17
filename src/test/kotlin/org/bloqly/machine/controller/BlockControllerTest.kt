@@ -10,7 +10,6 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.BlockDataList
-import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -56,12 +55,9 @@ class BlockControllerTest {
 
     @Before
     fun init() {
-        testService.createBlockchain()
-    }
-
-    @After
-    fun tearDown() {
         testService.cleanup()
+
+        testService.createBlockchain()
     }
 
     @Test

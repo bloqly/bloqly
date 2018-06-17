@@ -81,6 +81,11 @@ object CryptoUtils {
         return sha256Digest.digest(input)
     }
 
+    fun digest(input: String): ByteArray {
+
+        return digest(input.toByteArray())
+    }
+
     fun digestTransactions(transactions: List<Transaction>): ByteArray {
 
         val bos = ByteArrayOutputStream()

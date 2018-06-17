@@ -38,7 +38,6 @@ class Application {
         const val DEFAULT_PORT = "9900"
 
         const val POWER_KEY = "power"
-        const val GENESIS_KEY = "genesis"
         const val DEFAULT_SPACE = "main"
         const val DEFAULT_SELF = "self"
         const val QUORUM_KEY = "quorum"
