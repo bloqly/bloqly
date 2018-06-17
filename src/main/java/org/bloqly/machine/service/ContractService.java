@@ -1,7 +1,7 @@
 package org.bloqly.machine.service;
 
 import com.google.common.collect.Lists;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.apache.commons.lang3.tuple.Triple;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.InvocationContext;
 import org.bloqly.machine.model.Property;
@@ -18,6 +18,7 @@ import javax.script.ScriptEngineManager;
 import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static java.util.stream.Collectors.toList;
@@ -57,32 +58,38 @@ public class ContractService {
         };
     }
 
-    private List<Property> invokeFunction(InvocationContext context, byte[] arg) {
+    private Invocable getEngine(InvocationContext context) throws Exception {
+        System.setProperty("nashorn.args", "--language=es6");
 
+        var engine = new ScriptEngineManager().getEngineByName("nashorn");
+
+        engine.put("getProperty", getPropertyFunction(context));
+
+        engine.eval(context.getContract().getBody());
+
+        return (Invocable) engine;
+    }
+
+    private Invocable getEngine(String body) throws Exception {
+        System.setProperty("nashorn.args", "--language=es6");
+
+        var engine = new ScriptEngineManager().getEngineByName("nashorn");
+
+        engine.eval(body);
+
+        return (Invocable) engine;
+    }
+
+
+    public List<Triple<String, String, Object>> invokeFunction(String name, String body) {
         try {
 
-            var contract = context.getContract();
+            var engine = getEngine(body);
 
-            var params = ParameterUtils.INSTANCE.readParams(arg);
-
-            List<Object> args = Lists.newArrayList(context, context.getCaller(), context.getCallee());
-
-            args.addAll(Arrays.asList(params));
-
-            System.setProperty("nashorn.args", "--language=es6");
-
-            var engine = new ScriptEngineManager().getEngineByName("nashorn");
-
-            engine.put("getProperty", getPropertyFunction(context));
-
-            engine.eval(contract.getBody());
-
-            var invocable = (Invocable) engine;
-
-            var results = (ScriptObjectMirror) invocable.invokeFunction(context.getFunctionName(), args.toArray());
+            var results = (Map<String, Object>) engine.invokeFunction(name);
 
             return results.values().stream()
-                    .map(item -> prepareResults((ScriptObjectMirror) item, context))
+                    .map(item -> getEntry((Map<String, Object>) item))
                     .collect(toList());
 
         } catch (Exception e) {
@@ -90,8 +97,30 @@ public class ContractService {
         }
     }
 
-    private Property prepareResults(ScriptObjectMirror item, InvocationContext context) {
+    private List<Property> invokeFunction(InvocationContext context, byte[] arg) {
 
+        try {
+
+            var params = ParameterUtils.INSTANCE.readParams(arg);
+
+            List<Object> args = Lists.newArrayList(context, context.getCaller(), context.getCallee());
+
+            args.addAll(Arrays.asList(params));
+
+            var engine = getEngine(context);
+
+            var results = (Map<String, Object>) engine.invokeFunction(context.getFunctionName(), args.toArray());
+
+            return results.values().stream()
+                    .map(item -> prepareResults((Map<String, Object>) item, context))
+                    .collect(toList());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Triple<String, String, Object> getEntry(Map<String, Object> item) {
         var command = item.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals("target"))
                 .findFirst()
@@ -99,16 +128,23 @@ public class ContractService {
 
         String target = item.get("target").toString();
 
+        return Triple.of(target, command.getKey(), command.getValue());
+    }
+
+    private Property prepareResults(Map<String, Object> item, InvocationContext context) {
+
+        var entry = getEntry(item);
+
         var contract = Objects.requireNonNull(context.getContract());
         // TODO: check isolation
         return new Property(
                 new PropertyId(
                         Objects.requireNonNull(contract.getSpace()),
                         Objects.requireNonNull(contract.getId()),
-                        Objects.requireNonNull(target),
-                        command.getKey()
+                        Objects.requireNonNull(entry.getLeft()),
+                        entry.getMiddle()
                 ),
-                ParameterUtils.INSTANCE.writeValue(command.getValue())
+                ParameterUtils.INSTANCE.writeValue(entry.getRight())
         );
     }
 

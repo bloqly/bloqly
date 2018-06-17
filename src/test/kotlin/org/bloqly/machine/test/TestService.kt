@@ -1,7 +1,6 @@
 package org.bloqly.machine.test
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
@@ -71,7 +70,7 @@ class TestService(
             accountService.importAccount(account.privateKey!!)
         }
 
-        eventProcessorService.createBlockchain(Application.DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
+        eventProcessorService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
     }
 
     fun newTransaction(): Transaction {

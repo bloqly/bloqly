@@ -45,8 +45,6 @@ class EventProcessorService(
 
     fun createBlockchain(space: String, baseDir: String) {
 
-        val rootId = "0A83C9CD3F1CA7DC1CA8AFA1727D64E9B1FAC66321403136EB2F1CB86DC93736"
-
         blockService.ensureSpaceEmpty(space)
 
         val contractBody = File(baseDir).list()
@@ -59,6 +57,10 @@ class EventProcessorService(
                 val header = FileUtils.getResourceAsString("/headers/header.$extension")
                 header + source
             }.reduce { str, acc -> str + "\n" + acc }
+
+        val initProperties = contractService.invokeFunction("init", contractBody)
+
+        val rootId = initProperties.find { it.middle == "root" }!!.right.toString()
 
         spaceRepository.save(Space(id = space, creatorId = rootId))
 
@@ -208,8 +210,8 @@ class EventProcessorService(
 
     private fun getPendingTransactions(space: String): List<Transaction> {
 
-        val lastBlock = blockRepository.getLastBlock(space)
-        val height = lastBlock.height
+        //val lastBlock = blockRepository.getLastBlock(space)
+        //val height = lastBlock.height
         // TODO
 
         return transactionRepository.findBySpaceAndContainingBlockIdIsNull(space)
