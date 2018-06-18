@@ -4,6 +4,7 @@ import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
+import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
@@ -35,10 +36,9 @@ class NodeQueryService(
 
     private fun queryForNodes(node: Node) {
 
-        val server = node.getServer()
-        val path = "http://$server/data/nodes"
+        val path = APIUtils.getDataPath(node, "nodes")
 
-        log.info("Query host $server for nodes")
+        log.info("Query host $node for nodes")
 
         val nodeList = try {
             restTemplate.getForObject(path, NodeList::class.java)
@@ -48,7 +48,7 @@ class NodeQueryService(
         }
 
         if (nodeList.nodes.isNotEmpty()) {
-            log.info("Node $server returned  ${nodeList.nodes.size} nodes")
+            log.info("Node $node returned  ${nodeList.nodes.size} nodes")
 
             nodeList.nodes.forEach { nodeService.addNode(it.toModel()) }
         }
@@ -56,8 +56,7 @@ class NodeQueryService(
 
     fun sendTransactions(node: Node, transactions: List<Transaction>) {
 
-        val server = node.getServer()
-        val path = "http://$server/data/transactions"
+        val path = APIUtils.getDataPath(node, "transactions")
 
         val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
@@ -66,8 +65,7 @@ class NodeQueryService(
 
     fun sendVotes(node: Node, votes: List<Vote>) {
 
-        val server = node.getServer()
-        val path = "http://$server/data/votes"
+        val path = APIUtils.getDataPath(node, "votes")
 
         val entity = HttpEntity(VoteList.fromVotes(votes))
 
@@ -76,8 +74,7 @@ class NodeQueryService(
 
     fun sendProposals(node: Node, proposals: List<BlockData>) {
 
-        val server = node.getServer()
-        val path = "http://$server/data/blocks"
+        val path = APIUtils.getDataPath(node, "blocks")
 
         val entity = HttpEntity(BlockDataList(proposals))
 
@@ -91,8 +88,7 @@ class NodeQueryService(
     }
 
     fun requestDelta(node: Node, delta: Delta): List<BlockData>? {
-        val server = node.getServer()
-        val path = "http://$server/data/deltas"
+        val path = APIUtils.getDataPath(node, "deltas")
 
         var result: List<BlockData>? = null
 
@@ -102,7 +98,7 @@ class NodeQueryService(
 
             result = blockDataList?.blocks
         } catch (e: Exception) {
-            log.error("Could not retrieve deltas from $server. Details: ${e.message}")
+            log.error("Could not retrieve deltas from $node. Details: ${e.message}")
         }
 
         return result

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Profile("server")
 @RestController
-@RequestMapping("/data/votes")
+@RequestMapping("/api/v1/data/votes")
 class VoteController(
     private val eventReceiverService: EventReceiverService
 ) {

@@ -7,7 +7,7 @@ import org.bloqly.machine.model.NodeId
 @ValueObject
 data class NodeVO(
     val host: String,
-    val port: Long,
+    val port: Int,
     val addedTime: Long,
     val lastSuccessTime: Long?,
     val lastErrorTime: Long?,

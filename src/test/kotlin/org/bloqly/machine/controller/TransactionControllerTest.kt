@@ -2,8 +2,11 @@ package org.bloqly.machine.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
+import org.bloqly.machine.model.Node
+import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.vo.TransactionList
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -39,16 +42,20 @@ class TransactionControllerTest {
     @LocalServerPort
     private var port: Int = 0
 
+    private lateinit var node: Node
+
     @Before
     fun init() {
         testService.cleanup()
         testService.createBlockchain()
+
+        node = Node(NodeId("localhost", port), 0)
     }
 
     @Test
     fun testReceiveTransactions() {
 
-        val url = "http://localhost:$port/data/transactions"
+        val url = APIUtils.getDataPath(node, "transactions")
 
         val transaction = testService.newTransaction()
 

@@ -5,10 +5,13 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.model.BlockCandidateId
+import org.bloqly.machine.model.Node
+import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.vo.BlockDataList
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -53,17 +56,21 @@ class BlockControllerTest {
     @LocalServerPort
     private var port: Int = 0
 
+    private lateinit var node: Node
+
     @Before
     fun init() {
         testService.cleanup()
 
         testService.createBlockchain()
+
+        node = Node(NodeId("localhost", port), 0)
     }
 
     @Test
     fun testReceiveBlocks() {
 
-        val url = "http://localhost:$port/data/blocks"
+        val url = APIUtils.getDataPath(node, "blocks")
 
         val blockDatas = eventProcessorService.onGetProposals()
 

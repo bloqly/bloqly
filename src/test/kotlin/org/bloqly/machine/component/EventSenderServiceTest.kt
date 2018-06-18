@@ -10,6 +10,7 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.TransactionList
@@ -90,7 +91,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendProposals() {
 
-        val path = "http://${node.id}/data/blocks"
+        val path = APIUtils.getDataPath(node, "blocks")
 
         val proposals = getProposals()
 
@@ -115,7 +116,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendProposalsFailed() {
 
-        val path = "http://${node.id}/data/blocks"
+        val path = APIUtils.getDataPath(node, "blocks")
 
         val proposals = getProposals()
 
@@ -170,7 +171,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendVotes() {
 
-        val path = "http://${node.id}/data/votes"
+        val path = APIUtils.getDataPath(node, "votes")
 
         val votes = getVotes()
 
@@ -195,7 +196,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendVotesFailed() {
 
-        val path = "http://${node.id}/data/votes"
+        val path = APIUtils.getDataPath(node, "votes")
 
         val votes = getVotes()
 
@@ -250,7 +251,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendTransactions() {
 
-        val path = "http://${node.id}/data/transactions"
+        val path = APIUtils.getDataPath(node, "transactions")
 
         val transactions = getTransactions()
 
@@ -275,7 +276,7 @@ class EventSenderServiceTest {
     @Test
     fun testSendTransactionsFailed() {
 
-        val path = "http://${node.id}/data/transactions"
+        val path = APIUtils.getDataPath(node, "transactions")
 
         val transactions = getTransactions()
 

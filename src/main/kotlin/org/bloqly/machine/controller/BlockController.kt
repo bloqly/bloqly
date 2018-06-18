@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Profile("server")
 @RestController
-@RequestMapping("/data/blocks")
+@RequestMapping("/api/v1/data/blocks")
 class BlockController(
     private val eventReceiverService: EventReceiverService
 ) {

@@ -12,7 +12,7 @@ import javax.annotation.PostConstruct
 class NodeService(
     private val nodeRepository: NodeRepository,
     @Value("\${nodes:}") private val nodes: Array<String>,
-    @Value("\${server.port:9900}") private val serverPort: Long
+    @Value("\${server.port:9900}") private val serverPort: Int
 ) {
 
     @PostConstruct
@@ -28,7 +28,7 @@ class NodeService(
 
                     val nodeId = NodeId(
                             host = host,
-                            port = port.toLong()
+                            port = port.toInt()
                     )
 
                     if (!nodeRepository.existsById(nodeId)) {

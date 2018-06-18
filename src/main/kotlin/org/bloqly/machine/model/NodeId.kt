@@ -8,7 +8,7 @@ data class NodeId(
 
     val host: String,
 
-    val port: Long
+    val port: Int
 
 ) : Serializable {
 
