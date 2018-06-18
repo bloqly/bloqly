@@ -1,7 +1,7 @@
 ---
 layout: default
 ---
-### Bloqly is a distributed database + blockchain + smart contracts + [PBFT](https://en.wikipedia.org/wiki/Byzantine_fault_tolerance#Practical_Byzantine_fault_tolerance) consensus
+### Bloqly is a distributed database + blockchain + smart contracts engine
 
 1. #### Not-a-cryptocurrency semantics
   Useful not only for creating another cryptocurrency, but more as blockchain database with smart contracts.
