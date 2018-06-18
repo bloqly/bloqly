@@ -43,7 +43,7 @@ class Application {
         const val QUORUM_KEY = "quorum"
         const val DEFAULT_FUNCTION_NAME = "contract"
         const val MAX_DELTA_SIZE = 1000
-        // TODO what should it be?
-        const val MAX_REFERENCED_BLOCK_DEPTH = 10
+        const val MAX_REFERENCED_BLOCK_DEPTH = 1440
+        const val MAX_TRANSACTION_AGE = 2 * 3600 * 1000
     }
 }

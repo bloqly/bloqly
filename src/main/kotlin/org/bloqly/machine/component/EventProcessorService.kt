@@ -133,12 +133,12 @@ class EventProcessorService(
             transaction.timestamp > now ||
             !CryptoUtils.isTransactionValid(transaction) ||
             transactionRepository.existsById(transaction.id) ||
-            !blockRepository.existsById(transaction.referencedBlockId)
+            !blockRepository.existsById(transaction.referencedBlockId) ||
+            !transactionService.isActual(transaction)
         ) {
             return
         }
 
-        // TODO verify transaction can be executed (do it when constructing a new proposal)
         transactionRepository.save(transaction)
     }
 

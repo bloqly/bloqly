@@ -25,9 +25,9 @@ class TransactionController(
     }
 
     @GetMapping
-    fun getTransactions(): TransactionList {
+    fun getPendingTransactions(): TransactionList {
 
-        val transactions = transactionService.getNewTransactions()
+        val transactions = transactionService.getPendingTransactions()
 
         return TransactionList.fromTransactions(transactions)
     }

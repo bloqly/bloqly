@@ -1,20 +1,25 @@
 package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes.concat
+import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
+import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
+import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class TransactionService(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val blockRepository: BlockRepository
 ) {
 
     fun newTransaction(
@@ -69,8 +74,18 @@ class TransactionService(
         )
     }
 
-    fun getNewTransactions(): List<Transaction> {
-        // TODO: restrict by referenced block id
-        return transactionRepository.findByContainingBlockIdIsNull()
+    fun isActual(transaction: Transaction): Boolean {
+
+        val referencedBlock = blockRepository.findById(transaction.referencedBlockId).orElseThrow()
+        val lastBlock = blockRepository.getLastBlock(transaction.space)
+
+        return lastBlock.height - referencedBlock.height <= MAX_REFERENCED_BLOCK_DEPTH
+    }
+
+    fun getPendingTransactions(): List<Transaction> {
+        val minTimestamp = Instant.now().toEpochMilli() - MAX_TRANSACTION_AGE
+        return transactionRepository
+            .findPendingTransactions(minTimestamp)
+            .filter { isActual(it) }
     }
 }
