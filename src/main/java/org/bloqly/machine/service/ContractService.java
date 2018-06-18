@@ -81,6 +81,7 @@ public class ContractService {
     }
 
 
+    @SuppressWarnings("unchecked")
     public List<Triple<String, String, Object>> invokeFunction(String name, String body) {
         try {
 
@@ -89,6 +90,7 @@ public class ContractService {
             var results = (Map<String, Object>) engine.invokeFunction(name);
 
             return results.values().stream()
+
                     .map(item -> getEntry((Map<String, Object>) item))
                     .collect(toList());
 
@@ -97,6 +99,7 @@ public class ContractService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private List<Property> invokeFunction(InvocationContext context, byte[] arg) {
 
         try {

@@ -19,6 +19,12 @@ buildscript {
     }
 }
 
+ext {
+    hamcrest_version = '1.3'
+    commons_collections_version = '4.0'
+    jackson_version = '2.9.5'
+}
+
 configurations {
     compile.exclude module: "spring-boot-starter-tomcat"
 }
@@ -92,33 +98,31 @@ dependencies {
         exclude(group: 'org.hamcrest', module: 'hamcrest-library')
     }
 
-    compile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+    compile group: 'org.hamcrest', name: 'hamcrest-all', version: hamcrest_version
 
-    compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.0'
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: commons_collections_version // TODO remove commons dependency
 
     compile group: 'javax.xml', name: 'jaxb-api', version: '2.1'
 
     compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.59'
 
-    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7' // TODO remove commons dependency
 
-    compile group: 'com.google.guava', name: 'guava', version: '19.0'
+    compile group: 'com.google.guava', name: 'guava', version: '19.0' // TODO remove guava dependency
 
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
-    compile group: 'org.springframework', name: 'spring-web', version: '5.0.5.RELEASE'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jackson_version
 
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jackson_version
 
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.5'
+    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: jackson_version
 
-    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'commons-io', name: 'commons-io', version: '2.6' // TODO remove commons dependency
 
     compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
 
     compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlin_version
-
-    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.5'
     
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 
