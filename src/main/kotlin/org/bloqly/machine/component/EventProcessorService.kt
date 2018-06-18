@@ -218,12 +218,7 @@ class EventProcessorService(
     }
 
     private fun getPendingTransactions(space: String): List<Transaction> {
-
-        //val lastBlock = blockRepository.getLastBlock(space)
-        //val height = lastBlock.height
-        // TODO
-
-        return transactionRepository.findBySpaceAndContainingBlockIdIsNull(space)
+        return transactionService.getPendingTransactionsBySpace(space)
     }
 
     private fun getNewVotes(space: String): List<Vote> {

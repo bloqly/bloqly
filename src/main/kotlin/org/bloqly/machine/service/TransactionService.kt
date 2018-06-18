@@ -88,4 +88,11 @@ class TransactionService(
             .findPendingTransactions(minTimestamp)
             .filter { isActual(it) }
     }
+
+    fun getPendingTransactionsBySpace(space: String): List<Transaction> {
+        val minTimestamp = Instant.now().toEpochMilli() - MAX_TRANSACTION_AGE
+        return transactionRepository
+            .findPendingTransactionsBySpace(space, minTimestamp)
+            .filter { isActual(it) }
+    }
 }
