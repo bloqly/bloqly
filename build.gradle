@@ -45,8 +45,6 @@ noArg {
 bootJar {
     baseName = 'bloqly'
     version = '0.1.0'
-
-    requiresUnpack "**/groovy-*.jar"
 }
 
 repositories {
@@ -121,9 +119,7 @@ dependencies {
     compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlin_version
 
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.5'
-
-    compile group: "org.codehaus.groovy", name: "groovy-groovysh", version: "2.4.15"
-
+    
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'

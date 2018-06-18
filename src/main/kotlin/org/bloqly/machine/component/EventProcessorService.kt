@@ -237,7 +237,7 @@ class EventProcessorService(
 
         val spaces = spaceRepository.findAll().map { it.id }
 
-        return spaces.mapNotNull { space ->
+        val proposals = spaces.mapNotNull { space ->
             val lastBlock = blockRepository.getLastBlock(space)
 
             val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
@@ -255,5 +255,11 @@ class EventProcessorService(
 
             bestBlockCandidate
         }
+
+        if (proposals.isEmpty()) {
+
+        }
+
+        return proposals
     }
 }
