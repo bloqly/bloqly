@@ -124,12 +124,13 @@ class BlockService(
             )
         )
 
-        processImportGenesisBlock(block, now)
+        processImportGenesisBlock(genesis, block, now)
 
         processImportGenesisTransactions(genesis, block, now)
     }
 
     private fun processImportGenesisBlock(
+        genesis: Genesis,
         block: Block,
         now: Instant
     ) {
@@ -144,11 +145,17 @@ class BlockService(
             "We don't accept blocks from the future, timestamp: ${block.timestamp}."
         }
 
-        /* TODO
-        require(block.parentHash == EncodingUtils.encodeToString16(genesisHash)) {
+        val transaction = genesis.transactions.first()
+
+        val contractBody = transaction.toModel().value
+
+        val contractBodyHash = EncodingUtils.encodeToString16(
+            CryptoUtils.digest(contractBody)
+        )
+
+        require(block.parentHash == contractBodyHash) {
             "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."
         }
-        */
 
         blockRepository.save(block)
     }
