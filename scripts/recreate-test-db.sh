@@ -8,7 +8,6 @@ dropdb bloqly_loge
 
 dropdb bloqly_test
 
-
 createdb bloqly_main
 createdb bloqly_rhea
 createdb bloqly_loge

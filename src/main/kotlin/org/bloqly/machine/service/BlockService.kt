@@ -100,14 +100,18 @@ class BlockService(
             transactions = transactions.map { it.toVO() }
         )
 
-        return objectMapper.writeValueAsString(genesis)
+        val json = objectMapper.writeValueAsString(genesis)
+
+        return EncodingUtils.encodeToString16(json.toByteArray())
     }
 
     fun importFirst(genesisString: String) {
 
         val now = Instant.now()
 
-        val genesis = objectMapper.readValue(genesisString, Genesis::class.java)
+        val json = EncodingUtils.decodeFromString16(genesisString)
+
+        val genesis = objectMapper.readValue(json, Genesis::class.java)
 
         ensureSpaceEmpty(genesis.block.space)
 

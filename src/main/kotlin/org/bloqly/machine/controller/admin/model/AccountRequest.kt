@@ -1,8 +1,8 @@
-package org.bloqly.machine.vo
+package org.bloqly.machine.controller.admin.model
 
 import org.bloqly.machine.annotation.ValueObject
 
 @ValueObject
-data class AccountVO(
+data class AccountRequest(
     val privateKey: String
 )
