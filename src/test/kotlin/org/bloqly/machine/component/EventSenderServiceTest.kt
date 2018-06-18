@@ -53,6 +53,9 @@ class EventSenderServiceTest {
     private lateinit var eventSenderService: EventSenderService
 
     @Autowired
+    private lateinit var eventReceiverService: EventReceiverService
+
+    @Autowired
     private lateinit var eventProcessorService: EventProcessorService
 
     @Autowired
@@ -90,6 +93,7 @@ class EventSenderServiceTest {
 
     @Test
     fun testSendProposals() {
+        eventReceiverService.receiveVotes(testService.getVotes())
 
         val path = APIUtils.getDataPath(node, "blocks")
 
@@ -115,6 +119,7 @@ class EventSenderServiceTest {
 
     @Test
     fun testSendProposalsFailed() {
+        eventReceiverService.receiveVotes(testService.getVotes())
 
         val path = APIUtils.getDataPath(node, "blocks")
 
@@ -140,6 +145,9 @@ class EventSenderServiceTest {
 
     @Test
     fun testSendProposalsAlreadySent() {
+
+        eventReceiverService.receiveVotes(testService.getVotes())
+
         val proposals = getProposals()
 
         assertEquals(1, proposals.size)

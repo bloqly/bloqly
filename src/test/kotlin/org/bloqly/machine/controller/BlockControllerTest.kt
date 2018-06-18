@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
+import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.BlockCandidateId
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
@@ -45,6 +46,9 @@ class BlockControllerTest {
     private lateinit var blockCandidateRepository: BlockCandidateRepository
 
     @Autowired
+    private lateinit var eventReceiverService: EventReceiverService
+
+    @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     @Autowired
@@ -69,6 +73,7 @@ class BlockControllerTest {
 
     @Test
     fun testReceiveBlocks() {
+        eventReceiverService.receiveVotes(testService.getVotes())
 
         val url = APIUtils.getDataPath(node, "blocks")
 

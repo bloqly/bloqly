@@ -7,6 +7,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -39,7 +40,8 @@ class EventProcessorService(
     private val transactionRepository: TransactionRepository,
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
-    private val transactionProcessor: TransactionProcessor
+    private val transactionProcessor: TransactionProcessor,
+    private val propertyRepository: PropertyRepository
 ) {
     private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
@@ -178,28 +180,35 @@ class EventProcessorService(
 
         val spaces = spaceRepository.findAll().map { it.id }
 
-        val proposals = spaces.mapNotNull { space ->
+        val proposals = spaces
+            .mapNotNull { space ->
 
-            val lastBlock = blockRepository.getLastBlock(space)
-            val transactions = getPendingTransactions(space)
-            val votes = getNewVotes(space)
-            val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
+                val lastBlock = blockRepository.getLastBlock(space)
+                val transactions = getPendingTransactions(space)
+                val votes = getNewVotes(space)
+                val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
 
-            validator.privateKey?.let {
+                validator.privateKey?.let {
 
-                val proposal = blockService.newBlock(
-                    space = space,
-                    height = lastBlock.height + 1,
-                    timestamp = Instant.now().toEpochMilli(),
-                    parentHash = lastBlock.id,
-                    proposerId = validator.id,
-                    txHash = CryptoUtils.digestTransactions(transactions),
-                    validatorTxHash = CryptoUtils.digestVotes(votes)
-                )
+                    val proposal = blockService.newBlock(
+                        space = space,
+                        height = lastBlock.height + 1,
+                        timestamp = Instant.now().toEpochMilli(),
+                        parentHash = lastBlock.id,
+                        proposerId = validator.id,
+                        txHash = CryptoUtils.digestTransactions(transactions),
+                        validatorTxHash = CryptoUtils.digestVotes(votes)
+                    )
 
-                BlockData(proposal, transactions, votes)
+                    BlockData(proposal, transactions, votes)
+                }
             }
-        }.toList()
+            .filter { blockData ->
+                val quorum = propertyRepository.getQuorum(blockData.block.space)
+
+                blockData.votes.size >= quorum
+            }
+            .toList()
 
         if (proposals.isNotEmpty()) {
             blockCandidateService.saveAll(proposals)

@@ -30,8 +30,7 @@ class AccountService(
 
         val validatorIndex = height % validators.size
 
-        return validators
-            .sortedBy { it.id }[validatorIndex.toInt()]
+        return validators[validatorIndex.toInt()]
     }
 
     fun createAccount(): Account {

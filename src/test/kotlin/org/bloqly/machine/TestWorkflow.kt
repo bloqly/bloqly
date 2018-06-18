@@ -4,6 +4,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.test.TestService
@@ -35,6 +36,9 @@ class TestWorkflow {
     @Autowired
     private lateinit var blockService: BlockService
 
+    @Autowired
+    private lateinit var voteRepository: VoteRepository
+
     @Before
     fun init() {
         testService.cleanup()
@@ -49,6 +53,19 @@ class TestWorkflow {
         val deltas = deltaService.getDeltas()
 
         assertTrue(deltas.isEmpty())
+    }
+
+    @Test
+    fun testNoProposalWithoutQuorum() {
+
+        val votes = testService.getVotes()
+        voteRepository.deleteAll()
+
+        eventReceiverService.receiveVotes(votes.subList(0, 1))
+
+        val proposals = eventProcessorService.onGetProposals()
+
+        assertTrue(proposals.isEmpty())
     }
 
     @Test
@@ -76,8 +93,9 @@ class TestWorkflow {
     }
 
     private fun sendVotes() {
-
-        val votes = eventProcessorService.onGetVotes().map { it.toVO() }
+        val votes = testService.getVotes()
+        assertEquals(3, votes.size)
+        voteRepository.deleteAll()
 
         eventReceiverService.receiveVotes(votes)
     }

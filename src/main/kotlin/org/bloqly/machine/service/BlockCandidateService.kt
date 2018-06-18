@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.model.BlockCandidate
 import org.bloqly.machine.model.BlockCandidateId
 import org.bloqly.machine.repository.BlockCandidateRepository
+import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.vo.BlockData
@@ -17,7 +18,8 @@ class BlockCandidateService(
     private val blockCandidateRepository: BlockCandidateRepository,
     private val objectMapper: ObjectMapper,
     private val transactionRepository: TransactionRepository,
-    private val voteRepository: VoteRepository
+    private val voteRepository: VoteRepository,
+    private val propertyRepository: PropertyRepository
 ) {
 
     fun saveAll(blocks: List<BlockData>) {
@@ -45,11 +47,13 @@ class BlockCandidateService(
     }
 
     fun getBlockCandidate(space: String, height: Long, proposerId: String): BlockData? {
+        val quorum = propertyRepository.getQuorum(space)
         return blockCandidateRepository
             .findById(BlockCandidateId(space, height, proposerId))
             .map { blockCandidate ->
                 objectMapper.readValue(blockCandidate.data, BlockData::class.java)
             }
+            .filter { it.votes.size >= quorum }
             .orElse(null)
     }
 }
