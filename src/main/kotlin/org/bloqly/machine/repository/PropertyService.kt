@@ -20,7 +20,6 @@ class PropertyService(
 
         properties.forEach { property ->
 
-            // TODO check public keys when processing transactions
             accountRepository.insertAccountId(property.id.target)
 
             propertyRepository.save(property)
