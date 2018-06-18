@@ -7,4 +7,8 @@ object APIUtils {
     fun getDataPath(node: Node, noun: String): String {
         return "http://${node.id}/api/v1/data/$noun"
     }
+
+    fun geAdminPath(node: Node, noun: String): String {
+        return "http://${node.id}/api/v1/admin/$noun"
+    }
 }

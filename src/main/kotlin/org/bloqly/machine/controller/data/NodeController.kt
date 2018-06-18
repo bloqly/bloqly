@@ -1,4 +1,4 @@
-package org.bloqly.machine.controller
+package org.bloqly.machine.controller.data
 
 import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.vo.NodeList

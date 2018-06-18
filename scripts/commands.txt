@@ -1,19 +1,19 @@
 
 
-./release/run.sh -database bloqly_second -command "block.importFirst('')"
-./release/run.sh -database bloqly_third -command "block.importFirst('')"
+./release/run.sh -database bloqly_rhea -command "block.importFirst('')"
+./release/run.sh -database bloqly_loge -command "block.importFirst('')"
 
-./release/run.sh -database bloqly_third -command "txs.createTransaction('9EB1858D8BBBDD10BA3E4EE83BE51EEF1BCB95CAFDA89FA57E5AE8342AB97A3F','475653C1BB33E7AC09AD1C98FF4EE9B1A9084AA4B15D2E8A39FEC06227DE7986','1')"
+./release/run.sh -database bloqly_loge -command "txs.createTransaction('9EB1858D8BBBDD10BA3E4EE83BE51EEF1BCB95CAFDA89FA57E5AE8342AB97A3F','475653C1BB33E7AC09AD1C98FF4EE9B1A9084AA4B15D2E8A39FEC06227DE7986','1')"
 
 ./release/run.sh -database bloqly_main -command "txs.count()"
 
-./release/run.sh -database bloqly_third -command "txs.list()"
+./release/run.sh -database bloqly_loge -command "txs.list()"
 
-./release/run.sh -database bloqly_third -command "block.last('main')"
+./release/run.sh -database bloqly_loge -command "block.last('main')"
 
 ./release/run.sh -database bloqly_main -server -port 9901 -nodes localhost:9902,localhost:9903
-./release/run.sh -database bloqly_second -server -port 9902 -nodes localhost:9901,localhost:9903
-./release/run.sh -database bloqly_third -server -port 9903 -nodes localhost:9901,localhost:9902
+./release/run.sh -database bloqly_rhea -server -port 9902 -nodes localhost:9901,localhost:9903
+./release/run.sh -database bloqly_loge -server -port 9903 -nodes localhost:9901,localhost:9902
 
 
 
@@ -22,8 +22,5 @@
 macos:
 createuser -s postgres
 createdb bloqly_test
-createdb bloqly_main
 
-psql -d bloqly_main -c "alter user "$USER" with password 'password';"
-psql -d bloqly_second -c "alter user "$USER" with password 'password';"
-psql -d bloqly_third -c "alter user "$USER" with password 'password';"
+
