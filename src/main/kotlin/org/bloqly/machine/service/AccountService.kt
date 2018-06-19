@@ -1,11 +1,14 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.Application.Companion.MAX_EMPTY_ROUND_COUNTER
 import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.RoundId
 import org.bloqly.machine.repository.AccountRepository
+import org.bloqly.machine.repository.EmptyRoundRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
@@ -20,16 +23,25 @@ import javax.transaction.Transactional
 @Transactional
 class AccountService(
     private val accountRepository: AccountRepository,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val emptyRoundRepository: EmptyRoundRepository
 ) {
 
     // TODO this method can theoretically return null
     fun getActiveValidator(space: String, height: Long): Account {
         require(height > 0)
 
+        val emptyRoundOpt = emptyRoundRepository.findById(RoundId(space, height))
+
+        val deltaHeight = emptyRoundOpt.map { emptyRound ->
+            emptyRound.counter % (MAX_EMPTY_ROUND_COUNTER - 1)
+        }.orElse(0)
+
         val validators = getValidatorsForSpace(space)
 
-        val validatorIndex = height % validators.size
+        val effectiveHeight = height + deltaHeight
+
+        val validatorIndex = effectiveHeight % validators.size
 
         return validators[validatorIndex.toInt()]
     }
