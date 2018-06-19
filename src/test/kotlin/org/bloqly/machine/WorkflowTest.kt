@@ -4,6 +4,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.repository.EmptyRoundRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
@@ -19,7 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class TestWorkflow {
+class WorkflowTest {
 
     @Autowired
     private lateinit var deltaService: DeltaService
@@ -35,6 +36,9 @@ class TestWorkflow {
 
     @Autowired
     private lateinit var blockService: BlockService
+
+    @Autowired
+    private lateinit var emptyRoundRepository: EmptyRoundRepository
 
     @Autowired
     private lateinit var voteRepository: VoteRepository
@@ -86,6 +90,8 @@ class TestWorkflow {
         val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
 
         assertEquals(1, lastBlock.height)
+
+        assertTrue(emptyRoundRepository.findAll().toList().isEmpty())
     }
 
     private fun sendTransactions(transactions: List<Transaction>) {

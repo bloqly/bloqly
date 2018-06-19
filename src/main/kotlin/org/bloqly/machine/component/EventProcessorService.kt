@@ -2,11 +2,14 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.model.EmptyRound
+import org.bloqly.machine.model.RoundId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.EmptyRoundRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
@@ -41,7 +44,8 @@ class EventProcessorService(
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
     private val transactionProcessor: TransactionProcessor,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val emptyRoundRepository: EmptyRoundRepository
 ) {
     private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
@@ -237,29 +241,47 @@ class EventProcessorService(
 
         val spaces = spaceRepository.findAll().map { it.id }
 
-        val proposals = spaces.mapNotNull { space ->
-            val lastBlock = blockRepository.getLastBlock(space)
+        return spaces.mapNotNull { spaceId ->
+            val lastBlock = blockRepository.getLastBlock(spaceId)
+            val newHeight = lastBlock.height + 1
 
-            val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
+            // what is the active validator for the current height in this space?
+            val validator = accountService.getActiveValidator(spaceId, newHeight)
 
-            val bestBlockCandidate = blockCandidateService
-                .getBlockCandidate(space, lastBlock.height + 1, validator.id)
+            // did this validator produce a block candidate we are aware of?
+            val blockCandidate = blockCandidateService.getBlockCandidate(spaceId, newHeight, validator.id)
 
-            bestBlockCandidate?.let {
-                val block = bestBlockCandidate.block
+            if (blockCandidate != null) {
+                // block candidate is found, select it
+
+                val block = blockCandidate.block
 
                 log.info("Selected next block ${block.id} on height ${block.height}.")
 
                 blockRepository.save(block.toModel())
+            } else {
+                // no block candidate is found, increase empty round counter
+
+                processEmptyRound(spaceId, newHeight)
             }
 
-            bestBlockCandidate
+            blockCandidate
+        }
+    }
+
+    private fun processEmptyRound(spaceId: String, height: Long) {
+
+        val roundId = RoundId(spaceId, height)
+
+        val emptyRoundId = emptyRoundRepository.findById(roundId).orElseGet {
+            EmptyRound(id = roundId, counter = 0, lastMissTime = 0)
         }
 
-        if (proposals.isEmpty()) {
-
-        }
-
-        return proposals
+        emptyRoundRepository.save(
+            emptyRoundId.copy(
+                counter = emptyRoundId.counter + 1,
+                lastMissTime = Instant.now().toEpochMilli()
+            )
+        )
     }
 }

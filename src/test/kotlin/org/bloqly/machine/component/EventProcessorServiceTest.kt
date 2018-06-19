@@ -7,15 +7,17 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.RoundId
 import org.bloqly.machine.repository.AccountRepository
+import org.bloqly.machine.repository.EmptyRoundRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -45,11 +47,12 @@ class EventProcessorServiceTest {
     @Autowired
     private lateinit var testService: TestService
 
+    @Autowired
+    private lateinit var emptyRoundRepository: EmptyRoundRepository
+
     private lateinit var root: Account
 
     private lateinit var user: Account
-
-    private lateinit var contractBody: String
 
     @Before
     fun setup() {
@@ -61,8 +64,6 @@ class EventProcessorServiceTest {
 
         root = accountRepository.findById(testService.getRoot().id).get()
         user = accountRepository.findById(testService.getUser().id).get()
-
-        contractBody = FileUtils.getResourceAsString("/scripts/test.js")
     }
 
     @Test
@@ -108,6 +109,24 @@ class EventProcessorServiceTest {
                 Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.id, "balance"), writeLong("999997"))
             )
         )
+    }
+
+    @Test
+    fun testEmptyRoundCreated() {
+
+        val roundId = RoundId(DEFAULT_SPACE, 1)
+
+        assertFalse(emptyRoundRepository.existsById(roundId))
+
+        eventProcessorService.onSelectBestProposal()
+
+        assertTrue(emptyRoundRepository.existsById(roundId))
+
+        assertEquals(1, emptyRoundRepository.findById(roundId).orElseThrow().counter)
+
+        eventProcessorService.onSelectBestProposal()
+
+        assertEquals(2, emptyRoundRepository.findById(roundId).orElseThrow().counter)
     }
 
     @Test
