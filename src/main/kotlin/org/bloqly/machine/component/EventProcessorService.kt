@@ -2,8 +2,6 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
-import org.bloqly.machine.model.EmptyRound
-import org.bloqly.machine.model.RoundId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -262,26 +260,10 @@ class EventProcessorService(
             } else {
                 // no block candidate is found, increase empty round counter
 
-                processEmptyRound(spaceId, newHeight)
+                emptyRoundRepository.processEmptyRound(spaceId, newHeight)
             }
 
             blockCandidate
         }
-    }
-
-    private fun processEmptyRound(spaceId: String, height: Long) {
-
-        val roundId = RoundId(spaceId, height)
-
-        val emptyRoundId = emptyRoundRepository.findById(roundId).orElseGet {
-            EmptyRound(id = roundId, counter = 0, lastMissTime = 0)
-        }
-
-        emptyRoundRepository.save(
-            emptyRoundId.copy(
-                counter = emptyRoundId.counter + 1,
-                lastMissTime = Instant.now().toEpochMilli()
-            )
-        )
     }
 }

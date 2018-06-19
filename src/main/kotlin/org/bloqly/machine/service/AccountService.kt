@@ -23,6 +23,7 @@ class AccountService(
     private val propertyRepository: PropertyRepository
 ) {
 
+    // TODO this method can theoretically return null
     fun getActiveValidator(space: String, height: Long): Account {
         require(height > 0)
 
