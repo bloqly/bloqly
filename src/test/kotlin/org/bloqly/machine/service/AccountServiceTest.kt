@@ -88,8 +88,12 @@ class AccountServiceTest {
 
         accountService.getValidatorsForSpace(DEFAULT_SPACE)
 
-        val validator1 = accountService.getActiveValidator(DEFAULT_SPACE, 1)
+        val validator1Temp = accountService.getActiveValidator(DEFAULT_SPACE, 1)
 
-        assertEquals(validator1, validator2)
+        assertEquals(validator1Temp, validator2)
+
+        val validator2Normal = accountService.getActiveValidator(DEFAULT_SPACE, 2)
+
+        assertEquals(validator2Normal, validator2)
     }
 }
