@@ -155,4 +155,19 @@ class EventProcessorServiceTest {
         assertArrayEquals(writeLong("999996"), rootBalanceAfter.value)
         assertArrayEquals(writeLong("1"), userBalanceAfter.value)
     }
+
+    @Test
+    fun testReturnSameProposals() {
+        val votes = testService.getVotes()
+
+        assertEquals(3, votes.size)
+
+        val proposals1 = eventProcessorService.onGetProposals()
+
+        val proposals2 = eventProcessorService.onGetProposals()
+
+        assertEquals(1, proposals1.size)
+
+        assertEquals(proposals1, proposals2)
+    }
 }

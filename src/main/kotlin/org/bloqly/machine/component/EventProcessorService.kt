@@ -2,6 +2,7 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -182,57 +183,59 @@ class EventProcessorService(
 
         val spaces = spaceRepository.findAll().map { it.id }
 
-        val proposals = spaces
+        return spaces
             .mapNotNull { space ->
 
                 val lastBlock = blockRepository.getLastBlock(space)
-                val transactions = getPendingTransactions(space)
-                val votes = getNewVotes(space)
-                val validator = accountService.getActiveValidator(space, lastBlock.height + 1)
+                val newHeight = lastBlock.height + 1
+                val validator = accountService.getActiveValidator(space, newHeight)
 
-                validator.privateKey?.let {
+                val savedProposal = blockCandidateService.getBlockCandidate(space, newHeight, validator.id)
 
-                    val proposal = blockService.newBlock(
-                        space = space,
-                        height = lastBlock.height + 1,
-                        timestamp = Instant.now().toEpochMilli(),
-                        parentHash = lastBlock.id,
-                        proposerId = validator.id,
-                        txHash = CryptoUtils.digestTransactions(transactions),
-                        validatorTxHash = CryptoUtils.digestVotes(votes)
-                    )
+                if (savedProposal != null) {
+                    savedProposal
+                } else {
+                    val transactions = getPendingTransactions(space)
+                    val votes = getVotesForBlock(lastBlock)
 
-                    BlockData(proposal, transactions, votes)
+                    validator.privateKey?.let {
+
+                        val newBlock = blockService.newBlock(
+                            space = space,
+                            height = newHeight,
+                            timestamp = Instant.now().toEpochMilli(),
+                            parentHash = lastBlock.id,
+                            proposerId = validator.id,
+                            txHash = CryptoUtils.digestTransactions(transactions),
+                            validatorTxHash = CryptoUtils.digestVotes(votes)
+                        )
+
+                        BlockData(newBlock, transactions, votes)
+                    }
                 }
             }
-            .filter { blockData ->
-                val quorum = propertyRepository.getQuorum(blockData.block.space)
-
-                blockData.votes.size >= quorum
-            }
+            .filter { hasQuorum(it) }
+            .onEach { blockCandidateService.save(it) }
             .toList()
+    }
 
-        if (proposals.isNotEmpty()) {
-            blockCandidateService.saveAll(proposals)
-        }
+    private fun hasQuorum(blockData: BlockData): Boolean {
 
-        return proposals
+        val quorum = propertyRepository.getQuorum(blockData.block.space)
+
+        return blockData.votes.size >= quorum
     }
 
     private fun getPendingTransactions(space: String): List<Transaction> {
         return transactionService.getPendingTransactionsBySpace(space)
     }
 
-    private fun getNewVotes(space: String): List<Vote> {
-
-        val lastBlock = blockRepository.getLastBlock(space)
-
-        return voteRepository.findByBlockId(lastBlock.id)
+    private fun getVotesForBlock(block: Block): List<Vote> {
+        return voteRepository.findByBlockId(block.id)
     }
 
     fun onProposals(proposals: List<BlockData>) {
-
-        blockCandidateService.saveAll(proposals)
+        proposals.forEach { blockCandidateService.save(it) }
     }
 
     fun onSelectBestProposal(): List<BlockData> {

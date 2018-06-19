@@ -22,17 +22,26 @@ class BlockCandidateService(
     private val propertyRepository: PropertyRepository
 ) {
 
-    fun saveAll(blocks: List<BlockData>) {
+    fun save(blockData: BlockData) {
 
-        blocks.forEach { blockData ->
+        val blockCandidateId = BlockCandidateId(
+            space = blockData.block.space,
+            height = blockData.block.height,
+            proposerId = blockData.block.proposerId
+        )
 
-            val transactions = blockData.transactions.map { it.toModel() }
-            val votes = blockData.votes.map { it.toModel() }
+        if (blockCandidateRepository.existsById(blockCandidateId)) {
+            return
+        }
 
-            transactionRepository.saveAll(transactions)
-            voteRepository.saveAll(votes)
+        val transactions = blockData.transactions.map { it.toModel() }
+        val votes = blockData.votes.map { it.toModel() }
 
-            val blockCandidate = BlockCandidate(
+        transactionRepository.saveAll(transactions)
+        voteRepository.saveAll(votes)
+
+        blockCandidateRepository.save(
+            BlockCandidate(
                 id = BlockCandidateId(
                     space = blockData.block.space,
                     height = blockData.block.height,
@@ -41,9 +50,7 @@ class BlockCandidateService(
                 data = objectMapper.writeValueAsString(blockData),
                 timeReceived = Instant.now().toEpochMilli()
             )
-
-            blockCandidateRepository.save(blockCandidate)
-        }
+        )
     }
 
     fun getBlockCandidate(space: String, height: Long, proposerId: String): BlockData? {

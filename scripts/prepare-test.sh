@@ -8,7 +8,7 @@ curl -X POST \
   -d '{"privateKey":"78CA9AE2A589CB7D0E151E153F2CCCC760CBDAA05FE74C802FBAC6B0CDDCA534"}' \
   http://localhost:9901/api/v1/admin/accounts
 
-#validator1
+#validator1emp
 curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"privateKey":"7869F85C5F8138512E75C2E8469DDDA0A6A4EFBCD5FE3F068EECD9B0439601C9"}' \
