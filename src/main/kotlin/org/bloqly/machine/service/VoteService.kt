@@ -5,6 +5,7 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
@@ -17,7 +18,8 @@ import java.time.Instant
 @Transactional
 class VoteService(
     private val voteRepository: VoteRepository,
-    private val blockRepository: BlockRepository
+    private val blockRepository: BlockRepository,
+    private val roundRepository: RoundRepository
 ) {
 
     fun createVote(space: String, validator: Account): Vote {
@@ -34,7 +36,6 @@ class VoteService(
             val timestamp = Instant.now().toEpochMilli()
 
             val dataToSign = Bytes.concat(
-
                 validator.id.toByteArray(),
                 space.toByteArray(),
                 EncodingUtils.longToBytes(lastBlock.height),
@@ -49,6 +50,8 @@ class VoteService(
             val vote = Vote(
                 id = voteId,
                 blockId = lastBlock.id,
+                round = 0,
+                proposerId = "",
                 timestamp = timestamp,
                 signature = signature,
                 publicKey = validator.publicKey!!
@@ -56,5 +59,13 @@ class VoteService(
 
             voteRepository.save(vote)
         }
+    }
+
+    fun processVote(vote: Vote) {
+        require(CryptoUtils.verifyVote(vote)) {
+            "Could not verify vote $vote"
+        }
+
+        voteRepository.save(vote)
     }
 }

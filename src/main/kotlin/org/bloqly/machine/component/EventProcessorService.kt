@@ -9,7 +9,6 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
-import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -43,8 +42,7 @@ class EventProcessorService(
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
     private val transactionProcessor: TransactionProcessor,
-    private val propertyRepository: PropertyRepository,
-    private val roundRepository: RoundRepository
+    private val propertyRepository: PropertyRepository
 ) {
     private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
@@ -158,7 +156,9 @@ class EventProcessorService(
 
             validators
                 .filter { it.privateKey != null }
-                .map { validator -> voteService.createVote(space, validator) }
+                .map { voter ->
+                    voteService.createVote(space, voter)
+                }
         }
     }
 
@@ -167,12 +167,7 @@ class EventProcessorService(
      *
      */
     fun onVote(vote: Vote) {
-
-        require(CryptoUtils.verifyVote(vote)) {
-            "Could not verify vote $vote"
-        }
-
-        voteRepository.save(vote)
+        voteService.processVote(vote)
     }
 
     /**
