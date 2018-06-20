@@ -3,6 +3,7 @@ package org.bloqly.machine.service
 import com.google.common.primitives.Bytes.concat
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
@@ -59,7 +60,7 @@ class TransactionService(
 
         return Transaction(
             id = transactionId,
-            space = space,
+            spaceId = space,
             origin = origin.id,
             destination = destinationId,
             self = self,
@@ -77,7 +78,7 @@ class TransactionService(
     fun isActual(transaction: Transaction): Boolean {
 
         val referencedBlock = blockRepository.findById(transaction.referencedBlockId).orElseThrow()
-        val lastBlock = blockRepository.getLastBlock(transaction.space)
+        val lastBlock = blockRepository.getLastBlock(transaction.spaceId)
 
         return lastBlock.height - referencedBlock.height <= MAX_REFERENCED_BLOCK_DEPTH
     }
@@ -89,10 +90,10 @@ class TransactionService(
             .filter { isActual(it) }
     }
 
-    fun getPendingTransactionsBySpace(space: String): List<Transaction> {
+    fun getPendingTransactionsBySpace(space: Space): List<Transaction> {
         val minTimestamp = Instant.now().toEpochMilli() - MAX_TRANSACTION_AGE
         return transactionRepository
-            .findPendingTransactionsBySpace(space, minTimestamp)
+            .findPendingTransactionsBySpaceId(space.id, minTimestamp)
             .filter { isActual(it) }
     }
 }

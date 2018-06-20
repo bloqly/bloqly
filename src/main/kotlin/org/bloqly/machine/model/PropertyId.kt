@@ -6,7 +6,7 @@ import javax.persistence.Embeddable
 @Embeddable
 data class PropertyId(
 
-    val space: String,
+    val spaceId: String,
 
     val self: String,
 

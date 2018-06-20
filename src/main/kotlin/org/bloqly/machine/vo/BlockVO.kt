@@ -6,7 +6,7 @@ import org.bloqly.machine.model.Block
 @ValueObject
 data class BlockVO(
     val id: String,
-    val space: String,
+    val spaceId: String,
     val height: Long,
     val round: Long,
     val timestamp: Long,
@@ -21,7 +21,7 @@ data class BlockVO(
 
         return Block(
             id = id,
-            space = space,
+            spaceId = spaceId,
             height = height,
             round = round,
             timestamp = timestamp,

@@ -1,8 +1,8 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
-import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.TestService
@@ -41,24 +41,28 @@ class VoteServiceTest {
 
     private lateinit var validators: List<Account>
 
+    private lateinit var space: Space
+
     @Before
     fun init() {
         testService.cleanup()
         testService.createBlockchain()
 
-        validators = accountService.getValidatorsForSpace(DEFAULT_SPACE)
+        space = testService.getDefaultSpace()
 
-        val producer = accountService.getActiveValidator(DEFAULT_SPACE)
+        validators = accountService.getValidatorsForSpace(space)
+
+        val producer = accountService.getActiveProducerBySpace(space)
 
         validator = validators.first()
 
-        vote = voteService.createVote(DEFAULT_SPACE, validator, producer)
+        vote = voteService.createVote(space, validator, producer)
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val producer = accountService.getActiveValidator(DEFAULT_SPACE)
-        val newVote = voteService.createVote(DEFAULT_SPACE, validator, producer)
+        val producer = accountService.getActiveProducerBySpace(space)
+        val newVote = voteService.createVote(space, validator, producer)
         assertEquals(newVote, vote)
     }
 
@@ -93,7 +97,7 @@ class VoteServiceTest {
     @Test
     fun testVerifyVoteRoundWrongFails() {
 
-        assertFalse(verifyVote(vote.copy(round = 100)))
+        assertFalse(verifyVote(vote.copy(id = vote.id.copy(round = 100))))
     }
 
     @Test
@@ -119,7 +123,7 @@ class VoteServiceTest {
     @Test
     fun testVerifyVoteSpaceWrongFails() {
 
-        val newId = vote.id.copy(space = FAKE_DATA)
+        val newId = vote.id.copy(spaceId = FAKE_DATA)
 
         assertFalse(verifyVote(vote.copy(id = newId)))
     }

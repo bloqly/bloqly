@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.CryptoUtils
@@ -23,8 +24,8 @@ class AccountService(
     private val accountRepository: AccountRepository,
     private val propertyRepository: PropertyRepository
 ) {
-    // TODO this method can theoretically return null
-    fun getActiveValidator(space: String): Account {
+
+    fun getActiveProducerBySpace(space: Space): Account {
 
         val round = TimeUtils.getCurrentRound()
 
@@ -52,9 +53,9 @@ class AccountService(
         )
     }
 
-    fun getValidatorsForSpace(space: String): List<Account> {
+    fun getValidatorsForSpace(space: Space): List<Account> {
 
-        val powerProperties = propertyRepository.findBySpaceAndKey(space, POWER_KEY)
+        val powerProperties = propertyRepository.findBySpaceAndKey(space.id, POWER_KEY)
         val accountIds = powerProperties.map { it.id.target }
 
         return accountRepository
@@ -65,7 +66,7 @@ class AccountService(
     fun getAccountPower(space: String, accountId: String): BigInteger {
 
         val propertyKey = PropertyId(
-            space = space,
+            spaceId = space,
             self = DEFAULT_SELF,
             target = accountId,
             key = POWER_KEY

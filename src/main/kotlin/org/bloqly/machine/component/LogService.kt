@@ -4,7 +4,6 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.AccountService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import javax.annotation.PostConstruct
 
 @Service
 class LogService(
@@ -14,18 +13,19 @@ class LogService(
 
     private val log = LoggerFactory.getLogger(LogService::class.simpleName)
 
+    /*
     @PostConstruct
     fun init() {
-        spaceRepository.findAll().forEach { space ->
+        spaceRepository.findAll().forEach { spaceId ->
 
-            val validators = accountService.getValidatorsForSpace(space.id)
+            val validators = accountService.getValidatorsForSpace(spaceId)
 
             if (validators.isNotEmpty()) {
-                log.info("validators for space $space:")
+                log.info("validators for spaceId $spaceId:")
                 validators.forEach { account ->
                     log.info("\t${account.id}")
                 }
             }
         }
-    }
+    }*/
 }

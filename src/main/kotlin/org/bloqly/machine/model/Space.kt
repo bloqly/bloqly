@@ -7,7 +7,6 @@ import javax.persistence.Id
 @Entity
 data class Space(
 
-        // space name
     @Id
     val id: String,
 

@@ -157,7 +157,7 @@ class TransactionServiceTest {
 
         assertFalse(
             isTransactionValid(
-                transaction.copy(space = FAKE_DATA)
+                transaction.copy(spaceId = FAKE_DATA)
             )
         )
     }

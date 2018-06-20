@@ -14,7 +14,7 @@ data class Block(
     var id: String,
 
     @Column(nullable = false)
-    var space: String,
+    var spaceId: String,
 
     @Column(nullable = false)
     var height: Long,
@@ -46,7 +46,7 @@ data class Block(
 
         return BlockVO(
             id = id,
-            space = space,
+            spaceId = spaceId,
             height = height,
             round = round,
             timestamp = timestamp,

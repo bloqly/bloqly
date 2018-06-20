@@ -34,7 +34,7 @@ class EventReceiverService(
     fun receiveProposals(proposals: List<BlockData>) {
         val validatedProposals = proposals
             .filter { proposal ->
-                val quorum = propertyRepository.getQuorum(proposal.block.space)
+                val quorum = propertyRepository.getQuorumBySpaceId(proposal.block.spaceId)
                 proposal.votes.size >= quorum
             }
 

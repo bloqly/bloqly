@@ -7,6 +7,6 @@ import org.springframework.data.repository.CrudRepository
 
 interface PropertyRepository : CrudRepository<Property, PropertyId>, PropertyRepositoryCustom {
 
-    @Query("select p from Property p where p.id.space = ?1 and p.id.key = ?2")
+    @Query("select p from Property p where p.id.spaceId = ?1 and p.id.key = ?2")
     fun findBySpaceAndKey(space: String, key: String): List<Property>
 }

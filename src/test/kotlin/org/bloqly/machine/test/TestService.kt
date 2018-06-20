@@ -6,6 +6,7 @@ import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.ResetService
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
@@ -93,7 +94,7 @@ class TestService(
     }
 
     fun testPropertiesAreCreated() {
-        assertEquals(2, propertyRepository.getQuorum(DEFAULT_SPACE))
+        assertEquals(2, propertyRepository.getQuorumBySpace(getDefaultSpace()))
     }
 
     fun testSpaceCreated() {
@@ -101,7 +102,7 @@ class TestService(
     }
 
     fun testValidatorsInitialized() {
-        val validators = accountService.getValidatorsForSpace(DEFAULT_SPACE)
+        val validators = accountService.getValidatorsForSpace(getDefaultSpace())
 
         assertEquals(3, validators.size)
 
@@ -129,6 +130,10 @@ class TestService(
 
     fun getVotes(): List<VoteVO> {
         return eventProcessorService.onGetVotes().map { it.toVO() }
+    }
+
+    fun getDefaultSpace(): Space {
+        return spaceRepository.findById(DEFAULT_SPACE).orElseThrow()
     }
 
     @ValueObject

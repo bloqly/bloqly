@@ -19,7 +19,7 @@ class GenesisController(
     private val blockService: BlockService
 ) {
 
-    @GetMapping("/{space}")
+    @GetMapping("/{spaceId}")
     fun exportGenesis(@PathVariable space: String): ResponseEntity<GenesisEncoded> {
 
         val genesis = blockService.exportFirst(space)
@@ -27,7 +27,7 @@ class GenesisController(
         return ResponseEntity(GenesisEncoded(genesis), HttpStatus.OK)
     }
 
-    @PostMapping("/{space}")
+    @PostMapping("/{spaceId}")
     fun importGenesis(@RequestBody genesisEncoded: GenesisEncoded): ResponseEntity<Void> {
 
         blockService.importFirst(genesisEncoded.genesis)

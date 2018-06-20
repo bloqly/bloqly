@@ -35,7 +35,7 @@ data class TransactionVO(
 
         return Transaction(
             id = id,
-            space = space,
+            spaceId = space,
             origin = origin,
             destination = destination,
             self = self,

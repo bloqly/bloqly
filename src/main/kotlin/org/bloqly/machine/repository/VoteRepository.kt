@@ -9,6 +9,6 @@ interface VoteRepository : CrudRepository<Vote, VoteId> {
 
     fun findByBlockId(blockId: String): List<Vote>
 
-    @Query("select * from vote where space = ?1 order by height limit 1", nativeQuery = true)
-    fun findLastForSpace(space: String): Vote
+    @Query("select * from vote where space_id = ?1 order by height limit 1", nativeQuery = true)
+    fun findLastForSpace(spaceId: String): Vote
 }

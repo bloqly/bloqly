@@ -32,7 +32,7 @@ class PropertyService(
             .map { (target, key, value) ->
                 Property(
                     id = PropertyId(
-                        space = DEFAULT_SPACE,
+                        spaceId = DEFAULT_SPACE,
                         self = DEFAULT_SELF,
                         target = target,
                         key = key

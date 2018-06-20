@@ -8,7 +8,7 @@ import org.bloqly.machine.util.EncodingUtils
 @ValueObject
 data class VoteVO(
     val validatorId: String,
-    val space: String,
+    val spaceId: String,
     val height: Long,
     val blockId: String,
     val round: Long,
@@ -22,14 +22,14 @@ data class VoteVO(
 
         val voteId = VoteId(
             validatorId = validatorId,
-            space = space,
-            height = height
+            spaceId = spaceId,
+            height = height,
+            round = round
         )
 
         return Vote(
             id = voteId,
             blockId = blockId,
-            round = round,
             proposerId = proposerId,
             timestamp = timestamp,
             signature = EncodingUtils.decodeFromString16(signature),

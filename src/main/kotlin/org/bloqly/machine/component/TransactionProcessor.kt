@@ -59,7 +59,7 @@ class TransactionProcessor(
         if (transaction.transactionType == TransactionType.CREATE) {
 
             createContract(
-                space = transaction.space,
+                space = transaction.spaceId,
                 self = transaction.self!!,
                 body = String(transaction.value),
                 owner = transaction.destination

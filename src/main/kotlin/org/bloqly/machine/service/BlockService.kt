@@ -40,7 +40,7 @@ class BlockService(
 ) {
 
     fun newBlock(
-        space: String,
+        spaceId: String,
         height: Long,
         timestamp: Long,
         parentHash: String,
@@ -58,7 +58,7 @@ class BlockService(
 
                 val dataToSign = CryptoUtils.digest(
                     arrayOf(
-                        space.toByteArray(),
+                        spaceId.toByteArray(),
                         EncodingUtils.longToBytes(height),
                         EncodingUtils.longToBytes(round),
                         EncodingUtils.longToBytes(timestamp),
@@ -76,7 +76,7 @@ class BlockService(
 
                 Block(
                     id = blockId,
-                    space = space,
+                    spaceId = spaceId,
                     height = height,
                     round = round,
                     timestamp = timestamp,
@@ -117,13 +117,13 @@ class BlockService(
 
         val genesis = objectMapper.readValue(json, Genesis::class.java)
 
-        ensureSpaceEmpty(genesis.block.space)
+        ensureSpaceEmpty(genesis.block.spaceId)
 
         val block = genesis.block.toModel()
 
         spaceRepository.save(
             Space(
-                id = block.space,
+                id = block.spaceId,
                 creatorId = genesis.block.proposerId
             )
         )
@@ -195,8 +195,8 @@ class BlockService(
             "Transaction has invalid referencedBlockId."
         }
 
-        require(transaction.space == block.space) {
-            "Transaction space ${transaction.space} should be the same as block space ${block.space}."
+        require(transaction.spaceId == block.spaceId) {
+            "Transaction spaceId ${transaction.spaceId} should be the same as block spaceId ${block.spaceId}."
         }
 
         require(transaction.destination == Application.DEFAULT_SELF) {
@@ -218,8 +218,8 @@ class BlockService(
 
     fun ensureSpaceEmpty(space: String) {
 
-        require(!blockRepository.existsBySpace(space)) {
-            "Blockchain already initialized for space '$space'"
+        require(!blockRepository.existsBySpaceId(space)) {
+            "Blockchain already initialized for spaceId '$space'"
         }
 
         require(!spaceRepository.existsById(space)) {

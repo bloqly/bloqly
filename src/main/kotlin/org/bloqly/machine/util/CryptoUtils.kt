@@ -129,7 +129,7 @@ object CryptoUtils {
     fun isTransactionValid(transaction: Transaction): Boolean {
 
         val dataToVerify = Bytes.concat(
-            transaction.space.toByteArray(),
+            transaction.spaceId.toByteArray(),
             transaction.origin.toByteArray(),
             transaction.destination.toByteArray(),
             transaction.value,
@@ -158,9 +158,9 @@ object CryptoUtils {
         val dataToVerify = Bytes.concat(
             vote.id.validatorId.toByteArray(),
             vote.proposerId.toByteArray(),
-            vote.id.space.toByteArray(),
+            vote.id.spaceId.toByteArray(),
             EncodingUtils.longToBytes(vote.id.height),
-            EncodingUtils.longToBytes(vote.round),
+            EncodingUtils.longToBytes(vote.id.round),
             vote.blockId.toByteArray(),
             EncodingUtils.longToBytes(vote.timestamp)
         )

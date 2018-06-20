@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
 import org.bloqly.machine.repository.BlockRepository
@@ -22,28 +23,29 @@ class VoteService(
 ) {
 
     fun createVote(
-        space: String,
+        space: Space,
         validator: Account,
         producer: Account
     ): Vote {
 
-        val lastBlock = blockRepository.getLastBlock(space)
+        val lastBlock = blockRepository.getLastBlock(space.id)
+
+        val round = TimeUtils.getCurrentRound()
 
         val voteId = VoteId(
             validatorId = validator.id,
-            space = space,
-            height = lastBlock.height
+            spaceId = space.id,
+            height = lastBlock.height,
+            round = round
         )
 
         return voteRepository.findById(voteId).orElseGet {
             val timestamp = Instant.now().toEpochMilli()
 
-            val round = TimeUtils.getCurrentRound()
-
             val dataToSign = Bytes.concat(
                 validator.id.toByteArray(),
                 producer.id.toByteArray(),
-                space.toByteArray(),
+                space.id.toByteArray(),
                 EncodingUtils.longToBytes(lastBlock.height),
                 EncodingUtils.longToBytes(round),
                 lastBlock.id.toByteArray(),
@@ -57,7 +59,6 @@ class VoteService(
             val vote = Vote(
                 id = voteId,
                 blockId = lastBlock.id,
-                round = round,
                 proposerId = producer.id,
                 timestamp = timestamp,
                 signature = signature,

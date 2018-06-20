@@ -46,9 +46,9 @@ class EventProcessorService(
 ) {
     private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
-    fun createBlockchain(space: String, baseDir: String) {
+    fun createBlockchain(spaceId: String, baseDir: String) {
 
-        blockService.ensureSpaceEmpty(space)
+        blockService.ensureSpaceEmpty(spaceId)
 
         val contractBody = File(baseDir).list()
             .filter {
@@ -65,7 +65,7 @@ class EventProcessorService(
 
         val rootId = initProperties.find { it.middle == "root" }!!.right.toString()
 
-        spaceRepository.save(Space(id = space, creatorId = rootId))
+        spaceRepository.save(Space(id = spaceId, creatorId = rootId))
 
         val timestamp = Instant.now().toEpochMilli()
 
@@ -76,7 +76,7 @@ class EventProcessorService(
         )
 
         val firstBlock = blockService.newBlock(
-            space = space,
+            spaceId = spaceId,
             height = height,
             timestamp = timestamp,
             parentHash = contractBodyHash,
@@ -86,7 +86,7 @@ class EventProcessorService(
         )
 
         val transaction = transactionService.newTransaction(
-            space = space,
+            space = spaceId,
             originId = rootId,
             destinationId = DEFAULT_SELF,
             self = DEFAULT_SELF,
@@ -147,20 +147,14 @@ class EventProcessorService(
      *
      */
     fun onGetVotes(): List<Vote> {
-
-        val spaces = spaceRepository.findAll().map { it.id }
-
-        return spaces.flatMap { space ->
-            val validators = accountService.getValidatorsForSpace(space)
-
-            val producer = accountService.getActiveValidator(space)
-
-            validators
-                .filter { it.privateKey != null }
-                .map { voter ->
-                    voteService.createVote(space, voter, producer)
-                }
-        }
+        return spaceRepository
+            .findAll()
+            .flatMap { space ->
+                val producer = accountService.getActiveProducerBySpace(space)
+                accountService.getValidatorsForSpace(space)
+                    .filter { it.privateKey != null }
+                    .map { voter -> voteService.createVote(space, voter, producer) }
+            }
     }
 
     /**
@@ -177,14 +171,13 @@ class EventProcessorService(
     // TODO return existing proposals if available
     fun onGetProposals(): List<BlockData> {
 
-        val spaces = spaceRepository.findAll().map { it.id }
-
-        return spaces
+        return spaceRepository
+            .findAll()
             .mapNotNull { space ->
 
-                val lastBlock = blockRepository.getLastBlock(space)
+                val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
-                val validator = accountService.getActiveValidator(space)
+                val validator = accountService.getActiveProducerBySpace(space)
 
                 val savedProposal = blockCandidateService.getBlockCandidate(space, newHeight, validator.id)
 
@@ -197,7 +190,7 @@ class EventProcessorService(
                     validator.privateKey?.let {
 
                         val newBlock = blockService.newBlock(
-                            space = space,
+                            spaceId = space.id,
                             height = newHeight,
                             timestamp = Instant.now().toEpochMilli(),
                             parentHash = lastBlock.id,
@@ -216,12 +209,12 @@ class EventProcessorService(
 
     private fun hasQuorum(blockData: BlockData): Boolean {
 
-        val quorum = propertyRepository.getQuorum(blockData.block.space)
+        val quorum = propertyRepository.getQuorumBySpaceId(blockData.block.spaceId)
 
         return blockData.votes.size >= quorum
     }
 
-    private fun getPendingTransactions(space: String): List<Transaction> {
+    private fun getPendingTransactions(space: Space): List<Transaction> {
         return transactionService.getPendingTransactionsBySpace(space)
     }
 
@@ -235,29 +228,29 @@ class EventProcessorService(
 
     fun onSelectBestProposal(): List<BlockData> {
 
-        val spaces = spaceRepository.findAll().map { it.id }
+        return spaceRepository
+            .findAll()
+            .mapNotNull { space ->
+                val lastBlock = blockRepository.getLastBlock(space.id)
+                val newHeight = lastBlock.height + 1
 
-        return spaces.mapNotNull { spaceId ->
-            val lastBlock = blockRepository.getLastBlock(spaceId)
-            val newHeight = lastBlock.height + 1
+                // what is the active validator for the current round in this spaceId?
+                val validator = accountService.getActiveProducerBySpace(space)
 
-            // what is the active validator for the current round in this space?
-            val validator = accountService.getActiveValidator(spaceId)
+                // did this validator produce a block candidate we are aware of?
+                val blockCandidate = blockCandidateService.getBlockCandidate(space, newHeight, validator.id)
 
-            // did this validator produce a block candidate we are aware of?
-            val blockCandidate = blockCandidateService.getBlockCandidate(spaceId, newHeight, validator.id)
+                if (blockCandidate != null) {
+                    // block candidate is found, select it
 
-            if (blockCandidate != null) {
-                // block candidate is found, select it
+                    val block = blockCandidate.block
 
-                val block = blockCandidate.block
+                    log.info("Selected next block ${block.id} on height ${block.height}.")
 
-                log.info("Selected next block ${block.id} on height ${block.height}.")
+                    blockRepository.save(block.toModel())
+                }
 
-                blockRepository.save(block.toModel())
+                blockCandidate
             }
-
-            blockCandidate
-        }
     }
 }

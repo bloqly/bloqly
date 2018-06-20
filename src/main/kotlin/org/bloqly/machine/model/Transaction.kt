@@ -12,7 +12,7 @@ data class Transaction(
     @Id
     val id: String,
 
-    val space: String,
+    val spaceId: String,
 
     val origin: String,
 
@@ -47,7 +47,7 @@ data class Transaction(
 
         return TransactionVO(
             id = id,
-            space = space,
+            space = spaceId,
             destination = destination,
             self = self,
             key = key,

@@ -20,7 +20,7 @@ object TestUtils {
 
                     id = "",
 
-                    space = "",
+                    spaceId = "",
 
                     transactionType = TransactionType.CALL,
 

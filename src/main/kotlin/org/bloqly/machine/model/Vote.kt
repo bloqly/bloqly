@@ -16,9 +16,6 @@ data class Vote(
     val blockId: String,
 
     @Column(nullable = false)
-    val round: Long,
-
-    @Column(nullable = false)
     val proposerId: String,
 
     @Column(nullable = false)
@@ -35,10 +32,10 @@ data class Vote(
 
         return VoteVO(
             validatorId = id.validatorId,
-            space = id.space,
+            spaceId = id.spaceId,
             height = id.height,
             blockId = blockId,
-            round = round,
+            round = id.round,
             proposerId = proposerId,
             timestamp = timestamp,
             signature = EncodingUtils.encodeToString16(signature),

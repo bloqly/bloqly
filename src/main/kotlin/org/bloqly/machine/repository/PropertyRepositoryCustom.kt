@@ -1,5 +1,9 @@
 package org.bloqly.machine.repository
 
+import org.bloqly.machine.model.Space
+
 interface PropertyRepositoryCustom {
-    fun getQuorum(space: String): Int
+    fun getQuorumBySpace(space: Space): Int
+
+    fun getQuorumBySpaceId(spaceId: String): Int
 }

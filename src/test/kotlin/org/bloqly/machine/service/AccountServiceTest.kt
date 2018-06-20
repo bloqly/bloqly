@@ -1,8 +1,8 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
-import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.test.TestService
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
@@ -25,6 +25,8 @@ class AccountServiceTest {
 
     private lateinit var account: Account
 
+    private lateinit var space: Space
+
     @Before
     fun setup() {
         testService.cleanup()
@@ -32,12 +34,14 @@ class AccountServiceTest {
 
         account = accountService.newAccount()
 
+        space = testService.getDefaultSpace()
+
         accountService.importAccount(account.privateKey!!)
     }
 
     @Test
     fun testGetActiveValidator() {
-        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE))
+        assertNotNull(accountService.getActiveProducerBySpace(space))
     }
 
     @Test
