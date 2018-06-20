@@ -19,12 +19,12 @@ class SchedulerService(
 
     private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 1000)
     fun queryForNodes() {
         nodeQueryService.queryForNodes()
     }
 
-    @Scheduled(fixedDelay = 5000, initialDelay = 1000)
+    @Scheduled(fixedDelay = 1000)
     fun sendTransactions() {
 
         val transactions = transactionService.getPendingTransactions()
@@ -37,7 +37,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(fixedDelay = 5000, initialDelay = 2000)
+    @Scheduled(fixedDelay = 1000)
     fun sendVotes() {
         val votes = eventProcessorService.onGetVotes()
 
@@ -49,7 +49,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(fixedDelay = 5000, initialDelay = 3000)
+    @Scheduled(fixedDelay = 1000, initialDelay = 500)
     fun sendProposals() {
 
         val proposals = eventProcessorService.onGetProposals()
@@ -64,7 +64,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(fixedDelay = 5000, initialDelay = 4000)
+    @Scheduled(fixedDelay = 1000, initialDelay = 1000)
     fun selectBestProposal() {
         eventProcessorService.onSelectBestProposal()
     }
