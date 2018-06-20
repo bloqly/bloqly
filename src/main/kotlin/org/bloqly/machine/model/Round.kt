@@ -4,12 +4,12 @@ import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 
 @Entity
-data class EmptyRound(
+data class Round(
 
     @EmbeddedId
     val id: RoundId,
 
-    val counter: Int,
+    val producerId: String,
 
-    val lastMissTime: Long
+    val createTime: Long
 )

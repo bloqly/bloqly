@@ -7,10 +7,9 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
-import org.bloqly.machine.model.RoundId
 import org.bloqly.machine.repository.AccountRepository
-import org.bloqly.machine.repository.EmptyRoundRepository
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.ParameterUtils.writeLong
@@ -48,7 +47,7 @@ class EventProcessorServiceTest {
     private lateinit var testService: TestService
 
     @Autowired
-    private lateinit var emptyRoundRepository: EmptyRoundRepository
+    private lateinit var roundRepository: RoundRepository
 
     private lateinit var root: Account
 
@@ -109,24 +108,6 @@ class EventProcessorServiceTest {
                 Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.id, "balance"), writeLong("999997"))
             )
         )
-    }
-
-    @Test
-    fun testEmptyRoundCreated() {
-
-        val roundId = RoundId(DEFAULT_SPACE, 1)
-
-        assertFalse(emptyRoundRepository.existsById(roundId))
-
-        eventProcessorService.onSelectBestProposal()
-
-        assertTrue(emptyRoundRepository.existsById(roundId))
-
-        assertEquals(1, emptyRoundRepository.findById(roundId).orElseThrow().counter)
-
-        eventProcessorService.onSelectBestProposal()
-
-        assertEquals(2, emptyRoundRepository.findById(roundId).orElseThrow().counter)
     }
 
     @Test

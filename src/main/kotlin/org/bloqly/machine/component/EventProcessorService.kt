@@ -8,8 +8,8 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.EmptyRoundRepository
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -44,7 +44,7 @@ class EventProcessorService(
     private val blockCandidateService: BlockCandidateService,
     private val transactionProcessor: TransactionProcessor,
     private val propertyRepository: PropertyRepository,
-    private val emptyRoundRepository: EmptyRoundRepository
+    private val roundRepository: RoundRepository
 ) {
     private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
@@ -216,7 +216,6 @@ class EventProcessorService(
             }
             .filter { hasQuorum(it) }
             .onEach { blockCandidateService.save(it) }
-            .toList()
     }
 
     private fun hasQuorum(blockData: BlockData): Boolean {
@@ -260,10 +259,6 @@ class EventProcessorService(
                 log.info("Selected next block ${block.id} on height ${block.height}.")
 
                 blockRepository.save(block.toModel())
-            } else {
-                // no block candidate is found, increase empty round counter
-
-                emptyRoundRepository.processEmptyRound(spaceId, newHeight)
             }
 
             blockCandidate

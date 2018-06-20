@@ -4,7 +4,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.repository.EmptyRoundRepository
+import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
@@ -38,7 +38,7 @@ class WorkflowTest {
     private lateinit var blockService: BlockService
 
     @Autowired
-    private lateinit var emptyRoundRepository: EmptyRoundRepository
+    private lateinit var roundRepository: RoundRepository
 
     @Autowired
     private lateinit var voteRepository: VoteRepository
@@ -91,7 +91,7 @@ class WorkflowTest {
 
         assertEquals(1, lastBlock.height)
 
-        assertTrue(emptyRoundRepository.findAll().toList().isEmpty())
+        assertTrue(roundRepository.findAll().toList().isEmpty())
     }
 
     private fun sendTransactions(transactions: List<Transaction>) {

@@ -4,7 +4,7 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.ContractRepository
-import org.bloqly.machine.repository.EmptyRoundRepository
+import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.repository.PropertyRepository
@@ -27,7 +27,7 @@ class ResetService(
     private val entityEventRepository: EntityEventRepository,
     private val voteRepository: VoteRepository,
     private val blockCandidateRepository: BlockCandidateRepository,
-    private val emptyRoundRepository: EmptyRoundRepository
+    private val roundRepository: RoundRepository
 ) {
 
     fun reset() {
@@ -41,6 +41,6 @@ class ResetService(
         entityEventRepository.deleteAll()
         voteRepository.deleteAll()
         blockCandidateRepository.deleteAll()
-        emptyRoundRepository.deleteAll()
+        roundRepository.deleteAll()
     }
 }

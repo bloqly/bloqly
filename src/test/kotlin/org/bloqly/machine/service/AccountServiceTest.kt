@@ -2,13 +2,8 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.Application.Companion.MAX_EMPTY_ROUND_COUNTER
 import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.EmptyRound
-import org.bloqly.machine.model.RoundId
-import org.bloqly.machine.repository.EmptyRoundRepository
 import org.bloqly.machine.test.TestService
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Before
@@ -24,9 +19,6 @@ class AccountServiceTest {
 
     @Autowired
     private lateinit var accountService: AccountService
-
-    @Autowired
-    private lateinit var emptyRoundRepository: EmptyRoundRepository
 
     @Autowired
     private lateinit var testService: TestService
@@ -71,29 +63,5 @@ class AccountServiceTest {
             fail()
         } catch (e: Exception) {
         }
-    }
-
-    @Test
-    fun testNextValidatorSelectedAfterMissedRound() {
-
-        val validator2 = accountService.getActiveValidator(DEFAULT_SPACE, 2)
-
-        emptyRoundRepository.save(
-            EmptyRound(
-                id = RoundId(DEFAULT_SPACE, 1),
-                counter = MAX_EMPTY_ROUND_COUNTER,
-                lastMissTime = 0
-            )
-        )
-
-        accountService.getValidatorsForSpace(DEFAULT_SPACE)
-
-        val validator1Temp = accountService.getActiveValidator(DEFAULT_SPACE, 1)
-
-        assertEquals(validator1Temp, validator2)
-
-        val validator2Normal = accountService.getActiveValidator(DEFAULT_SPACE, 2)
-
-        assertEquals(validator2Normal, validator2)
     }
 }
