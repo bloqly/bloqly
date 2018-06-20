@@ -68,4 +68,12 @@ class VoteService(
 
         voteRepository.save(vote)
     }
+
+    fun save(vote: Vote) {
+        require(CryptoUtils.verifyVote(vote)) {
+            "Could not verify vote $vote"
+        }
+
+        voteRepository.save(vote)
+    }
 }

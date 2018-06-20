@@ -7,6 +7,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.RoundId
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.RoundRepository
@@ -83,6 +84,11 @@ class EventProcessorServiceTest {
     @Test
     fun testValidatorsPowerValues() {
         testService.testValidatorsPowerValues()
+    }
+
+    @Test
+    fun testZeroRoundCreated() {
+        assertTrue(roundRepository.existsById(RoundId(DEFAULT_SPACE, 0)))
     }
 
     @Test

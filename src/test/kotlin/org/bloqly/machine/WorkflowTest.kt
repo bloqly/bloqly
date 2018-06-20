@@ -91,7 +91,6 @@ class WorkflowTest {
 
         assertEquals(1, lastBlock.height)
 
-        assertTrue(roundRepository.findAll().toList().isEmpty())
     }
 
     private fun sendTransactions(transactions: List<Transaction>) {

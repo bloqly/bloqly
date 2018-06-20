@@ -16,6 +16,7 @@ import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockCandidateService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.RoundService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
@@ -42,7 +43,8 @@ class EventProcessorService(
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
     private val transactionProcessor: TransactionProcessor,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val roundService: RoundService
 ) {
     private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
@@ -101,8 +103,9 @@ class EventProcessorService(
         transactionProcessor.processTransaction(transaction)
         transactionRepository.save(transaction)
 
-        firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
+        roundService.createZeroRound(space, rootId)
 
+        firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
         blockRepository.save(firstBlock)
     }
 
