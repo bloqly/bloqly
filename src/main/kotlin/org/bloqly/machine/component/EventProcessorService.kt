@@ -21,6 +21,7 @@ import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.FileUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -80,7 +81,7 @@ class EventProcessorService(
             height = height,
             timestamp = timestamp,
             parentHash = contractBodyHash,
-            proposerId = rootId,
+            producerId = rootId,
             txHash = null,
             validatorTxHash = validatorTxHash
         )
@@ -131,7 +132,7 @@ class EventProcessorService(
 
         if (
             transaction.timestamp > now ||
-            !CryptoUtils.isTransactionValid(transaction) ||
+            !CryptoUtils.verifyTransaction(transaction) ||
             transactionRepository.existsById(transaction.id) ||
             !blockRepository.existsById(transaction.referencedBlockId) ||
             !transactionService.isActual(transaction)
@@ -150,10 +151,11 @@ class EventProcessorService(
         return spaceRepository
             .findAll()
             .flatMap { space ->
-                val producer = accountService.getActiveProducerBySpace(space)
+                val round = TimeUtils.getCurrentRound()
+                val producer = accountService.getActiveProducerBySpace(space, round)
                 accountService.getValidatorsForSpace(space)
-                    .filter { it.privateKey != null }
-                    .map { voter -> voteService.createVote(space, voter, producer) }
+                    .filter { it.hasKey() }
+                    .map { voter -> voteService.createVote(space, voter, producer, round) }
             }
     }
 
@@ -175,11 +177,18 @@ class EventProcessorService(
             .findAll()
             .mapNotNull { space ->
 
+                val round = TimeUtils.getCurrentRound()
+
                 val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
-                val validator = accountService.getActiveProducerBySpace(space)
+                val producer = accountService.getActiveProducerBySpace(space, round)
 
-                val savedProposal = blockCandidateService.getBlockCandidate(space, newHeight, validator.id)
+                val savedProposal = blockCandidateService.getBlockCandidate(
+                    space = space,
+                    height = newHeight,
+                    round = round,
+                    producerId = producer.id
+                )
 
                 if (savedProposal != null) {
                     savedProposal
@@ -187,14 +196,14 @@ class EventProcessorService(
                     val transactions = getPendingTransactions(space)
                     val votes = getVotesForBlock(lastBlock)
 
-                    validator.privateKey?.let {
+                    producer.privateKey?.let {
 
                         val newBlock = blockService.newBlock(
                             spaceId = space.id,
                             height = newHeight,
                             timestamp = Instant.now().toEpochMilli(),
                             parentHash = lastBlock.id,
-                            proposerId = validator.id,
+                            producerId = producer.id,
                             txHash = CryptoUtils.digestTransactions(transactions),
                             validatorTxHash = CryptoUtils.digestVotes(votes)
                         )
@@ -227,18 +236,19 @@ class EventProcessorService(
     }
 
     fun onSelectBestProposal(): List<BlockData> {
-
         return spaceRepository
             .findAll()
             .mapNotNull { space ->
                 val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
 
+                val round = TimeUtils.getCurrentRound()
+
                 // what is the active validator for the current round in this spaceId?
-                val validator = accountService.getActiveProducerBySpace(space)
+                val producer = accountService.getActiveProducerBySpace(space, round)
 
                 // did this validator produce a block candidate we are aware of?
-                val blockCandidate = blockCandidateService.getBlockCandidate(space, newHeight, validator.id)
+                val blockCandidate = blockCandidateService.getBlockCandidate(space, newHeight, round, producer.id)
 
                 if (blockCandidate != null) {
                     // block candidate is found, select it

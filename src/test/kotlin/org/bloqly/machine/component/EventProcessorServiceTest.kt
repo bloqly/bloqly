@@ -14,6 +14,7 @@ import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
+import org.bloqly.machine.util.TimeUtils
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -135,6 +136,7 @@ class EventProcessorServiceTest {
 
     @Test
     fun testReturnSameProposals() {
+        TimeUtils.setTestTime(1)
         val votes = testService.getVotes()
 
         assertEquals(3, votes.size)

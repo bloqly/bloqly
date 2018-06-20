@@ -10,5 +10,8 @@ data class BlockCandidateId(
 
     val height: Long,
 
+    val round: Long,
+
     val proposerId: String
+
 ) : Serializable

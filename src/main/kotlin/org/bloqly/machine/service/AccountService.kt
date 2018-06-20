@@ -13,7 +13,6 @@ import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bloqly.machine.util.ParameterUtils
-import org.bloqly.machine.util.TimeUtils
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import javax.transaction.Transactional
@@ -25,9 +24,7 @@ class AccountService(
     private val propertyRepository: PropertyRepository
 ) {
 
-    fun getActiveProducerBySpace(space: Space): Account {
-
-        val round = TimeUtils.getCurrentRound()
+    fun getActiveProducerBySpace(space: Space, round: Long): Account {
 
         val validators = getValidatorsForSpace(space)
 

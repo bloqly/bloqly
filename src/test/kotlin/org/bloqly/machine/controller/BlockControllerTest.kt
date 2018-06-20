@@ -13,6 +13,7 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.APIUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockDataList
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -96,13 +97,16 @@ class BlockControllerTest {
 
         assertFalse(blockRepository.existsById(blockData.block.id))
 
-        val validator = accountService.getActiveProducerBySpace(testService.getDefaultSpace())
+        val validator = accountService.getActiveProducerBySpace(
+            testService.getDefaultSpace(), TimeUtils.getCurrentRound()
+        )
 
         assertTrue(
             blockCandidateRepository.existsById(
                 BlockCandidateId(
                     space = DEFAULT_SPACE,
                     height = 1,
+                    round = TimeUtils.getCurrentRound(),
                     proposerId = validator.id
                 )
             )

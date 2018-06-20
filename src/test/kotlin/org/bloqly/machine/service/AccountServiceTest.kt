@@ -4,6 +4,7 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.TimeUtils
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Before
@@ -41,7 +42,7 @@ class AccountServiceTest {
 
     @Test
     fun testGetActiveValidator() {
-        assertNotNull(accountService.getActiveProducerBySpace(space))
+        assertNotNull(accountService.getActiveProducerBySpace(space, TimeUtils.getCurrentRound()))
     }
 
     @Test

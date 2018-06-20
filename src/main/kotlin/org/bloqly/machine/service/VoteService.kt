@@ -25,12 +25,11 @@ class VoteService(
     fun createVote(
         space: Space,
         validator: Account,
-        producer: Account
+        producer: Account,
+        round: Long
     ): Vote {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
-
-        val round = TimeUtils.getCurrentRound()
 
         val voteId = VoteId(
             validatorId = validator.id,
@@ -85,7 +84,18 @@ class VoteService(
             "Can not accept vote form the future."
         }
 
-        //val block = blockRepository.findById(vote.blockId).orElseThrow()
+        val votedBlock = blockRepository.findById(vote.blockId).orElseThrow()
+        val lastBlock = blockRepository.getLastBlock(votedBlock.spaceId)
+
+        require(votedBlock == lastBlock) {
+            "Vote is for block ${votedBlock.id}, last block for space ${votedBlock.spaceId} is ${lastBlock.id}."
+        }
+
+        val round = TimeUtils.getCurrentRound()
+
+        require(vote.id.round == round) {
+            "Vote is for round ${vote.id.round}, current round is $round."
+        }
 
         voteRepository.save(vote)
     }

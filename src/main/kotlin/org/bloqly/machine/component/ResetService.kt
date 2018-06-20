@@ -10,6 +10,7 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
+import org.bloqly.machine.util.TimeUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -39,5 +40,6 @@ class ResetService(
         entityEventRepository.deleteAll()
         voteRepository.deleteAll()
         blockCandidateRepository.deleteAll()
+        TimeUtils.reset()
     }
 }

@@ -43,8 +43,11 @@ class VoteServiceTest {
 
     private lateinit var space: Space
 
+    private val round = 1L
+
     @Before
     fun init() {
+
         testService.cleanup()
         testService.createBlockchain()
 
@@ -52,17 +55,17 @@ class VoteServiceTest {
 
         validators = accountService.getValidatorsForSpace(space)
 
-        val producer = accountService.getActiveProducerBySpace(space)
+        val producer = accountService.getActiveProducerBySpace(space, round)
 
         validator = validators.first()
 
-        vote = voteService.createVote(space, validator, producer)
+        vote = voteService.createVote(space, validator, producer, round)
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val producer = accountService.getActiveProducerBySpace(space)
-        val newVote = voteService.createVote(space, validator, producer)
+        val producer = accountService.getActiveProducerBySpace(space, round)
+        val newVote = voteService.createVote(space, validator, producer, round)
         assertEquals(newVote, vote)
     }
 

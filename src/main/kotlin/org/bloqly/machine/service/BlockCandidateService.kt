@@ -5,9 +5,12 @@ import org.bloqly.machine.model.BlockCandidate
 import org.bloqly.machine.model.BlockCandidateId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.BlockCandidateRepository
+import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
+import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,15 +23,23 @@ class BlockCandidateService(
     private val objectMapper: ObjectMapper,
     private val transactionRepository: TransactionRepository,
     private val voteRepository: VoteRepository,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val blockRepository: BlockRepository
 ) {
 
     fun save(blockData: BlockData) {
 
+        if (!validateProposal(blockData)) {
+            return
+        }
+
+        val block = blockData.block
+
         val blockCandidateId = BlockCandidateId(
-            space = blockData.block.spaceId,
-            height = blockData.block.height,
-            proposerId = blockData.block.proposerId
+            space = block.spaceId,
+            height = block.height,
+            round = block.round,
+            proposerId = block.proposerId
         )
 
         if (blockCandidateRepository.existsById(blockCandidateId)) {
@@ -43,21 +54,45 @@ class BlockCandidateService(
 
         blockCandidateRepository.save(
             BlockCandidate(
-                id = BlockCandidateId(
-                    space = blockData.block.spaceId,
-                    height = blockData.block.height,
-                    proposerId = blockData.block.proposerId
-                ),
+                id = blockCandidateId,
                 data = objectMapper.writeValueAsString(blockData),
                 timeReceived = Instant.now().toEpochMilli()
             )
         )
     }
 
-    fun getBlockCandidate(space: Space, height: Long, proposerId: String): BlockData? {
+    private fun validateProposal(blockData: BlockData): Boolean {
+
+        val round = TimeUtils.getCurrentRound()
+
+        val block = blockData.block
+
+        val roundOK = block.round == round
+
+        val votes = blockData.votes
+
+        val votesRoundsOK = votes.all { it.round == round }
+
+        val votesForThisBlock = votes.all { it.blockId == block.id }
+
+        val votesVerified = votes.all { CryptoUtils.verifyVote(it.toModel()) }
+
+        val transactions = blockData.transactions
+
+        val lastBlock = blockRepository.getLastBlock(block.spaceId)
+
+        val referencedBlockIdsOK = transactions.all { it.referencedBlockId == lastBlock.id }
+
+        val transactionsVerifiedOK = transactions.all { CryptoUtils.verifyTransaction(it.toModel()) }
+
+        return roundOK && votesRoundsOK && votesForThisBlock && votesVerified &&
+            referencedBlockIdsOK && transactionsVerifiedOK
+    }
+
+    fun getBlockCandidate(space: Space, height: Long, round: Long, producerId: String): BlockData? {
         val quorum = propertyRepository.getQuorumBySpace(space)
         return blockCandidateRepository
-            .findById(BlockCandidateId(space.id, height, proposerId))
+            .findById(BlockCandidateId(space.id, height, round, producerId))
             .map { blockCandidate ->
                 objectMapper.readValue(blockCandidate.data, BlockData::class.java)
             }

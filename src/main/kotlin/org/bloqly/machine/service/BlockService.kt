@@ -44,14 +44,14 @@ class BlockService(
         height: Long,
         timestamp: Long,
         parentHash: String,
-        proposerId: String,
+        producerId: String,
         txHash: ByteArray? = null,
         validatorTxHash: ByteArray
     ): Block {
 
         return accountRepository
-            .findById(proposerId)
-            .filter { it.privateKey != null }
+            .findById(producerId)
+            .filter { it.hasKey() }
             .map { proposer ->
 
                 val round = TimeUtils.getCurrentRound()
@@ -63,7 +63,7 @@ class BlockService(
                         EncodingUtils.longToBytes(round),
                         EncodingUtils.longToBytes(timestamp),
                         parentHash.toByteArray(),
-                        proposerId.toByteArray(),
+                        producerId.toByteArray(),
                         txHash ?: ByteArray(0),
                         validatorTxHash
                     )
@@ -81,7 +81,7 @@ class BlockService(
                     round = round,
                     timestamp = timestamp,
                     parentHash = parentHash,
-                    proposerId = proposerId,
+                    proposerId = producerId,
                     txHash = txHash,
                     validatorTxHash = validatorTxHash,
                     signature = signature
@@ -183,7 +183,7 @@ class BlockService(
     }
 
     private fun validateGenesisTransaction(transaction: Transaction, block: Block, now: Instant) {
-        require(CryptoUtils.isTransactionValid(transaction)) {
+        require(CryptoUtils.verifyTransaction(transaction)) {
             "Transaction in genesis is invalid."
         }
 
