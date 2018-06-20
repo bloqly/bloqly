@@ -11,13 +11,13 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
@@ -36,8 +36,7 @@ class BlockService(
     private val objectMapper: ObjectMapper,
     private val spaceRepository: SpaceRepository,
     private val transactionProcessor: TransactionProcessor,
-    private val voteRepository: VoteRepository,
-    private val roundRepository: RoundRepository
+    private val voteRepository: VoteRepository
 ) {
 
     fun newBlock(
@@ -55,7 +54,7 @@ class BlockService(
             .filter { it.privateKey != null }
             .map { proposer ->
 
-                val round = if (height > 0) roundRepository.getRoundValue(space) else 0
+                val round = TimeUtils.getCurrentRound()
 
                 val dataToSign = CryptoUtils.digest(
                     arrayOf(

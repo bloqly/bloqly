@@ -5,11 +5,11 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
+import org.bloqly.machine.util.TimeUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -18,11 +18,14 @@ import java.time.Instant
 @Transactional
 class VoteService(
     private val voteRepository: VoteRepository,
-    private val blockRepository: BlockRepository,
-    private val roundRepository: RoundRepository
+    private val blockRepository: BlockRepository
 ) {
 
-    fun createVote(space: String, validator: Account): Vote {
+    fun createVote(
+        space: String,
+        validator: Account,
+        producer: Account
+    ): Vote {
 
         val lastBlock = blockRepository.getLastBlock(space)
 
@@ -35,14 +38,14 @@ class VoteService(
         return voteRepository.findById(voteId).orElseGet {
             val timestamp = Instant.now().toEpochMilli()
 
-            val round = roundRepository.getRound(space)
+            val round = TimeUtils.getCurrentRound()
 
             val dataToSign = Bytes.concat(
                 validator.id.toByteArray(),
-                round.producerId.toByteArray(),
+                producer.id.toByteArray(),
                 space.toByteArray(),
                 EncodingUtils.longToBytes(lastBlock.height),
-                EncodingUtils.longToBytes(round.id.round),
+                EncodingUtils.longToBytes(round),
                 lastBlock.id.toByteArray(),
                 EncodingUtils.longToBytes(timestamp)
             )
@@ -54,8 +57,8 @@ class VoteService(
             val vote = Vote(
                 id = voteId,
                 blockId = lastBlock.id,
-                round = round.id.round,
-                proposerId = round.producerId,
+                round = round,
+                proposerId = producer.id,
                 timestamp = timestamp,
                 signature = signature,
                 publicKey = validator.publicKey!!
@@ -67,8 +70,21 @@ class VoteService(
 
     fun processVote(vote: Vote) {
         require(CryptoUtils.verifyVote(vote)) {
-            "Could not verify vote $vote"
+            "Could not verify vote."
         }
+
+        // already received
+        if (voteRepository.existsById(vote.id)) {
+            return
+        }
+
+        val now = Instant.now().toEpochMilli()
+
+        require(vote.timestamp < now) {
+            "Can not accept vote form the future."
+        }
+
+        //val block = blockRepository.findById(vote.blockId).orElseThrow()
 
         voteRepository.save(vote)
     }

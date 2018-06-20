@@ -48,14 +48,17 @@ class VoteServiceTest {
 
         validators = accountService.getValidatorsForSpace(DEFAULT_SPACE)
 
+        val producer = accountService.getActiveValidator(DEFAULT_SPACE)
+
         validator = validators.first()
 
-        vote = voteService.createVote(DEFAULT_SPACE, validator)
+        vote = voteService.createVote(DEFAULT_SPACE, validator, producer)
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val newVote = voteService.createVote(DEFAULT_SPACE, validator)
+        val producer = accountService.getActiveValidator(DEFAULT_SPACE)
+        val newVote = voteService.createVote(DEFAULT_SPACE, validator, producer)
         assertEquals(newVote, vote)
     }
 

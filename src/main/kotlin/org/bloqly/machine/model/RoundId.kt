@@ -6,5 +6,5 @@ import javax.persistence.Embeddable
 @Embeddable
 data class RoundId (
     val spaceId: String,
-    val round: Long
+    val roundId: Long
 ) : Serializable

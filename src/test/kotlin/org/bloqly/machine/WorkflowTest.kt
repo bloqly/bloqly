@@ -4,7 +4,6 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
@@ -36,9 +35,6 @@ class WorkflowTest {
 
     @Autowired
     private lateinit var blockService: BlockService
-
-    @Autowired
-    private lateinit var roundRepository: RoundRepository
 
     @Autowired
     private lateinit var voteRepository: VoteRepository

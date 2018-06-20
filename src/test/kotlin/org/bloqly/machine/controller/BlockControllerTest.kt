@@ -96,7 +96,7 @@ class BlockControllerTest {
 
         assertFalse(blockRepository.existsById(blockData.block.id))
 
-        val validator = accountService.getActiveValidator(DEFAULT_SPACE, 1)
+        val validator = accountService.getActiveValidator(DEFAULT_SPACE)
 
         assertTrue(
             blockCandidateRepository.existsById(

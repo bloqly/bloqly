@@ -37,10 +37,7 @@ class AccountServiceTest {
 
     @Test
     fun testGetActiveValidator() {
-        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE, 1))
-        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE, 2))
-        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE, 3))
-        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE, 4))
+        assertNotNull(accountService.getActiveValidator(DEFAULT_SPACE))
     }
 
     @Test

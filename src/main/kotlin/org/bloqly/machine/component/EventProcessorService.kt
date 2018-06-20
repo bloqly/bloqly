@@ -16,7 +16,6 @@ import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockCandidateService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
-import org.bloqly.machine.service.RoundService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
@@ -43,8 +42,7 @@ class EventProcessorService(
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
     private val transactionProcessor: TransactionProcessor,
-    private val propertyRepository: PropertyRepository,
-    private val roundService: RoundService
+    private val propertyRepository: PropertyRepository
 ) {
     private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
@@ -103,8 +101,6 @@ class EventProcessorService(
         transactionProcessor.processTransaction(transaction)
         transactionRepository.save(transaction)
 
-        roundService.createZeroRound(space, rootId)
-
         firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
         blockRepository.save(firstBlock)
     }
@@ -157,10 +153,12 @@ class EventProcessorService(
         return spaces.flatMap { space ->
             val validators = accountService.getValidatorsForSpace(space)
 
+            val producer = accountService.getActiveValidator(space)
+
             validators
                 .filter { it.privateKey != null }
                 .map { voter ->
-                    voteService.createVote(space, voter)
+                    voteService.createVote(space, voter, producer)
                 }
         }
     }
@@ -186,7 +184,7 @@ class EventProcessorService(
 
                 val lastBlock = blockRepository.getLastBlock(space)
                 val newHeight = lastBlock.height + 1
-                val validator = accountService.getActiveValidator(space, newHeight)
+                val validator = accountService.getActiveValidator(space)
 
                 val savedProposal = blockCandidateService.getBlockCandidate(space, newHeight, validator.id)
 
@@ -243,8 +241,8 @@ class EventProcessorService(
             val lastBlock = blockRepository.getLastBlock(spaceId)
             val newHeight = lastBlock.height + 1
 
-            // what is the active validator for the current height in this space?
-            val validator = accountService.getActiveValidator(spaceId, newHeight)
+            // what is the active validator for the current round in this space?
+            val validator = accountService.getActiveValidator(spaceId)
 
             // did this validator produce a block candidate we are aware of?
             val blockCandidate = blockCandidateService.getBlockCandidate(spaceId, newHeight, validator.id)
