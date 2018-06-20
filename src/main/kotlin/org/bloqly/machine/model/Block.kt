@@ -20,6 +20,9 @@ data class Block(
     var height: Long,
 
     @Column(nullable = false)
+    var round: Long,
+
+    @Column(nullable = false)
     var timestamp: Long,
 
     @Column(nullable = false)
@@ -42,15 +45,16 @@ data class Block(
     fun toVO(): BlockVO {
 
         return BlockVO(
-                id = id,
-                space = space,
-                height = height,
-                timestamp = timestamp,
-                parentHash = parentHash,
-                proposerId = proposerId,
-                txHash = EncodingUtils.encodeToString16(txHash),
-                validatorTxHash = EncodingUtils.encodeToString16(validatorTxHash),
-                signature = EncodingUtils.encodeToString16(signature)
+            id = id,
+            space = space,
+            height = height,
+            round = round,
+            timestamp = timestamp,
+            parentHash = parentHash,
+            proposerId = proposerId,
+            txHash = EncodingUtils.encodeToString16(txHash),
+            validatorTxHash = EncodingUtils.encodeToString16(validatorTxHash),
+            signature = EncodingUtils.encodeToString16(signature)
         )
     }
 

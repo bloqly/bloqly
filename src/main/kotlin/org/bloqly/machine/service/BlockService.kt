@@ -11,6 +11,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.RoundRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -35,7 +36,8 @@ class BlockService(
     private val objectMapper: ObjectMapper,
     private val spaceRepository: SpaceRepository,
     private val transactionProcessor: TransactionProcessor,
-    private val voteRepository: VoteRepository
+    private val voteRepository: VoteRepository,
+    private val roundRepository: RoundRepository
 ) {
 
     fun newBlock(
@@ -48,41 +50,44 @@ class BlockService(
         validatorTxHash: ByteArray
     ): Block {
 
-        val accountOpt = accountRepository
+        return accountRepository
             .findById(proposerId)
             .filter { it.privateKey != null }
+            .map { proposer ->
 
-        return accountOpt.map { proposer ->
+                val round = if (height > 0) roundRepository.getRound(space) else 0
 
-            val dataToSign = CryptoUtils.digest(
-                arrayOf(
-                    space.toByteArray(),
-                    EncodingUtils.longToBytes(height),
-                    EncodingUtils.longToBytes(timestamp),
-                    parentHash.toByteArray(),
-                    proposerId.toByteArray(),
-                    txHash ?: ByteArray(0),
-                    validatorTxHash
+                val dataToSign = CryptoUtils.digest(
+                    arrayOf(
+                        space.toByteArray(),
+                        EncodingUtils.longToBytes(height),
+                        EncodingUtils.longToBytes(round),
+                        EncodingUtils.longToBytes(timestamp),
+                        parentHash.toByteArray(),
+                        proposerId.toByteArray(),
+                        txHash ?: ByteArray(0),
+                        validatorTxHash
+                    )
                 )
-            )
 
-            val privateKey = decodeFromString16(proposer.privateKey)
-            val signature = CryptoUtils.sign(privateKey, dataToSign)
-            val blockHash = CryptoUtils.digest(signature)
-            val blockId = EncodingUtils.encodeToString16(blockHash)
+                val privateKey = decodeFromString16(proposer.privateKey)
+                val signature = CryptoUtils.sign(privateKey, dataToSign)
+                val blockHash = CryptoUtils.digest(signature)
+                val blockId = EncodingUtils.encodeToString16(blockHash)
 
-            Block(
-                id = blockId,
-                space = space,
-                height = height,
-                timestamp = timestamp,
-                parentHash = parentHash,
-                proposerId = proposerId,
-                txHash = txHash,
-                validatorTxHash = validatorTxHash,
-                signature = signature
-            )
-        }.orElseThrow()
+                Block(
+                    id = blockId,
+                    space = space,
+                    height = height,
+                    round = round,
+                    timestamp = timestamp,
+                    parentHash = parentHash,
+                    proposerId = proposerId,
+                    txHash = txHash,
+                    validatorTxHash = validatorTxHash,
+                    signature = signature
+                )
+            }.orElseThrow()
     }
 
     fun getLastBlockForSpace(space: String): Block {

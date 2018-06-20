@@ -8,6 +8,7 @@ data class BlockVO(
     val id: String,
     val space: String,
     val height: Long,
+    val round: Long,
     val timestamp: Long,
     val parentHash: String,
     val proposerId: String,
@@ -19,15 +20,16 @@ data class BlockVO(
     fun toModel(): Block {
 
         return Block(
-                id = id,
-                space = space,
-                height = height,
-                timestamp = timestamp,
-                parentHash = parentHash,
-                proposerId = proposerId,
-                txHash = txHash.toByteArray(),
-                validatorTxHash = validatorTxHash.toByteArray(),
-                signature = signature.toByteArray()
+            id = id,
+            space = space,
+            height = height,
+            round = round,
+            timestamp = timestamp,
+            parentHash = parentHash,
+            proposerId = proposerId,
+            txHash = txHash.toByteArray(),
+            validatorTxHash = validatorTxHash.toByteArray(),
+            signature = signature.toByteArray()
         )
     }
 }
