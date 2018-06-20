@@ -82,6 +82,18 @@ class VoteServiceTest {
     }
 
     @Test
+    fun testVerifyVoteProposerWrongFails() {
+
+        assertFalse(verifyVote(vote.copy(proposerId = FAKE_DATA)))
+    }
+
+    @Test
+    fun testVerifyVoteRoundWrongFails() {
+
+        assertFalse(verifyVote(vote.copy(round = 100)))
+    }
+
+    @Test
     fun testVerifyVoteTimestampWrongFails() {
 
         assertFalse(verifyVote(vote.copy(timestamp = System.currentTimeMillis() + 1)))

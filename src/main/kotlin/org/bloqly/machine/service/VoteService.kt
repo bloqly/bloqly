@@ -35,10 +35,14 @@ class VoteService(
         return voteRepository.findById(voteId).orElseGet {
             val timestamp = Instant.now().toEpochMilli()
 
+            val round = roundRepository.getRound(space)
+
             val dataToSign = Bytes.concat(
                 validator.id.toByteArray(),
+                round.producerId.toByteArray(),
                 space.toByteArray(),
                 EncodingUtils.longToBytes(lastBlock.height),
+                EncodingUtils.longToBytes(round.id.round),
                 lastBlock.id.toByteArray(),
                 EncodingUtils.longToBytes(timestamp)
             )
@@ -50,8 +54,8 @@ class VoteService(
             val vote = Vote(
                 id = voteId,
                 blockId = lastBlock.id,
-                round = 0,
-                proposerId = "",
+                round = round.id.round,
+                proposerId = round.producerId,
                 timestamp = timestamp,
                 signature = signature,
                 publicKey = validator.publicKey!!

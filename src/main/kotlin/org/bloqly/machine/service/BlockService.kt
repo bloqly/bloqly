@@ -55,7 +55,7 @@ class BlockService(
             .filter { it.privateKey != null }
             .map { proposer ->
 
-                val round = if (height > 0) roundRepository.getRound(space) else 0
+                val round = if (height > 0) roundRepository.getRoundValue(space) else 0
 
                 val dataToSign = CryptoUtils.digest(
                     arrayOf(
