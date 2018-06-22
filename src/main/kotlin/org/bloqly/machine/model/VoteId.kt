@@ -14,14 +14,11 @@ data class VoteId(
     val spaceId: String,
 
     @Column(nullable = false)
-    val height: Long,
-
-    @Column(nullable = false)
-    val round: Long
+    val height: Long
 
 ) : Serializable {
 
     override fun toString(): String {
-        return "$validatorId:$spaceId:$height:$round"
+        return "$validatorId:$spaceId:$height"
     }
 }

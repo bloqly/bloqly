@@ -11,8 +11,6 @@ data class VoteVO(
     val spaceId: String,
     val height: Long,
     val blockId: String,
-    val round: Long,
-    val proposerId: String,
     val timestamp: Long,
     val signature: String,
     val publicKey: String
@@ -23,14 +21,12 @@ data class VoteVO(
         val voteId = VoteId(
             validatorId = validatorId,
             spaceId = spaceId,
-            height = height,
-            round = round
+            height = height
         )
 
         return Vote(
             id = voteId,
             blockId = blockId,
-            proposerId = proposerId,
             timestamp = timestamp,
             signature = EncodingUtils.decodeFromString16(signature),
             publicKey = publicKey

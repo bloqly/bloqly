@@ -80,6 +80,8 @@ class BlockControllerTest {
 
         val blockDatas = eventProcessorService.onGetProposals()
 
+        assertTrue(blockDatas.isNotEmpty())
+
         val proposalsPayload = objectMapper.writeValueAsString(
             BlockDataList(blockDatas)
         )
@@ -104,7 +106,7 @@ class BlockControllerTest {
         assertTrue(
             blockCandidateRepository.existsById(
                 BlockCandidateId(
-                    space = DEFAULT_SPACE,
+                    spaceId = DEFAULT_SPACE,
                     height = 1,
                     round = TimeUtils.getCurrentRound(),
                     proposerId = validator.id

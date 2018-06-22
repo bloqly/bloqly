@@ -36,7 +36,7 @@ class BlockCandidateService(
         val block = blockData.block
 
         val blockCandidateId = BlockCandidateId(
-            space = block.spaceId,
+            spaceId = block.spaceId,
             height = block.height,
             round = block.round,
             proposerId = block.proposerId
@@ -71,8 +71,6 @@ class BlockCandidateService(
 
         val votes = blockData.votes
 
-        val votesRoundsOK = votes.all { it.round == round }
-
         val lastBlock = blockRepository.getLastBlock(block.spaceId)
 
         val votesForLastBlock = votes.all { it.blockId == lastBlock.id }
@@ -85,7 +83,7 @@ class BlockCandidateService(
 
         val transactionsVerifiedOK = transactions.all { CryptoUtils.verifyTransaction(it.toModel()) }
 
-        return roundOK && votesRoundsOK && votesForLastBlock && votesVerified &&
+        return roundOK  && votesForLastBlock && votesVerified &&
             referencedBlockIdsOK && transactionsVerifiedOK
     }
 

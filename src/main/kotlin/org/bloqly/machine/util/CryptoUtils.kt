@@ -157,10 +157,8 @@ object CryptoUtils {
 
         val dataToVerify = Bytes.concat(
             vote.id.validatorId.toByteArray(),
-            vote.proposerId.toByteArray(),
             vote.id.spaceId.toByteArray(),
             EncodingUtils.longToBytes(vote.id.height),
-            EncodingUtils.longToBytes(vote.id.round),
             vote.blockId.toByteArray(),
             EncodingUtils.longToBytes(vote.timestamp)
         )

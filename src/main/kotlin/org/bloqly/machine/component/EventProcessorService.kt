@@ -29,6 +29,16 @@ import java.io.File
 import java.time.Instant
 import javax.transaction.Transactional
 
+/**
+ * Processes the most important events
+ *
+ * Q    - number of votes necessary to quorum
+ * LIB  - last irreversible block
+ * H    - current height
+ * BCs  - list of block candidates of height H + 1. BC contains at least Q votes, directly referring to LIB
+ * R    - voting round
+ *
+ */
 @Component
 @Transactional
 class EventProcessorService(
@@ -144,18 +154,26 @@ class EventProcessorService(
     }
 
     /**
-     * Step 1.2, vote for previous block
+     * Create votes
+     *
+     * - It is not allowed to vote > 1 time for the same round
+     * - It is not allowed to vote > 1 time for the same height
+     *
+     * IF already voted for H + 1 THEN
+     *  vote = existing vote for H + 1
+     * ELSE IF exists BCs
+     *  BC = select one from BCs with min R
+     *  vote = vote for BC
+     * ELSE
+     *  vote for the LIB
      *
      */
     fun onGetVotes(): List<Vote> {
-        return spaceRepository
-            .findAll()
+        return spaceRepository.findAll()
             .flatMap { space ->
-                val round = TimeUtils.getCurrentRound()
-                val producer = accountService.getActiveProducerBySpace(space, round)
                 accountService.getValidatorsForSpace(space)
                     .filter { it.hasKey() }
-                    .map { voter -> voteService.createVote(space, voter, producer, round) }
+                    .map { validator -> voteService.getVote(space, validator) }
             }
     }
 

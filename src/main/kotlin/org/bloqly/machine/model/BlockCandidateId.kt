@@ -6,7 +6,7 @@ import javax.persistence.Embeddable
 @Embeddable
 data class BlockCandidateId(
 
-    val space: String,
+    val spaceId: String,
 
     val height: Long,
 

@@ -8,6 +8,8 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.TimeUtils
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -41,10 +43,15 @@ class WorkflowTest {
 
     @Before
     fun init() {
+        TimeUtils.setTestTime(1)
         testService.cleanup()
         testService.createBlockchain()
     }
 
+    @After
+    fun tearDown() {
+        TimeUtils.reset()
+    }
     @Test
     fun testNoDelta() {
 

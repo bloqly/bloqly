@@ -43,8 +43,6 @@ class VoteServiceTest {
 
     private lateinit var space: Space
 
-    private val round = 1L
-
     @Before
     fun init() {
 
@@ -55,17 +53,14 @@ class VoteServiceTest {
 
         validators = accountService.getValidatorsForSpace(space)
 
-        val producer = accountService.getActiveProducerBySpace(space, round)
-
         validator = validators.first()
 
-        vote = voteService.createVote(space, validator, producer, round)
+        vote = voteService.getVote(space, validator)
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val producer = accountService.getActiveProducerBySpace(space, round)
-        val newVote = voteService.createVote(space, validator, producer, round)
+        val newVote = voteService.getVote(space, validator)
         assertEquals(newVote, vote)
     }
 
@@ -89,18 +84,6 @@ class VoteServiceTest {
     fun testVerifyVoteBlockWrongFails() {
 
         assertFalse(verifyVote(vote.copy(blockId = FAKE_DATA)))
-    }
-
-    @Test
-    fun testVerifyVoteProposerWrongFails() {
-
-        assertFalse(verifyVote(vote.copy(proposerId = FAKE_DATA)))
-    }
-
-    @Test
-    fun testVerifyVoteRoundWrongFails() {
-
-        assertFalse(verifyVote(vote.copy(id = vote.id.copy(round = 100))))
     }
 
     @Test

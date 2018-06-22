@@ -93,9 +93,9 @@ class BlockService(
         return blockRepository.getLastBlock(space)
     }
 
-    fun exportFirst(space: String): String {
+    fun exportFirst(spaceId: String): String {
 
-        val firstBlock = blockRepository.findGenesisBlockBySpace(space)
+        val firstBlock = blockRepository.findGenesisBlockBySpaceId(spaceId)
 
         val transactions = transactionRepository.findByContainingBlockId(firstBlock.id)
 
