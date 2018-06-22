@@ -10,6 +10,7 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
 import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
@@ -26,7 +27,8 @@ class VoteService(
     private val blockRepository: BlockRepository,
     private val blockCandidateRepository: BlockCandidateRepository,
     // TODO make object mapper a static thing
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val propertyRepository: PropertyRepository
 ) {
 
     fun getVote(space: Space, validator: Account): Vote {
@@ -48,7 +50,7 @@ class VoteService(
 
             if (blockCandidate != null) {
                 // Voting for a BC with new height
-                val block = getBlock(blockCandidate)
+                val block = getBlockData(blockCandidate).block.toModel()
                 createVote(validator, block, newHeightVoteId)
             } else {
                 // nothing found, voting for the LIB
@@ -58,8 +60,8 @@ class VoteService(
         }
     }
 
-    private fun getBlock(blockCandidate: BlockCandidate): Block {
-        return objectMapper.readValue(blockCandidate.data, BlockData::class.java).block.toModel()
+    private fun getBlockData(blockCandidate: BlockCandidate): BlockData {
+        return objectMapper.readValue(blockCandidate.data, BlockData::class.java)
     }
 
     private fun createVote(validator: Account, block: Block, voteId: VoteId): Vote {
@@ -89,14 +91,57 @@ class VoteService(
         return voteRepository.save(vote)
     }
 
-    fun processVote(vote: Vote) {
-        require(CryptoUtils.verifyVote(vote)) {
-            "Could not verify vote."
+    fun processVote(vote: Vote): BlockData? {
+
+        validateAndSave(vote)
+
+        val votedBlockOpt = blockRepository.findById(vote.blockId)
+
+        if (!votedBlockOpt.isPresent) {
+            return null
         }
+
+        // TODO implement security consensus rules check
+        // TODO move it out to some kind of loop
+
+        val votedBlock = votedBlockOpt.get()
+
+        val lastBlock = blockRepository.getLastBlock(votedBlock.spaceId)
+
+        val newHeight = lastBlock.height + 1
+
+        val blockCandidate = blockCandidateRepository.getBlockCandidateByBlockId(vote.blockId)
+
+        return blockCandidate?.let {
+
+            if (it.id.height != newHeight) {
+                return null
+            }
+
+            val blockData = getBlockData(blockCandidate)
+
+            require(blockData.block.parentHash == lastBlock.id)
+
+            blockData
+        }
+    }
+
+    fun validateAndSave(vote: Vote) {
+
+        validateVote(vote)
 
         // already received
         if (voteRepository.existsById(vote.id)) {
             return
+        }
+
+        voteRepository.save(vote)
+    }
+
+    private fun validateVote(vote: Vote) {
+        // TODO create a log file where log full stack traces
+        require(CryptoUtils.verifyVote(vote)) {
+            "Could not verify vote."
         }
 
         val now = Instant.now().toEpochMilli()
@@ -104,22 +149,13 @@ class VoteService(
         require(vote.timestamp < now) {
             "Can not accept vote form the future."
         }
-
-        val votedBlock = blockRepository.findById(vote.blockId).orElseThrow()
-        val lastBlock = blockRepository.getLastBlock(votedBlock.spaceId)
-
-        require(votedBlock == lastBlock) {
-            "Vote is for block ${votedBlock.id}, last block for space ${votedBlock.spaceId} is ${lastBlock.id}."
-        }
-
-        voteRepository.save(vote)
     }
 
-    fun save(vote: Vote) {
-        require(CryptoUtils.verifyVote(vote)) {
-            "Could not verify vote $vote"
-        }
+    // TODO move it to property repository or elsewhere
+    private fun hasQuorum(blockData: BlockData): Boolean {
 
-        voteRepository.save(vote)
+        val quorum = propertyRepository.getQuorumBySpaceId(blockData.block.spaceId)
+
+        return blockData.votes.size >= quorum
     }
 }

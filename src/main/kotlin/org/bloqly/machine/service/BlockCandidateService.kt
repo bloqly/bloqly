@@ -56,6 +56,7 @@ class BlockCandidateService(
             BlockCandidate(
                 id = blockCandidateId,
                 data = objectMapper.writeValueAsString(blockData),
+                blockId = blockData.block.id,
                 timeReceived = Instant.now().toEpochMilli()
             )
         )
@@ -83,7 +84,7 @@ class BlockCandidateService(
 
         val transactionsVerifiedOK = transactions.all { CryptoUtils.verifyTransaction(it.toModel()) }
 
-        return roundOK  && votesForLastBlock && votesVerified &&
+        return roundOK && votesForLastBlock && votesVerified &&
             referencedBlockIdsOK && transactionsVerifiedOK
     }
 

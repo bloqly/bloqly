@@ -175,14 +175,32 @@ class EventProcessorService(
                     .filter { it.hasKey() }
                     .map { validator -> voteService.getVote(space, validator) }
             }
+
+        // TODO send all known votes for blocks with height > H
     }
 
     /**
-     * Step 1.3, collecting votes
+     * Receive new vote
+     *
+     * validate
+     * save
+     *
+     * If it is a valid vote for an unknown block - OK, return
+     * If it is a valid vote for LIB, H, - OK, return
+     * If it is a valid vote for BC, H + 1 then
+     *
+     *  If BC reached Q then LIB = BC
+     *
      *
      */
     fun onVote(vote: Vote) {
-        voteService.processVote(vote)
+        voteService.processVote(vote)?.let { blockData ->
+            if (hasQuorum(blockData)) {
+                // TODO process transactions
+
+                blockRepository.save(blockData.block.toModel())
+            }
+        }
     }
 
     /**

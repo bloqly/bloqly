@@ -7,7 +7,8 @@ import org.springframework.data.repository.CrudRepository
 
 interface BlockCandidateRepository : CrudRepository<BlockCandidate, BlockCandidateId> {
 
-    @Query("""
+    @Query(
+        """
         select * from block_candidate bc
         where
         bc.space_id = ?1 and
@@ -15,6 +16,9 @@ interface BlockCandidateRepository : CrudRepository<BlockCandidate, BlockCandida
         bc.proposer_id = ?3
         order by  bc.round
         limit 1
-        """, nativeQuery = true)
+        """, nativeQuery = true
+    )
     fun getBlockCandidate(spaceId: String, height: Long, proposerId: String): BlockCandidate?
+
+    fun getBlockCandidateByBlockId(blockId: String): BlockCandidate?
 }

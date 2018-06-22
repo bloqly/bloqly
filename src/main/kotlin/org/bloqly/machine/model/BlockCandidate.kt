@@ -1,5 +1,6 @@
 package org.bloqly.machine.model
 
+import javax.persistence.Column
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 import javax.persistence.Lob
@@ -11,8 +12,13 @@ data class BlockCandidate(
     val id: BlockCandidateId,
 
     @Lob
+    @Column(nullable = false)
     val data: String,
 
+    @Column(nullable = false)
+    val blockId: String,
+
+    @Column(nullable = false)
     val timeReceived: Long
 
 )

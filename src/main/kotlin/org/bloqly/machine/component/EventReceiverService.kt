@@ -26,7 +26,7 @@ class EventReceiverService(
                 val vote = voteVO.toModel()
                 eventProcessorService.onVote(vote)
             } catch (e: Exception) {
-                log.error("Could not process vote $voteVO")
+                log.error("Could not process vote $voteVO", e)
             }
         }
     }
