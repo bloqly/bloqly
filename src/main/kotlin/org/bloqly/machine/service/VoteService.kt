@@ -35,7 +35,7 @@ class VoteService(
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
-        val newHeight = lastBlock.height
+        val newHeight = lastBlock.height + 1
 
         // did I vote for H + 1?
         val newHeightVoteId = VoteId(
@@ -46,7 +46,7 @@ class VoteService(
 
         return voteRepository.findById(newHeightVoteId).orElseGet {
             // is there a BC for new height?
-            val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, newHeight, validator.id)
+            val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, newHeight)
 
             if (blockCandidate != null) {
                 // Voting for a BC with new height

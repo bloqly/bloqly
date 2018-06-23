@@ -104,16 +104,14 @@ class BlockCandidateService(
 
     fun getVotedBlockCandidate(space: Space, height: Long): BlockData? {
         val quorum = propertyRepository.getQuorumBySpace(space)
-        return blockCandidateRepository.findBySpaceIdAndHeight(space.id, height)
-            .map { blockCandidate ->
-                objectMapper.readValue(blockCandidate.data, BlockData::class.java)
-            }
-            // TODO check if there is several voted block candidates for the same height
-            // as this would break consensus rules
-            .firstOrNull { blockData ->
-                val votes = voteRepository.findByBlockId(blockData.block.id)
+        val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, height)
 
-                votes.size >= quorum
-            }
+        return blockCandidate?.let {
+            val blockData = objectMapper.readValue(it.data, BlockData::class.java)
+
+            val votes = voteRepository.findByBlockId(blockData.block.id)
+
+            if (votes.size >= quorum) blockData else null
+        }
     }
 }

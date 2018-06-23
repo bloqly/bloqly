@@ -136,7 +136,7 @@ class EventProcessorServiceTest {
 
     @Test
     fun testReturnSameProposals() {
-        TimeUtils.setTestTime(1)
+        TimeUtils.setTestTime(0)
         val votes = testService.getVotes()
 
         assertEquals(3, votes.size)

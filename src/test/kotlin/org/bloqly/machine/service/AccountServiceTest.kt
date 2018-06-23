@@ -4,7 +4,8 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.util.TimeUtils
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Before
@@ -42,7 +43,21 @@ class AccountServiceTest {
 
     @Test
     fun testGetActiveValidator() {
-        assertNotNull(accountService.getActiveProducerBySpace(space, TimeUtils.getCurrentRound()))
+        val validator1 = accountService.getActiveProducerBySpace(space, 0)
+        val validator2 = accountService.getActiveProducerBySpace(space, 1)
+        val validator3 = accountService.getActiveProducerBySpace(space, 2)
+        val validator4 = accountService.getActiveProducerBySpace(space, 3)
+
+        assertNotNull(validator1)
+        assertNotNull(validator2)
+        assertNotNull(validator3)
+        assertNotNull(validator4)
+
+        assertNotEquals(validator1, validator2)
+        assertNotEquals(validator2, validator3)
+        assertNotEquals(validator3, validator1)
+
+        assertEquals(validator4, validator1)
     }
 
     @Test

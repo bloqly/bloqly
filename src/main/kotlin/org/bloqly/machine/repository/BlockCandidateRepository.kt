@@ -14,7 +14,7 @@ interface BlockCandidateRepository : CrudRepository<BlockCandidate, BlockCandida
         bc.space_id = ?1 and
         bc.height = ?2 and
         bc.proposer_id = ?3
-        order by  bc.round
+        order by bc.round
         limit 1
         """, nativeQuery = true
     )
@@ -28,8 +28,9 @@ interface BlockCandidateRepository : CrudRepository<BlockCandidate, BlockCandida
         where
         bc.space_id = ?1 and
         bc.height = ?2
+        order by bc.round
+        limit 1
         """, nativeQuery = true
     )
-    fun findBySpaceIdAndHeight(spaceId: String, height: Long): List<BlockCandidate>
-
+    fun getBlockCandidate(spaceId: String, height: Long): BlockCandidate?
 }

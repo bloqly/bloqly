@@ -1,8 +1,11 @@
 package org.bloqly.machine
 
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.Application.Companion.PERIOD
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
@@ -40,9 +43,12 @@ class WorkflowTest {
     @Autowired
     private lateinit var voteRepository: VoteRepository
 
+    @Autowired
+    private lateinit var blockCandidateRepository: BlockCandidateRepository
+
     @Before
     fun init() {
-        TimeUtils.setTestTime(1)
+        TimeUtils.setTestTime(0)
         testService.cleanup()
         testService.createBlockchain()
     }
@@ -51,6 +57,7 @@ class WorkflowTest {
     fun tearDown() {
         TimeUtils.reset()
     }
+
     @Test
     fun testNoDelta() {
 
@@ -77,27 +84,37 @@ class WorkflowTest {
     @Test
     fun testSingleRound() {
 
+        // 1. Start first round
+        TimeUtils.setTestTime(0)
+
         val transaction = testService.newTransaction()
 
         sendTransactions(listOf(transaction))
 
         sendVotes()
+        assertEquals(3, voteRepository.findAll().toList().size)
 
         sendProposals()
+        assertEquals(1, blockCandidateRepository.findAll().toList().size)
 
         selectBestProposal()
 
-        // END
+        assertEquals(0, getHeight())
+
+        // 2. Start second round
+        TimeUtils.setTestTime(PERIOD + 1L)
 
         // TODO fix - after latest changes we'lll get voted proposal only in the second round
-        //sendVotes()
+        sendVotes()
+        assertEquals(6, voteRepository.findAll().toList().size)
 
-        //selectBestProposal()
+        selectBestProposal()
 
-        //val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        assertEquals(1, getHeight())
+    }
 
-        //assertEquals(1, lastBlock.height)
-
+    private fun getHeight(): Long {
+        return blockService.getLastBlockForSpace(DEFAULT_SPACE).height
     }
 
     private fun sendTransactions(transactions: List<Transaction>) {
@@ -106,8 +123,8 @@ class WorkflowTest {
 
     private fun sendVotes() {
         val votes = testService.getVotes()
+
         assertEquals(3, votes.size)
-        voteRepository.deleteAll()
 
         eventReceiverService.receiveVotes(votes)
     }
@@ -115,6 +132,7 @@ class WorkflowTest {
     private fun sendProposals() {
         val proposals = eventProcessorService.onGetProposals()
 
+        assertEquals(1, proposals.size)
         eventReceiverService.receiveProposals(proposals)
     }
 
