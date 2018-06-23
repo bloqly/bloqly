@@ -187,20 +187,11 @@ class EventProcessorService(
      *
      * If it is a valid vote for an unknown block - OK, return
      * If it is a valid vote for LIB, H, - OK, return
-     * If it is a valid vote for BC, H + 1 then
-     *
-     *  If BC reached Q then LIB = BC
      *
      *
      */
     fun onVote(vote: Vote) {
-        voteService.processVote(vote)?.let { blockData ->
-            if (hasQuorum(blockData)) {
-                // TODO process transactions
-
-                blockRepository.save(blockData.block.toModel())
-            }
-        }
+        voteService.validateAndSave(vote)
     }
 
     /**
@@ -219,7 +210,7 @@ class EventProcessorService(
                 val newHeight = lastBlock.height + 1
                 val producer = accountService.getActiveProducerBySpace(space, round)
 
-                val savedProposal = blockCandidateService.getBlockCandidate(
+                val savedProposal = blockCandidateService.getVotedBlockCandidate(
                     space = space,
                     height = newHeight,
                     round = round,
@@ -271,32 +262,23 @@ class EventProcessorService(
         proposals.forEach { blockCandidateService.save(it) }
     }
 
-    fun onSelectBestProposal(): List<BlockData> {
-        return spaceRepository
+    /**
+     * If it is a valid vote for BC, H + 1 AND BC reached Q then LIB = BC
+     *
+     */
+    fun onSelectBestProposal() {
+        spaceRepository
             .findAll()
             .mapNotNull { space ->
                 val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
 
-                val round = TimeUtils.getCurrentRound()
+                val votedBlockData = blockCandidateService.getVotedBlockCandidate(space, newHeight)
 
-                // what is the active validator for the current round in this spaceId?
-                val producer = accountService.getActiveProducerBySpace(space, round)
-
-                // did this validator produce a block candidate we are aware of?
-                val blockCandidate = blockCandidateService.getBlockCandidate(space, newHeight, round, producer.id)
-
-                if (blockCandidate != null) {
-                    // block candidate is found, select it
-
-                    val block = blockCandidate.block
-
-                    log.info("Selected next block ${block.id} on height ${block.height}.")
-
-                    blockRepository.save(block.toModel())
+                votedBlockData?.let {
+                    blockRepository.save(it.block.toModel())
                 }
 
-                blockCandidate
             }
     }
 }

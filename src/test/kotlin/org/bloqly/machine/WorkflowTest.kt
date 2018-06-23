@@ -115,9 +115,6 @@ class WorkflowTest {
     }
 
     private fun selectBestProposal() {
-
-        val bestProposals = eventProcessorService.onSelectBestProposal()
-
-        assertEquals(1, bestProposals.size)
+        eventProcessorService.onSelectBestProposal()
     }
 }

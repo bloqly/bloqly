@@ -21,4 +21,14 @@ interface BlockCandidateRepository : CrudRepository<BlockCandidate, BlockCandida
     fun getBlockCandidate(spaceId: String, height: Long, proposerId: String): BlockCandidate?
 
     fun getBlockCandidateByBlockId(blockId: String): BlockCandidate?
+
+    @Query(
+        """
+        select * from block_candidate bc
+        where
+        bc.space_id = ?1 and
+        bc.height = ?2
+        """, nativeQuery = true
+    )
+    fun findBySpaceIdAndHeight(spaceId: String, height: Long): List<BlockCandidate>
 }

@@ -91,41 +91,6 @@ class VoteService(
         return voteRepository.save(vote)
     }
 
-    fun processVote(vote: Vote): BlockData? {
-
-        validateAndSave(vote)
-
-        val votedBlockOpt = blockRepository.findById(vote.blockId)
-
-        if (!votedBlockOpt.isPresent) {
-            return null
-        }
-
-        // TODO implement security consensus rules check
-        // TODO move it out to some kind of loop
-
-        val votedBlock = votedBlockOpt.get()
-
-        val lastBlock = blockRepository.getLastBlock(votedBlock.spaceId)
-
-        val newHeight = lastBlock.height + 1
-
-        val blockCandidate = blockCandidateRepository.getBlockCandidateByBlockId(vote.blockId)
-
-        return blockCandidate?.let {
-
-            if (it.id.height != newHeight) {
-                return null
-            }
-
-            val blockData = getBlockData(blockCandidate)
-
-            require(blockData.block.parentHash == lastBlock.id)
-
-            blockData
-        }
-    }
-
     fun validateAndSave(vote: Vote) {
 
         validateVote(vote)
@@ -149,13 +114,5 @@ class VoteService(
         require(vote.timestamp < now) {
             "Can not accept vote form the future."
         }
-    }
-
-    // TODO move it to property repository or elsewhere
-    private fun hasQuorum(blockData: BlockData): Boolean {
-
-        val quorum = propertyRepository.getQuorumBySpaceId(blockData.block.spaceId)
-
-        return blockData.votes.size >= quorum
     }
 }
