@@ -5,7 +5,7 @@ import java.time.Instant
 
 object TimeUtils {
 
-    private var TEST_TIME: Long? = null;
+    private var TEST_TIME: Long? = null
 
     fun getCurrentRound(): Long {
         return TEST_TIME ?: Instant.now().toEpochMilli() / PERIOD

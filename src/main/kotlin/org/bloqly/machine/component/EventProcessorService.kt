@@ -286,7 +286,6 @@ class EventProcessorService(
                 votedBlockData?.let {
                     blockRepository.save(it.block.toModel())
                 }
-
             }
     }
 }
