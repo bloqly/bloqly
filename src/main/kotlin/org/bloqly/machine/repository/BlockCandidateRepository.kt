@@ -31,4 +31,5 @@ interface BlockCandidateRepository : CrudRepository<BlockCandidate, BlockCandida
         """, nativeQuery = true
     )
     fun findBySpaceIdAndHeight(spaceId: String, height: Long): List<BlockCandidate>
+
 }

@@ -27,12 +27,17 @@ class BlockCandidateService(
     private val blockRepository: BlockRepository
 ) {
 
-    fun save(blockData: BlockData) {
+    fun validateAndSave(blockData: BlockData) {
 
         if (!validateProposal(blockData)) {
+            // TODO it is better to throw things here
             return
         }
 
+        save(blockData)
+    }
+
+    fun save(blockData: BlockData) {
         val block = blockData.block
 
         val blockCandidateId = BlockCandidateId(
@@ -88,15 +93,13 @@ class BlockCandidateService(
             referencedBlockIdsOK && transactionsVerifiedOK
     }
 
-    fun getCompleteBlockCandidate(space: Space, height: Long, round: Long, producerId: String): BlockData? {
-        val quorum = propertyRepository.getQuorumBySpace(space)
-        return blockCandidateRepository
-            .findById(BlockCandidateId(space.id, height, round, producerId))
-            .map { blockCandidate ->
-                objectMapper.readValue(blockCandidate.data, BlockData::class.java)
-            }
-            .filter { it.votes.size >= quorum }
-            .orElse(null)
+    fun getBlockCandidate(space: Space, height: Long, producerId: String): BlockData? {
+        val blockCandidate = blockCandidateRepository
+            .getBlockCandidate(space.id, height, producerId)
+
+        return blockCandidate?.let {
+            objectMapper.readValue(blockCandidate.data, BlockData::class.java)
+        }
     }
 
     fun getVotedBlockCandidate(space: Space, height: Long): BlockData? {

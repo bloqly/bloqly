@@ -195,7 +195,6 @@ class EventProcessorService(
     /**
      * Get next block proposal
      */
-    // TODO return existing proposals if available
     fun onGetProposals(): List<BlockData> {
 
         return spaceRepository
@@ -208,20 +207,19 @@ class EventProcessorService(
                 val newHeight = lastBlock.height + 1
                 val producer = accountService.getActiveProducerBySpace(space, round)
 
-                val savedProposal = blockCandidateService.getCompleteBlockCandidate(
-                    space = space,
-                    height = newHeight,
-                    round = round,
-                    producerId = producer.id
-                )
+                // Did I already created proposal for this height?
+                val savedProposal = blockCandidateService.getBlockCandidate(space, newHeight, producer.id)
 
                 if (savedProposal != null) {
                     savedProposal
                 } else {
-                    val transactions = getPendingTransactions(space)
                     val votes = getVotesForBlock(lastBlock)
 
-                    producer.privateKey?.let {
+                    val quorum = propertyRepository.getQuorumBySpaceId(space.id)
+
+                    if (producer.privateKey != null && votes.size >= quorum) {
+
+                        val transactions = getPendingTransactions(space)
 
                         val newBlock = blockService.newBlock(
                             spaceId = space.id,
@@ -233,19 +231,16 @@ class EventProcessorService(
                             validatorTxHash = CryptoUtils.digestVotes(votes)
                         )
 
-                        BlockData(newBlock, transactions, votes)
+                        val blockData = BlockData(newBlock, transactions, votes)
+
+                        blockCandidateService.save(blockData)
+
+                        blockData
+                    } else {
+                        null
                     }
                 }
             }
-            .filter { hasQuorum(it) }
-            .onEach { blockCandidateService.save(it) }
-    }
-
-    private fun hasQuorum(blockData: BlockData): Boolean {
-
-        val quorum = propertyRepository.getQuorumBySpaceId(blockData.block.spaceId)
-
-        return blockData.votes.size >= quorum
     }
 
     private fun getPendingTransactions(space: Space): List<Transaction> {
@@ -268,11 +263,10 @@ class EventProcessorService(
             val activeValidator = accountService.getActiveProducerBySpace(space, round)
 
             if (activeValidator.id == blockData.block.proposerId) {
-                blockCandidateService.save(blockData)
+                blockCandidateService.validateAndSave(blockData)
             } else {
                 // TODO log illegal request
             }
-
         }
     }
 
