@@ -23,7 +23,6 @@ import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.Instant
@@ -55,7 +54,6 @@ class EventProcessorService(
     private val transactionProcessor: TransactionProcessor,
     private val propertyRepository: PropertyRepository
 ) {
-    private val log = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
     fun createBlockchain(spaceId: String, baseDir: String) {
 
@@ -133,7 +131,7 @@ class EventProcessorService(
     }
 
     /**
-     * Step 1.1, collecting transactions
+     * Collecting transactions
      *
      */
     fun onTransaction(transaction: Transaction) {
@@ -195,7 +193,7 @@ class EventProcessorService(
     }
 
     /**
-     * Step 2, get next block proposal
+     * Get next block proposal
      */
     // TODO return existing proposals if available
     fun onGetProposals(): List<BlockData> {
@@ -210,7 +208,7 @@ class EventProcessorService(
                 val newHeight = lastBlock.height + 1
                 val producer = accountService.getActiveProducerBySpace(space, round)
 
-                val savedProposal = blockCandidateService.getVotedBlockCandidate(
+                val savedProposal = blockCandidateService.getCompleteBlockCandidate(
                     space = space,
                     height = newHeight,
                     round = round,
@@ -259,7 +257,23 @@ class EventProcessorService(
     }
 
     fun onProposals(proposals: List<BlockData>) {
-        proposals.forEach { blockCandidateService.save(it) }
+        proposals.forEach { blockData ->
+
+            val round = TimeUtils.getCurrentRound()
+
+            val spaceId = blockData.block.spaceId
+
+            val space = spaceRepository.findById(spaceId).orElseThrow()
+
+            val activeValidator = accountService.getActiveProducerBySpace(space, round)
+
+            if (activeValidator.id == blockData.block.proposerId) {
+                blockCandidateService.save(blockData)
+            } else {
+                // TODO log illegal request
+            }
+
+        }
     }
 
     /**

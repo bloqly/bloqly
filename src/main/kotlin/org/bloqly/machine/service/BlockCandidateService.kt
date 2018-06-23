@@ -88,7 +88,7 @@ class BlockCandidateService(
             referencedBlockIdsOK && transactionsVerifiedOK
     }
 
-    fun getVotedBlockCandidate(space: Space, height: Long, round: Long, producerId: String): BlockData? {
+    fun getCompleteBlockCandidate(space: Space, height: Long, round: Long, producerId: String): BlockData? {
         val quorum = propertyRepository.getQuorumBySpace(space)
         return blockCandidateRepository
             .findById(BlockCandidateId(space.id, height, round, producerId))
@@ -107,6 +107,10 @@ class BlockCandidateService(
             }
             // TODO check if there is several voted block candidates for the same height
             // as this would break consensus rules
-            .first { it.votes.size >= quorum }
+            .firstOrNull { blockData ->
+                val votes = voteRepository.findByBlockId(blockData.block.id)
+
+                votes.size >= quorum
+            }
     }
 }
