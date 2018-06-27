@@ -137,6 +137,6 @@ class WorkflowTest {
     }
 
     private fun selectBestProposal() {
-        eventProcessorService.onSelectBestProposal()
+        eventProcessorService.onTick()
     }
 }

@@ -4,7 +4,8 @@ data class Node(
     val id: Int,
     var lastBlock: Block,
     val proposals: MutableSet<Block> = mutableSetOf(),
-    val votes: MutableSet<Vote> = mutableSetOf()
+    val votes: MutableSet<Vote> = mutableSetOf(),
+    var faulty: Boolean = false
 ) {
 
     fun receiveVote(vote: Vote) {
@@ -14,16 +15,31 @@ data class Node(
     }
 
     private fun addVote(vote: Vote) {
+        if (faulty) {
+            return
+        }
         votes.add(vote)
     }
 
     fun receiveProposal(proposal: Block) {
         if (!SimUtils.isNetworkFailure()) {
-            proposals.add(proposal)
+            addProposal(proposal)
         }
     }
 
-    fun getProposal(): Block {
+    private fun addProposal(proposal: Block) {
+        if (faulty) {
+            return
+        }
+        proposals.add(proposal)
+    }
+
+    fun getProposal(): Block? {
+
+        if (faulty) {
+            return null
+        }
+
         val newHeight = lastBlock.height + 1
 
         // Did I propose new height already?
@@ -51,15 +67,24 @@ data class Node(
         }
     }
 
-    fun getVote(): Vote {
+    fun getVote(): Vote? {
+
+        if (faulty) {
+            return null
+        }
+
         val newHeight = lastBlock.height + 1
 
         val savedVote = votes.firstOrNull {
-            it.block.height == newHeight && it.block.proposerId == id
+            it.block.height == newHeight && it.nodeId == id && it.voteType == VoteType.VOTE
         }
 
         if (savedVote != null) {
-            return savedVote
+            return if (SimUtils.round - lastBlock.round >= Nodes.maxRoundDelay) {
+                getLockVote(newHeight)
+            } else {
+                savedVote
+            }
         }
 
         val proposal = proposals
@@ -80,10 +105,96 @@ data class Node(
         return newVote
     }
 
+    private fun getLockVote(newHeight: Long): Vote {
+        val preLockVote = votes.firstOrNull {
+            it.block.height == newHeight && it.nodeId == id && it.voteType == VoteType.PRE_LOCK
+        }
+
+        if (preLockVote != null && SimUtils.round - preLockVote.voteRound < Nodes.maxRoundDelay) {
+            return preLockVote
+        }
+
+        return if (preLockVote != null) {
+
+            val preLockVotesCount = votes.count {
+                it.block.height == newHeight && it.voteType == VoteType.PRE_LOCK
+            }
+
+            if (preLockVotesCount >= Nodes.quorum ) {
+
+                val lockVote = votes.firstOrNull {
+                    it.block.height == newHeight && it.nodeId == id && it.voteType == VoteType.LOCK
+                }
+
+                if (lockVote != null) {
+                    lockVote
+                } else {
+                    val lockBlock = Block(
+                        parent = lastBlock,
+                        round = -1,
+                        height = newHeight,
+                        blockType = BlockType.LOCK
+                    )
+
+                    val newLockVote = Vote(
+                        nodeId = id,
+                        block = lockBlock,
+                        voteType = VoteType.LOCK
+                    )
+
+                    votes.add(newLockVote)
+
+                    newLockVote
+                }
+            } else {
+                preLockVote
+            }
+        } else {
+
+            val lockBlock = Block(
+                parent = lastBlock,
+                round = -1,
+                height = newHeight,
+                blockType = BlockType.LOCK
+            )
+
+            val newPreLockVote = Vote(
+                nodeId = id,
+                block = lockBlock,
+                voteType = VoteType.PRE_LOCK
+            )
+
+            votes.add(newPreLockVote)
+
+            newPreLockVote
+        }
+    }
+
     fun tick() {
+        if (faulty) {
+            return
+        }
+
         val newHeight = lastBlock.height + 1
 
-        val nextVotes = votes.filter { it.block.height == newHeight }.toSet()
+        val lockVotesCount = votes.count { it.block.height == newHeight && it.voteType == VoteType.LOCK }
+
+        if (lockVotesCount >= Nodes.quorum) {
+
+            val lockBlock = Block(
+                parent = lastBlock,
+                round = -1,
+                height = newHeight
+            )
+
+            lastBlock = lockBlock
+
+            SimUtils.incLock()
+
+            return
+        }
+
+        val nextVotes = votes.filter { it.block.height == newHeight && it.voteType == VoteType.VOTE }.toSet()
 
         val nextProposals = nextVotes.map { it.block }.toSet()
 
@@ -97,10 +208,13 @@ data class Node(
                 parent = lastBlock,
                 round = SimUtils.round,
                 height = newHeight,
-                proofOfLock = nextVotes
+                proofOfLock = nextVotes,
+                blockType = BlockType.DEADLOCK
             )
 
             lastBlock = lockBlock
+
+            SimUtils.incDeadLock()
         } else {
             val bestProposal = proposals
                 .filter { it.height == newHeight }
@@ -114,9 +228,13 @@ data class Node(
                 lastBlock = bestProposal.copy(parent = lastBlock)
             }
         }
+
     }
 
     fun syncBlocks() {
+        if (faulty) {
+            return
+        }
 
         if (SimUtils.isNetworkFailure()) {
             return
@@ -145,6 +263,10 @@ data class Node(
     }
 
     fun syncVotes() {
+        if (faulty) {
+            return
+        }
+
         if (SimUtils.isNetworkFailure()) {
             return
         }

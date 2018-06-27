@@ -6,11 +6,17 @@ object SimUtils {
 
     private val random: Random = Random()
 
+    var locksCount: Int = 0
+        private set
+    var deadlocksCount: Int = 0
+        private set
+
     init {
         random.setSeed(2)
     }
 
     var round: Int = 0
+        private set
 
     fun getRandomIndex(): Int {
         return random.nextInt(Nodes.nodesCount)
@@ -18,6 +24,14 @@ object SimUtils {
 
     fun nextRound() {
         round++
+    }
+
+    fun incLock() {
+        locksCount++
+    }
+
+    fun incDeadLock() {
+        deadlocksCount++
     }
 
     fun sendProposal(proposal: Block) {
@@ -30,7 +44,7 @@ object SimUtils {
     }
 
     fun getVotes(): Set<Vote> {
-        return Nodes.nodes.map { it.getVote() }.toSet()
+        return Nodes.nodes.mapNotNull { it.getVote() }.toSet()
     }
 
     fun sendVotes(votes: Set<Vote>) {
@@ -57,6 +71,6 @@ object SimUtils {
     }
 
     fun isNetworkFailure(): Boolean {
-        return random.nextInt(10) < 1
+        return random.nextInt(10) < -1
     }
 }

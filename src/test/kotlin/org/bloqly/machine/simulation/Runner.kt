@@ -1,6 +1,6 @@
 package org.bloqly.machine.simulation
 
-const val iterations = 10000
+const val iterations = 1000
 
 fun main(args: Array<String>) {
 
@@ -16,9 +16,8 @@ fun main(args: Array<String>) {
         val proposer = Nodes.getProposer()
 
         proposer?.let {
-            val proposal = proposer.getProposal()
-
-            SimUtils.sendProposal(proposal)
+            proposer.getProposal()
+                ?.let { SimUtils.sendProposal(it) }
         }
 
         val votes = SimUtils.getVotes()
@@ -48,4 +47,8 @@ fun main(args: Array<String>) {
 
         println()
     }
+
+    println("Locks count: ${SimUtils.locksCount}")
+    println("Deadlocks count: ${SimUtils.locksCount}")
+
 }

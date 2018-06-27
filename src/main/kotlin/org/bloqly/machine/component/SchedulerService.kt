@@ -65,8 +65,9 @@ class SchedulerService(
     }
 
     @Scheduled(fixedDelay = 1000, initialDelay = 1000)
-    fun selectBestProposal() {
-        eventProcessorService.onSelectBestProposal()
+    fun tick() {
+        // TODO repeat without delay if there are new proposals available
+        eventProcessorService.onTick()
     }
 
     // @Scheduled(fixedDelay = 5000)
@@ -78,7 +79,7 @@ class SchedulerService(
 
             blocks?.forEach { block ->
                 eventProcessorService.onProposals(listOf(block))
-                eventProcessorService.onSelectBestProposal()
+                eventProcessorService.onTick()
             }
         }
     }

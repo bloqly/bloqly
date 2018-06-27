@@ -24,6 +24,8 @@ import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.Instant
@@ -55,6 +57,8 @@ class EventProcessorService(
     private val transactionProcessor: TransactionProcessor,
     private val propertyRepository: PropertyRepository
 ) {
+
+    private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
     fun createBlockchain(spaceId: String, baseDir: String) {
 
@@ -275,7 +279,7 @@ class EventProcessorService(
      * If it is a valid vote for BC, H + 1 AND BC reached Q then LIB = BC
      *
      */
-    fun onSelectBestProposal() {
+    fun onTick() {
         spaceRepository.findAll()
             .forEach { space ->
                 val lastBlock = blockRepository.getLastBlock(space.id)
@@ -301,6 +305,8 @@ class EventProcessorService(
         val lockBlockId = EncodingUtils.encodeToString16(
             CryptoUtils.digest("${space.id}:$newHeight")
         )
+
+        log.info("Lock detected on height $newHeight, lock block id id: $lockBlockId")
 
         return Block(
             id = lockBlockId,

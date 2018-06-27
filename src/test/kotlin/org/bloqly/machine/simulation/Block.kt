@@ -8,10 +8,11 @@ data class Block(
     val parent: Block? = null,
     val round: Int,
     val height: Long,
-    val proofOfLock: Set<Vote>? = null
+    val proofOfLock: Set<Vote>? = null,
+    val blockType: BlockType = BlockType.NORMAL
 ) {
     override fun toString(): String {
-        return "Block(proposerId=$proposerId, parent=$parent, round=$round, height=$height)"
+        return "Block(proposerId=$proposerId, round=$round, height=$height)"
     }
 
     override fun equals(other: Any?): Boolean {
