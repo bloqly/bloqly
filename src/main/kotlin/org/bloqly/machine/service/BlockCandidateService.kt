@@ -1,6 +1,7 @@
 package org.bloqly.machine.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.BlockCandidate
 import org.bloqly.machine.model.BlockCandidateId
 import org.bloqly.machine.model.Space
@@ -93,9 +94,9 @@ class BlockCandidateService(
             referencedBlockIdsOK && transactionsVerifiedOK
     }
 
-    fun getBlockCandidate(space: Space, height: Long, producerId: String): BlockData? {
+    fun getBlockCandidate(space: Space, height: Long, producer: Account): BlockData? {
         val blockCandidate = blockCandidateRepository
-            .getBlockCandidate(space.id, height, producerId)
+            .getBlockCandidate(space.id, height, producer.id)
 
         return blockCandidate?.let {
             objectMapper.readValue(blockCandidate.data, BlockData::class.java)

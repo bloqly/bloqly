@@ -32,7 +32,7 @@ data class Node(
         // as his proposal is better. As we do it in our round, in real implementation
         // 'block' will be encapsulated in a BlockContainer with the required additional information
         // provided...
-        val bestProposal = proposals.filter { it.height == newHeight }
+        val bestProposal = proposals.filter { it.height == newHeight && it.proposerId == id }
             .sortedBy { it.round }
             .firstOrNull()
 
@@ -117,6 +117,11 @@ data class Node(
     }
 
     fun syncBlocks() {
+
+        if (SimUtils.isNetworkFailure()) {
+            return
+        }
+
         val height = lastBlock.height
 
         if (votes.isEmpty()) {
@@ -140,6 +145,10 @@ data class Node(
     }
 
     fun syncVotes() {
+        if (SimUtils.isNetworkFailure()) {
+            return
+        }
+
         val nodeToAsk = Nodes.nodes[SimUtils.getRandomIndex()]
 
         if (nodeToAsk.id == id) {

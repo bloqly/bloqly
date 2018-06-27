@@ -104,13 +104,14 @@ class TestService(
     fun testValidatorsInitialized() {
         val validators = accountService.getValidatorsForSpace(getDefaultSpace())
 
-        assertEquals(3, validators.size)
+        assertEquals(4, validators.size)
 
         val validatorsIds = validators.map { it.id }
 
         assertTrue(validatorsIds.contains(getValidator(0).id))
         assertTrue(validatorsIds.contains(getValidator(1).id))
         assertTrue(validatorsIds.contains(getValidator(2).id))
+        assertTrue(validatorsIds.contains(getValidator(3).id))
     }
 
     fun testValidatorsPowerValues() {
@@ -125,6 +126,10 @@ class TestService(
         assertEquals(
             BigInteger.ONE,
             accountService.getAccountPower(DEFAULT_SPACE, getValidator(2).id)
+        )
+        assertEquals(
+            BigInteger.ONE,
+            accountService.getAccountPower(DEFAULT_SPACE, getValidator(3).id)
         )
     }
 

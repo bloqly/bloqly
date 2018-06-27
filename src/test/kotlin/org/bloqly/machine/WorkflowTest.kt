@@ -92,7 +92,7 @@ class WorkflowTest {
         sendTransactions(listOf(transaction))
 
         sendVotes()
-        assertEquals(3, voteRepository.findAll().toList().size)
+        assertEquals(4, voteRepository.findAll().toList().size)
 
         sendProposals()
         assertEquals(1, blockCandidateRepository.findAll().toList().size)
@@ -104,9 +104,9 @@ class WorkflowTest {
         // 2. Start second round
         TimeUtils.setTestTime(PERIOD + 1L)
 
-        // TODO fix - after latest changes we'lll get voted proposal only in the second round
+        // TODO fix - after latest changes we'll get voted proposal only in the second round
         sendVotes()
-        assertEquals(6, voteRepository.findAll().toList().size)
+        assertEquals(8, voteRepository.findAll().toList().size)
 
         selectBestProposal()
 
@@ -124,7 +124,7 @@ class WorkflowTest {
     private fun sendVotes() {
         val votes = testService.getVotes()
 
-        assertEquals(3, votes.size)
+        assertEquals(4, votes.size)
 
         eventReceiverService.receiveVotes(votes)
     }

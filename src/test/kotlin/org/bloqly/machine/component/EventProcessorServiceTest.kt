@@ -102,7 +102,7 @@ class EventProcessorServiceTest {
 
         assertTrue(
             Sets.newHashSet(propertyRepository.findAll()).contains(
-                Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.id, "balance"), writeLong("999997"))
+                Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.id, "balance"), writeLong("999996"))
             )
         )
     }
@@ -116,7 +116,7 @@ class EventProcessorServiceTest {
         val rootBalanceBefore = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceBefore = propertyRepository.findById(userBalanceId)
 
-        assertArrayEquals(writeLong("999997"), rootBalanceBefore.value)
+        assertArrayEquals(writeLong("999996"), rootBalanceBefore.value)
         assertFalse(userBalanceBefore.isPresent)
 
         val transaction = TestUtils.createTransaction(
@@ -130,7 +130,7 @@ class EventProcessorServiceTest {
         val rootBalanceAfter = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceAfter = propertyRepository.findById(userBalanceId).orElseThrow()
 
-        assertArrayEquals(writeLong("999996"), rootBalanceAfter.value)
+        assertArrayEquals(writeLong("999995"), rootBalanceAfter.value)
         assertArrayEquals(writeLong("1"), userBalanceAfter.value)
     }
 
@@ -139,7 +139,7 @@ class EventProcessorServiceTest {
         TimeUtils.setTestTime(0)
         val votes = testService.getVotes()
 
-        assertEquals(3, votes.size)
+        assertEquals(4, votes.size)
 
         val proposals1 = eventProcessorService.onGetProposals()
 

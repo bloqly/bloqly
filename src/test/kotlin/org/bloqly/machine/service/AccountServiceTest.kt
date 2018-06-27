@@ -47,17 +47,20 @@ class AccountServiceTest {
         val validator2 = accountService.getActiveProducerBySpace(space, 1)
         val validator3 = accountService.getActiveProducerBySpace(space, 2)
         val validator4 = accountService.getActiveProducerBySpace(space, 3)
+        val validator5 = accountService.getActiveProducerBySpace(space, 4)
 
         assertNotNull(validator1)
         assertNotNull(validator2)
         assertNotNull(validator3)
         assertNotNull(validator4)
+        assertNotNull(validator5)
 
         assertNotEquals(validator1, validator2)
         assertNotEquals(validator2, validator3)
-        assertNotEquals(validator3, validator1)
+        assertNotEquals(validator3, validator2)
+        assertNotEquals(validator4, validator3)
 
-        assertEquals(validator4, validator1)
+        assertEquals(validator5, validator1)
     }
 
     @Test

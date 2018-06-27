@@ -20,6 +20,7 @@ data class Block(
             .append(proposerId, otherBlock?.proposerId)
             .append(round, otherBlock?.round)
             .append(height, otherBlock?.height)
+            .append(proofOfLock, otherBlock?.proofOfLock)
             .build()
     }
 
@@ -28,6 +29,7 @@ data class Block(
             .append(proposerId)
             .append(round)
             .append(height)
+            .append(proofOfLock)
             .build()
     }
 }

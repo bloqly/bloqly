@@ -57,6 +57,6 @@ object SimUtils {
     }
 
     fun isNetworkFailure(): Boolean {
-        return random.nextInt(10) < 3
+        return random.nextInt(10) < 1
     }
 }

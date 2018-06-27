@@ -13,6 +13,7 @@ data class BlockData(
     val transactions: List<TransactionVO>,
 
     val votes: List<VoteVO>
+
 ) {
     constructor(
         block: Block,

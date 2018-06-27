@@ -230,7 +230,7 @@ class EventSenderServiceTest {
     fun testSendVotesAlreadySent() {
         val votes = getVotes()
 
-        assertEquals(3, votes.size)
+        assertEquals(4, votes.size)
 
         val events = votes.map {
             EntityEvent(
