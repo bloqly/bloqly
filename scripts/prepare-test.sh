@@ -26,6 +26,12 @@ curl -X POST \
   -d '{"privateKey":"3890ACF98A004E166A864F1444F4425003275DBD1BF84DFCA9F55847BF5E84B4"}' \
   http://localhost:9903/api/v1/admin/accounts
 
+#validator4
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"privateKey":"A115E92725C45AD12D054EDBBFEAA071D12D20512602A66CB6B401D3CD459944"}' \
+  http://localhost:9904/api/v1/admin/accounts
+
 # init blockchain
 curl -X POST \
   -H "Content-Type: application/json" \
@@ -38,3 +44,4 @@ GENESIS=$(curl -X GET http://localhost:9901/api/v1/admin/genesis/main)
 # import genesis
 curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9902/api/v1/admin/genesis/main
 curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9903/api/v1/admin/genesis/main
+curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9904/api/v1/admin/genesis/main
