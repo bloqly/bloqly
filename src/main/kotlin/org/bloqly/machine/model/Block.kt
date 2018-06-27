@@ -11,35 +11,35 @@ import javax.persistence.Lob
 data class Block(
 
     @Id
-    var id: String,
+    val id: String,
 
     @Column(nullable = false)
-    var spaceId: String,
+    val spaceId: String,
 
     @Column(nullable = false)
-    var height: Long,
+    val height: Long,
 
     @Column(nullable = false)
-    var round: Long,
+    val round: Long,
 
     @Column(nullable = false)
-    var timestamp: Long,
+    val timestamp: Long,
 
     @Column(nullable = false)
-    var parentHash: String,
-
-    @Column(nullable = false)
-    var proposerId: String,
+    val parentHash: String,
 
     @Column
-    var txHash: ByteArray?,
+    val proposerId: String,
 
-    @Column(nullable = false)
-    var validatorTxHash: ByteArray,
+    @Column
+    var txHash: ByteArray? = null,
+
+    @Column
+    val validatorTxHash: ByteArray? = null,
 
     @Lob
-    @Column(nullable = false)
-    var signature: ByteArray
+    @Column
+    val signature: ByteArray? = null
 ) {
 
     fun toVO(): BlockVO {

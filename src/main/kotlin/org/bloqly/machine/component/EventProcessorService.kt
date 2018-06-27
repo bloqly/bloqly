@@ -283,9 +283,37 @@ class EventProcessorService(
             .forEach { space ->
                 val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
+                val newHeightVotes = voteRepository.findByHeight(newHeight)
+
+                if (isDeadlock(space, newHeightVotes)) {
+
+                    val lockBlockId = EncodingUtils.encodeToString16(
+                        CryptoUtils.digest("${space.id}:$newHeight")
+                    )
+
+                    val lockBlock = Block(
+                        id = lockBlockId,
+                        spaceId = space.id,
+                        height = newHeight,
+                        round = -1,
+                        timestamp = Instant.now().toEpochMilli(),
+                        parentHash = lastBlock.id,
+                        proposerId = lockBlockId
+                    )
+
+                    blockRepository.save(lockBlock)
+                }
 
                 blockCandidateService.getBestBlockCandidate(space, newHeight)
                     ?.let { blockRepository.save(it.block.toModel()) }
             }
+    }
+
+    private fun isDeadlock(space: Space, newHeightVotes: List<Vote>): Boolean {
+        val proposalIds = newHeightVotes.map { it.blockId }.toSet()
+        val quorum = propertyRepository.getQuorumBySpaceId(space.id)
+        val validators = accountService.getValidatorsForSpace(space)
+
+        return newHeightVotes.size >= quorum && proposalIds.size > validators.size - quorum + 1
     }
 }
