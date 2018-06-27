@@ -4,7 +4,7 @@ object Nodes {
 
     const val quorum = 3
     const val nodesCount: Int = 4
-    const val maxRoundDelay = 10
+    const val maxRoundDelay = 5
 
     val nodes: List<Node>
 

@@ -71,6 +71,6 @@ object SimUtils {
     }
 
     fun isNetworkFailure(): Boolean {
-        return random.nextInt(10) < -1
+        return random.nextInt(100) < 1
     }
 }

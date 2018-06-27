@@ -1,6 +1,6 @@
 package org.bloqly.machine.simulation
 
-const val iterations = 1000
+const val iterations = 10000
 
 fun main(args: Array<String>) {
 
