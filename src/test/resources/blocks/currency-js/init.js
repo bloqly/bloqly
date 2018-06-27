@@ -32,10 +32,10 @@ function init() {
             power: new BigInteger('1')
         }, {
             target: 'self',
-            quorum: 2
+            quorum: 3
         }, {
             target: 'self',
-            validators: 3
+            validators: 4
         }
     ];
 }

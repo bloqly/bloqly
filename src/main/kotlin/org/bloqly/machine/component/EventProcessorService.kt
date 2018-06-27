@@ -259,11 +259,8 @@ class EventProcessorService(
         proposals.forEach { blockData ->
 
             val round = TimeUtils.getCurrentRound()
-
             val spaceId = blockData.block.spaceId
-
             val space = spaceRepository.findById(spaceId).orElseThrow()
-
             val activeValidator = accountService.getActiveProducerBySpace(space, round)
 
             if (activeValidator.id == blockData.block.proposerId) {
@@ -286,27 +283,34 @@ class EventProcessorService(
                 val newHeightVotes = voteRepository.findByHeight(newHeight)
 
                 if (isDeadlock(space, newHeightVotes)) {
-
-                    val lockBlockId = EncodingUtils.encodeToString16(
-                        CryptoUtils.digest("${space.id}:$newHeight")
-                    )
-
-                    val lockBlock = Block(
-                        id = lockBlockId,
-                        spaceId = space.id,
-                        height = newHeight,
-                        round = -1,
-                        timestamp = Instant.now().toEpochMilli(),
-                        parentHash = lastBlock.id,
-                        proposerId = lockBlockId
-                    )
-
-                    blockRepository.save(lockBlock)
+                    blockRepository.save(newLockBlock(space, lastBlock))
+                } else {
+                    blockCandidateService.getBestBlockCandidate(space, newHeight)
+                        ?.let { blockRepository.save(it.block.toModel()) }
                 }
-
-                blockCandidateService.getBestBlockCandidate(space, newHeight)
-                    ?.let { blockRepository.save(it.block.toModel()) }
             }
+    }
+
+    private fun newLockBlock(
+        space: Space,
+        lastBlock: Block
+    ): Block {
+
+        val newHeight = lastBlock.height + 1
+
+        val lockBlockId = EncodingUtils.encodeToString16(
+            CryptoUtils.digest("${space.id}:$newHeight")
+        )
+
+        return Block(
+            id = lockBlockId,
+            spaceId = space.id,
+            height = newHeight,
+            round = -1,
+            timestamp = Instant.now().toEpochMilli(),
+            parentHash = lastBlock.id,
+            proposerId = lockBlockId
+        )
     }
 
     private fun isDeadlock(space: Space, newHeightVotes: List<Vote>): Boolean {

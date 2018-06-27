@@ -94,7 +94,7 @@ class TestService(
     }
 
     fun testPropertiesAreCreated() {
-        assertEquals(2, propertyRepository.getQuorumBySpace(getDefaultSpace()))
+        assertEquals(3, propertyRepository.getQuorumBySpace(getDefaultSpace()))
     }
 
     fun testSpaceCreated() {
