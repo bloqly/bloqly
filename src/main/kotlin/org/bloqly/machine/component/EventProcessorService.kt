@@ -198,8 +198,7 @@ class EventProcessorService(
      */
     fun onGetProposals(): List<BlockData> {
 
-        return spaceRepository
-            .findAll()
+        return spaceRepository.findAll()
             .mapNotNull { space ->
                 val round = TimeUtils.getCurrentRound()
                 val lastBlock = blockRepository.getLastBlock(space.id)
@@ -280,17 +279,13 @@ class EventProcessorService(
      *
      */
     fun onSelectBestProposal() {
-        spaceRepository
-            .findAll()
-            .mapNotNull { space ->
+        spaceRepository.findAll()
+            .forEach { space ->
                 val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
 
-                val votedBlockData = blockCandidateService.getVotedBlockCandidate(space, newHeight)
-
-                votedBlockData?.let {
-                    blockRepository.save(it.block.toModel())
-                }
+                blockCandidateService.getBestBlockCandidate(space, newHeight)
+                    ?.let { blockRepository.save(it.block.toModel()) }
             }
     }
 }

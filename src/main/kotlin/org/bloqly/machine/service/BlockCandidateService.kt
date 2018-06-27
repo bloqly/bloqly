@@ -95,24 +95,20 @@ class BlockCandidateService(
     }
 
     fun getBlockCandidate(space: Space, height: Long, producer: Account): BlockData? {
-        val blockCandidate = blockCandidateRepository
-            .getBlockCandidate(space.id, height, producer.id)
-
-        return blockCandidate?.let {
-            objectMapper.readValue(blockCandidate.data, BlockData::class.java)
-        }
+        return blockCandidateRepository.getBlockCandidate(space.id, height, producer.id)
+            ?.let {
+                objectMapper.readValue(it.data, BlockData::class.java)
+            }
     }
 
-    fun getVotedBlockCandidate(space: Space, height: Long): BlockData? {
-        val quorum = propertyRepository.getQuorumBySpace(space)
-        val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, height)
+    fun getBestBlockCandidate(space: Space, height: Long): BlockData? {
+        return blockCandidateRepository.getBlockCandidate(space.id, height)
+            ?.let {
+                val blockData = objectMapper.readValue(it.data, BlockData::class.java)
+                val votes = voteRepository.findByBlockId(blockData.block.id)
+                val quorum = propertyRepository.getQuorumBySpace(space)
 
-        return blockCandidate?.let {
-            val blockData = objectMapper.readValue(it.data, BlockData::class.java)
-
-            val votes = voteRepository.findByBlockId(blockData.block.id)
-
-            if (votes.size >= quorum) blockData else null
-        }
+                blockData.takeIf { votes.size >= quorum }
+            }
     }
 }
