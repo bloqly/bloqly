@@ -105,10 +105,9 @@ class BlockCandidateService(
         return blockCandidateRepository.getBlockCandidate(space.id, height)
             ?.let {
                 val blockData = ObjectUtils.readValue(it.data, BlockData::class.java)
-                val votes = voteRepository.findByBlockId(blockData.block.id)
                 val quorum = propertyRepository.getQuorumBySpace(space)
 
-                blockData.takeIf { votes.count { it.id.voteType == VoteType.VOTE } >= quorum }
+                blockData.takeIf { blockData.votes.count { it.voteType == VoteType.VOTE.name } >= quorum }
             }
     }
 }

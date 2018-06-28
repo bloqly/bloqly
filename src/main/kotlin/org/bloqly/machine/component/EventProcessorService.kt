@@ -295,7 +295,6 @@ class EventProcessorService(
 
     private fun isLock(space: Space, height: Long): Boolean {
         val quorum = propertyRepository.getQuorumBySpaceId(space.id)
-
         return voteRepository.findLocksCountByHeight(space.id, height) >= quorum
     }
 

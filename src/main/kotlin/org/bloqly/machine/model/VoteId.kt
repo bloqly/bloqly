@@ -25,6 +25,6 @@ data class VoteId(
 ) : Serializable {
 
     override fun toString(): String {
-        return "$validatorId:$spaceId:$height"
+        return "$validatorId:$spaceId:$height:$voteType"
     }
 }

@@ -30,6 +30,6 @@ class Application {
         const val MAX_REFERENCED_BLOCK_DEPTH = 1440
         const val MAX_TRANSACTION_AGE = 2 * 3600 * 1000
         const val ROUND = 5000
-        const val MAX_MISSED_ROUNDS = 2
+        const val MAX_MISSED_ROUNDS = 4
     }
 }
