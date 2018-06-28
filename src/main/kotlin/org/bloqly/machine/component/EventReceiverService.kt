@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.TransactionVO
@@ -35,7 +36,7 @@ class EventReceiverService(
         val validatedProposals = proposals
             .filter { proposal ->
                 val quorum = propertyRepository.getQuorumBySpaceId(proposal.block.spaceId)
-                proposal.votes.size >= quorum
+                proposal.votes.count { it.voteType == VoteType.VOTE.name } >= quorum
             }
 
         eventProcessorService.onProposals(validatedProposals)

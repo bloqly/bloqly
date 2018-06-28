@@ -1,6 +1,5 @@
 package org.bloqly.machine.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
@@ -13,6 +12,7 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.APIUtils
+import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockDataList
 import org.junit.Assert.assertFalse
@@ -50,9 +50,6 @@ class BlockControllerTest {
     private lateinit var eventReceiverService: EventReceiverService
 
     @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
-    @Autowired
     private lateinit var restTemplate: TestRestTemplate
 
     @Autowired
@@ -82,7 +79,7 @@ class BlockControllerTest {
 
         assertTrue(blockDatas.isNotEmpty())
 
-        val proposalsPayload = objectMapper.writeValueAsString(
+        val proposalsPayload = ObjectUtils.writeValueAsString(
             BlockDataList(blockDatas)
         )
 

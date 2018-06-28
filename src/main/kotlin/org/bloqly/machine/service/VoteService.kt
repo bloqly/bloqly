@@ -1,6 +1,5 @@
 package org.bloqly.machine.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
@@ -10,11 +9,11 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
 import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
+import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -25,10 +24,7 @@ import java.time.Instant
 class VoteService(
     private val voteRepository: VoteRepository,
     private val blockRepository: BlockRepository,
-    private val blockCandidateRepository: BlockCandidateRepository,
-    // TODO make object mapper a static thing
-    private val objectMapper: ObjectMapper,
-    private val propertyRepository: PropertyRepository
+    private val blockCandidateRepository: BlockCandidateRepository
 ) {
 
     fun getVote(space: Space, validator: Account): Vote {
@@ -61,7 +57,7 @@ class VoteService(
     }
 
     private fun getBlockData(blockCandidate: BlockCandidate): BlockData {
-        return objectMapper.readValue(blockCandidate.data, BlockData::class.java)
+        return ObjectUtils.readValue(blockCandidate.data, BlockData::class.java)
     }
 
     private fun createVote(validator: Account, block: Block, voteId: VoteId): Vote {

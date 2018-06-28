@@ -1,6 +1,5 @@
 package org.bloqly.machine.test
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
@@ -16,6 +15,7 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.FileUtils
+import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.vo.VoteVO
@@ -37,7 +37,6 @@ class TestService(
     private val transactionService: TransactionService,
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
-    private val objectMapper: ObjectMapper,
     private val resetService: ResetService
 ) {
 
@@ -49,7 +48,7 @@ class TestService(
 
         val accountsString = FileUtils.getResourceAsString("/accounts.json")
 
-        accounts = objectMapper.readValue(accountsString, Accounts::class.java).accounts
+        accounts = ObjectUtils.readValue(accountsString, Accounts::class.java).accounts
     }
 
     fun cleanup() {
@@ -66,7 +65,7 @@ class TestService(
 
         val accountsString = FileUtils.getResourceAsString("/accounts.json")
 
-        val accountsObject = objectMapper.readValue(accountsString, Accounts::class.java)
+        val accountsObject = ObjectUtils.readValue(accountsString, Accounts::class.java)
 
         accountsObject.accounts.forEach { account ->
             accountService.importAccount(account.privateKey!!)

@@ -8,6 +8,7 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
+import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
@@ -214,10 +215,8 @@ class EventProcessorService(
             }
     }
 
-    private fun createBlockCandidate(
-        lastBlock: Block,
-        producer: Account
-    ): BlockData? {
+    private fun createBlockCandidate(lastBlock: Block, producer: Account): BlockData? {
+
         val newHeight = lastBlock.height + 1
         val spaceId = lastBlock.spaceId
         val votes = getVotesForBlock(lastBlock)
@@ -248,7 +247,7 @@ class EventProcessorService(
     private fun isQuorum(spaceId: String, votes: List<Vote>): Boolean {
         val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
 
-        return votes.size >= quorum
+        return votes.count { it.id.voteType == VoteType.VOTE } >= quorum
     }
 
     private fun getPendingTransactions(spaceId: String): List<Transaction> {
@@ -286,7 +285,7 @@ class EventProcessorService(
                 val newHeight = lastBlock.height + 1
                 val newHeightVotes = voteRepository.findByHeight(newHeight)
 
-                if (isDeadlock(space, newHeightVotes)) {
+                if (isLock()) {
                     blockRepository.save(newLockBlock(space, lastBlock))
                 } else {
                     blockCandidateService.getBestBlockCandidate(space, newHeight)
@@ -295,10 +294,11 @@ class EventProcessorService(
             }
     }
 
-    private fun newLockBlock(
-        space: Space,
-        lastBlock: Block
-    ): Block {
+    private fun isLock(): Boolean {
+        return false
+    }
+
+    private fun newLockBlock(space: Space, lastBlock: Block): Block {
 
         val newHeight = lastBlock.height + 1
 
@@ -317,13 +317,5 @@ class EventProcessorService(
             parentHash = lastBlock.id,
             proposerId = lockBlockId
         )
-    }
-
-    private fun isDeadlock(space: Space, newHeightVotes: List<Vote>): Boolean {
-        val proposalIds = newHeightVotes.map { it.blockId }.toSet()
-        val quorum = propertyRepository.getQuorumBySpaceId(space.id)
-        val validators = accountService.getValidatorsForSpace(space)
-
-        return newHeightVotes.size >= quorum && proposalIds.size > validators.size - quorum + 1
     }
 }

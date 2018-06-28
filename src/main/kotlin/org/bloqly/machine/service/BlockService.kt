@@ -1,6 +1,5 @@
 package org.bloqly.machine.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
@@ -17,6 +16,7 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
+import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
@@ -33,7 +33,6 @@ class BlockService(
     private val accountRepository: AccountRepository,
     private val blockRepository: BlockRepository,
     private val transactionRepository: TransactionRepository,
-    private val objectMapper: ObjectMapper,
     private val spaceRepository: SpaceRepository,
     private val transactionProcessor: TransactionProcessor,
     private val voteRepository: VoteRepository
@@ -104,7 +103,7 @@ class BlockService(
             transactions = transactions.map { it.toVO() }
         )
 
-        val json = objectMapper.writeValueAsString(genesis)
+        val json = ObjectUtils.writeValueAsString(genesis)
 
         return EncodingUtils.encodeToString16(json.toByteArray())
     }
@@ -115,7 +114,7 @@ class BlockService(
 
         val json = EncodingUtils.decodeFromString16(genesisString)
 
-        val genesis = objectMapper.readValue(json, Genesis::class.java)
+        val genesis = ObjectUtils.readValue(json, Genesis::class.java)
 
         ensureSpaceEmpty(genesis.block.spaceId)
 

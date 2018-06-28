@@ -1,16 +1,17 @@
 package org.bloqly.machine.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.BlockCandidate
 import org.bloqly.machine.model.BlockCandidateId
 import org.bloqly.machine.model.Space
+import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
@@ -21,7 +22,6 @@ import java.time.Instant
 @Transactional
 class BlockCandidateService(
     private val blockCandidateRepository: BlockCandidateRepository,
-    private val objectMapper: ObjectMapper,
     private val transactionRepository: TransactionRepository,
     private val voteRepository: VoteRepository,
     private val propertyRepository: PropertyRepository,
@@ -61,7 +61,7 @@ class BlockCandidateService(
         blockCandidateRepository.save(
             BlockCandidate(
                 id = blockCandidateId,
-                data = objectMapper.writeValueAsString(blockData),
+                data = ObjectUtils.writeValueAsString(blockData),
                 blockId = blockData.block.id,
                 timeReceived = Instant.now().toEpochMilli()
             )
@@ -97,18 +97,18 @@ class BlockCandidateService(
     fun getBlockCandidate(space: Space, height: Long, producer: Account): BlockData? {
         return blockCandidateRepository.getBlockCandidate(space.id, height, producer.id)
             ?.let {
-                objectMapper.readValue(it.data, BlockData::class.java)
+                ObjectUtils.readValue(it.data, BlockData::class.java)
             }
     }
 
     fun getBestBlockCandidate(space: Space, height: Long): BlockData? {
         return blockCandidateRepository.getBlockCandidate(space.id, height)
             ?.let {
-                val blockData = objectMapper.readValue(it.data, BlockData::class.java)
+                val blockData = ObjectUtils.readValue(it.data, BlockData::class.java)
                 val votes = voteRepository.findByBlockId(blockData.block.id)
                 val quorum = propertyRepository.getQuorumBySpace(space)
 
-                blockData.takeIf { votes.size >= quorum }
+                blockData.takeIf { votes.count { it.id.voteType == VoteType.VOTE } >= quorum }
             }
     }
 }

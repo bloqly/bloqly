@@ -1,6 +1,5 @@
 package org.bloqly.machine.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.bloqly.machine.Application
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.model.Node
@@ -8,6 +7,7 @@ import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.APIUtils
+import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.vo.VoteList
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -30,9 +30,6 @@ class VoteControllerTest {
 
     @Autowired
     private lateinit var testService: TestService
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
 
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
@@ -63,14 +60,14 @@ class VoteControllerTest {
 
         val votes = eventProcessorService.onGetVotes()
 
-        val votesPayload = objectMapper.writeValueAsString(
+        val votesPayload = ObjectUtils.writeValueAsString(
             VoteList.fromVotes(votes)
         )
 
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
-        val entity = HttpEntity<String>(votesPayload, headers)
+        val entity = HttpEntity(votesPayload, headers)
 
         val vote = votes.first()
 
