@@ -283,9 +283,8 @@ class EventProcessorService(
             .forEach { space ->
                 val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
-                val newHeightVotes = voteRepository.findByHeight(newHeight)
 
-                if (isLock()) {
+                if (isLock(space, newHeight)) {
                     blockRepository.save(newLockBlock(space, lastBlock))
                 } else {
                     blockCandidateService.getBestBlockCandidate(space, newHeight)
@@ -294,8 +293,10 @@ class EventProcessorService(
             }
     }
 
-    private fun isLock(): Boolean {
-        return false
+    private fun isLock(space: Space, height: Long): Boolean {
+        val quorum = propertyRepository.getQuorumBySpaceId(space.id)
+
+        return voteRepository.findLocksCountByHeight(space.id, height) >= quorum
     }
 
     private fun newLockBlock(space: Space, lastBlock: Block): Block {

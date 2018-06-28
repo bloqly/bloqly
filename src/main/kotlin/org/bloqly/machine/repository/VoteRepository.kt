@@ -14,4 +14,26 @@ interface VoteRepository : CrudRepository<Vote, VoteId> {
 
     @Query("select * from vote where height = ?1", nativeQuery = true)
     fun findByHeight(height: Long): List<Vote>
+
+    @Query(
+        """
+        select count(*) from vote
+        where
+        space_id = ?1 and
+        height = ?2 and
+        vote_type = 'PRE_LOCK'
+        """, nativeQuery = true
+    )
+    fun findPreLocksCountByHeight(spaceId: String, height: Long): Int
+
+    @Query(
+        """
+        select count(*) from vote
+        where
+        space_id = ?1 and
+        height = ?2 and
+        vote_type = 'LOCK'
+        """, nativeQuery = true
+    )
+    fun findLocksCountByHeight(spaceId: String, height: Long): Int
 }

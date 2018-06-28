@@ -1,7 +1,7 @@
 package org.bloqly.machine
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.Application.Companion.PERIOD
+import org.bloqly.machine.Application.Companion.ROUND
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
@@ -102,7 +102,7 @@ class WorkflowTest {
         assertEquals(0, getHeight())
 
         // 2. Start second round
-        TimeUtils.setTestTime(PERIOD + 1L)
+        TimeUtils.setTestTime(ROUND + 1L)
 
         // TODO fix - after latest changes we'll get voted proposal only in the second round
         sendVotes()
