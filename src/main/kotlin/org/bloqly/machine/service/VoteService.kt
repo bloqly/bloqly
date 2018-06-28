@@ -2,7 +2,6 @@ package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.Application
-import org.bloqly.machine.Application.Companion.ROUND
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.BlockCandidate
@@ -39,73 +38,61 @@ class VoteService(
 
         val newHeight = lastBlock.height + 1
 
-        // did I vote for H + 1?
-        val newHeightVoteId = VoteId(
+        val voteId = VoteId(
             validatorId = validator.id,
             spaceId = space.id,
-            height = newHeight
+            height = lastBlock.height
         )
 
-        val vote = voteRepository.findById(newHeightVoteId)
+        val newHeightVoteId = voteId.copy(height = newHeight)
 
-        return if (vote.isPresent) {
-            if (isOutdated(lastBlock)) {
-                val preLockVoteId = newHeightVoteId.copy(voteType = VoteType.PRE_LOCK)
+        return if (isOutdated(lastBlock)) {
+            val preLockVoteId = newHeightVoteId.copy(voteType = VoteType.PRE_LOCK)
 
-                val lockBlockId = EncodingUtils.encodeToString16(
-                    CryptoUtils.digest("${space.id}:$newHeight")
-                )
+            val lockBlockId = EncodingUtils.encodeToString16(
+                CryptoUtils.digest("${space.id}:$newHeight")
+            )
 
-                val preLockVoteOpt = voteRepository.findById(preLockVoteId)
+            val preLockVoteOpt = voteRepository.findById(preLockVoteId)
 
-                // Last block is outdated. Did we create PRE_LOCK for it?
-                if (preLockVoteOpt.isPresent) {
+            // Last block is outdated. Did we create PRE_LOCK for it?
+            if (preLockVoteOpt.isPresent) {
 
-                    // Yes, PRE_LOCK is created. It's probably quorum for LOCK?
-                    val preLocksCount = voteRepository.findPreLocksCountByHeight(space.id, newHeight)
+                // Yes, PRE_LOCK is created. It's probably quorum for LOCK?
+                val preLocksCount = voteRepository.findPreLocksCountByHeight(space.id, newHeight)
 
-                    val quorum = propertyRepository.getQuorumBySpaceId(space.id)
+                val quorum = propertyRepository.getQuorumBySpaceId(space.id)
 
-                    // quorum for LOCK, create LOCK vote if not exists or send the existing
-                    if (preLocksCount >= quorum) {
-                        val lockVoteId = newHeightVoteId.copy(voteType = VoteType.LOCK)
-                        voteRepository.findById(lockVoteId).orElseGet {
-                            createVote(validator, lockBlockId, newHeight, space, lockVoteId)
-                        }
-                    } else {
-                        // Not quorum for LOCK yet, just send existing PRE_LOCK vote
-                        preLockVoteOpt.get()
+                // quorum for LOCK, create LOCK vote if not exists or send the existing
+                if (preLocksCount >= quorum) {
+                    val lockVoteId = newHeightVoteId.copy(voteType = VoteType.LOCK)
+                    voteRepository.findById(lockVoteId).orElseGet {
+                        createVote(validator, lockBlockId, lockVoteId)
                     }
                 } else {
-                    // Block is outdated, but we haven't created PRE_LOCK for yet, do this
-                    createVote(validator, lockBlockId, newHeight, space, preLockVoteId)
+                    // Not quorum for LOCK yet, just send existing PRE_LOCK vote
+                    preLockVoteOpt.get()
                 }
             } else {
-                vote.get()
+                // Block is outdated, but we haven't created PRE_LOCK for yet, do this
+                createVote(validator, lockBlockId, preLockVoteId)
             }
         } else {
-            // is there a BC for new height?
-            val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, newHeight)
+            voteRepository.findById(newHeightVoteId).orElseGet {
+                // is there a BC for new height?
+                val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, newHeight)
 
-            if (blockCandidate != null) {
-                val block = getBlockData(blockCandidate).block.toModel()
+                if (blockCandidate != null) {
+                    val block = getBlockData(blockCandidate).block.toModel()
 
-                // is it my block candidate, is some time passed?
-                if (block.proposerId == validator.id && Instant.now().toEpochMilli() - block.timestamp < ROUND) {
-                    null
-                } else {
                     // Voting for a BC with new height
-                    createVote(validator, block.id, newHeight, space, newHeightVoteId)
+                    createVote(
+                        validator, block.id, newHeightVoteId
+                    )
+                } else {
+                    // nothing found, voting for the LIB
+                    createVote(validator, lastBlock.id, voteId)
                 }
-            } else {
-                // nothing found, voting for the LIB
-                createVote(
-                    validator,
-                    lastBlock.id,
-                    lastBlock.height,
-                    space,
-                    newHeightVoteId.copy(height = lastBlock.height)
-                )
             }
         }
     }
@@ -121,8 +108,6 @@ class VoteService(
     private fun createVote(
         validator: Account,
         blockId: String,
-        height: Long,
-        space: Space,
         voteId: VoteId
     ): Vote {
 
@@ -130,8 +115,8 @@ class VoteService(
 
         val dataToSign = Bytes.concat(
             validator.id.toByteArray(),
-            space.id.toByteArray(),
-            EncodingUtils.longToBytes(height),
+            voteId.spaceId.toByteArray(),
+            EncodingUtils.longToBytes(voteId.height),
             voteId.voteType.name.toByteArray(),
             blockId.toByteArray(),
             EncodingUtils.longToBytes(timestamp)

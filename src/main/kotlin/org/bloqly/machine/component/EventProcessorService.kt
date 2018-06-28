@@ -312,7 +312,7 @@ class EventProcessorService(
             id = lockBlockId,
             spaceId = space.id,
             height = newHeight,
-            round = lastBlock.round + 1,
+            round = TimeUtils.getCurrentRound(),
             timestamp = Instant.now().toEpochMilli(),
             parentHash = lastBlock.id,
             proposerId = lockBlockId
