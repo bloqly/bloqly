@@ -74,6 +74,7 @@ class BlockCandidateService(
 
         val block = blockData.block
 
+        // TODO move to the higher layer
         val roundOK = block.round == round
 
         val votes = blockData.votes
@@ -90,7 +91,7 @@ class BlockCandidateService(
 
         val transactionsVerifiedOK = transactions.all { CryptoUtils.verifyTransaction(it.toModel()) }
 
-        return roundOK && votesForLastBlock && votesVerified &&
+        return votesForLastBlock && votesVerified &&
             referencedBlockIdsOK && transactionsVerifiedOK
     }
 
