@@ -14,7 +14,10 @@ data class VoteId(
     val spaceId: String,
 
     @Column(nullable = false)
-    val height: Long
+    val height: Long,
+
+    @Column(nullable = false)
+    val voteType: VoteType = VoteType.VOTE
 
 ) : Serializable {
 

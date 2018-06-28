@@ -72,6 +72,7 @@ class VoteService(
             validator.id.toByteArray(),
             block.spaceId.toByteArray(),
             EncodingUtils.longToBytes(block.height),
+            voteId.voteType.name.toByteArray(),
             block.id.toByteArray(),
             EncodingUtils.longToBytes(timestamp)
         )

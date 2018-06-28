@@ -2,8 +2,9 @@ package org.bloqly.machine.simulation
 
 object Nodes {
 
-    const val quorum = 3
-    const val nodesCount: Int = 4
+    const val quorum = 15
+    const val nodesCount: Int = 21
+
     const val maxRoundDelay = 5
 
     val nodes: List<Node>
@@ -16,6 +17,7 @@ object Nodes {
             .sortedBy { it.id }
 
         nodes[0].faulty = true
+        nodes[1].faulty = true
     }
 
     fun getProposer(): Node? {

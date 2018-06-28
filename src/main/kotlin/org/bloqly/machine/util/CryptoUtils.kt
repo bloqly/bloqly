@@ -159,6 +159,7 @@ object CryptoUtils {
             vote.id.validatorId.toByteArray(),
             vote.id.spaceId.toByteArray(),
             EncodingUtils.longToBytes(vote.id.height),
+            vote.id.voteType.name.toByteArray(),
             vote.blockId.toByteArray(),
             EncodingUtils.longToBytes(vote.timestamp)
         )

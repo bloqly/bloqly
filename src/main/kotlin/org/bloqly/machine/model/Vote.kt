@@ -31,6 +31,7 @@ data class Vote(
             validatorId = id.validatorId,
             spaceId = id.spaceId,
             height = id.height,
+            voteType = id.voteType.name,
             blockId = blockId,
             timestamp = timestamp,
             signature = EncodingUtils.encodeToString16(signature),
