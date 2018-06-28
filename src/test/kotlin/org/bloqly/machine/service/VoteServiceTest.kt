@@ -55,7 +55,7 @@ class VoteServiceTest {
 
         validator = validators.first()
 
-        vote = voteService.getVote(space, validator)
+        vote = voteService.getVote(space, validator)!!
     }
 
     @Test

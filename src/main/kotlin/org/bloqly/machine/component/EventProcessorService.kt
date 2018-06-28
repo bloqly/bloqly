@@ -177,7 +177,7 @@ class EventProcessorService(
             .flatMap { space ->
                 accountService.getValidatorsForSpace(space)
                     .filter { it.hasKey() }
-                    .map { validator -> voteService.getVote(space, validator) }
+                    .mapNotNull { validator -> voteService.getVote(space, validator) }
             }
 
         // TODO send all known votes for blocks with height > H
@@ -312,7 +312,7 @@ class EventProcessorService(
             id = lockBlockId,
             spaceId = space.id,
             height = newHeight,
-            round = -1,
+            round = lastBlock.round + 1,
             timestamp = Instant.now().toEpochMilli(),
             parentHash = lastBlock.id,
             proposerId = lockBlockId

@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.ROUND
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.BlockCandidate
@@ -32,7 +33,7 @@ class VoteService(
     private val propertyRepository: PropertyRepository
 ) {
 
-    fun getVote(space: Space, validator: Account): Vote {
+    fun getVote(space: Space, validator: Account): Vote? {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
@@ -45,51 +46,66 @@ class VoteService(
             height = newHeight
         )
 
-        return if (isOutdated(lastBlock)) {
-            val preLockVoteId = newHeightVoteId.copy(voteType = VoteType.PRE_LOCK)
+        val vote = voteRepository.findById(newHeightVoteId)
 
-            val lockBlockId = EncodingUtils.encodeToString16(
-                CryptoUtils.digest("${space.id}:$newHeight")
-            )
+        return if (vote.isPresent) {
+            if (isOutdated(lastBlock)) {
+                val preLockVoteId = newHeightVoteId.copy(voteType = VoteType.PRE_LOCK)
 
-            val preLockVoteOpt = voteRepository.findById(preLockVoteId)
+                val lockBlockId = EncodingUtils.encodeToString16(
+                    CryptoUtils.digest("${space.id}:$newHeight")
+                )
 
-            // Last block is outdated. Did we create PRE_LOCK for it?
-            if (preLockVoteOpt.isPresent) {
+                val preLockVoteOpt = voteRepository.findById(preLockVoteId)
 
-                // Yes, PRE_LOCK is created. It's probably quorum for LOCK?
-                val preLocksCount = voteRepository.findPreLocksCountByHeight(space.id, newHeight)
+                // Last block is outdated. Did we create PRE_LOCK for it?
+                if (preLockVoteOpt.isPresent) {
 
-                val quorum = propertyRepository.getQuorumBySpaceId(space.id)
+                    // Yes, PRE_LOCK is created. It's probably quorum for LOCK?
+                    val preLocksCount = voteRepository.findPreLocksCountByHeight(space.id, newHeight)
 
-                // quorum for LOCK, create LOCK vote if not exists or send the existing
-                if (preLocksCount >= quorum) {
-                    val lockVoteId = newHeightVoteId.copy(voteType = VoteType.LOCK)
-                    voteRepository.findById(lockVoteId).orElseGet {
-                        createVote(validator, lockBlockId, newHeight, space, lockVoteId)
+                    val quorum = propertyRepository.getQuorumBySpaceId(space.id)
+
+                    // quorum for LOCK, create LOCK vote if not exists or send the existing
+                    if (preLocksCount >= quorum) {
+                        val lockVoteId = newHeightVoteId.copy(voteType = VoteType.LOCK)
+                        voteRepository.findById(lockVoteId).orElseGet {
+                            createVote(validator, lockBlockId, newHeight, space, lockVoteId)
+                        }
+                    } else {
+                        // Not quorum for LOCK yet, just send existing PRE_LOCK vote
+                        preLockVoteOpt.get()
                     }
                 } else {
-                    // Not quorum for LOCK yet, just send existing PRE_LOCK vote
-                    preLockVoteOpt.get()
+                    // Block is outdated, but we haven't created PRE_LOCK for yet, do this
+                    createVote(validator, lockBlockId, newHeight, space, preLockVoteId)
                 }
             } else {
-                // Block is outdated, but we haven't created PRE_LOCK for yet, do this
-                createVote(validator, lockBlockId, newHeight, space, preLockVoteId)
+                vote.get()
             }
         } else {
-            voteRepository.findById(newHeightVoteId).orElseGet {
-                // is there a BC for new height?
-                val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, newHeight)
+            // is there a BC for new height?
+            val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, newHeight)
 
-                if (blockCandidate != null) {
-                    // Voting for a BC with new height
-                    val block = getBlockData(blockCandidate).block.toModel()
-                    createVote(validator, block.id, newHeight, space, newHeightVoteId)
+            if (blockCandidate != null) {
+                val block = getBlockData(blockCandidate).block.toModel()
+
+                // is it my block candidate, is some time passed?
+                if (block.proposerId == validator.id && Instant.now().toEpochMilli() - block.timestamp < ROUND) {
+                    null
                 } else {
-                    // nothing found, voting for the LIB
-                    val currentHeightVoteId = newHeightVoteId.copy(height = lastBlock.height)
-                    createVote(validator, lastBlock.id, lastBlock.height, space, currentHeightVoteId)
+                    // Voting for a BC with new height
+                    createVote(validator, block.id, newHeight, space, newHeightVoteId)
                 }
+            } else {
+                // nothing found, voting for the LIB
+                createVote(
+                    validator,
+                    lastBlock.id,
+                    lastBlock.height,
+                    space,
+                    newHeightVoteId.copy(height = lastBlock.height)
+                )
             }
         }
     }

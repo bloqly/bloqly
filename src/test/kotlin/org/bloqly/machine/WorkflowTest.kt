@@ -99,7 +99,7 @@ class WorkflowTest {
 
         selectBestProposal()
 
-        assertEquals(0, getHeight())
+        assertEquals(1, getHeight())
 
         // 2. Start second round
         TimeUtils.setTestTime(ROUND + 1L)
