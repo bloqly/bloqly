@@ -6,8 +6,7 @@ spring:
     show-sql: false
     open-in-view: false
     properties:
-      hibernate:
-        ddl-auto: update
+      hibernate.ddl-auto: update
         temp:
           use_jdbc_metadata_defaults: false
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
