@@ -8,11 +8,11 @@ spring:
   jpa:
     show-sql: false
     open-in-view: false
+    hibernate:
+      ddl-auto: create
     properties:
-      hibernate:
-        ddl-auto: create
-        temp:
-          use_jdbc_metadata_defaults: false
+      temp:
+        use_jdbc_metadata_defaults: false
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
 
   datasource:
