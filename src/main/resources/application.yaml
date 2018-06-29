@@ -1,0 +1,24 @@
+spring:
+  profiles:
+    active: production
+
+  jpa:
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        ddl-auto: update
+        temp:
+          use_jdbc_metadata_defaults: false
+    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+
+  datasource:
+    pool-size: 30
+
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+
+logging:
+  level:
+    root: WARN

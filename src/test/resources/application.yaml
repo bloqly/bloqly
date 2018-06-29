@@ -1,0 +1,28 @@
+server:
+  port: 9900
+
+spring:
+  profiles:
+    active: test,server
+
+  jpa:
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        ddl-auto: create
+        temp:
+          use_jdbc_metadata_defaults: false
+    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+
+  datasource:
+    pool-size: 30
+    url: jdbc:postgresql:bloqly_test
+    username: postgres
+    password:
+
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+
+nodes:
