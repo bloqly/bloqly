@@ -61,4 +61,5 @@ class BlockServiceTest {
         testService.testValidatorsInitialized()
         testService.testValidatorsPowerValues()
     }
+
 }

@@ -52,9 +52,9 @@ data class Block(
             timestamp = timestamp,
             parentHash = parentHash,
             proposerId = proposerId,
-            txHash = EncodingUtils.encodeToString16(txHash),
-            validatorTxHash = EncodingUtils.encodeToString16(validatorTxHash),
-            signature = EncodingUtils.encodeToString16(signature)
+            txHash = txHash?.let { EncodingUtils.encodeToString16(txHash) },
+            validatorTxHash = validatorTxHash?.let { EncodingUtils.encodeToString16(validatorTxHash) },
+            signature = signature?.let { EncodingUtils.encodeToString16(signature) }
         )
     }
 
