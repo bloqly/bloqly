@@ -49,9 +49,7 @@ class VoteService(
         return if (isOutdated(lastBlock)) {
             val preLockVoteId = newHeightVoteId.copy(voteType = VoteType.PRE_LOCK)
 
-            val lockBlockId = EncodingUtils.encodeToString16(
-                CryptoUtils.digest("${space.id}:$newHeight")
-            )
+            val lockBlockId = CryptoUtils.getLockBlockId(lastBlock)
 
             val preLockVoteOpt = voteRepository.findById(preLockVoteId)
 

@@ -1,6 +1,7 @@
 package org.bloqly.machine.util
 
 import com.google.common.primitives.Bytes
+import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
@@ -193,5 +194,19 @@ object CryptoUtils {
             LOG.error(String.format("Could not verify signature for message %s", String(message)), e)
             return false
         }
+    }
+
+    fun getLockBlockId(lastBlock: Block): String {
+        val newHeight = lastBlock.height + 1
+
+        val blockIdBytes = Bytes.concat(
+            lastBlock.spaceId.toByteArray(),
+            EncodingUtils.longToBytes(newHeight),
+            lastBlock.id.toByteArray()
+        )
+
+        val blockIdBytesHash = digest(blockIdBytes)
+
+        return EncodingUtils.encodeToString16(blockIdBytesHash)
     }
 }

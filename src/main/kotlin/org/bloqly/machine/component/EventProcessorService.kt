@@ -1,6 +1,5 @@
 package org.bloqly.machine.component
 
-import com.google.common.primitives.Bytes
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.model.Account
@@ -306,15 +305,7 @@ class EventProcessorService(
 
         val newHeight = lastBlock.height + 1
 
-        val blockIdBytes = Bytes.concat(
-            space.id.toByteArray(),
-            EncodingUtils.longToBytes(newHeight),
-            lastBlock.id.toByteArray()
-        )
-
-        val blockIdBytesHash = CryptoUtils.digest(blockIdBytes)
-
-        val lockBlockId = EncodingUtils.encodeToString16(blockIdBytesHash)
+        val lockBlockId = CryptoUtils.getLockBlockId(lastBlock)
 
         log.info("Lock detected on height $newHeight, lock block id id: $lockBlockId")
 
