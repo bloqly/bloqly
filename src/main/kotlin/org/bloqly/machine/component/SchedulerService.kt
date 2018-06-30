@@ -58,11 +58,9 @@ class SchedulerService(
 
         if (proposals.isNotEmpty()) {
 
-            log.info("Sending ${proposals.size} proposals.")
+            log.info("Block proposals to send: ${proposals.size}.")
 
             eventSenderService.sendProposals(proposals)
-        } else {
-            log.warn("No new block proposals to send.")
         }
     }
 

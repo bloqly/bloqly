@@ -11,8 +11,9 @@ spring:
     hibernate:
       ddl-auto: create
     properties:
-      temp:
-        use_jdbc_metadata_defaults: false
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
 
   datasource:
