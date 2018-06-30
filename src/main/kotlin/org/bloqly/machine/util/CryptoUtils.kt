@@ -10,6 +10,7 @@ import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequenceGenerator
 import org.bouncycastle.asn1.DLSequence
 import org.bouncycastle.asn1.sec.SECNamedCurves
+import org.bouncycastle.asn1.x9.X9ECParameters
 import org.bouncycastle.crypto.digests.SHA256Digest
 import org.bouncycastle.crypto.generators.ECKeyPairGenerator
 import org.bouncycastle.crypto.params.ECDomainParameters
@@ -28,27 +29,31 @@ object CryptoUtils {
 
     private val log = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
 
-    private val sha256Digest: MessageDigest = MessageDigest.getInstance("SHA-256")
-
     private val generator: ECKeyPairGenerator = ECKeyPairGenerator()
 
     private const val CURVE_NAME = "secp256k1"
 
-    private val CURVE = SECNamedCurves.getByName(CURVE_NAME)
-
-    private val DOMAIN = ECDomainParameters(
-        CURVE.curve,
-        CURVE.g,
-        CURVE.n,
-        CURVE.h
-    )
+    private const val SHA_256 = "SHA-256"
 
     init {
         val secureRandom = SecureRandom.getInstance("SHA1PRNG")
 
-        val keygenParams = ECKeyGenerationParameters(DOMAIN, secureRandom)
+        val keygenParams = ECKeyGenerationParameters(getDomain(getCurve()), secureRandom)
 
         generator.init(keygenParams)
+    }
+
+    private fun getCurve(): X9ECParameters {
+        return SECNamedCurves.getByName(CURVE_NAME)
+    }
+
+    private fun getDomain(curve: X9ECParameters): ECDomainParameters {
+        return ECDomainParameters(
+            curve.curve,
+            curve.g,
+            curve.n,
+            curve.h
+        )
     }
 
     fun generatePrivateKey(): ByteArray {
@@ -62,7 +67,7 @@ object CryptoUtils {
 
     fun getPublicFor(privateKey: ByteArray): ByteArray {
 
-        return CURVE.g.multiply(BigInteger(privateKey)).getEncoded(true)
+        return getCurve().g.multiply(BigInteger(privateKey)).getEncoded(true)
     }
 
     fun digest(inputs: Array<ByteArray>): ByteArray {
@@ -73,13 +78,14 @@ object CryptoUtils {
                 bos.write(input)
             }
 
-            return sha256Digest.digest(bos.toByteArray())
+            return MessageDigest.getInstance(SHA_256)
+                .digest(bos.toByteArray())
         }
     }
 
     fun digest(input: ByteArray): ByteArray {
 
-        return sha256Digest.digest(input)
+        return MessageDigest.getInstance(SHA_256).digest(input)
     }
 
     fun digest(input: String): ByteArray {
@@ -112,7 +118,7 @@ object CryptoUtils {
     fun sign(privateKey: ByteArray, input: ByteArray): ByteArray {
 
         val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
-        val privateKeyParams = ECPrivateKeyParameters(BigInteger(privateKey), DOMAIN)
+        val privateKeyParams = ECPrivateKeyParameters(BigInteger(privateKey), getDomain(getCurve()))
 
         signer.init(true, privateKeyParams)
 
@@ -183,8 +189,9 @@ object CryptoUtils {
 
             decoder.close()
 
-            val q = CURVE.curve.decodePoint(publicKey)
-            val pubParams = ECPublicKeyParameters(q, DOMAIN)
+            val curve = getCurve()
+            val q = curve.curve.decodePoint(publicKey)
+            val pubParams = ECPublicKeyParameters(q, getDomain(curve))
 
             val signer = ECDSASigner()
             signer.init(false, pubParams)
