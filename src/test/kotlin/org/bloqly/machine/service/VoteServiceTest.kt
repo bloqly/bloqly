@@ -77,6 +77,7 @@ class VoteServiceTest {
     @Test
     fun testVerifyVote() {
 
+        assertEquals(vote, vote.toVO().toModel())
         assertTrue(verifyVote(vote))
     }
 
