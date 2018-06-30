@@ -1,5 +1,5 @@
 package org.bloqly.machine.simulation
 
 enum class VoteType {
-    VOTE, PRE_LOCK, LOCK
+    VOTE, PRE_SYNC, SYNC
 }

@@ -26,7 +26,7 @@ data class Block(
     val timestamp: Long,
 
     @Column(nullable = false)
-    val parentHash: String,
+    val parentId: String,
 
     @Column
     val proposerId: String,
@@ -50,7 +50,7 @@ data class Block(
             height = height,
             round = round,
             timestamp = timestamp,
-            parentHash = parentHash,
+            parentHash = parentId,
             proposerId = proposerId,
             txHash = txHash?.let { EncodingUtils.encodeToString16(txHash) },
             validatorTxHash = validatorTxHash?.let { EncodingUtils.encodeToString16(validatorTxHash) },

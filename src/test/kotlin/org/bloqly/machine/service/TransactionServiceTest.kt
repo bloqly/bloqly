@@ -144,11 +144,8 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifyPubKeyWrong() {
-
-        assertFalse(
-            verifyTransaction(
-                transaction.copy(publicKey = transaction.publicKey.reversed())
-            )
+        verifyTransaction(
+            transaction.copy(publicKey = transaction.publicKey.reversed())
         )
     }
 

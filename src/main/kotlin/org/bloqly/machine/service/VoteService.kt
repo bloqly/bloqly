@@ -1,7 +1,7 @@
 package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes
-import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.MAX_MISSED_ROUNDS
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.BlockCandidate
@@ -47,33 +47,33 @@ class VoteService(
         val newHeightVoteId = voteId.copy(height = newHeight)
 
         return if (isOutdated(lastBlock)) {
-            val preLockVoteId = newHeightVoteId.copy(voteType = VoteType.PRE_LOCK)
+            val preLockVoteId = newHeightVoteId.copy(voteType = VoteType.PRE_SYNC)
 
-            val lockBlockId = CryptoUtils.getLockBlockId(lastBlock)
+            val syncBlockId = CryptoUtils.getSyncBlockId(lastBlock)
 
             val preLockVoteOpt = voteRepository.findById(preLockVoteId)
 
-            // Last block is outdated. Did we create PRE_LOCK for it?
+            // Last block is outdated. Did we create PRE_SYNC for it?
             if (preLockVoteOpt.isPresent) {
 
-                // Yes, PRE_LOCK is created. It's probably quorum for LOCK?
+                // Yes, PRE_SYNC is created. It's probably quorum for SYNC?
                 val preLocksCount = voteRepository.findPreLocksCountByHeight(space.id, newHeight)
 
                 val quorum = propertyRepository.getQuorumBySpaceId(space.id)
 
-                // quorum for LOCK, create LOCK vote if not exists or send the existing
+                // quorum for SYNC, create SYNC vote if not exists or send the existing
                 if (preLocksCount >= quorum) {
-                    val lockVoteId = newHeightVoteId.copy(voteType = VoteType.LOCK)
+                    val lockVoteId = newHeightVoteId.copy(voteType = VoteType.SYNC)
                     voteRepository.findById(lockVoteId).orElseGet {
-                        createVote(validator, lockBlockId, lockVoteId)
+                        createVote(validator, syncBlockId, lockVoteId)
                     }
                 } else {
-                    // Not quorum for LOCK yet, just send existing PRE_LOCK vote
+                    // Not quorum for SYNC yet, just send existing PRE_SYNC vote
                     preLockVoteOpt.get()
                 }
             } else {
-                // Block is outdated, but we haven't created PRE_LOCK for yet, do this
-                createVote(validator, lockBlockId, preLockVoteId)
+                // Block is outdated, but we haven't created PRE_SYNC for yet, do this
+                createVote(validator, syncBlockId, preLockVoteId)
             }
         } else {
             voteRepository.findById(newHeightVoteId).orElseGet {
@@ -96,7 +96,7 @@ class VoteService(
     }
 
     private fun isOutdated(block: Block): Boolean {
-        return TimeUtils.getCurrentRound() - block.round >= Application.MAX_MISSED_ROUNDS
+        return TimeUtils.getCurrentRound() - block.round >= MAX_MISSED_ROUNDS
     }
 
     private fun getBlockData(blockCandidate: BlockCandidate): BlockData {

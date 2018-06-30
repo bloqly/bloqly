@@ -287,8 +287,8 @@ class EventProcessorService(
                 val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
 
-                if (isLock(space, newHeight)) {
-                    blockRepository.save(newLockBlock(space, lastBlock))
+                if (isSync(space, newHeight)) {
+                    blockRepository.save(newSyncBlock(space, lastBlock))
                 } else {
                     blockCandidateService.getBestBlockCandidate(space, newHeight)
                         ?.let { blockRepository.save(it.block.toModel()) }
@@ -296,27 +296,27 @@ class EventProcessorService(
             }
     }
 
-    private fun isLock(space: Space, height: Long): Boolean {
+    private fun isSync(space: Space, height: Long): Boolean {
         val quorum = propertyRepository.getQuorumBySpaceId(space.id)
         return voteRepository.findLocksCountByHeight(space.id, height) >= quorum
     }
 
-    private fun newLockBlock(space: Space, lastBlock: Block): Block {
+    private fun newSyncBlock(space: Space, lastBlock: Block): Block {
 
         val newHeight = lastBlock.height + 1
 
-        val lockBlockId = CryptoUtils.getLockBlockId(lastBlock)
+        val syncBlockId = CryptoUtils.getSyncBlockId(lastBlock)
 
-        log.info("Lock detected on height $newHeight, lock block id id: $lockBlockId")
+        log.info("Sync block detected on height $newHeight, blockId: $syncBlockId")
 
         return Block(
-            id = lockBlockId,
+            id = syncBlockId,
             spaceId = space.id,
             height = newHeight,
             round = TimeUtils.getCurrentRound(),
             timestamp = Instant.now().toEpochMilli(),
-            parentHash = lastBlock.id,
-            proposerId = lockBlockId
+            parentId = lastBlock.id,
+            proposerId = syncBlockId
         )
     }
 }

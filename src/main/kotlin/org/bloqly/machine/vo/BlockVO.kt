@@ -25,7 +25,7 @@ data class BlockVO(
             height = height,
             round = round,
             timestamp = timestamp,
-            parentHash = parentHash,
+            parentId = parentHash,
             proposerId = proposerId,
             txHash = txHash?.toByteArray(),
             validatorTxHash = validatorTxHash?.toByteArray(),

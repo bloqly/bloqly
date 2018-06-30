@@ -79,7 +79,7 @@ class BlockService(
                     height = height,
                     round = round,
                     timestamp = timestamp,
-                    parentHash = parentHash,
+                    parentId = parentHash,
                     proposerId = producerId,
                     txHash = txHash,
                     validatorTxHash = validatorTxHash,
@@ -156,8 +156,8 @@ class BlockService(
             CryptoUtils.digest(contractBody)
         )
 
-        require(block.parentHash == contractBodyHash) {
-            "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."
+        require(block.parentId == contractBodyHash) {
+            "Genesis block parentId be set to the genesis parameters hash, found ${block.parentId} instead."
         }
 
         blockRepository.save(block)
@@ -236,7 +236,7 @@ class BlockService(
         return BlockDataList(blocks.map { block ->
 
             val transactions = transactionRepository.findByContainingBlockId(block.id)
-            val votes = voteRepository.findByBlockId(block.parentHash)
+            val votes = voteRepository.findByBlockId(block.parentId)
 
             BlockData(block, transactions, votes)
         })

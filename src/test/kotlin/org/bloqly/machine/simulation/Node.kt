@@ -81,7 +81,7 @@ data class Node(
 
         if (savedVote != null) {
             return if (SimUtils.round - lastBlock.round >= Nodes.maxRoundDelay) {
-                getLockVote(newHeight)
+                getSyncVote(newHeight)
             } else {
                 savedVote
             }
@@ -105,31 +105,31 @@ data class Node(
         return newVote
     }
 
-    private fun getLockVote(newHeight: Long): Vote {
-        val preLockVote = votes.firstOrNull {
-            it.block.height == newHeight && it.nodeId == id && it.voteType == VoteType.PRE_LOCK
+    private fun getSyncVote(newHeight: Long): Vote {
+        val preSyncVote = votes.firstOrNull {
+            it.block.height == newHeight && it.nodeId == id && it.voteType == VoteType.PRE_SYNC
         }
 
-        if (preLockVote != null && SimUtils.round - preLockVote.voteRound < Nodes.maxRoundDelay) {
-            return preLockVote
+        if (preSyncVote != null && SimUtils.round - preSyncVote.voteRound < Nodes.maxRoundDelay) {
+            return preSyncVote
         }
 
-        return if (preLockVote != null) {
+        return if (preSyncVote != null) {
 
             val preLockVotesCount = votes.count {
-                it.block.height == newHeight && it.voteType == VoteType.PRE_LOCK
+                it.block.height == newHeight && it.voteType == VoteType.PRE_SYNC
             }
 
             if (preLockVotesCount >= Nodes.quorum ) {
 
                 val lockVote = votes.firstOrNull {
-                    it.block.height == newHeight && it.nodeId == id && it.voteType == VoteType.LOCK
+                    it.block.height == newHeight && it.nodeId == id && it.voteType == VoteType.SYNC
                 }
 
                 if (lockVote != null) {
                     lockVote
                 } else {
-                    val lockBlock = Block(
+                    val syncBlock = Block(
                         parent = lastBlock,
                         round = -1,
                         height = newHeight,
@@ -138,8 +138,8 @@ data class Node(
 
                     val newLockVote = Vote(
                         nodeId = id,
-                        block = lockBlock,
-                        voteType = VoteType.LOCK
+                        block = syncBlock,
+                        voteType = VoteType.SYNC
                     )
 
                     votes.add(newLockVote)
@@ -147,26 +147,26 @@ data class Node(
                     newLockVote
                 }
             } else {
-                preLockVote
+                preSyncVote
             }
         } else {
 
-            val lockBlock = Block(
+            val syncBlock = Block(
                 parent = lastBlock,
                 round = -1,
                 height = newHeight,
                 blockType = BlockType.LOCK
             )
 
-            val newPreLockVote = Vote(
+            val newPreSyncVote = Vote(
                 nodeId = id,
-                block = lockBlock,
-                voteType = VoteType.PRE_LOCK
+                block = syncBlock,
+                voteType = VoteType.PRE_SYNC
             )
 
-            votes.add(newPreLockVote)
+            votes.add(newPreSyncVote)
 
-            newPreLockVote
+            newPreSyncVote
         }
     }
 
@@ -177,17 +177,17 @@ data class Node(
 
         val newHeight = lastBlock.height + 1
 
-        val lockVotesCount = votes.count { it.block.height == newHeight && it.voteType == VoteType.LOCK }
+        val lockVotesCount = votes.count { it.block.height == newHeight && it.voteType == VoteType.SYNC }
 
         if (lockVotesCount >= Nodes.quorum) {
 
-            val lockBlock = Block(
+            val syncBlock = Block(
                 parent = lastBlock,
                 round = -1,
                 height = newHeight
             )
 
-            lastBlock = lockBlock
+            lastBlock = syncBlock
 
             SimUtils.incLock()
 
@@ -204,7 +204,7 @@ data class Node(
 
             // set the proof of deadlock as the next block
 
-            val lockBlock = Block(
+            val syncBlock = Block(
                 parent = lastBlock,
                 round = SimUtils.round,
                 height = newHeight,
@@ -212,7 +212,7 @@ data class Node(
                 blockType = BlockType.DEADLOCK
             )
 
-            lastBlock = lockBlock
+            lastBlock = syncBlock
 
             SimUtils.incDeadLock()
         } else {

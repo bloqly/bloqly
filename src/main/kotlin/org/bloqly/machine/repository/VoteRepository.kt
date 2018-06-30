@@ -21,7 +21,7 @@ interface VoteRepository : CrudRepository<Vote, VoteId> {
         where
         space_id = ?1 and
         height = ?2 and
-        vote_type = 'PRE_LOCK'
+        vote_type = 'PRE_SYNC'
         """, nativeQuery = true
     )
     fun findPreLocksCountByHeight(spaceId: String, height: Long): Int
@@ -32,7 +32,7 @@ interface VoteRepository : CrudRepository<Vote, VoteId> {
         where
         space_id = ?1 and
         height = ?2 and
-        vote_type = 'LOCK'
+        vote_type = 'SYNC'
         """, nativeQuery = true
     )
     fun findLocksCountByHeight(spaceId: String, height: Long): Int

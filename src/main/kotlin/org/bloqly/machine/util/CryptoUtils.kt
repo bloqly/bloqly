@@ -26,7 +26,7 @@ import java.security.SecureRandom
 
 object CryptoUtils {
 
-    private val LOG = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
+    private val log = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
 
     private val sha256Digest: MessageDigest = MessageDigest.getInstance("SHA-256")
 
@@ -191,12 +191,12 @@ object CryptoUtils {
 
             return signer.verifySignature(message, r.positiveValue, s.positiveValue)
         } catch (e: Exception) {
-            LOG.error(String.format("Could not verify signature for message %s", String(message)), e)
+            log.error(e.message, e)
             return false
         }
     }
 
-    fun getLockBlockId(lastBlock: Block): String {
+    fun getSyncBlockId(lastBlock: Block): String {
         val newHeight = lastBlock.height + 1
 
         val blockIdBytes = Bytes.concat(

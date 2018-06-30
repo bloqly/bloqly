@@ -8,18 +8,18 @@ import java.time.Instant
 class BlockTest {
 
     @Test
-    fun testLockBlockToVO() {
+    fun testSyncBlockToVO() {
 
-        val lockBlock = Block(
-            id = "lockBlockId",
+        val syncBlock = Block(
+            id = "syncBlockId",
             spaceId = "main",
             height = 1,
             round = TimeUtils.getCurrentRound(),
             timestamp = Instant.now().toEpochMilli(),
-            parentHash = "lastBlockId",
-            proposerId = "lockBlockId"
+            parentId = "lastBlockId",
+            proposerId = "syncBlockId"
         )
 
-        assertEquals(lockBlock, lockBlock.toVO().toModel())
+        assertEquals(syncBlock, syncBlock.toVO().toModel())
     }
 }

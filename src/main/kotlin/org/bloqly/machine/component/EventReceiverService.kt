@@ -21,8 +21,7 @@ class EventReceiverService(
     fun receiveVotes(voteVOs: List<VoteVO>) {
         voteVOs.forEach { voteVO ->
             try {
-                val vote = voteVO.toModel()
-                eventProcessorService.onVote(vote)
+                eventProcessorService.onVote(voteVO.toModel())
             } catch (e: Exception) {
                 log.error("Could not process vote $voteVO", e)
             }
