@@ -15,6 +15,8 @@ import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockDataList
+import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -60,55 +62,96 @@ class BlockControllerTest {
 
     private lateinit var node: Node
 
+    private lateinit var url: String
+
+    private lateinit var blockCandidateId: BlockCandidateId
+
     @Before
     fun init() {
         testService.cleanup()
-
         testService.createBlockchain()
 
-        node = Node(NodeId("localhost", port), 0)
-    }
+        TimeUtils.setTestTime(0)
 
-    @Test
-    fun testReceiveBlocks() {
+        node = Node(NodeId("localhost", port), 0)
+
         eventReceiverService.receiveVotes(testService.getVotes())
 
-        val url = APIUtils.getDataPath(node, "blocks")
-
-        val blockDatas = eventProcessorService.onGetProposals()
-
-        assertTrue(blockDatas.isNotEmpty())
-
-        val proposalsPayload = ObjectUtils.writeValueAsString(
-            BlockDataList(blockDatas)
-        )
-
-        val headers = HttpHeaders()
-        headers.contentType = MediaType.APPLICATION_JSON
-
-        val entity = HttpEntity<String>(proposalsPayload, headers)
-
-        val blockData = blockDatas.first()
-
-        assertFalse(blockRepository.existsById(blockData.block.id))
-
-        restTemplate.postForObject(url, entity, Void.TYPE)
-
-        assertFalse(blockRepository.existsById(blockData.block.id))
+        url = APIUtils.getDataPath(node, "blocks")
 
         val validator = accountService.getActiveProducerBySpace(
             testService.getDefaultSpace(), TimeUtils.getCurrentRound()
         )
 
-        assertTrue(
-            blockCandidateRepository.existsById(
-                BlockCandidateId(
-                    spaceId = DEFAULT_SPACE,
-                    height = 1,
-                    round = TimeUtils.getCurrentRound(),
-                    proposerId = validator.id
-                )
-            )
+        blockCandidateId = BlockCandidateId(
+            spaceId = DEFAULT_SPACE,
+            height = 1,
+            round = TimeUtils.getCurrentRound(),
+            proposerId = validator.id
         )
+    }
+
+    @After
+    fun tearDown() {
+        TimeUtils.reset()
+    }
+
+    private fun getHttpEntity(): HttpEntity<String> {
+        val blocks = eventProcessorService.onGetProposals()
+
+        assertTrue(blocks.isNotEmpty())
+
+        val proposalsPayload = ObjectUtils.writeValueAsString(
+            BlockDataList(blocks)
+        )
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        return HttpEntity(proposalsPayload, headers)
+    }
+
+    @Test
+    fun testReceiveBlocks() {
+
+        val entity = getHttpEntity()
+
+        assertEquals(1, blockRepository.count())
+        blockCandidateRepository.deleteById(blockCandidateId)
+
+        assertFalse(blockCandidateRepository.existsById(blockCandidateId))
+
+        restTemplate.postForObject(url, entity, Void.TYPE)
+
+        assertEquals(1, blockRepository.count())
+
+        assertTrue(blockCandidateRepository.existsById(blockCandidateId))
+    }
+
+    @Test
+    fun testReceiveBlocksTwice() {
+        val entity = getHttpEntity()
+
+        assertTrue(blockCandidateRepository.existsById(blockCandidateId))
+
+        TimeUtils.setTestTime(Application.ROUND + 1L)
+        restTemplate.postForObject(url, entity, Void.TYPE)
+
+        val blocks = eventProcessorService.onGetProposals()
+        eventReceiverService.receiveProposals(blocks)
+    }
+
+    @Test
+    fun testReceiveBlocksWrongRound() {
+
+        val entity = getHttpEntity()
+
+        blockCandidateRepository.deleteById(blockCandidateId)
+        assertFalse(blockCandidateRepository.existsById(blockCandidateId))
+
+        TimeUtils.setTestTime(Application.ROUND + 1L)
+        restTemplate.postForObject(url, entity, Void.TYPE)
+
+        assertFalse(blockCandidateRepository.existsById(blockCandidateId))
     }
 }

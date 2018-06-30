@@ -1,7 +1,5 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.model.VoteType
-import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.TransactionVO
 import org.bloqly.machine.vo.VoteVO
@@ -12,8 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class EventReceiverService(
-    private val eventProcessorService: EventProcessorService,
-    private val propertyRepository: PropertyRepository
+    private val eventProcessorService: EventProcessorService
 ) {
     private val log = LoggerFactory.getLogger(EventReceiverService::class.simpleName)
 
@@ -33,12 +30,6 @@ class EventReceiverService(
     }
 
     fun receiveProposals(proposals: List<BlockData>) {
-        val validatedProposals = proposals
-            .filter { proposal ->
-                val quorum = propertyRepository.getQuorumBySpaceId(proposal.block.spaceId)
-                proposal.votes.count { it.voteType == VoteType.VOTE.name } >= quorum
-            }
-
-        eventProcessorService.onProposals(validatedProposals)
+        eventProcessorService.onProposals(proposals)
     }
 }

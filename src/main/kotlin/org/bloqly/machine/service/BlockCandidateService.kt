@@ -12,7 +12,6 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -39,18 +38,7 @@ class BlockCandidateService(
     }
 
     fun save(blockData: BlockData) {
-        val block = blockData.block
-
-        val blockCandidateId = BlockCandidateId(
-            spaceId = block.spaceId,
-            height = block.height,
-            round = block.round,
-            proposerId = block.proposerId
-        )
-
-        if (blockCandidateRepository.existsById(blockCandidateId)) {
-            return
-        }
+        val blockCandidateId = BlockCandidateId(blockData.block.toModel())
 
         val transactions = blockData.transactions.map { it.toModel() }
         val votes = blockData.votes.map { it.toModel() }
@@ -70,12 +58,7 @@ class BlockCandidateService(
 
     private fun validateProposal(blockData: BlockData): Boolean {
 
-        val round = TimeUtils.getCurrentRound()
-
         val block = blockData.block
-
-        // TODO move to the higher layer
-        val roundOK = block.round == round
 
         val votes = blockData.votes
 
@@ -91,7 +74,10 @@ class BlockCandidateService(
 
         val transactionsVerifiedOK = transactions.all { CryptoUtils.verifyTransaction(it.toModel()) }
 
-        return votesForLastBlock && votesVerified &&
+        val blockCandidateId = BlockCandidateId(blockData.block.toModel())
+        val notExists = !blockCandidateRepository.existsById(blockCandidateId)
+
+        return notExists && votesForLastBlock && votesVerified &&
             referencedBlockIdsOK && transactionsVerifiedOK
     }
 

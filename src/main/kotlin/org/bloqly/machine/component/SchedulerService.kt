@@ -33,7 +33,7 @@ class SchedulerService(
 
         if (transactions.isNotEmpty()) {
 
-            log.info("Sending ${transactions.size} transactions.")
+            log.info("Transactions to send: ${transactions.size}.")
 
             eventSenderService.sendTransactions(transactions)
         }
@@ -45,7 +45,7 @@ class SchedulerService(
 
         if (votes.isNotEmpty()) {
 
-            log.info("Sending ${votes.size} votes.")
+            log.info("Votes to send: ${votes.size}.")
 
             eventSenderService.sendVotes(votes)
         }

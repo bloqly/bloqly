@@ -259,19 +259,22 @@ class EventProcessorService(
     }
 
     fun onProposals(proposals: List<BlockData>) {
-        proposals.forEach { blockData ->
 
-            val round = TimeUtils.getCurrentRound()
-            val spaceId = blockData.block.spaceId
-            val space = spaceRepository.findById(spaceId).orElseThrow()
-            val activeValidator = accountService.getActiveProducerBySpace(space, round)
+        val round = TimeUtils.getCurrentRound()
 
-            if (activeValidator.id == blockData.block.proposerId) {
-                blockCandidateService.validateAndSave(blockData)
-            } else {
-                // TODO log illegal request
+        proposals
+            .filter { it.block.round == TimeUtils.getCurrentRound() }
+            .filter {
+                val space = spaceRepository.findById(it.block.spaceId).orElseThrow()
+                val activeValidator = accountService.getActiveProducerBySpace(space, round)
+
+                activeValidator.id == it.block.proposerId
             }
-        }
+            .filter { proposal ->
+                val quorum = propertyRepository.getQuorumBySpaceId(proposal.block.spaceId)
+                proposal.votes.count { it.voteType == VoteType.VOTE.name } >= quorum
+            }
+            .forEach { blockCandidateService.validateAndSave(it) }
     }
 
     /**

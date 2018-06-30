@@ -14,4 +14,12 @@ data class BlockCandidateId(
 
     val proposerId: String
 
-) : Serializable
+) : Serializable {
+
+    constructor(block: Block) : this(
+        spaceId = block.spaceId,
+        height = block.height,
+        round = block.round,
+        proposerId = block.proposerId
+    )
+}
