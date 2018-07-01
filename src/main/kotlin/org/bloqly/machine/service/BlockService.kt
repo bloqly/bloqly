@@ -77,6 +77,8 @@ class BlockService(
                     id = blockId,
                     spaceId = spaceId,
                     height = height,
+                    // TODO provide weight
+                    weight = 1,
                     round = round,
                     timestamp = timestamp,
                     parentId = parentHash,

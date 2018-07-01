@@ -20,7 +20,7 @@ data class Block(
     val height: Long,
 
     @Column
-    val blockType: BlockType = BlockType.NORMAL,
+    val weight: Long,
 
     @Column(nullable = false)
     val round: Long,
@@ -51,6 +51,7 @@ data class Block(
             id = id,
             spaceId = spaceId,
             height = height,
+            weight = weight,
             round = round,
             timestamp = timestamp,
             parentHash = parentId,

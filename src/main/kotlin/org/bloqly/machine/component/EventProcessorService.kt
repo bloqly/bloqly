@@ -4,7 +4,6 @@ import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.model.BlockType
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -178,7 +177,7 @@ class EventProcessorService(
             .flatMap { space ->
                 accountService.getValidatorsForSpace(space)
                     .filter { it.hasKey() }
-                    .flatMap { validator -> voteService.getVotes(space, validator) }
+                    .mapNotNull { validator -> voteService.getVote(space, validator) }
             }
 
         // TODO send all known votes for blocks with height > H
@@ -288,37 +287,8 @@ class EventProcessorService(
                 val lastBlock = blockRepository.getLastBlock(space.id)
                 val newHeight = lastBlock.height + 1
 
-                if (isSync(space, newHeight)) {
-                    blockRepository.save(newSyncBlock(space, lastBlock))
-                } else {
-                    blockCandidateService.getBestBlockCandidate(space, newHeight)
-                        ?.let { blockRepository.save(it.block.toModel()) }
-                }
+                blockCandidateService.getBestBlockCandidate(space, newHeight)
+                    ?.let { blockRepository.save(it.block.toModel()) }
             }
-    }
-
-    private fun isSync(space: Space, height: Long): Boolean {
-        val quorum = propertyRepository.getQuorumBySpaceId(space.id)
-        return voteRepository.findSyncCountByHeight(space.id, height) >= quorum
-    }
-
-    private fun newSyncBlock(space: Space, lastBlock: Block): Block {
-
-        val newHeight = lastBlock.height + 1
-
-        val syncBlockId = CryptoUtils.getSyncBlockId(lastBlock)
-
-        log.info("Sync block detected on height $newHeight, blockId: $syncBlockId")
-
-        return Block(
-            id = syncBlockId,
-            spaceId = space.id,
-            height = newHeight,
-            blockType = BlockType.SYNC,
-            round = TimeUtils.getCurrentRound(),
-            timestamp = Instant.now().toEpochMilli(),
-            parentId = lastBlock.id,
-            proposerId = syncBlockId
-        )
     }
 }

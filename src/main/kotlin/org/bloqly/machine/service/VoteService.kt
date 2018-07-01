@@ -1,24 +1,18 @@
 package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes
-import org.bloqly.machine.Application.Companion.MAX_MISSED_ROUNDS
 import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.BlockCandidate
-import org.bloqly.machine.model.BlockType
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
-import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -29,11 +23,10 @@ import java.time.Instant
 class VoteService(
     private val voteRepository: VoteRepository,
     private val blockRepository: BlockRepository,
-    private val blockCandidateRepository: BlockCandidateRepository,
-    private val propertyRepository: PropertyRepository
+    private val blockCandidateRepository: BlockCandidateRepository
 ) {
 
-    fun getVotes(space: Space, validator: Account): List<Vote> {
+    fun getVote(space: Space, validator: Account): Vote? {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
@@ -47,63 +40,22 @@ class VoteService(
 
         val newHeightVoteId = voteId.copy(height = newHeight)
 
-        val outdated = isOutdated(lastBlock)
+        return voteRepository.findById(newHeightVoteId).orElseGet {
+            // is there a BC for new height?
+            val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, newHeight)
 
-        if (outdated) {
-            val preLockVoteId = newHeightVoteId.copy(voteType = VoteType.PRE_SYNC)
+            if (blockCandidate != null) {
+                val block = getBlockData(blockCandidate).block.toModel()
 
-            val syncBlockId = CryptoUtils.getSyncBlockId(lastBlock)
-
-            val preSyncVoteOpt = voteRepository.findById(preLockVoteId)
-
-            // Last block is outdated. Did we create PRE_SYNC for it?
-            if (preSyncVoteOpt.isPresent) {
-
-                // Yes, PRE_SYNC is created. It's probably quorum for SYNC?
-                val preSyncCount = voteRepository.findPreSyncCountByHeight(space.id, newHeight)
-
-                val quorum = propertyRepository.getQuorumBySpaceId(space.id)
-
-                // quorum for SYNC, create SYNC vote if not exists or send the existing
-                if (preSyncCount >= quorum) {
-                    val syncVoteId = newHeightVoteId.copy(voteType = VoteType.SYNC)
-                    voteRepository.findById(syncVoteId).orElseGet {
-                        createVote(validator, syncBlockId, syncVoteId)
-                    }
-                } else {
-                    // Not quorum for SYNC yet, just send existing PRE_SYNC vote
-                    preSyncVoteOpt.get()
-                }
+                // Voting for a BC with new height
+                createVote(
+                    validator, block.id, newHeightVoteId
+                )
             } else {
-                // Block is outdated, but we haven't created PRE_SYNC for yet, do this
-                createVote(validator, syncBlockId, preLockVoteId)
-            }
-        } else {
-            if (!voteRepository.findById(newHeightVoteId).isPresent) {
-                // is there a BC for new height?
-                val blockCandidate = blockCandidateRepository.getBlockCandidate(space.id, newHeight)
-
-                if (blockCandidate != null) {
-                    val block = getBlockData(blockCandidate).block.toModel()
-
-                    // Voting for a BC with new height
-                    createVote(
-                        validator, block.id, newHeightVoteId
-                    )
-                } else {
-                    // nothing found, voting for the LIB
-                    createVote(validator, lastBlock.id, voteId)
-                }
+                // nothing found, voting for the LIB
+                createVote(validator, lastBlock.id, voteId)
             }
         }
-
-        return voteRepository.findByHeightAndValidatorId(newHeight, validator.id)
-            .filter { it.id.voteType != VoteType.VOTE || !outdated }
-    }
-
-    private fun isOutdated(block: Block): Boolean {
-        val m = if (block.blockType == BlockType.NORMAL) 1 else 2
-        return TimeUtils.getCurrentRound() - block.round >= MAX_MISSED_ROUNDS * m
     }
 
     private fun getBlockData(blockCandidate: BlockCandidate): BlockData {

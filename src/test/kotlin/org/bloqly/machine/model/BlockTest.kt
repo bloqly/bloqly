@@ -14,6 +14,7 @@ class BlockTest {
             id = "syncBlockId",
             spaceId = "main",
             height = 1,
+            weight = 1,
             round = TimeUtils.getCurrentRound(),
             timestamp = Instant.now().toEpochMilli(),
             parentId = "lastBlockId",
