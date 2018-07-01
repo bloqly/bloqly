@@ -121,7 +121,7 @@ class BlockControllerTest {
 
         assertFalse(blockCandidateRepository.existsById(blockCandidateId))
 
-        restTemplate.postForObject(url, entity, Void.TYPE)
+        restTemplate.postForObject(url, entity, String::class.java)
 
         assertEquals(1, blockRepository.count())
 
@@ -130,15 +130,22 @@ class BlockControllerTest {
 
     @Test
     fun testReceiveBlocksTwice() {
-        val entity = getHttpEntity()
-
-        assertTrue(blockCandidateRepository.existsById(blockCandidateId))
-
-        TimeUtils.setTestTime(Application.ROUND + 1L)
-        restTemplate.postForObject(url, entity, Void.TYPE)
-
         val blocks = eventProcessorService.onGetProposals()
-        eventReceiverService.receiveProposals(blocks)
+
+        assertTrue(blocks.isNotEmpty())
+
+        val doubleBlocks = blocks.plus(blocks)
+
+        val proposalsPayload = ObjectUtils.writeValueAsString(
+            BlockDataList(doubleBlocks)
+        )
+
+        val headers = HttpHeaders()
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val entity = HttpEntity(proposalsPayload, headers)
+
+        restTemplate.postForObject(url, entity, String::class.java)
     }
 
     @Test
@@ -150,7 +157,7 @@ class BlockControllerTest {
         assertFalse(blockCandidateRepository.existsById(blockCandidateId))
 
         TimeUtils.setTestTime(Application.ROUND + 1L)
-        restTemplate.postForObject(url, entity, Void.TYPE)
+        restTemplate.postForObject(url, entity, String::class.java)
 
         assertFalse(blockCandidateRepository.existsById(blockCandidateId))
     }

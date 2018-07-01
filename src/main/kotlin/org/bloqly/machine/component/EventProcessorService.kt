@@ -4,6 +4,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.BlockType
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -313,6 +314,7 @@ class EventProcessorService(
             id = syncBlockId,
             spaceId = space.id,
             height = newHeight,
+            blockType = BlockType.SYNC,
             round = TimeUtils.getCurrentRound(),
             timestamp = Instant.now().toEpochMilli(),
             parentId = lastBlock.id,

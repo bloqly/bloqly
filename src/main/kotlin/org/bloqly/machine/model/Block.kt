@@ -19,6 +19,9 @@ data class Block(
     @Column(nullable = false)
     val height: Long,
 
+    @Column
+    val blockType: BlockType = BlockType.NORMAL,
+
     @Column(nullable = false)
     val round: Long,
 
