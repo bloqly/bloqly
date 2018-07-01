@@ -188,7 +188,6 @@ class EventSenderServiceTest {
 
         assertEquals(4, votes.size)
 
-
         eventSenderService.sendVotes(votes)
 
         Mockito.verifyZeroInteractions(restTemplate)

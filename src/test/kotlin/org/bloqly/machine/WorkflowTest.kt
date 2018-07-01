@@ -99,7 +99,6 @@ class WorkflowTest {
         selectBestProposal()
 
         assertEquals(1, getHeight())
-
     }
 
     private fun getHeight(): Long {

@@ -38,11 +38,11 @@ data class Block(
     var txHash: ByteArray? = null,
 
     @Column
-    val validatorTxHash: ByteArray? = null,
+    val validatorTxHash: ByteArray,
 
     @Lob
     @Column
-    val signature: ByteArray? = null
+    val signature: ByteArray
 ) {
 
     fun toVO(): BlockVO {
@@ -57,8 +57,8 @@ data class Block(
             parentHash = parentId,
             proposerId = proposerId,
             txHash = txHash?.let { EncodingUtils.encodeToString16(txHash) },
-            validatorTxHash = validatorTxHash?.let { EncodingUtils.encodeToString16(validatorTxHash) },
-            signature = signature?.let { EncodingUtils.encodeToString16(signature) }
+            validatorTxHash = EncodingUtils.encodeToString16(validatorTxHash),
+            signature = EncodingUtils.encodeToString16(signature)
         )
     }
 

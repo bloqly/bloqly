@@ -14,8 +14,8 @@ data class BlockVO(
     val parentHash: String,
     val proposerId: String,
     val txHash: String?,
-    val validatorTxHash: String?,
-    val signature: String?
+    val validatorTxHash: String,
+    val signature: String
 ) {
 
     fun toModel(): Block {
@@ -30,8 +30,8 @@ data class BlockVO(
             parentId = parentHash,
             proposerId = proposerId,
             txHash = txHash?.toByteArray(),
-            validatorTxHash = validatorTxHash?.toByteArray(),
-            signature = signature?.toByteArray()
+            validatorTxHash = validatorTxHash.toByteArray(),
+            signature = signature.toByteArray()
         )
     }
 }
