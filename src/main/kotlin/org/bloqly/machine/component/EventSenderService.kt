@@ -75,12 +75,12 @@ class EventSenderService(
                 try {
                     log.info("Request deltas from node $node")
 
-                    val blocks = nodeQueryService.requestDelta(node, delta)
-
-                    blocks?.forEach { blockData ->
-                        blockCandidateService.validateAndSave(blockData)
-                        eventProcessorService.onTick()
-                    }
+                    nodeQueryService.requestDelta(node, delta)
+                        ?.sortedBy { it.block.height }
+                        ?.forEach { blockData ->
+                            blockCandidateService.validateAndSave(blockData)
+                            eventProcessorService.onTick()
+                        }
                 } catch (e: Exception) {
                     "Could not request deltas from $node. Details: ${e.message}"
                 }

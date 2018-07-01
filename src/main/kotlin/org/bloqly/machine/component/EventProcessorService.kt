@@ -178,7 +178,7 @@ class EventProcessorService(
             .flatMap { space ->
                 accountService.getValidatorsForSpace(space)
                     .filter { it.hasKey() }
-                    .mapNotNull { validator -> voteService.getVote(space, validator) }
+                    .flatMap { validator -> voteService.getVotes(space, validator) }
             }
 
         // TODO send all known votes for blocks with height > H
@@ -299,7 +299,7 @@ class EventProcessorService(
 
     private fun isSync(space: Space, height: Long): Boolean {
         val quorum = propertyRepository.getQuorumBySpaceId(space.id)
-        return voteRepository.findLocksCountByHeight(space.id, height) >= quorum
+        return voteRepository.findSyncCountByHeight(space.id, height) >= quorum
     }
 
     private fun newSyncBlock(space: Space, lastBlock: Block): Block {

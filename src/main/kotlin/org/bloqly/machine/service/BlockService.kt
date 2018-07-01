@@ -228,7 +228,7 @@ class BlockService(
 
     fun getBlockDataList(delta: Delta): BlockDataList {
 
-        val startHeight = delta.localHeight + 1
+        val startHeight = delta.localHeight
         val endHeight = min(delta.remoteHeight, startHeight + MAX_DELTA_SIZE)
 
         val blocks = blockRepository.getBlocksDelta(delta.spaceId, startHeight, endHeight)

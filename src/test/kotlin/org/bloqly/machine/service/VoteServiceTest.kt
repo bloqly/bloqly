@@ -55,13 +55,14 @@ class VoteServiceTest {
 
         validator = validators.first()
 
-        vote = voteService.getVote(space, validator)!!
+        vote = voteService.getVotes(space, validator).first()
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val newVote = voteService.getVote(space, validator)
-        assertEquals(newVote, vote)
+        val newVotes = voteService.getVotes(space, validator)
+        assertEquals(1, newVotes.size)
+        assertEquals(newVotes.first(), vote)
     }
 
     @Test
