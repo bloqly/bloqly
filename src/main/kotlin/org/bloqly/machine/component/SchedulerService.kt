@@ -1,6 +1,5 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.service.BlockCandidateService
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.service.TransactionService
 import org.slf4j.LoggerFactory
@@ -15,8 +14,7 @@ class SchedulerService(
     private val transactionService: TransactionService,
     private val eventSenderService: EventSenderService,
     private val eventProcessorService: EventProcessorService,
-    private val deltaService: DeltaService,
-    private val blockCandidateService: BlockCandidateService
+    private val deltaService: DeltaService
 ) {
 
     private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
@@ -74,13 +72,8 @@ class SchedulerService(
     fun checkDeltas() {
         val deltas = deltaService.getDeltas()
 
-        deltas.forEach { delta ->
-            val blocks = eventSenderService.requestDelta(delta)
-
-            blocks?.forEach { blockData ->
-                blockCandidateService.validateAndSave(blockData)
-                eventProcessorService.onTick()
-            }
+        if (deltas.isNotEmpty()) {
+            eventSenderService.requestDeltas(deltas)
         }
     }
 }

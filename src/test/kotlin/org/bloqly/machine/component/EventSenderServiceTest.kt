@@ -1,13 +1,10 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
-import org.bloqly.machine.model.EntityEvent
-import org.bloqly.machine.model.EntityEventId
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.repository.EntityEventRepository
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.APIUtils
@@ -16,8 +13,6 @@ import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.VoteList
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,6 +29,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.web.client.RestTemplate
 import java.time.Instant
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.TimeUnit
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class, EventSenderServiceTest.TestConfiguration::class])
@@ -50,6 +47,9 @@ class EventSenderServiceTest {
     }
 
     @Autowired
+    private lateinit var executorService: ExecutorService
+
+    @Autowired
     private lateinit var eventSenderService: EventSenderService
 
     @Autowired
@@ -62,9 +62,6 @@ class EventSenderServiceTest {
     private lateinit var nodeRepository: NodeRepository
 
     @Autowired
-    private lateinit var entityEventRepository: EntityEventRepository
-
-    @Autowired
     private lateinit var testService: TestService
 
     @Autowired
@@ -74,6 +71,8 @@ class EventSenderServiceTest {
 
     @Before
     fun init() {
+        Mockito.clearInvocations(restTemplate)
+
         testService.cleanup()
 
         testService.createBlockchain()
@@ -87,6 +86,7 @@ class EventSenderServiceTest {
         nodeRepository.deleteAll()
 
         eventSenderService.sendProposals(getProposals())
+        executorService.awaitTermination(100, TimeUnit.MILLISECONDS)
 
         Mockito.verifyZeroInteractions(restTemplate)
     }
@@ -99,10 +99,6 @@ class EventSenderServiceTest {
 
         val proposals = getProposals()
 
-        val eventId = EntityEventId(proposals.first().block.id, node.id.toString())
-
-        assertFalse(entityEventRepository.existsById(eventId))
-
         val entity = HttpEntity(BlockDataList(proposals))
 
         val response = ResponseEntity<String>(OK)
@@ -111,10 +107,9 @@ class EventSenderServiceTest {
             .thenReturn(response)
 
         eventSenderService.sendProposals(proposals)
+        executorService.awaitTermination(100, TimeUnit.MILLISECONDS)
 
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
-
-        assertTrue(entityEventRepository.existsById(eventId))
     }
 
     @Test
@@ -125,10 +120,6 @@ class EventSenderServiceTest {
 
         val proposals = getProposals()
 
-        val eventId = EntityEventId(proposals.first().block.id, node.id.toString())
-
-        assertFalse(entityEventRepository.existsById(eventId))
-
         val entity = HttpEntity(BlockDataList(proposals))
 
         val response = ResponseEntity<String>(REQUEST_TIMEOUT)
@@ -137,33 +128,9 @@ class EventSenderServiceTest {
             .thenReturn(response)
 
         eventSenderService.sendProposals(proposals)
+        executorService.awaitTermination(100, TimeUnit.MILLISECONDS)
 
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
-
-        assertFalse(entityEventRepository.existsById(eventId))
-    }
-
-    @Test
-    fun testSendProposalsAlreadySent() {
-
-        eventReceiverService.receiveVotes(testService.getVotes())
-
-        val proposals = getProposals()
-
-        assertEquals(1, proposals.size)
-
-        val events = proposals.map {
-            EntityEvent(
-                entityEventId = EntityEventId(it.block.id, node.id.toString()),
-                timestamp = Instant.now().toEpochMilli()
-            )
-        }
-
-        entityEventRepository.saveAll(events)
-
-        eventSenderService.sendProposals(proposals)
-
-        Mockito.verifyZeroInteractions(restTemplate)
     }
 
     @Test
@@ -183,10 +150,6 @@ class EventSenderServiceTest {
 
         val votes = getVotes()
 
-        val eventId = EntityEventId(votes.first().id.toString(), node.id.toString())
-
-        assertFalse(entityEventRepository.existsById(eventId))
-
         val entity = HttpEntity(VoteList.fromVotes(votes))
 
         val response = ResponseEntity<String>(OK)
@@ -197,8 +160,6 @@ class EventSenderServiceTest {
         eventSenderService.sendVotes(votes)
 
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
-
-        assertTrue(entityEventRepository.existsById(eventId))
     }
 
     @Test
@@ -208,10 +169,6 @@ class EventSenderServiceTest {
 
         val votes = getVotes()
 
-        val eventId = EntityEventId(votes.first().id.toString(), node.id.toString())
-
-        assertFalse(entityEventRepository.existsById(eventId))
-
         val entity = HttpEntity(VoteList.fromVotes(votes))
 
         val response = ResponseEntity<String>(REQUEST_TIMEOUT)
@@ -220,10 +177,9 @@ class EventSenderServiceTest {
             .thenReturn(response)
 
         eventSenderService.sendVotes(votes)
+        executorService.awaitTermination(100, TimeUnit.MILLISECONDS)
 
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
-
-        assertFalse(entityEventRepository.existsById(eventId))
     }
 
     @Test
@@ -232,14 +188,6 @@ class EventSenderServiceTest {
 
         assertEquals(4, votes.size)
 
-        val events = votes.map {
-            EntityEvent(
-                entityEventId = EntityEventId(it.id.toString(), node.id.toString()),
-                timestamp = Instant.now().toEpochMilli()
-            )
-        }
-
-        entityEventRepository.saveAll(events)
 
         eventSenderService.sendVotes(votes)
 
@@ -263,10 +211,6 @@ class EventSenderServiceTest {
 
         val transactions = getTransactions()
 
-        val eventId = EntityEventId(transactions.first().id, node.id.toString())
-
-        assertFalse(entityEventRepository.existsById(eventId))
-
         val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
         val response = ResponseEntity<String>(OK)
@@ -276,9 +220,9 @@ class EventSenderServiceTest {
 
         eventSenderService.sendTransactions(transactions)
 
-        Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
+        executorService.awaitTermination(100, TimeUnit.MILLISECONDS)
 
-        assertTrue(entityEventRepository.existsById(eventId))
+        Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
     }
 
     @Test
@@ -288,10 +232,6 @@ class EventSenderServiceTest {
 
         val transactions = getTransactions()
 
-        val eventId = EntityEventId(transactions.first().id, node.id.toString())
-
-        assertFalse(entityEventRepository.existsById(eventId))
-
         val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
         val response = ResponseEntity<String>(REQUEST_TIMEOUT)
@@ -300,23 +240,9 @@ class EventSenderServiceTest {
             .thenReturn(response)
 
         eventSenderService.sendTransactions(transactions)
+        executorService.awaitTermination(100, TimeUnit.MILLISECONDS)
 
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
-
-        assertFalse(entityEventRepository.existsById(eventId))
-    }
-
-    @Test
-    fun testSendTransactionsAlreadySent() {
-        val transactions = getTransactions()
-
-        val eventId = EntityEventId(transactions.first().id, node.id.toString())
-
-        entityEventRepository.save(EntityEvent(eventId, Instant.now().toEpochMilli()))
-
-        eventSenderService.sendTransactions(transactions)
-
-        Mockito.verifyZeroInteractions(restTemplate)
     }
 
     private fun getTransactions(): List<Transaction> = listOf(testService.newTransaction())

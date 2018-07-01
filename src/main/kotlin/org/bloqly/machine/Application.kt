@@ -20,6 +20,7 @@ class Application {
             )
         }
 
+        const val REQUEST_THREADS = 5
         const val DEFAULT_PORT = "9900"
         const val POWER_KEY = "power"
         const val DEFAULT_SPACE = "main"
