@@ -19,8 +19,11 @@ data class Block(
     @Column(nullable = false)
     val height: Long,
 
-    @Column
+    @Column(nullable = false)
     val weight: Long,
+
+    @Column(nullable = false)
+    val diff: Int,
 
     @Column(nullable = false)
     val round: Long,
@@ -31,17 +34,17 @@ data class Block(
     @Column(nullable = false)
     val parentId: String,
 
-    @Column
+    @Column(nullable = false)
     val proposerId: String,
 
     @Column
     var txHash: ByteArray? = null,
 
-    @Column
+    @Column(nullable = false)
     val validatorTxHash: ByteArray,
 
     @Lob
-    @Column
+    @Column(nullable = false)
     val signature: ByteArray
 ) {
 
@@ -52,6 +55,7 @@ data class Block(
             spaceId = spaceId,
             height = height,
             weight = weight,
+            diff = diff,
             round = round,
             timestamp = timestamp,
             parentHash = parentId,

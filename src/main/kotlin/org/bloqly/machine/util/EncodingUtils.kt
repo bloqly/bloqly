@@ -24,10 +24,9 @@ object EncodingUtils {
 
     fun decodeFromString64(data: String?): ByteArray = ENCODER64.decode(data ?: throw RuntimeException())
 
-    fun longToBytes(value: Long): ByteArray {
+    fun longToBytes(value: Long): ByteArray = ByteBuffer.allocate(LONG_BYTES).putLong(value).array()
 
-        return ByteBuffer.allocate(LONG_BYTES).putLong(value).array()
-    }
+    fun intToBytes(value: Int): ByteArray = ByteBuffer.allocate(LONG_BYTES).putInt(value).array()
 
     fun hashAndEncode16(input: ByteArray): String {
         val hash = CryptoUtils.digest(input)

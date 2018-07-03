@@ -41,27 +41,31 @@ class BlockService(
     fun newBlock(
         spaceId: String,
         height: Long,
+        weight: Long,
+        diff: Int,
         timestamp: Long,
-        parentHash: String,
+        parentId: String,
         producerId: String,
         txHash: ByteArray? = null,
         validatorTxHash: ByteArray
     ): Block {
+
+        val round = TimeUtils.getCurrentRound()
 
         return accountRepository
             .findById(producerId)
             .filter { it.hasKey() }
             .map { proposer ->
 
-                val round = TimeUtils.getCurrentRound()
-
                 val dataToSign = CryptoUtils.digest(
                     arrayOf(
                         spaceId.toByteArray(),
                         EncodingUtils.longToBytes(height),
+                        EncodingUtils.longToBytes(weight),
+                        EncodingUtils.intToBytes(diff),
                         EncodingUtils.longToBytes(round),
                         EncodingUtils.longToBytes(timestamp),
-                        parentHash.toByteArray(),
+                        parentId.toByteArray(),
                         producerId.toByteArray(),
                         txHash ?: ByteArray(0),
                         validatorTxHash
@@ -77,17 +81,20 @@ class BlockService(
                     id = blockId,
                     spaceId = spaceId,
                     height = height,
-                    // TODO provide weight
-                    weight = 1,
+                    weight = weight,
+                    diff = diff,
                     round = round,
                     timestamp = timestamp,
-                    parentId = parentHash,
+                    parentId = parentId,
                     proposerId = producerId,
                     txHash = txHash,
                     validatorTxHash = validatorTxHash,
                     signature = signature
                 )
-            }.orElseThrow()
+            }
+            .orElseThrow {
+                IllegalArgumentException("Could not create block in behalf of producer $producerId")
+            }
     }
 
     fun getLastBlockForSpace(space: String): Block {

@@ -25,8 +25,6 @@ import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.Instant
@@ -58,8 +56,6 @@ class EventProcessorService(
     private val transactionProcessor: TransactionProcessor,
     private val propertyRepository: PropertyRepository
 ) {
-
-    private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
     fun createBlockchain(spaceId: String, baseDir: String) {
 
@@ -93,8 +89,10 @@ class EventProcessorService(
         val firstBlock = blockService.newBlock(
             spaceId = spaceId,
             height = height,
+            weight = 0,
+            diff = 0,
             timestamp = timestamp,
-            parentHash = contractBodyHash,
+            parentId = contractBodyHash,
             producerId = rootId,
             txHash = null,
             validatorTxHash = validatorTxHash
@@ -219,18 +217,25 @@ class EventProcessorService(
 
         val newHeight = lastBlock.height + 1
         val spaceId = lastBlock.spaceId
-        val votes = getVotesForBlock(lastBlock)
+        val votes = getVotesForBlock(lastBlock.id)
+        val prevVotes = getVotesForBlock(lastBlock.parentId)
+
+        val diff = votes.minus(prevVotes).size
 
         return producer
             .takeIf { it.hasKey() && isQuorum(spaceId, votes) }
             ?.let {
                 val transactions = getPendingTransactions(spaceId)
 
+                val weight = lastBlock.weight + votes.size
+
                 val newBlock = blockService.newBlock(
                     spaceId = spaceId,
                     height = newHeight,
+                    weight = weight,
+                    diff = diff,
                     timestamp = Instant.now().toEpochMilli(),
-                    parentHash = lastBlock.id,
+                    parentId = lastBlock.id,
                     producerId = producer.id,
                     txHash = CryptoUtils.digestTransactions(transactions),
                     validatorTxHash = CryptoUtils.digestVotes(votes)
@@ -254,8 +259,8 @@ class EventProcessorService(
         return transactionService.getPendingTransactionsBySpace(spaceId)
     }
 
-    private fun getVotesForBlock(block: Block): List<Vote> {
-        return voteRepository.findByBlockId(block.id)
+    private fun getVotesForBlock(blockId: String): List<Vote> {
+        return voteRepository.findByBlockId(blockId)
     }
 
     fun onProposals(proposals: List<BlockData>) {
