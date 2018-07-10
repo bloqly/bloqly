@@ -1,11 +1,11 @@
 package org.bloqly.machine.service;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.tuple.Triple;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.InvocationContext;
 import org.bloqly.machine.model.Property;
 import org.bloqly.machine.model.PropertyId;
+import org.bloqly.machine.model.PropertyResult;
 import org.bloqly.machine.repository.ContractRepository;
 import org.bloqly.machine.repository.PropertyRepository;
 import org.bloqly.machine.repository.PropertyService;
@@ -19,8 +19,8 @@ import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 @Service
@@ -82,7 +82,7 @@ public class ContractService {
 
 
     @SuppressWarnings("unchecked")
-    public List<Triple<String, String, Object>> invokeFunction(String name, String body) {
+    public List<PropertyResult> invokeFunction(String name, String body) {
         try {
 
             var engine = getEngine(body);
@@ -90,7 +90,6 @@ public class ContractService {
             var results = (Map<String, Object>) engine.invokeFunction(name);
 
             return results.values().stream()
-
                     .map(item -> getEntry((Map<String, Object>) item))
                     .collect(toList());
 
@@ -123,7 +122,7 @@ public class ContractService {
         }
     }
 
-    private Triple<String, String, Object> getEntry(Map<String, Object> item) {
+    private PropertyResult getEntry(Map<String, Object> item) {
         var command = item.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals("target"))
                 .findFirst()
@@ -131,23 +130,23 @@ public class ContractService {
 
         String target = item.get("target").toString();
 
-        return Triple.of(target, command.getKey(), command.getValue());
+        return new PropertyResult(target, command.getKey(), command.getValue());
     }
 
     private Property prepareResults(Map<String, Object> item, InvocationContext context) {
 
         var entry = getEntry(item);
 
-        var contract = Objects.requireNonNull(context.getContract());
+        var contract = requireNonNull(context.getContract());
         // TODO: check isolation
         return new Property(
                 new PropertyId(
-                        Objects.requireNonNull(contract.getSpace()),
-                        Objects.requireNonNull(contract.getId()),
-                        Objects.requireNonNull(entry.getLeft()),
-                        entry.getMiddle()
+                        requireNonNull(contract.getSpace()),
+                        requireNonNull(contract.getId()),
+                        requireNonNull(entry.getTarget()),
+                        requireNonNull(entry.getKey())
                 ),
-                ParameterUtils.INSTANCE.writeValue(entry.getRight())
+                ParameterUtils.INSTANCE.writeValue(entry.getValue())
         );
     }
 

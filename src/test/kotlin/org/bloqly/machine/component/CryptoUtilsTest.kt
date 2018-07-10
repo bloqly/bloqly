@@ -1,6 +1,7 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.util.CryptoUtils
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CryptoUtilsTest {
@@ -18,6 +19,8 @@ class CryptoUtilsTest {
 
         val verified = CryptoUtils.verify("test".toByteArray(), signature, pub)
 
-        println("verified = $verified")
+        assertTrue(verified)
+
+
     }
 }

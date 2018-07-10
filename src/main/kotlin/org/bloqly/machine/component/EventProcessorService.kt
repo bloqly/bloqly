@@ -74,7 +74,7 @@ class EventProcessorService(
 
         val initProperties = contractService.invokeFunction("init", contractBody)
 
-        val rootId = initProperties.find { it.middle == "root" }!!.right.toString()
+        val rootId = initProperties.find { it.key == "root" }!!.value.toString()
 
         spaceRepository.save(Space(id = spaceId, creatorId = rootId))
 

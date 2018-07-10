@@ -27,6 +27,7 @@ data class TransactionVO(
         val value = EncodingUtils.decodeFromString64(value)
         val signature = EncodingUtils.decodeFromString64(signature)
 
+        // TODO after introducing Schnorr change it to recover from signature if possible
         val publicKeyBytes = EncodingUtils.decodeFromString16(publicKey)
         val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
         val origin = EncodingUtils.encodeToString16(publicKeyHash)

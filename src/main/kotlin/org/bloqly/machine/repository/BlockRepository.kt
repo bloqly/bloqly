@@ -12,7 +12,7 @@ interface BlockRepository : CrudRepository<Block, String> {
         """
         select * from block
         where space_id = ?1
-        order by height desc, weight desc, round asc
+        order by height desc, diff desc, weight desc, round asc
         limit 1
         """, nativeQuery = true
     )

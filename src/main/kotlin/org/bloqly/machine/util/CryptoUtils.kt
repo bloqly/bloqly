@@ -1,7 +1,6 @@
 package org.bloqly.machine.util
 
 import com.google.common.primitives.Bytes
-import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.EncodingUtils.decodeFromString16
@@ -25,6 +24,7 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.SecureRandom
 
+// TODO change it to using Schnorr https://github.com/sipa/bips/blob/bip-schnorr/bip-schnorr.mediawiki
 object CryptoUtils {
 
     private val log = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
@@ -201,19 +201,5 @@ object CryptoUtils {
             log.error(e.message, e)
             return false
         }
-    }
-
-    fun getSyncBlockId(lastBlock: Block): String {
-        val newHeight = lastBlock.height + 1
-
-        val blockIdBytes = Bytes.concat(
-            lastBlock.spaceId.toByteArray(),
-            EncodingUtils.longToBytes(newHeight),
-            lastBlock.id.toByteArray()
-        )
-
-        val blockIdBytesHash = digest(blockIdBytes)
-
-        return EncodingUtils.encodeToString16(blockIdBytesHash)
     }
 }
