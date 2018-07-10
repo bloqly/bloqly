@@ -22,8 +22,8 @@ data class Transaction(
     @Column(nullable = false)
     val destination: String,
 
-    @Column(nullable = true)
-    var self: String? = null,
+    @Column(nullable = false)
+    var self: String,
 
     @Column(nullable = true)
     var key: String? = null,

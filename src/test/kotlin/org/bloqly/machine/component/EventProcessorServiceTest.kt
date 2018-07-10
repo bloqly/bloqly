@@ -38,6 +38,9 @@ class EventProcessorServiceTest {
     private lateinit var eventProcessorService: EventProcessorService
 
     @Autowired
+    private lateinit var transactionProcessor: TransactionProcessor
+
+    @Autowired
     private lateinit var accountRepository: AccountRepository
 
     @Autowired
@@ -125,7 +128,7 @@ class EventProcessorServiceTest {
             value = writeLong("1")
         )
 
-        eventProcessorService.processTransaction(transaction)
+        transactionProcessor.processTransaction(transaction)
 
         val rootBalanceAfter = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceAfter = propertyRepository.findById(userBalanceId).orElseThrow()

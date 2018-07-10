@@ -1,5 +1,6 @@
 package org.bloqly.machine.test
 
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.EventProcessorService
@@ -85,6 +86,7 @@ class TestService(
             space = DEFAULT_SPACE,
             originId = root.id,
             destinationId = user.id,
+            self = DEFAULT_SELF,
             value = writeLong("1"),
             transactionType = TransactionType.CALL,
             referencedBlockId = lastBlock.id,

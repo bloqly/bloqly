@@ -26,7 +26,7 @@ class TransactionService(
         space: String,
         originId: String,
         destinationId: String,
-        self: String? = null,
+        self: String,
         key: String? = null,
         value: ByteArray,
         transactionType: TransactionType,

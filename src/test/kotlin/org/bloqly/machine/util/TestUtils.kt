@@ -1,5 +1,6 @@
 package org.bloqly.machine.util
 
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 
@@ -15,6 +16,10 @@ object TestUtils {
                     origin = origin,
 
                     destination = destination,
+
+                    self = DEFAULT_SELF,
+
+                    key = "contract",
 
                     value = value,
 

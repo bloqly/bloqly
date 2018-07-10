@@ -13,7 +13,7 @@ data class TransactionVO(
     val id: String,
     val space: String,
     val destination: String,
-    val self: String?,
+    val self: String,
     val key: String?,
     val value: String,
     val transactionType: TransactionType,

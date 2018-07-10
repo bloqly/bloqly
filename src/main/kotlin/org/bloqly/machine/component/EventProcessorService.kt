@@ -1,6 +1,5 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION_NAME
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
@@ -114,22 +113,6 @@ class EventProcessorService(
 
         firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
         blockRepository.save(firstBlock)
-    }
-
-    fun processTransaction(transaction: Transaction) {
-
-        // contract id
-        val self = transaction.self ?: DEFAULT_SELF
-
-        // contract function name
-        val key = transaction.key ?: DEFAULT_FUNCTION_NAME
-
-        // contract arguments
-        val arg = transaction.value
-        val caller = transaction.origin
-        val callee = transaction.destination
-
-        contractService.invokeContract(key, self, caller, callee, arg)
     }
 
     /**

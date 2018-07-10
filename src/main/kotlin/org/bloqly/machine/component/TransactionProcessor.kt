@@ -22,7 +22,7 @@ class TransactionProcessor(
 ) {
 
     fun createContract(
-        space: String,
+        spaceId: String,
         self: String,
         body: String,
         owner: String
@@ -32,37 +32,59 @@ class TransactionProcessor(
             "Contract body can not be empty"
         }
 
-        val contract = Contract(self, space, owner, body)
+        val contract = Contract(self, spaceId, owner, body)
 
         contractRepository.save(contract)
 
         contractService.invokeContract("init", self, owner, self, byteArrayOf())
     }
 
-    fun processTransaction(transaction: Transaction) {
+    private fun createContract(tx: Transaction) {
 
-        accountRepository.insertAccountIdIfNotExists(transaction.origin)
-        accountRepository.insertAccountIdIfNotExists(transaction.destination)
-        accountRepository.insertAccountIdIfNotExists(transaction.self)
+        return createContract(tx.spaceId, tx.self, String(tx.value), tx.origin)
+    }
 
-        val origin = accountRepository.findById(transaction.origin).orElseThrow()
+    fun call(transaction: Transaction) {
 
-        val publicKey = transaction.publicKey.decode16()
+        // contract id
+        val self = transaction.self
+
+        // contract function name
+        val key = transaction.key
+
+        // contract arguments
+        val arg = transaction.value
+        val caller = transaction.origin
+        val callee = transaction.destination
+
+        contractService.invokeContract(key, self, caller, callee, arg)
+    }
+
+    fun processTransaction(tx: Transaction) {
+
+        accountRepository.insertAccountIdIfNotExists(tx.origin)
+        accountRepository.insertAccountIdIfNotExists(tx.destination)
+        accountRepository.insertAccountIdIfNotExists(tx.self)
+
+        val origin = accountRepository.findById(tx.origin).orElseThrow()
+
+        val publicKey = tx.publicKey.decode16()
 
         val publicKeyHash = CryptoUtils.digest(publicKey).encode16()
 
         if (origin.publicKey == null && publicKeyHash == origin.id) {
-            accountRepository.save(origin.copy(publicKey = transaction.publicKey))
+            accountRepository.save(origin.copy(publicKey = tx.publicKey))
         }
 
-        if (transaction.transactionType == TransactionType.CREATE) {
+        when (tx.transactionType) {
 
-            createContract(
-                space = transaction.spaceId,
-                self = transaction.self!!,
-                body = String(transaction.value),
-                owner = transaction.destination
-            )
+            TransactionType.CREATE -> createContract(tx)
+
+            TransactionType.CALL -> call(tx)
+
+            else -> {
+                // do nothing
+            }
         }
     }
 }
