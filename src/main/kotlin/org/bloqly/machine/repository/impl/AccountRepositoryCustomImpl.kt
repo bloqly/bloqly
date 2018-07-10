@@ -10,7 +10,7 @@ class AccountRepositoryCustomImpl(
     private var entityManager: EntityManager
 ) : AccountRepositoryCustom {
 
-    override fun insertAccountId(accountId: String?) {
+    override fun insertAccountIdIfNotExists(accountId: String?) {
 
         if (accountId == null) {
             return

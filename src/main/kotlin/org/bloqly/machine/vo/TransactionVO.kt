@@ -4,7 +4,9 @@ import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.decode64
+import org.bloqly.machine.util.encode16
 
 @ValueObject
 data class TransactionVO(
@@ -23,14 +25,10 @@ data class TransactionVO(
 ) {
 
     fun toModel(): Transaction {
-
-        val value = EncodingUtils.decodeFromString64(value)
-        val signature = EncodingUtils.decodeFromString64(signature)
-
         // TODO after introducing Schnorr change it to recover from signature if possible
-        val publicKeyBytes = EncodingUtils.decodeFromString16(publicKey)
+        val publicKeyBytes = publicKey.decode16()
         val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
-        val origin = EncodingUtils.encodeToString16(publicKeyHash)
+        val origin = publicKeyHash.encode16()
 
         val transactionType = TransactionType.valueOf(transactionType.name)
 
@@ -41,12 +39,12 @@ data class TransactionVO(
             destination = destination,
             self = self,
             key = key,
-            value = value,
+            value = value.decode64(),
             transactionType = transactionType,
             referencedBlockId = referencedBlockId,
             containingBlockId = containingBlockId,
             timestamp = timestamp,
-            signature = signature,
+            signature = signature.decode64(),
             publicKey = publicKey
         )
     }

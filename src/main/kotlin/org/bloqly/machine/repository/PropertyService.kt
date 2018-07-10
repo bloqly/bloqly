@@ -20,7 +20,7 @@ class PropertyService(
 
         properties.forEach { property ->
 
-            accountRepository.insertAccountId(property.id.target)
+            accountRepository.insertAccountIdIfNotExists(property.id.target)
 
             propertyRepository.save(property)
         }
@@ -43,7 +43,7 @@ class PropertyService(
 
         properties.forEach { property ->
             propertyRepository.save(property)
-            accountRepository.insertAccountId(property.id.target)
+            accountRepository.insertAccountIdIfNotExists(property.id.target)
         }
     }
 }

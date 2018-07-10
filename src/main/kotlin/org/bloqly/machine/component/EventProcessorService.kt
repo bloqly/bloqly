@@ -21,9 +21,9 @@ import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
+import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Component
 import java.io.File
@@ -82,9 +82,7 @@ class EventProcessorService(
 
         val height = 0L
         val validatorTxHash = ByteArray(0)
-        val contractBodyHash = EncodingUtils.encodeToString16(
-            CryptoUtils.digest(contractBody)
-        )
+        val contractBodyHash = CryptoUtils.digest(contractBody).encode16()
 
         val firstBlock = blockService.newBlock(
             spaceId = spaceId,

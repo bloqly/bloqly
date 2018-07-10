@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.TransactionVO
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -56,21 +56,18 @@ data class Transaction(
 
     fun toVO(): TransactionVO {
 
-        val value = EncodingUtils.encodeToString64(value)
-        val signature = EncodingUtils.encodeToString64(signature)
-
         return TransactionVO(
             id = id,
             space = spaceId,
             destination = destination,
             self = self,
             key = key,
-            value = value,
+            value = value.encode64(),
             transactionType = transactionType,
             referencedBlockId = referencedBlockId,
             containingBlockId = containingBlockId,
             timestamp = timestamp,
-            signature = signature,
+            signature = signature.encode64(),
             publicKey = publicKey
         )
     }

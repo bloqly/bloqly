@@ -3,7 +3,6 @@ package org.bloqly.machine.util
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.bouncycastle.asn1.ASN1InputStream
 import org.bouncycastle.asn1.ASN1Integer
 import org.bouncycastle.asn1.DERSequenceGenerator
@@ -147,7 +146,7 @@ object CryptoUtils {
 
         val txHash = digest(transaction.signature)
 
-        val transactionId = EncodingUtils.encodeToString16(txHash)
+        val transactionId = txHash.encode16()
 
         if (transactionId != transaction.id) {
             return false
@@ -156,7 +155,7 @@ object CryptoUtils {
         return verify(
             message = digest(dataToVerify),
             signature = transaction.signature,
-            publicKey = decodeFromString16(transaction.publicKey)
+            publicKey = transaction.publicKey.decode16()
         )
     }
 
@@ -173,7 +172,7 @@ object CryptoUtils {
 
         val dataHash = digest(dataToVerify)
 
-        val publicKey = decodeFromString16(vote.publicKey)
+        val publicKey = vote.publicKey.decode16()
 
         return verify(dataHash, vote.signature, publicKey)
     }

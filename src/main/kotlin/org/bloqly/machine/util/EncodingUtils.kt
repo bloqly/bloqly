@@ -3,26 +3,15 @@ package org.bloqly.machine.util
 import com.google.common.io.BaseEncoding
 import java.nio.ByteBuffer
 
+fun String?.decode16(): ByteArray = BaseEncoding.base16().decode(this!!)
+fun String?.decode64(): ByteArray = BaseEncoding.base64().decode(this!!)
+
+fun ByteArray?.encode16(): String = BaseEncoding.base16().encode(this!!)
+fun ByteArray?.encode64(): String = BaseEncoding.base64().encode(this!!)
+
 object EncodingUtils {
 
-    private val ENCODER16 = BaseEncoding.base16()
-    private val ENCODER64 = BaseEncoding.base64()
-
     const val LONG_BYTES = 8
-
-    fun encodeToString64(data: ByteArray?): String {
-        data ?: throw IllegalArgumentException()
-        return ENCODER64.encode(data)
-    }
-
-    fun encodeToString16(data: ByteArray?): String {
-        data ?: throw IllegalArgumentException()
-        return ENCODER16.encode(data)
-    }
-
-    fun decodeFromString16(data: String?): ByteArray = ENCODER16.decode(data ?: throw RuntimeException())
-
-    fun decodeFromString64(data: String?): ByteArray = ENCODER64.decode(data ?: throw RuntimeException())
 
     fun longToBytes(value: Long): ByteArray = ByteBuffer.allocate(LONG_BYTES).putLong(value).array()
 
@@ -30,6 +19,6 @@ object EncodingUtils {
 
     fun hashAndEncode16(input: ByteArray): String {
         val hash = CryptoUtils.digest(input)
-        return EncodingUtils.encodeToString16(hash)
+        return hash.encode16()
     }
 }

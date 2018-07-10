@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.BlockVO
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -60,9 +60,9 @@ data class Block(
             timestamp = timestamp,
             parentHash = parentId,
             proposerId = proposerId,
-            txHash = txHash?.let { EncodingUtils.encodeToString16(txHash) },
-            validatorTxHash = EncodingUtils.encodeToString16(validatorTxHash),
-            signature = EncodingUtils.encodeToString16(signature)
+            txHash = txHash?.encode16(),
+            validatorTxHash = validatorTxHash.encode16(),
+            signature = signature.encode16()
         )
     }
 

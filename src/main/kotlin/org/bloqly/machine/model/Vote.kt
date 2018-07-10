@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.VoteVO
 import javax.persistence.Column
 import javax.persistence.EmbeddedId
@@ -34,7 +34,7 @@ data class Vote(
             voteType = id.voteType.name,
             blockId = blockId,
             timestamp = timestamp,
-            signature = EncodingUtils.encodeToString16(signature),
+            signature = signature.encode64(),
             publicKey = publicKey
         )
     }

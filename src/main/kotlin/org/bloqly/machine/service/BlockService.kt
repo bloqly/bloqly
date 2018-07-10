@@ -15,9 +15,10 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.decodeFromString16
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
+import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
@@ -72,10 +73,10 @@ class BlockService(
                     )
                 )
 
-                val privateKey = decodeFromString16(proposer.privateKey)
+                val privateKey = proposer.privateKey.decode16()
                 val signature = CryptoUtils.sign(privateKey, dataToSign)
                 val blockHash = CryptoUtils.digest(signature)
-                val blockId = EncodingUtils.encodeToString16(blockHash)
+                val blockId = blockHash.encode16()
 
                 Block(
                     id = blockId,
@@ -114,14 +115,14 @@ class BlockService(
 
         val json = ObjectUtils.writeValueAsString(genesis)
 
-        return EncodingUtils.encodeToString16(json.toByteArray())
+        return json.toByteArray().encode16()
     }
 
     fun importFirst(genesisString: String) {
 
         val now = Instant.now()
 
-        val json = EncodingUtils.decodeFromString16(genesisString)
+        val json = genesisString.decode16()
 
         val genesis = ObjectUtils.readValue(json, Genesis::class.java)
 
@@ -161,9 +162,7 @@ class BlockService(
 
         val contractBody = transaction.toModel().value
 
-        val contractBodyHash = EncodingUtils.encodeToString16(
-            CryptoUtils.digest(contractBody)
-        )
+        val contractBodyHash = CryptoUtils.digest(contractBody).encode16()
 
         require(block.parentId == contractBodyHash) {
             "Genesis block parentId be set to the genesis parameters hash, found ${block.parentId} instead."

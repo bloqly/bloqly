@@ -8,7 +8,8 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
@@ -40,17 +41,15 @@ class TransactionProcessor(
 
     fun processTransaction(transaction: Transaction) {
 
-        accountRepository.insertAccountId(transaction.origin)
-        accountRepository.insertAccountId(transaction.destination)
-        accountRepository.insertAccountId(transaction.self)
+        accountRepository.insertAccountIdIfNotExists(transaction.origin)
+        accountRepository.insertAccountIdIfNotExists(transaction.destination)
+        accountRepository.insertAccountIdIfNotExists(transaction.self)
 
-        val originId = transaction.origin
+        val origin = accountRepository.findById(transaction.origin).orElseThrow()
 
-        val origin = accountRepository.findById(originId).orElseThrow()
+        val publicKey = transaction.publicKey.decode16()
 
-        val publicKey = EncodingUtils.decodeFromString16(transaction.publicKey)
-
-        val publicKeyHash = EncodingUtils.encodeToString16(CryptoUtils.digest(publicKey))
+        val publicKeyHash = CryptoUtils.digest(publicKey).encode16()
 
         if (origin.publicKey == null && publicKeyHash == origin.id) {
             accountRepository.save(origin.copy(publicKey = transaction.publicKey))

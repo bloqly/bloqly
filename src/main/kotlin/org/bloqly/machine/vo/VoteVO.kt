@@ -4,7 +4,7 @@ import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteId
 import org.bloqly.machine.model.VoteType
-import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.decode64
 
 @ValueObject
 data class VoteVO(
@@ -31,7 +31,7 @@ data class VoteVO(
             id = voteId,
             blockId = blockId,
             timestamp = timestamp,
-            signature = EncodingUtils.decodeFromString16(signature),
+            signature = signature.decode64(),
             publicKey = publicKey
         )
     }

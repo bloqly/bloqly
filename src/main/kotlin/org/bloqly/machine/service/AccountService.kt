@@ -9,10 +9,10 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.encodeToString16
 import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bloqly.machine.util.ParameterUtils
+import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import javax.transaction.Transactional
@@ -45,8 +45,8 @@ class AccountService(
 
         return Account(
             id = hashAndEncode16(publicKey),
-            publicKey = encodeToString16(publicKey),
-            privateKey = encodeToString16(privateKey)
+            publicKey = publicKey.encode16(),
+            privateKey = privateKey.encode16()
         )
     }
 
@@ -77,16 +77,16 @@ class AccountService(
 
     fun importAccount(privateKey: String): Account {
 
-        val privateKeyBytes = EncodingUtils.decodeFromString16(privateKey)
+        val privateKeyBytes = privateKey.decode16()
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
         val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
-        val accountId = EncodingUtils.encodeToString16(publicKeyHash)
+        val accountId = publicKeyHash.encode16()
 
         require(!accountRepository.existsById(accountId)) {
             "Could not import account: $accountId, account already exists."
         }
 
-        val publicKey = EncodingUtils.encodeToString16(publicKeyBytes)
+        val publicKey = publicKeyBytes.encode16()
 
         return accountRepository.save(
             Account(

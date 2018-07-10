@@ -2,8 +2,8 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.test.TestService
-import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.ObjectUtils
+import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.Genesis
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -34,7 +34,7 @@ class BlockServiceTest {
         val genesisString = blockService.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = ObjectUtils.readValue(
-            EncodingUtils.decodeFromString16(genesisString),
+            genesisString.decode16(),
             Genesis::class.java
         )
 
@@ -46,7 +46,7 @@ class BlockServiceTest {
         val genesisString = blockService.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = ObjectUtils.readValue(
-            EncodingUtils.decodeFromString16(genesisString),
+            genesisString.decode16(),
             Genesis::class.java
         )
 
