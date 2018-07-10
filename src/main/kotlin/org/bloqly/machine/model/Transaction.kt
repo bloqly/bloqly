@@ -32,9 +32,6 @@ data class Transaction(
     @Column(nullable = false)
     val value: ByteArray,
 
-    @Column(nullable = true)
-    val output: ByteArray? = null,
-
     @Column(nullable = false)
     val transactionType: TransactionType,
 

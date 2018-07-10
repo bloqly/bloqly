@@ -68,7 +68,7 @@ class ContractServiceTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun testCreateContractWithEmptyBodyFails() {
-        transactionProcessor.createContract(DEFAULT_SPACE, DEFAULT_SELF, "", caller)
+        transactionProcessor.processCreateContract(DEFAULT_SPACE, DEFAULT_SELF, "", caller)
     }
 
     @Test
@@ -76,7 +76,7 @@ class ContractServiceTest {
 
         assertEquals(0, propertyRepository.count())
 
-        transactionProcessor.createContract(
+        transactionProcessor.processCreateContract(
             DEFAULT_SPACE,
             DEFAULT_SELF,
             FileUtils.getResourceAsString("/scripts/test.js"),

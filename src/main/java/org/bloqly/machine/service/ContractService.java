@@ -2,13 +2,11 @@ package org.bloqly.machine.service;
 
 import com.google.common.collect.Lists;
 import org.bloqly.machine.function.GetPropertyFunction;
-import org.bloqly.machine.model.InvocationContext;
-import org.bloqly.machine.model.Property;
-import org.bloqly.machine.model.PropertyId;
-import org.bloqly.machine.model.PropertyResult;
+import org.bloqly.machine.model.*;
 import org.bloqly.machine.repository.ContractRepository;
 import org.bloqly.machine.repository.PropertyRepository;
 import org.bloqly.machine.repository.PropertyService;
+import org.bloqly.machine.util.ObjectUtils;
 import org.bloqly.machine.util.ParameterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -151,16 +149,20 @@ public class ContractService {
     }
 
     @Transactional
-    public void invokeContract(String functionName, String self, String caller, String callee, byte[] arg) {
+    public InvocationResult invokeContract(String functionName, String self, String orig, String dest, byte[] arg) {
 
-        contractRepository.findById(self).ifPresent(contract -> {
+        return contractRepository.findById(self).map(contract -> {
 
-            var invocationContext = new InvocationContext(functionName, caller, callee, contract);
+            var invocationContext = new InvocationContext(functionName, orig, dest, contract);
 
             var properties = invokeFunction(invocationContext, arg);
 
             propertyService.updateProperties(properties);
-        });
+
+            var resultData = ObjectUtils.INSTANCE.writeValueAsString(properties);
+
+            return new InvocationResult(InvocationResultType.SUCCESS, resultData);
+        }).orElseThrow();
     }
 
 }

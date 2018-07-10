@@ -2,10 +2,13 @@ package org.bloqly.machine.component
 
 import org.apache.commons.lang3.StringUtils
 import org.bloqly.machine.model.Contract
+import org.bloqly.machine.model.InvocationResultType
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.model.TransactionType
+import org.bloqly.machine.model.TransactionType.CALL
+import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.ContractRepository
+import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
@@ -18,10 +21,11 @@ import javax.transaction.Transactional
 class TransactionProcessor(
     private val contractRepository: ContractRepository,
     private val accountRepository: AccountRepository,
-    private val contractService: ContractService
+    private val contractService: ContractService,
+    private val transactionRepository: TransactionRepository
 ) {
 
-    fun createContract(
+    fun processCreateContract(
         spaceId: String,
         self: String,
         body: String,
@@ -39,25 +43,17 @@ class TransactionProcessor(
         contractService.invokeContract("init", self, owner, self, byteArrayOf())
     }
 
-    private fun createContract(tx: Transaction) {
-
-        return createContract(tx.spaceId, tx.self, String(tx.value), tx.origin)
+    private fun processCreateContract(tx: Transaction) {
+        return processCreateContract(tx.spaceId, tx.self, String(tx.value), tx.origin)
     }
 
-    fun call(transaction: Transaction) {
+    fun processCall(tx: Transaction) {
 
-        // contract id
-        val self = transaction.self
+        val invocationResult = contractService.invokeContract(tx.key, tx.self, tx.origin, tx.destination, tx.value)
 
-        // contract function name
-        val key = transaction.key
-
-        // contract arguments
-        val arg = transaction.value
-        val caller = transaction.origin
-        val callee = transaction.destination
-
-        contractService.invokeContract(key, self, caller, callee, arg)
+        if (invocationResult.invocationResultType == InvocationResultType.SUCCESS) {
+            //transactionRepository.updateOutput(tx.id, invocationResult.result)
+        }
     }
 
     fun processTransaction(tx: Transaction) {
@@ -70,17 +66,19 @@ class TransactionProcessor(
 
         val publicKey = tx.publicKey.decode16()
 
-        val publicKeyHash = CryptoUtils.digest(publicKey).encode16()
+        val address = CryptoUtils.digest(publicKey).encode16()
 
-        if (origin.publicKey == null && publicKeyHash == origin.id) {
+        if (origin.publicKey == null && address == origin.id) {
             accountRepository.save(origin.copy(publicKey = tx.publicKey))
         }
 
         when (tx.transactionType) {
 
-            TransactionType.CREATE -> createContract(tx)
+            CREATE ->
+                processCreateContract(tx)
 
-            TransactionType.CALL -> call(tx)
+            CALL ->
+                processCall(tx)
 
             else -> {
                 // do nothing
