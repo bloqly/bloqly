@@ -79,7 +79,7 @@ class AccountService(
 
         val privateKeyBytes = privateKey.decode16()
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
-        val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
+        val publicKeyHash = CryptoUtils.hash(publicKeyBytes)
         val accountId = publicKeyHash.encode16()
 
         require(!accountRepository.existsById(accountId)) {

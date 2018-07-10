@@ -27,7 +27,7 @@ data class TransactionVO(
     fun toModel(): Transaction {
         // TODO after introducing Schnorr change it to recover from signature if possible
         val publicKeyBytes = publicKey.decode16()
-        val publicKeyHash = CryptoUtils.digest(publicKeyBytes)
+        val publicKeyHash = CryptoUtils.hash(publicKeyBytes)
         val origin = publicKeyHash.encode16()
 
         val transactionType = TransactionType.valueOf(transactionType.name)

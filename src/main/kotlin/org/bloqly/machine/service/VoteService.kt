@@ -79,7 +79,7 @@ class VoteService(
             EncodingUtils.longToBytes(timestamp)
         )
 
-        val dataHash = CryptoUtils.digest(dataToSign)
+        val dataHash = CryptoUtils.hash(dataToSign)
         val privateKey = validator.privateKey.decode16()
         val signature = CryptoUtils.sign(privateKey, dataHash)
 

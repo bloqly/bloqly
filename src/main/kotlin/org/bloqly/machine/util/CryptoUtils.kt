@@ -69,7 +69,7 @@ object CryptoUtils {
         return getCurve().g.multiply(BigInteger(privateKey)).getEncoded(true)
     }
 
-    fun digest(inputs: Array<ByteArray>): ByteArray {
+    fun hash(inputs: Array<ByteArray>): ByteArray {
 
         ByteArrayOutputStream().use { bos ->
 
@@ -82,14 +82,14 @@ object CryptoUtils {
         }
     }
 
-    fun digest(input: ByteArray): ByteArray {
+    fun hash(input: ByteArray): ByteArray {
 
         return MessageDigest.getInstance(SHA_256).digest(input)
     }
 
-    fun digest(input: String): ByteArray {
+    fun hash(input: String): ByteArray {
 
-        return digest(input.toByteArray())
+        return hash(input.toByteArray())
     }
 
     fun digestTransactions(transactions: List<Transaction>): ByteArray {
@@ -100,7 +100,7 @@ object CryptoUtils {
             .sortedBy { it.id }
             .forEach { bos.write(it.signature) }
 
-        return digest(bos.toByteArray())
+        return hash(bos.toByteArray())
     }
 
     fun digestVotes(votes: List<Vote>): ByteArray {
@@ -111,7 +111,7 @@ object CryptoUtils {
             .sortedBy { it.id.validatorId }
             .forEach { bos.write(it.signature) }
 
-        return digest(bos.toByteArray())
+        return hash(bos.toByteArray())
     }
 
     fun sign(privateKey: ByteArray, input: ByteArray): ByteArray {
@@ -132,30 +132,30 @@ object CryptoUtils {
         return bos.toByteArray()
     }
 
-    fun verifyTransaction(transaction: Transaction): Boolean {
+    fun verifyTransaction(tx: Transaction): Boolean {
 
         val dataToVerify = Bytes.concat(
-            transaction.spaceId.toByteArray(),
-            transaction.origin.toByteArray(),
-            transaction.destination.toByteArray(),
-            transaction.value,
-            transaction.referencedBlockId.toByteArray(),
-            transaction.transactionType.name.toByteArray(),
-            EncodingUtils.longToBytes(transaction.timestamp)
+            tx.spaceId.toByteArray(),
+            tx.origin.toByteArray(),
+            tx.destination.toByteArray(),
+            tx.value,
+            tx.referencedBlockId.toByteArray(),
+            tx.transactionType.name.toByteArray(),
+            EncodingUtils.longToBytes(tx.timestamp)
         )
 
-        val txHash = digest(transaction.signature)
+        val txHash = hash(tx.signature)
 
         val transactionId = txHash.encode16()
 
-        if (transactionId != transaction.id) {
+        if (transactionId != tx.id) {
             return false
         }
 
         return verify(
-            message = digest(dataToVerify),
-            signature = transaction.signature,
-            publicKey = transaction.publicKey.decode16()
+            message = hash(dataToVerify),
+            signature = tx.signature,
+            publicKey = tx.publicKey.decode16()
         )
     }
 
@@ -170,7 +170,7 @@ object CryptoUtils {
             EncodingUtils.longToBytes(vote.timestamp)
         )
 
-        val dataHash = digest(dataToVerify)
+        val dataHash = hash(dataToVerify)
 
         val publicKey = vote.publicKey.decode16()
 

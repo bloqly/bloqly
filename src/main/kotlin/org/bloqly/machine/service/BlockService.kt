@@ -58,7 +58,7 @@ class BlockService(
             .filter { it.hasKey() }
             .map { proposer ->
 
-                val dataToSign = CryptoUtils.digest(
+                val dataToSign = CryptoUtils.hash(
                     arrayOf(
                         spaceId.toByteArray(),
                         EncodingUtils.longToBytes(height),
@@ -75,7 +75,7 @@ class BlockService(
 
                 val privateKey = proposer.privateKey.decode16()
                 val signature = CryptoUtils.sign(privateKey, dataToSign)
-                val blockHash = CryptoUtils.digest(signature)
+                val blockHash = CryptoUtils.hash(signature)
                 val blockId = blockHash.encode16()
 
                 Block(
@@ -162,7 +162,7 @@ class BlockService(
 
         val contractBody = transaction.toModel().value
 
-        val contractBodyHash = CryptoUtils.digest(contractBody).encode16()
+        val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
 
         require(block.parentId == contractBodyHash) {
             "Genesis block parentId be set to the genesis parameters hash, found ${block.parentId} instead."

@@ -51,10 +51,10 @@ class TransactionService(
 
         val signature = CryptoUtils.sign(
             privateKey,
-            CryptoUtils.digest(dataToSign)
+            CryptoUtils.hash(dataToSign)
         )
 
-        val txHash = CryptoUtils.digest(signature)
+        val txHash = CryptoUtils.hash(signature)
         val transactionId = txHash.encode16()
 
         return Transaction(

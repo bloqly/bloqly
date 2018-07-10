@@ -2,13 +2,13 @@ package org.bloqly.machine.component
 
 import org.apache.commons.lang3.StringUtils
 import org.bloqly.machine.model.Contract
-import org.bloqly.machine.model.InvocationResultType
+import org.bloqly.machine.model.InvocationResult
+import org.bloqly.machine.model.InvocationResultType.SUCCESS
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.ContractRepository
-import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
@@ -21,8 +21,7 @@ import javax.transaction.Transactional
 class TransactionProcessor(
     private val contractRepository: ContractRepository,
     private val accountRepository: AccountRepository,
-    private val contractService: ContractService,
-    private val transactionRepository: TransactionRepository
+    private val contractService: ContractService
 ) {
 
     fun processCreateContract(
@@ -47,16 +46,11 @@ class TransactionProcessor(
         return processCreateContract(tx.spaceId, tx.self, String(tx.value), tx.origin)
     }
 
-    fun processCall(tx: Transaction) {
-
-        val invocationResult = contractService.invokeContract(tx.key, tx.self, tx.origin, tx.destination, tx.value)
-
-        if (invocationResult.invocationResultType == InvocationResultType.SUCCESS) {
-            //transactionRepository.updateOutput(tx.id, invocationResult.result)
-        }
+    fun processCall(tx: Transaction): InvocationResult {
+        return contractService.invokeContract(tx.key, tx.self, tx.origin, tx.destination, tx.value)
     }
 
-    fun processTransaction(tx: Transaction) {
+    fun processTransaction(tx: Transaction): InvocationResult {
 
         accountRepository.insertAccountIdIfNotExists(tx.origin)
         accountRepository.insertAccountIdIfNotExists(tx.destination)
@@ -66,22 +60,25 @@ class TransactionProcessor(
 
         val publicKey = tx.publicKey.decode16()
 
-        val address = CryptoUtils.digest(publicKey).encode16()
+        val address = CryptoUtils.hash(publicKey).encode16()
 
         if (origin.publicKey == null && address == origin.id) {
             accountRepository.save(origin.copy(publicKey = tx.publicKey))
         }
 
-        when (tx.transactionType) {
+        return when (tx.transactionType) {
 
-            CREATE ->
+            CREATE -> {
                 processCreateContract(tx)
+                InvocationResult(SUCCESS)
+            }
 
             CALL ->
                 processCall(tx)
 
             else -> {
                 // do nothing
+                InvocationResult(SUCCESS)
             }
         }
     }

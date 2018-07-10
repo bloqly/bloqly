@@ -18,7 +18,7 @@ object EncodingUtils {
     fun intToBytes(value: Int): ByteArray = ByteBuffer.allocate(LONG_BYTES).putInt(value).array()
 
     fun hashAndEncode16(input: ByteArray): String {
-        val hash = CryptoUtils.digest(input)
+        val hash = CryptoUtils.hash(input)
         return hash.encode16()
     }
 }

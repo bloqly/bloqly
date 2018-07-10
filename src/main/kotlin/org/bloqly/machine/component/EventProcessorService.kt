@@ -81,7 +81,7 @@ class EventProcessorService(
 
         val height = 0L
         val validatorTxHash = ByteArray(0)
-        val contractBodyHash = CryptoUtils.digest(contractBody).encode16()
+        val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
 
         val firstBlock = blockService.newBlock(
             spaceId = spaceId,
