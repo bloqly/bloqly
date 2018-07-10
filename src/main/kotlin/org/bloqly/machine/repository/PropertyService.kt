@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.GenesisParameters
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.PropertyResult
 import org.bloqly.machine.util.ParameterUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -24,6 +25,11 @@ class PropertyService(
 
             propertyRepository.save(property)
         }
+    }
+
+    fun updateProperties(spaceId: String, self: String, propertyResults: List<PropertyResult>) {
+        val properties = propertyResults.map { it.toProperty(spaceId, self) }
+        updateProperties(properties)
     }
 
     fun updateProperties(parametersContainer: GenesisParameters) {

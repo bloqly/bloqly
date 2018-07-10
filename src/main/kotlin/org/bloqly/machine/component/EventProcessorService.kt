@@ -3,13 +3,17 @@ package org.bloqly.machine.component
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.Contract
+import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -53,7 +57,9 @@ class EventProcessorService(
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
     private val transactionProcessor: TransactionProcessor,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val propertyService: PropertyService,
+    private val contractRepository: ContractRepository
 ) {
 
     fun createBlockchain(spaceId: String, baseDir: String) {
@@ -74,6 +80,8 @@ class EventProcessorService(
         val initProperties = contractService.invokeFunction("init", contractBody)
 
         val rootId = initProperties.find { it.key == "root" }!!.value.toString()
+
+        propertyService.updateProperties(spaceId, DEFAULT_SELF, initProperties)
 
         spaceRepository.save(Space(id = spaceId, creatorId = rootId))
 
@@ -108,7 +116,20 @@ class EventProcessorService(
             timestamp = timestamp
         )
 
-        transactionProcessor.processTransaction(transaction)
+        val propertyContext = PropertyContext(
+            propertyRepository = propertyRepository
+        )
+
+        contractRepository.save(
+            Contract(
+                id = transaction.self,
+                space = transaction.spaceId,
+                owner = transaction.origin,
+                body = contractBody
+            )
+        )
+
+        transactionProcessor.processTransaction(transaction, propertyContext)
         transactionRepository.save(transaction)
 
         firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))

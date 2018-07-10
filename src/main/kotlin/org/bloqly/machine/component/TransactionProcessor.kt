@@ -1,14 +1,13 @@
 package org.bloqly.machine.component
 
-import org.apache.commons.lang3.StringUtils
-import org.bloqly.machine.model.Contract
+import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.InvocationResultType.SUCCESS
+import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
-import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
@@ -19,38 +18,47 @@ import javax.transaction.Transactional
 @Component
 @Transactional
 class TransactionProcessor(
-    private val contractRepository: ContractRepository,
     private val accountRepository: AccountRepository,
     private val contractService: ContractService
 ) {
 
-    fun processCreateContract(
-        spaceId: String,
-        self: String,
-        body: String,
-        owner: String
-    ) {
+    private fun processCreateContract(
+        tx: Transaction,
+        propertyContext: PropertyContext
+    ): InvocationResult {
 
-        require(StringUtils.isNotEmpty(body)) {
-            "Contract body can not be empty"
-        }
+        val invocationContext = InvocationContext(
+            space = tx.spaceId,
+            owner = tx.origin,
+            self = tx.self,
+            key = tx.key!!,
+            caller = tx.origin,
+            callee = tx.destination
+        )
 
-        val contract = Contract(self, spaceId, owner, body)
-
-        contractRepository.save(contract)
-
-        contractService.invokeContract("init", self, owner, self, byteArrayOf())
+        return contractService.invokeContract(propertyContext, invocationContext, byteArrayOf())
     }
 
-    private fun processCreateContract(tx: Transaction) {
-        return processCreateContract(tx.spaceId, tx.self, String(tx.value), tx.origin)
+    private fun processCall(
+        tx: Transaction,
+        propertyContext: PropertyContext
+    ): InvocationResult {
+
+        val invocationContext = InvocationContext(
+            space = tx.spaceId,
+            self = tx.self,
+            key = tx.key!!,
+            caller = tx.origin,
+            callee = tx.destination
+        )
+
+        return contractService.invokeContract(propertyContext, invocationContext, tx.value)
     }
 
-    fun processCall(tx: Transaction): InvocationResult {
-        return contractService.invokeContract(tx.key, tx.self, tx.origin, tx.destination, tx.value)
-    }
-
-    fun processTransaction(tx: Transaction): InvocationResult {
+    fun processTransaction(
+        tx: Transaction,
+        propertyContext: PropertyContext
+    ): InvocationResult {
 
         accountRepository.insertAccountIdIfNotExists(tx.origin)
         accountRepository.insertAccountIdIfNotExists(tx.destination)
@@ -69,12 +77,13 @@ class TransactionProcessor(
         return when (tx.transactionType) {
 
             CREATE -> {
-                processCreateContract(tx)
+                processCreateContract(tx, propertyContext)
                 InvocationResult(SUCCESS)
             }
 
-            CALL ->
-                processCall(tx)
+            CALL -> {
+                processCall(tx, propertyContext)
+            }
 
             else -> {
                 // do nothing

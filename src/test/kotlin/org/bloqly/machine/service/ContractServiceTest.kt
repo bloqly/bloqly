@@ -66,11 +66,6 @@ class ContractServiceTest {
         testService.cleanup()
     }
 
-    @Test(expected = IllegalArgumentException::class)
-    fun testCreateContractWithEmptyBodyFails() {
-        transactionProcessor.processCreateContract(DEFAULT_SPACE, DEFAULT_SELF, "", caller)
-    }
-
     @Test
     fun testRunContractArgument() {
 
@@ -82,6 +77,7 @@ class ContractServiceTest {
             FileUtils.getResourceAsString("/scripts/test.js"),
             caller
         )
+
         propertyService.updateProperties(genesis)
 
         val propertiesBefore = propertyRepository.findAll()

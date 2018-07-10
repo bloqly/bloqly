@@ -6,6 +6,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Property
+import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
@@ -128,7 +129,9 @@ class EventProcessorServiceTest {
             value = writeLong("1")
         )
 
-        transactionProcessor.processTransaction(transaction)
+        val propertyContext = PropertyContext(propertyRepository)
+
+        transactionProcessor.processTransaction(transaction, propertyContext)
 
         val rootBalanceAfter = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceAfter = propertyRepository.findById(userBalanceId).orElseThrow()

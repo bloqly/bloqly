@@ -5,11 +5,13 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -36,7 +38,8 @@ class BlockService(
     private val transactionRepository: TransactionRepository,
     private val spaceRepository: SpaceRepository,
     private val transactionProcessor: TransactionProcessor,
-    private val voteRepository: VoteRepository
+    private val voteRepository: VoteRepository,
+    private val propertyRepository: PropertyRepository
 ) {
 
     fun newBlock(
@@ -184,7 +187,13 @@ class BlockService(
 
         validateGenesisTransaction(transactions.first(), block, now)
 
-        transactions.forEach { transactionProcessor.processTransaction(it) }
+        val propertyContext = PropertyContext(
+            propertyRepository = propertyRepository
+        )
+
+        transactions.forEach {
+            transactionProcessor.processTransaction(it, propertyContext)
+        }
 
         transactionRepository.saveAll(transactions)
     }

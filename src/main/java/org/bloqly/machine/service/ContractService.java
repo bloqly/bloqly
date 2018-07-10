@@ -4,8 +4,6 @@ import com.google.common.collect.Lists;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.*;
 import org.bloqly.machine.repository.ContractRepository;
-import org.bloqly.machine.repository.PropertyRepository;
-import org.bloqly.machine.repository.PropertyService;
 import org.bloqly.machine.util.ObjectUtils;
 import org.bloqly.machine.util.ParameterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,43 +25,36 @@ public class ContractService {
     @Autowired
     private ContractRepository contractRepository;
 
-    @Autowired
-    private PropertyRepository propertyRepository;
-
-    @Autowired
-    private PropertyService propertyService;
-
-    private GetPropertyFunction getPropertyFunction(InvocationContext context) {
+    private GetPropertyFunction getPropertyFunction(PropertyContext propertyContext, InvocationContext invocationContext) {
 
         return (target, key, defaultValue) -> {
 
-            var propertyKey = new PropertyId(
-                    context.getContract().getSpace(),
-                    context.getContract().getId(),
+            var propertyValue = propertyContext.getPropertyValue(
+                    invocationContext.getSpace(),
+                    invocationContext.getSelf(),
                     target,
                     key
             );
 
-            var propertyOpt = propertyRepository.findById(propertyKey);
-
-            if (propertyOpt.isPresent()) {
-                Property property = propertyOpt.get();
-
-                return ParameterUtils.INSTANCE.readValue(property.getValue());
+            if (propertyValue != null) {
+                return ParameterUtils.INSTANCE.readValue(propertyValue);
             } else {
                 return defaultValue;
             }
         };
     }
 
-    private Invocable getEngine(InvocationContext context) throws Exception {
+    private Invocable getEngine(PropertyContext propertyContext, InvocationContext invocationContext) throws Exception {
+
+        var contract = contractRepository.findById(invocationContext.getSelf()).orElseThrow();
+
         System.setProperty("nashorn.args", "--language=es6");
 
         var engine = new ScriptEngineManager().getEngineByName("nashorn");
 
-        engine.put("getProperty", getPropertyFunction(context));
+        engine.put("getProperty", getPropertyFunction(propertyContext, invocationContext));
 
-        engine.eval(context.getContract().getBody());
+        engine.eval(contract.getBody());
 
         return (Invocable) engine;
     }
@@ -78,6 +69,67 @@ public class ContractService {
         return (Invocable) engine;
     }
 
+    private PropertyResult getEntry(Map<String, Object> item) {
+        var command = item.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals("target"))
+                .findFirst()
+                .orElseThrow(IllegalStateException::new);
+
+        String target = item.get("target").toString();
+
+        return new PropertyResult(target, command.getKey(), command.getValue());
+    }
+
+    private Property prepareResults(Map<String, Object> item, InvocationContext invocationContext) {
+
+        var entry = getEntry(item);
+
+        // TODO: check isolation
+        return new Property(
+                new PropertyId(
+                        requireNonNull(invocationContext.getSpace()),
+                        requireNonNull(invocationContext.getSelf()),
+                        requireNonNull(entry.getTarget()),
+                        requireNonNull(entry.getKey())
+                ),
+                ParameterUtils.INSTANCE.writeValue(entry.getValue())
+        );
+    }
+
+    @Transactional
+    public InvocationResult invokeContract(PropertyContext propertyContext, InvocationContext invocationContext, byte[] arg) {
+
+        var properties = invokeFunction(propertyContext, invocationContext, arg);
+
+        var resultData = ObjectUtils.INSTANCE.writeValueAsString(properties);
+
+        return new InvocationResult(InvocationResultType.SUCCESS, resultData);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Property> invokeFunction(PropertyContext propertyContext, InvocationContext invocationContext, byte[] arg) {
+
+        try {
+
+            var params = ParameterUtils.INSTANCE.readParams(arg);
+
+            List<Object> args = Lists.newArrayList(
+                    invocationContext, invocationContext.getCaller(), invocationContext.getCallee());
+
+            args.addAll(Arrays.asList(params));
+
+            var engine = getEngine(propertyContext, invocationContext);
+
+            var results = (Map<String, Object>) engine.invokeFunction(invocationContext.getKey(), args.toArray());
+
+            return results.values().stream()
+                    .map(item -> prepareResults((Map<String, Object>) item, invocationContext))
+                    .collect(toList());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     public List<PropertyResult> invokeFunction(String name, String body) {
@@ -94,75 +146,6 @@ public class ContractService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<Property> invokeFunction(InvocationContext context, byte[] arg) {
-
-        try {
-
-            var params = ParameterUtils.INSTANCE.readParams(arg);
-
-            List<Object> args = Lists.newArrayList(context, context.getCaller(), context.getCallee());
-
-            args.addAll(Arrays.asList(params));
-
-            var engine = getEngine(context);
-
-            var results = (Map<String, Object>) engine.invokeFunction(context.getFunctionName(), args.toArray());
-
-            return results.values().stream()
-                    .map(item -> prepareResults((Map<String, Object>) item, context))
-                    .collect(toList());
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private PropertyResult getEntry(Map<String, Object> item) {
-        var command = item.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals("target"))
-                .findFirst()
-                .orElseThrow(IllegalStateException::new);
-
-        String target = item.get("target").toString();
-
-        return new PropertyResult(target, command.getKey(), command.getValue());
-    }
-
-    private Property prepareResults(Map<String, Object> item, InvocationContext context) {
-
-        var entry = getEntry(item);
-
-        var contract = requireNonNull(context.getContract());
-        // TODO: check isolation
-        return new Property(
-                new PropertyId(
-                        requireNonNull(contract.getSpace()),
-                        requireNonNull(contract.getId()),
-                        requireNonNull(entry.getTarget()),
-                        requireNonNull(entry.getKey())
-                ),
-                ParameterUtils.INSTANCE.writeValue(entry.getValue())
-        );
-    }
-
-    @Transactional
-    public InvocationResult invokeContract(String functionName, String self, String orig, String dest, byte[] arg) {
-
-        return contractRepository.findById(self).map(contract -> {
-
-            var invocationContext = new InvocationContext(functionName, orig, dest, contract);
-
-            var properties = invokeFunction(invocationContext, arg);
-
-            propertyService.updateProperties(properties);
-
-            var resultData = ObjectUtils.INSTANCE.writeValueAsString(properties);
-
-            return new InvocationResult(InvocationResultType.SUCCESS, resultData);
-        }).orElseThrow();
     }
 
 }

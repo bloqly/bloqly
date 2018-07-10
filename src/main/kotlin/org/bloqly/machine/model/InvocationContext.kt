@@ -1,8 +1,10 @@
 package org.bloqly.machine.model
 
 data class InvocationContext(
-    val functionName: String,
+    val space: String,
+    val owner: String? = null,
+    val self: String,
+    val key: String,
     val caller: String,
-    val callee: String,
-    val contract: Contract
+    val callee: String
 )
