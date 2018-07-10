@@ -2,6 +2,7 @@ package org.bloqly.machine.model
 
 import org.bloqly.machine.util.ParameterUtils
 import java.util.Arrays
+import javax.persistence.Column
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 import javax.persistence.Lob
@@ -13,6 +14,7 @@ data class Property(
     val id: PropertyId,
 
     @Lob
+    @Column(nullable = false)
     val value: ByteArray
 ) {
 

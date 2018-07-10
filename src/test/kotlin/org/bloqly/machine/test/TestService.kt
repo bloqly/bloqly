@@ -82,7 +82,7 @@ class TestService(
         val root = accountRepository.findById(getRoot().id).orElseThrow()
         val user = accountRepository.findById(getUser().id).orElseThrow()
 
-        return transactionService.newTransaction(
+        return transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = root.id,
             destinationId = user.id,

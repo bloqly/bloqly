@@ -22,7 +22,7 @@ class TransactionService(
     private val blockRepository: BlockRepository
 ) {
 
-    fun newTransaction(
+    fun createTransaction(
         space: String,
         originId: String,
         destinationId: String,
@@ -57,20 +57,22 @@ class TransactionService(
         val txHash = CryptoUtils.hash(signature)
         val transactionId = txHash.encode16()
 
-        return Transaction(
-            id = transactionId,
-            spaceId = space,
-            origin = origin.id,
-            destination = destinationId,
-            self = self,
-            key = key,
-            value = value,
-            transactionType = transactionType,
-            referencedBlockId = referencedBlockId,
-            containingBlockId = containingBlockId,
-            timestamp = timestamp,
-            signature = signature,
-            publicKey = origin.publicKey!!
+        return transactionRepository.save(
+            Transaction(
+                id = transactionId,
+                spaceId = space,
+                origin = origin.id,
+                destination = destinationId,
+                self = self,
+                key = key,
+                value = value,
+                transactionType = transactionType,
+                referencedBlockId = referencedBlockId,
+                containingBlockId = containingBlockId,
+                timestamp = timestamp,
+                signature = signature,
+                publicKey = origin.publicKey!!
+            )
         )
     }
 

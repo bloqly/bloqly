@@ -33,7 +33,7 @@ class TransactionServiceTest {
 
         val root = accountService.createAccount()
 
-        transaction = transactionService.newTransaction(
+        transaction = transactionService.createTransaction(
 
             space = DEFAULT_SPACE,
 

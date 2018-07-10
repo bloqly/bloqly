@@ -30,13 +30,13 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class ContractServiceTest {
+class ContractExecutorServiceTest {
 
     @Autowired
     private lateinit var propertyService: PropertyService
 
     @Autowired
-    private lateinit var contractService: ContractService
+    private lateinit var contractExecutorService: ContractExecutorService
 
     @Autowired
     private lateinit var transactionProcessor: TransactionProcessor
@@ -97,7 +97,7 @@ class ContractServiceTest {
 
         val params = arrayOf("test", 22, true, BInteger(123))
 
-        contractService.invokeContract(
+        contractExecutorService.invokeContract(
             DEFAULT_FUNCTION_NAME,
             DEFAULT_SELF,
             caller,

@@ -1,14 +1,27 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.PropertyService
+import org.bloqly.machine.service.ContractService
 
-data class PropertyContext(val propertyRepository: PropertyRepository) {
-    private val properties = mutableMapOf<PropertyId, ByteArray>()
+data class PropertyContext(
+    val propertyService: PropertyService,
+    val contractService: ContractService
+) {
+    private val properties = mutableMapOf<PropertyId, Property>()
+    private val contracts = mutableMapOf<String, Contract>()
 
     private fun syncPropertyValue(propertyId: PropertyId) {
         if (!properties.containsKey(propertyId)) {
-            propertyRepository.findById(propertyId).ifPresent { property ->
-                properties[propertyId] = property.value
+            propertyService.findById(propertyId)?.let { property ->
+                properties[propertyId] = property
+            }
+        }
+    }
+
+    private fun syncContract(self: String) {
+        if (!contracts.containsKey(self)) {
+            contractService.findById(self)?.let { contract ->
+                contracts[self] = contract
             }
         }
     }
@@ -27,10 +40,30 @@ data class PropertyContext(val propertyRepository: PropertyRepository) {
 
         syncPropertyValue(propertyId)
 
-        return properties[propertyId]
+        return properties[propertyId]?.value
+    }
+
+    fun getContract(self: String): Contract? {
+
+        syncContract(self)
+
+        return contracts[self]
+    }
+
+    fun saveContract(contract: Contract) {
+        contracts[contract.id] = contract
     }
 
     fun updatePropertyValue(spaceId: String, self: String, target: String, key: String, value: ByteArray) {
-        properties[getPropertyId(spaceId, self, target, key)] = value
+        val propertyId = getPropertyId(spaceId, self, target, key)
+        properties[propertyId] = Property(
+            id = propertyId,
+            value = value
+        )
+    }
+
+    fun commit() {
+        propertyService.updateProperties(properties.values.toList())
+        contractService.saveAll(contracts.values.toList())
     }
 }

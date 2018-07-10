@@ -3,7 +3,6 @@ package org.bloqly.machine.component
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
@@ -11,7 +10,6 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
@@ -20,6 +18,7 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockCandidateService
 import org.bloqly.machine.service.BlockService
+import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
@@ -46,7 +45,7 @@ import javax.transaction.Transactional
 @Component
 @Transactional
 class EventProcessorService(
-    private val contractService: ContractService,
+    private val contractExecutorService: ContractExecutorService,
     private val blockRepository: BlockRepository,
     private val blockService: BlockService,
     private val accountService: AccountService,
@@ -59,7 +58,7 @@ class EventProcessorService(
     private val transactionProcessor: TransactionProcessor,
     private val propertyRepository: PropertyRepository,
     private val propertyService: PropertyService,
-    private val contractRepository: ContractRepository
+    private val contractService: ContractService
 ) {
 
     fun createBlockchain(spaceId: String, baseDir: String) {
@@ -77,7 +76,7 @@ class EventProcessorService(
                 header + source
             }.reduce { str, acc -> str + "\n" + acc }
 
-        val initProperties = contractService.invokeFunction("init", contractBody)
+        val initProperties = contractExecutorService.invokeFunction("init", contractBody)
 
         val rootId = initProperties.find { it.key == "root" }!!.value.toString()
 
@@ -103,7 +102,7 @@ class EventProcessorService(
             validatorTxHash = validatorTxHash
         )
 
-        val transaction = transactionService.newTransaction(
+        val transaction = transactionService.createTransaction(
             space = spaceId,
             originId = rootId,
             destinationId = DEFAULT_SELF,
@@ -116,21 +115,9 @@ class EventProcessorService(
             timestamp = timestamp
         )
 
-        val propertyContext = PropertyContext(
-            propertyRepository = propertyRepository
-        )
-
-        contractRepository.save(
-            Contract(
-                id = transaction.self,
-                space = transaction.spaceId,
-                owner = transaction.origin,
-                body = contractBody
-            )
-        )
-
+        val propertyContext = PropertyContext(propertyService, contractService)
         transactionProcessor.processTransaction(transaction, propertyContext)
-        transactionRepository.save(transaction)
+        propertyContext.commit()
 
         firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
         blockRepository.save(firstBlock)

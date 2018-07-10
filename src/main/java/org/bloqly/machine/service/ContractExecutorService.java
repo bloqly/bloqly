@@ -20,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 @Service
-public class ContractService {
+public class ContractExecutorService {
 
     @Autowired
     private ContractRepository contractRepository;

@@ -8,7 +8,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
-import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
@@ -19,7 +19,7 @@ import javax.transaction.Transactional
 @Transactional
 class TransactionProcessor(
     private val accountRepository: AccountRepository,
-    private val contractService: ContractService
+    private val contractExecutorService: ContractExecutorService
 ) {
 
     private fun processCreateContract(
@@ -36,7 +36,7 @@ class TransactionProcessor(
             callee = tx.destination
         )
 
-        return contractService.invokeContract(propertyContext, invocationContext, byteArrayOf())
+        return contractExecutorService.invokeContract(propertyContext, invocationContext, byteArrayOf())
     }
 
     private fun processCall(
@@ -52,7 +52,7 @@ class TransactionProcessor(
             callee = tx.destination
         )
 
-        return contractService.invokeContract(propertyContext, invocationContext, tx.value)
+        return contractExecutorService.invokeContract(propertyContext, invocationContext, tx.value)
     }
 
     fun processTransaction(

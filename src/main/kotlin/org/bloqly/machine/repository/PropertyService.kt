@@ -52,4 +52,6 @@ class PropertyService(
             accountRepository.insertAccountIdIfNotExists(property.id.target)
         }
     }
+
+    fun findById(propertyId: PropertyId): Property? = propertyRepository.findById(propertyId).orElse(null)
 }
