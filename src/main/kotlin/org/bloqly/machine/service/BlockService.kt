@@ -194,6 +194,8 @@ class BlockService(
             transactionProcessor.processTransaction(it, propertyContext)
         }
 
+        propertyContext.commit()
+
         transactionRepository.saveAll(transactions)
     }
 

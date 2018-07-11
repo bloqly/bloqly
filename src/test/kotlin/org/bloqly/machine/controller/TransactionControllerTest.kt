@@ -8,7 +8,6 @@ import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.vo.TransactionList
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -63,9 +62,7 @@ class TransactionControllerTest {
         val headers = HttpHeaders()
         headers.contentType = MediaType.APPLICATION_JSON
 
-        val entity = HttpEntity<String>(transactionPayload, headers)
-
-        assertFalse(transactionRepository.existsById(transaction.id))
+        val entity = HttpEntity(transactionPayload, headers)
 
         restTemplate.postForObject(url, entity, Void.TYPE)
 

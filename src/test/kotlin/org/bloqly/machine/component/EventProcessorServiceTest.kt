@@ -141,6 +141,8 @@ class EventProcessorServiceTest {
 
         transactionProcessor.processTransaction(transaction, propertyContext)
 
+        propertyContext.commit()
+
         val rootBalanceAfter = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceAfter = propertyRepository.findById(userBalanceId).orElseThrow()
 

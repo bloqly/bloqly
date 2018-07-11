@@ -1,6 +1,7 @@
 package org.bloqly.machine.util
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 
@@ -25,7 +26,7 @@ object TestUtils {
 
                     id = "",
 
-                    spaceId = "",
+                    spaceId = DEFAULT_SPACE,
 
                     transactionType = TransactionType.CALL,
 
