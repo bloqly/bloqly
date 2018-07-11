@@ -56,6 +56,9 @@ class EventProcessorServiceTest {
     private lateinit var spaceRepository: SpaceRepository
 
     @Autowired
+    private lateinit var blockchainService: BlockchainService
+
+    @Autowired
     private lateinit var testService: TestService
 
     private lateinit var root: Account
@@ -97,7 +100,7 @@ class EventProcessorServiceTest {
     @Test
     fun testInitTwiceFails() {
         try {
-            eventProcessorService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
+            blockchainService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
             fail()
         } catch (e: Exception) {
             // pass
@@ -106,7 +109,7 @@ class EventProcessorServiceTest {
 
     @Test
     fun testInitTwiceWithDifferentSpaceOK() {
-        eventProcessorService.createBlockchain("space1", TEST_BLOCK_BASE_DIR)
+        blockchainService.createBlockchain("space1", TEST_BLOCK_BASE_DIR)
     }
 
     @Test

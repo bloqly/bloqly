@@ -1,34 +1,24 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.model.PropertyContext
-import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockCandidateService
 import org.bloqly.machine.service.BlockService
-import org.bloqly.machine.service.ContractExecutorService
-import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Component
-import java.io.File
 import java.time.Instant
 import javax.transaction.Transactional
 
@@ -38,14 +28,11 @@ import javax.transaction.Transactional
  * Q    - number of votes necessary to quorum
  * LIB  - last irreversible block
  * H    - current height
- * BCs  - list of block candidates of height H + 1. BC contains at least Q votes, directly referring to LIB
  * R    - voting round
- *
  */
 @Component
 @Transactional
 class EventProcessorService(
-    private val contractExecutorService: ContractExecutorService,
     private val blockRepository: BlockRepository,
     private val blockService: BlockService,
     private val accountService: AccountService,
@@ -55,73 +42,8 @@ class EventProcessorService(
     private val transactionRepository: TransactionRepository,
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
-    private val transactionProcessor: TransactionProcessor,
-    private val propertyRepository: PropertyRepository,
-    private val propertyService: PropertyService,
-    private val contractService: ContractService
+    private val propertyRepository: PropertyRepository
 ) {
-
-    fun createBlockchain(spaceId: String, baseDir: String) {
-
-        blockService.ensureSpaceEmpty(spaceId)
-
-        val contractBody = File(baseDir).list()
-            .filter {
-                it.endsWith(".js")
-            }
-            .map { fileName ->
-                val source = File("$baseDir/$fileName").readText()
-                val extension = fileName.substringAfterLast(".")
-                val header = FileUtils.getResourceAsString("/headers/header.$extension")
-                header + source
-            }.reduce { str, acc -> str + "\n" + acc }
-
-        val initProperties = contractExecutorService.invokeFunction("init", contractBody)
-
-        val rootId = initProperties.find { it.key == "root" }!!.value.toString()
-
-        propertyService.updateProperties(spaceId, DEFAULT_SELF, initProperties)
-
-        spaceRepository.save(Space(id = spaceId, creatorId = rootId))
-
-        val timestamp = Instant.now().toEpochMilli()
-
-        val height = 0L
-        val validatorTxHash = ByteArray(0)
-        val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
-
-        val firstBlock = blockService.newBlock(
-            spaceId = spaceId,
-            height = height,
-            weight = 0,
-            diff = 0,
-            timestamp = timestamp,
-            parentId = contractBodyHash,
-            producerId = rootId,
-            txHash = null,
-            validatorTxHash = validatorTxHash
-        )
-
-        val transaction = transactionService.createTransaction(
-            space = spaceId,
-            originId = rootId,
-            destinationId = DEFAULT_SELF,
-            self = DEFAULT_SELF,
-            key = null,
-            value = contractBody.toByteArray(),
-            transactionType = TransactionType.CREATE,
-            referencedBlockId = firstBlock.id,
-            containingBlockId = firstBlock.id,
-            timestamp = timestamp
-        )
-
-        val propertyContext = PropertyContext(propertyService, contractService)
-        transactionProcessor.processTransaction(transaction, propertyContext)
-        propertyContext.commit()
-
-        firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
-        blockRepository.save(firstBlock)
-    }
 
     /**
      * Collecting transactions

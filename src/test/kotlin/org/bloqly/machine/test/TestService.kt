@@ -3,6 +3,7 @@ package org.bloqly.machine.test
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
+import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.ResetService
 import org.bloqly.machine.model.Account
@@ -38,7 +39,8 @@ class TestService(
     private val transactionService: TransactionService,
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
-    private val resetService: ResetService
+    private val resetService: ResetService,
+    private val blockchainService: BlockchainService
 ) {
 
     private lateinit var accounts: List<Account>
@@ -72,7 +74,7 @@ class TestService(
             accountService.importAccount(account.privateKey!!)
         }
 
-        eventProcessorService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
+        blockchainService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
     }
 
     fun newTransaction(): Transaction {
