@@ -26,7 +26,8 @@ class Application {
         const val DEFAULT_SPACE = "main"
         const val DEFAULT_SELF = "self"
         const val QUORUM_KEY = "quorum"
-        const val DEFAULT_FUNCTION_NAME = "contract"
+        const val DEFAULT_KEY = "contract"
+        const val INIT_KEY = "init"
         const val MAX_DELTA_SIZE = 1000
         const val MAX_REFERENCED_BLOCK_DEPTH = 1440
         const val MAX_TRANSACTION_AGE = 2 * 3600 * 1000

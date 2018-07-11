@@ -32,7 +32,7 @@ class TransactionService(
         transactionType: TransactionType,
         referencedBlockId: String,
         containingBlockId: String? = null,
-        timestamp: Long
+        timestamp: Long = Instant.now().toEpochMilli()
     ): Transaction {
 
         val dataToSign = concat(

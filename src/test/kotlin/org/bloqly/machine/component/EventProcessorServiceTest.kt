@@ -10,7 +10,9 @@ import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
+import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils
@@ -34,6 +36,12 @@ class EventProcessorServiceTest {
 
     @Autowired
     private lateinit var propertyRepository: PropertyRepository
+
+    @Autowired
+    private lateinit var propertyService: PropertyService
+
+    @Autowired
+    private lateinit var contractService: ContractService
 
     @Autowired
     private lateinit var eventProcessorService: EventProcessorService
@@ -129,7 +137,7 @@ class EventProcessorServiceTest {
             value = writeLong("1")
         )
 
-        val propertyContext = PropertyContext(propertyRepository)
+        val propertyContext = PropertyContext(propertyService, contractService)
 
         transactionProcessor.processTransaction(transaction, propertyContext)
 

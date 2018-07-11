@@ -1,5 +1,8 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.Application.Companion.DEFAULT_KEY
+import org.bloqly.machine.Application.Companion.INIT_KEY
+import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.InvocationResultType.SUCCESS
@@ -31,9 +34,18 @@ class TransactionProcessor(
             space = tx.spaceId,
             owner = tx.origin,
             self = tx.self,
-            key = tx.key!!,
+            key = INIT_KEY,
             caller = tx.origin,
             callee = tx.destination
+        )
+
+        propertyContext.saveContract(
+            Contract(
+                id = tx.self,
+                space = tx.spaceId,
+                owner = tx.origin,
+                body = String(tx.value)
+            )
         )
 
         return contractExecutorService.invokeContract(propertyContext, invocationContext, byteArrayOf())
@@ -47,7 +59,7 @@ class TransactionProcessor(
         val invocationContext = InvocationContext(
             space = tx.spaceId,
             self = tx.self,
-            key = tx.key!!,
+            key = tx.key ?: DEFAULT_KEY,
             caller = tx.origin,
             callee = tx.destination
         )
@@ -74,11 +86,10 @@ class TransactionProcessor(
             accountRepository.save(origin.copy(publicKey = tx.publicKey))
         }
 
-        return when (tx.transactionType) {
+        val result = when (tx.transactionType) {
 
             CREATE -> {
                 processCreateContract(tx, propertyContext)
-                InvocationResult(SUCCESS)
             }
 
             CALL -> {
@@ -90,5 +101,9 @@ class TransactionProcessor(
                 InvocationResult(SUCCESS)
             }
         }
+
+        propertyContext.updatePropertyValues(result.output)
+
+        return result
     }
 }

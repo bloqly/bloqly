@@ -7,21 +7,25 @@ data class PropertyContext(
     val propertyService: PropertyService,
     val contractService: ContractService
 ) {
-    private val properties = mutableMapOf<PropertyId, Property>()
-    private val contracts = mutableMapOf<String, Contract>()
+    private val _properties = mutableMapOf<PropertyId, Property>()
+
+    val properties: List<Property>
+        get() = _properties.values.toList()
+
+    private val _contracts = mutableMapOf<String, Contract>()
 
     private fun syncPropertyValue(propertyId: PropertyId) {
-        if (!properties.containsKey(propertyId)) {
+        if (!_properties.containsKey(propertyId)) {
             propertyService.findById(propertyId)?.let { property ->
-                properties[propertyId] = property
+                _properties[propertyId] = property
             }
         }
     }
 
     private fun syncContract(self: String) {
-        if (!contracts.containsKey(self)) {
+        if (!_contracts.containsKey(self)) {
             contractService.findById(self)?.let { contract ->
-                contracts[self] = contract
+                _contracts[self] = contract
             }
         }
     }
@@ -40,30 +44,29 @@ data class PropertyContext(
 
         syncPropertyValue(propertyId)
 
-        return properties[propertyId]?.value
+        return _properties[propertyId]?.value
     }
 
     fun getContract(self: String): Contract? {
 
         syncContract(self)
 
-        return contracts[self]
+        return _contracts[self]
     }
 
     fun saveContract(contract: Contract) {
-        contracts[contract.id] = contract
+        _contracts[contract.id] = contract
     }
 
-    fun updatePropertyValue(spaceId: String, self: String, target: String, key: String, value: ByteArray) {
-        val propertyId = getPropertyId(spaceId, self, target, key)
-        properties[propertyId] = Property(
-            id = propertyId,
-            value = value
-        )
+    private fun updatePropertyValue(property: Property) {
+        _properties[property.id] = property
     }
 
     fun commit() {
-        propertyService.updateProperties(properties.values.toList())
-        contractService.saveAll(contracts.values.toList())
+        propertyService.updateProperties(_properties.values.toList())
+        contractService.saveAll(_contracts.values.toList())
     }
+
+    fun updatePropertyValues(properties: List<Property>) =
+        properties.forEach { updatePropertyValue(it) }
 }
