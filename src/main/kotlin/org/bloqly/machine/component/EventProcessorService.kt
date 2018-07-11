@@ -1,7 +1,5 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.model.VoteType
@@ -9,10 +7,8 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
-import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockCandidateService
-import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
@@ -34,15 +30,14 @@ import javax.transaction.Transactional
 @Transactional
 class EventProcessorService(
     private val blockRepository: BlockRepository,
-    private val blockService: BlockService,
     private val accountService: AccountService,
     private val spaceRepository: SpaceRepository,
     private val voteService: VoteService,
-    private val voteRepository: VoteRepository,
     private val transactionRepository: TransactionRepository,
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val blockProcessor: BlockProcessor
 ) {
 
     /**
@@ -112,51 +107,13 @@ class EventProcessorService(
      */
     fun onGetProposals(): List<BlockData> {
 
+        val round = TimeUtils.getCurrentRound()
+
         return spaceRepository.findAll()
             .mapNotNull { space ->
-                val round = TimeUtils.getCurrentRound()
-                val lastBlock = blockRepository.getLastBlock(space.id)
-                val newHeight = lastBlock.height + 1
-                val producer = accountService.getActiveProducerBySpace(space, round)
-
-                blockCandidateService.getBlockCandidate(space, newHeight, producer)
-                    ?: createBlockCandidate(lastBlock, producer)
-            }
-    }
-
-    private fun createBlockCandidate(lastBlock: Block, producer: Account): BlockData? {
-
-        val newHeight = lastBlock.height + 1
-        val spaceId = lastBlock.spaceId
-        val votes = getVotesForBlock(lastBlock.id)
-        val prevVotes = getVotesForBlock(lastBlock.parentId)
-
-        val diff = votes.minus(prevVotes).size
-
-        return producer
-            .takeIf { it.hasKey() && isQuorum(spaceId, votes) }
-            ?.let {
-                val transactions = getPendingTransactions(spaceId)
-
-                val weight = lastBlock.weight + votes.size
-
-                val newBlock = blockService.newBlock(
-                    spaceId = spaceId,
-                    height = newHeight,
-                    weight = weight,
-                    diff = diff,
-                    timestamp = Instant.now().toEpochMilli(),
-                    parentId = lastBlock.id,
-                    producerId = producer.id,
-                    txHash = CryptoUtils.digestTransactions(transactions),
-                    validatorTxHash = CryptoUtils.digestVotes(votes)
-                )
-
-                val blockData = BlockData(newBlock, transactions, votes)
-
-                blockCandidateService.save(blockData)
-
-                blockData
+                accountService.getActiveProducerBySpace(space, round)?.let { producer ->
+                    blockProcessor.createNextBlock(space.id, producer, round)
+                }
             }
     }
 
@@ -164,14 +121,6 @@ class EventProcessorService(
         val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
 
         return votes.count { it.id.voteType == VoteType.VOTE } >= quorum
-    }
-
-    private fun getPendingTransactions(spaceId: String): List<Transaction> {
-        return transactionService.getPendingTransactionsBySpace(spaceId)
-    }
-
-    private fun getVotesForBlock(blockId: String): List<Vote> {
-        return voteRepository.findByBlockId(blockId)
     }
 
     fun onProposals(proposals: List<BlockData>) {
@@ -182,7 +131,7 @@ class EventProcessorService(
             .filter { it.block.round == TimeUtils.getCurrentRound() }
             .filter {
                 val space = spaceRepository.findById(it.block.spaceId).orElseThrow()
-                val activeValidator = accountService.getActiveProducerBySpace(space, round)
+                val activeValidator = accountService.getProducerBySpace(space, round)
 
                 activeValidator.id == it.block.proposerId
             }

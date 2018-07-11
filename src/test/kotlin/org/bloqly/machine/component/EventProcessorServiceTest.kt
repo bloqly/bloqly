@@ -154,8 +154,9 @@ class EventProcessorServiceTest {
     }
 
     @Test
-    fun testReturnSameProposals() {
-        TimeUtils.setTestTime(0)
+    fun testReturnSameProposalsInSingleRound() {
+        TimeUtils.setTestTime(Application.ROUND + 1L)
+
         val votes = testService.getVotes()
 
         assertEquals(4, votes.size)
@@ -165,7 +166,10 @@ class EventProcessorServiceTest {
         val proposals2 = eventProcessorService.onGetProposals()
 
         assertEquals(1, proposals1.size)
+        assertEquals(1, proposals2.size)
 
-        assertEquals(proposals1, proposals2)
+        assertEquals(proposals1.first().block, proposals2.first().block)
+
+        // TODO votes and transactions
     }
 }

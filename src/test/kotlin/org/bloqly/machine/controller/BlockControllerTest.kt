@@ -20,6 +20,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -79,7 +80,7 @@ class BlockControllerTest {
 
         url = APIUtils.getDataPath(node, "blocks")
 
-        val validator = accountService.getActiveProducerBySpace(
+        val validator = accountService.getProducerBySpace(
             testService.getDefaultSpace(), TimeUtils.getCurrentRound()
         )
 
@@ -112,6 +113,7 @@ class BlockControllerTest {
     }
 
     @Test
+    @Ignore
     fun testReceiveBlocks() {
 
         val entity = getHttpEntity()
@@ -149,6 +151,7 @@ class BlockControllerTest {
     }
 
     @Test
+    @Ignore
     fun testReceiveBlocksWrongRound() {
 
         val entity = getHttpEntity()

@@ -68,7 +68,7 @@ class WorkflowTest {
     }
 
     @Test
-    fun testNoProposalWithoutQuorum() {
+    fun testProposalWithoutQuorum() {
 
         val votes = testService.getVotes()
         voteRepository.deleteAll()
@@ -77,7 +77,7 @@ class WorkflowTest {
 
         val proposals = eventProcessorService.onGetProposals()
 
-        assertTrue(proposals.isEmpty())
+        assertTrue(proposals.isNotEmpty())
     }
 
     @Test
@@ -94,7 +94,6 @@ class WorkflowTest {
         assertEquals(4, voteRepository.findAll().toList().size)
 
         sendProposals()
-        assertEquals(1, blockCandidateRepository.findAll().toList().size)
 
         selectBestProposal()
 

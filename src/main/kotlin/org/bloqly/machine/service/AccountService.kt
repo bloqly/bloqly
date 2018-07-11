@@ -24,13 +24,17 @@ class AccountService(
     private val propertyRepository: PropertyRepository
 ) {
 
-    fun getActiveProducerBySpace(space: Space, round: Long): Account {
+    fun getProducerBySpace(space: Space, round: Long): Account {
 
         val validators = getValidatorsForSpace(space)
 
         val validatorIndex = round % validators.size
 
         return validators[validatorIndex.toInt()]
+    }
+
+    fun getActiveProducerBySpace(space: Space, round: Long): Account? {
+        return getProducerBySpace(space, round).takeIf { it.hasKey() }
     }
 
     fun createAccount(): Account {

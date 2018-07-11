@@ -67,7 +67,8 @@ class BlockchainService(
             parentId = contractBodyHash,
             producerId = rootId,
             txHash = null,
-            validatorTxHash = validatorTxHash
+            validatorTxHash = validatorTxHash,
+            round = 0
         )
 
         val transaction = transactionService.createTransaction(

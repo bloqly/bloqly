@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.BlockCandidate
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
@@ -104,6 +105,10 @@ class VoteService(
         }
 
         voteRepository.save(vote)
+    }
+
+    fun findByBlock(block: Block): List<Vote> {
+        return voteRepository.findByBlockId(block.id)
     }
 
     private fun validateVote(vote: Vote) {

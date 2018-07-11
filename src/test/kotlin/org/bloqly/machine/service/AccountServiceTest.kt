@@ -43,11 +43,11 @@ class AccountServiceTest {
 
     @Test
     fun testGetActiveValidator() {
-        val validator1 = accountService.getActiveProducerBySpace(space, 0)
-        val validator2 = accountService.getActiveProducerBySpace(space, 1)
-        val validator3 = accountService.getActiveProducerBySpace(space, 2)
-        val validator4 = accountService.getActiveProducerBySpace(space, 3)
-        val validator5 = accountService.getActiveProducerBySpace(space, 4)
+        val validator1 = accountService.getProducerBySpace(space, 0)
+        val validator2 = accountService.getProducerBySpace(space, 1)
+        val validator3 = accountService.getProducerBySpace(space, 2)
+        val validator4 = accountService.getProducerBySpace(space, 3)
+        val validator5 = accountService.getProducerBySpace(space, 4)
 
         assertNotNull(validator1)
         assertNotNull(validator2)

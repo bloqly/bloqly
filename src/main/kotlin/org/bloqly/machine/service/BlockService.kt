@@ -9,7 +9,6 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.BlockData
@@ -38,10 +37,9 @@ class BlockService(
         parentId: String,
         producerId: String,
         txHash: ByteArray? = null,
-        validatorTxHash: ByteArray
+        validatorTxHash: ByteArray,
+        round: Long
     ): Block {
-
-        val round = TimeUtils.getCurrentRound()
 
         return accountRepository
             .findById(producerId)
@@ -88,8 +86,8 @@ class BlockService(
             }
     }
 
-    fun getLastBlockForSpace(space: String): Block {
-        return blockRepository.getLastBlock(space)
+    fun getLastBlockForSpace(spaceId: String): Block {
+        return blockRepository.getLastBlock(spaceId)
     }
 
     fun getBlockDataList(delta: Delta): BlockDataList {

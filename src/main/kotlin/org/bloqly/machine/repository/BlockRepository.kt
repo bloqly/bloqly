@@ -12,7 +12,8 @@ interface BlockRepository : CrudRepository<Block, String> {
     @Query(
         """
         select * from block
-        where space_id = ?1
+        where
+        space_id = ?1
         order by height desc, diff desc, weight desc, round asc
         limit 1
         """, nativeQuery = true
@@ -24,4 +25,6 @@ interface BlockRepository : CrudRepository<Block, String> {
 
     @Query("select b from Block b where b.spaceId = ?1 and b.height >= ?2 and b.height < ?3")
     fun getBlocksDelta(spaceId: String, startHeight: Long, endHeight: Long): List<Block>
+
+    fun findBySpaceIdAndProposerIdAndRound(spaceId: String, proposerId: String, round: Long): Block?
 }

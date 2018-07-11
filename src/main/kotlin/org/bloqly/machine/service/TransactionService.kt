@@ -3,6 +3,7 @@ package org.bloqly.machine.service
 import com.google.common.primitives.Bytes.concat
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
+import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
@@ -96,5 +97,9 @@ class TransactionService(
         return transactionRepository
             .findPendingTransactionsBySpaceId(spaceId, minTimestamp)
             .filter { isActual(it) }
+    }
+
+    fun findByBlock(block: Block): List<Transaction> {
+        return transactionRepository.findByContainingBlockId(block.id)
     }
 }
