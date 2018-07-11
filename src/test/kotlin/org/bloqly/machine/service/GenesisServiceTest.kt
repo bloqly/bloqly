@@ -1,6 +1,7 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.component.GenesisService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.decode16
@@ -15,10 +16,10 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class BlockServiceTest {
+class GenesisServiceTest {
 
     @Autowired
-    private lateinit var blockService: BlockService
+    private lateinit var genesisService: GenesisService
 
     @Autowired
     private lateinit var testService: TestService
@@ -31,7 +32,7 @@ class BlockServiceTest {
 
     @Test
     fun testExportGenesis() {
-        val genesisString = blockService.exportFirst(Application.DEFAULT_SPACE)
+        val genesisString = genesisService.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = ObjectUtils.readValue(
             genesisString.decode16(),
@@ -43,7 +44,7 @@ class BlockServiceTest {
 
     @Test
     fun testImportGenesis() {
-        val genesisString = blockService.exportFirst(Application.DEFAULT_SPACE)
+        val genesisString = genesisService.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = ObjectUtils.readValue(
             genesisString.decode16(),
@@ -54,7 +55,7 @@ class BlockServiceTest {
 
         testService.cleanup()
 
-        blockService.importFirst(genesisString)
+        genesisService.importFirst(genesisString)
 
         testService.testPropertiesAreCreated()
         testService.testSpaceCreated()
