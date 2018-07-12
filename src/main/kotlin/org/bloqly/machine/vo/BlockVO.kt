@@ -5,7 +5,6 @@ import org.bloqly.machine.model.Block
 
 @ValueObject
 data class BlockVO(
-    val id: String,
     val spaceId: String,
     val height: Long,
     val weight: Long,
@@ -16,24 +15,25 @@ data class BlockVO(
     val proposerId: String,
     val txHash: String?,
     val validatorTxHash: String,
-    val signature: String
+    val signature: String,
+    val hash: String
 ) {
 
     fun toModel(): Block {
 
         return Block(
-            id = id,
             spaceId = spaceId,
             height = height,
             weight = weight,
             diff = diff,
             round = round,
             timestamp = timestamp,
-            parentId = parentHash,
+            parentHash = parentHash,
             proposerId = proposerId,
             txHash = txHash?.toByteArray(),
             validatorTxHash = validatorTxHash.toByteArray(),
-            signature = signature.toByteArray()
+            signature = signature.toByteArray(),
+            hash = hash
         )
     }
 }

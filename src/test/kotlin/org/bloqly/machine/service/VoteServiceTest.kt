@@ -8,6 +8,8 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.CryptoUtils.verifyVote
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
+import org.bloqly.machine.util.decode16
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -37,7 +39,7 @@ class VoteServiceTest {
 
     private lateinit var vote: Vote
 
-    private lateinit var validator: Account
+    private lateinit var publicKey: ByteArray
 
     private lateinit var validators: List<Account>
 
@@ -53,14 +55,16 @@ class VoteServiceTest {
 
         validators = accountService.getValidatorsForSpace(space)
 
-        validator = validators.first()
+        val validator = validators.first()
+
+        publicKey = validator.publicKey.decode16()
 
         vote = voteService.getVote(space, validator)!!
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val newVote = voteService.getVote(space, validator)
+        val newVote = voteService.getVote(space, validators.first())
         assertEquals(newVote, vote)
     }
 
@@ -69,57 +73,51 @@ class VoteServiceTest {
 
         val savedVote = voteRepository.findAll().first()
 
-        val validator = validators.find { it.id == savedVote.id.validatorId }
+        val validator = validators.find { it.id == savedVote.validatorId }
 
         assertNotNull(validator)
     }
 
     @Test
     fun testVerifyVote() {
+        val converted = vote.toVO().toModel()
 
-        assertEquals(vote, vote.toVO().toModel())
-        assertTrue(verifyVote(vote))
+        assertEquals(vote.validatorId, converted.validatorId)
+        assertEquals(vote.blockHash, converted.blockHash)
+        assertEquals(vote.height, converted.height)
+        assertEquals(vote.timestamp, converted.timestamp)
+        assertArrayEquals(vote.signature, converted.signature)
+
+        assertTrue(verifyVote(vote, publicKey))
     }
 
     @Test
     fun testVerifyVoteBlockWrongFails() {
 
-        assertFalse(verifyVote(vote.copy(blockId = FAKE_DATA)))
+        assertFalse(verifyVote(vote.copy(blockHash = FAKE_DATA), publicKey))
     }
 
     @Test
     fun testVerifyVoteTimestampWrongFails() {
 
-        assertFalse(verifyVote(vote.copy(timestamp = System.currentTimeMillis() + 1)))
+        assertFalse(verifyVote(vote.copy(timestamp = System.currentTimeMillis() + 1), publicKey))
     }
 
     @Test
     fun testVerifyVoteSignatureWrongFails() {
 
-        assertFalse(verifyVote(vote.copy(signature = ByteArray(0))))
+        assertFalse(verifyVote(vote.copy(signature = ByteArray(0)), publicKey))
     }
 
     @Test
     fun testVerifyVoteValidatorWrongFails() {
 
-        val newId = vote.id.copy(validatorId = FAKE_DATA)
-
-        assertFalse(verifyVote(vote.copy(id = newId)))
-    }
-
-    @Test
-    fun testVerifyVoteSpaceWrongFails() {
-
-        val newId = vote.id.copy(spaceId = FAKE_DATA)
-
-        assertFalse(verifyVote(vote.copy(id = newId)))
+        assertFalse(verifyVote(vote.copy(validatorId = FAKE_DATA), publicKey))
     }
 
     @Test
     fun testVerifyVotHeightWrongFails() {
 
-        val newId = vote.id.copy(height = vote.id.height + 1)
-
-        assertFalse(verifyVote(vote.copy(id = newId)))
+        assertFalse(verifyVote(vote.copy(height = vote.height + 1), publicKey))
     }
 }

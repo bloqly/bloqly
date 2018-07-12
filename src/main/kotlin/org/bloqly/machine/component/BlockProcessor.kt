@@ -34,8 +34,8 @@ class BlockProcessor(
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
 
         val newHeight = lastBlock.height + 1
-        val votes = getVotesForBlock(lastBlock.id)
-        val prevVotes = getVotesForBlock(lastBlock.parentId)
+        val votes = getVotesForBlock(lastBlock.hash)
+        val prevVotes = getVotesForBlock(lastBlock.parentHash)
 
         val diff = votes.minus(prevVotes).size
 
@@ -49,7 +49,7 @@ class BlockProcessor(
             weight = weight,
             diff = diff,
             timestamp = Instant.now().toEpochMilli(),
-            parentId = lastBlock.id,
+            parentHash = lastBlock.hash,
             producerId = producer.id,
             txHash = CryptoUtils.digestTransactions(transactions),
             validatorTxHash = CryptoUtils.digestVotes(votes),
@@ -66,7 +66,7 @@ class BlockProcessor(
         return transactionService.getPendingTransactionsBySpace(spaceId)
     }
 
-    private fun getVotesForBlock(blockId: String): List<Vote> {
-        return voteRepository.findByBlockId(blockId)
+    private fun getVotesForBlock(blockHash: String): List<Vote> {
+        return voteRepository.findByBlockHash(blockHash)
     }
 }

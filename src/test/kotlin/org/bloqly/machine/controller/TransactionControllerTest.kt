@@ -66,6 +66,6 @@ class TransactionControllerTest {
 
         restTemplate.postForObject(url, entity, Void.TYPE)
 
-        assertTrue(transactionRepository.existsById(transaction.id))
+        assertTrue(transactionRepository.existsByHash(transaction.hash))
     }
 }

@@ -8,14 +8,16 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
+import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.ParameterUtils.writeLong
-import org.bloqly.machine.util.TestUtils
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.TimeUtils
 import org.junit.Assert.assertArrayEquals
@@ -57,6 +59,12 @@ class EventProcessorServiceTest {
 
     @Autowired
     private lateinit var blockchainService: BlockchainService
+
+    @Autowired
+    private lateinit var blockService: BlockService
+
+    @Autowired
+    private lateinit var transactionService: TransactionService
 
     @Autowired
     private lateinit var testService: TestService
@@ -134,10 +142,16 @@ class EventProcessorServiceTest {
         assertArrayEquals(writeLong("999996"), rootBalanceBefore.value)
         assertFalse(userBalanceBefore.isPresent)
 
-        val transaction = TestUtils.createTransaction(
-            origin = root.id,
-            destination = user.id,
-            value = writeLong("1")
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+
+        val transaction = transactionService.createTransaction(
+            space = DEFAULT_SPACE,
+            originId = root.id,
+            destinationId = user.id,
+            self = DEFAULT_SELF,
+            value = writeLong("1"),
+            transactionType = TransactionType.CALL,
+            referencedBlockHash = lastBlock.hash
         )
 
         val propertyContext = PropertyContext(propertyService, contractService)

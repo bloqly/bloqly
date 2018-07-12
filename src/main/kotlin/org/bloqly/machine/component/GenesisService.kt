@@ -95,8 +95,8 @@ class GenesisService(
 
         val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
 
-        require(block.parentId == contractBodyHash) {
-            "Genesis block parentId be set to the genesis parameters hash, found ${block.parentId} instead."
+        require(block.parentHash == contractBodyHash) {
+            "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."
         }
 
         blockRepository.save(block)
@@ -131,8 +131,8 @@ class GenesisService(
             "Transaction in genesis is invalid."
         }
 
-        require(transaction.referencedBlockId == block.id) {
-            "Transaction has invalid referencedBlockId."
+        require(transaction.referencedBlockHash.isEmpty()) {
+            "Transaction has invalid referencedBlockHash."
         }
 
         require(transaction.spaceId == block.spaceId) {

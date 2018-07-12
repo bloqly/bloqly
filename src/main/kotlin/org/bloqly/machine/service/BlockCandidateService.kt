@@ -1,10 +1,8 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.BlockCandidate
 import org.bloqly.machine.model.BlockCandidateId
 import org.bloqly.machine.model.Space
-import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
@@ -15,7 +13,6 @@ import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 
 @Service
 @Transactional
@@ -46,14 +43,6 @@ class BlockCandidateService(
         transactionRepository.saveAll(transactions)
         voteRepository.saveAll(votes)
 
-        blockCandidateRepository.save(
-            BlockCandidate(
-                id = blockCandidateId,
-                data = ObjectUtils.writeValueAsString(blockData),
-                blockId = blockData.block.id,
-                timeReceived = Instant.now().toEpochMilli()
-            )
-        )
     }
 
     private fun validateProposal(blockData: BlockData): Boolean {
@@ -64,21 +53,17 @@ class BlockCandidateService(
 
         val lastBlock = blockRepository.getLastBlock(block.spaceId)
 
-        val votesForLastBlock = votes.all { it.blockId == lastBlock.id }
 
-        val votesVerified = votes.all { CryptoUtils.verifyVote(it.toModel()) }
+        //val votesVerified = votes.all { CryptoUtils.verifyVote(it.toModel()) }
 
         val transactions = blockData.transactions
-
-        val referencedBlockIdsOK = transactions.all { it.referencedBlockId == lastBlock.id }
 
         val transactionsVerifiedOK = transactions.all { CryptoUtils.verifyTransaction(it.toModel()) }
 
         val blockCandidateId = BlockCandidateId(blockData.block.toModel())
         val notExists = !blockCandidateRepository.existsById(blockCandidateId)
 
-        return notExists && votesForLastBlock && votesVerified &&
-            referencedBlockIdsOK && transactionsVerifiedOK
+        return notExists  && transactionsVerifiedOK
     }
 
     fun getBlockCandidate(space: Space, height: Long, producer: Account): BlockData? {
@@ -94,7 +79,7 @@ class BlockCandidateService(
                 val blockData = ObjectUtils.readValue(it.data, BlockData::class.java)
                 val quorum = propertyRepository.getQuorumBySpace(space)
 
-                blockData.takeIf { blockData.votes.count { it.voteType == VoteType.VOTE.name } >= quorum }
+                blockData.takeIf { blockData.votes.size >= quorum }
             }
     }
 }

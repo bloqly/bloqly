@@ -2,7 +2,6 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.model.VoteType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
@@ -51,8 +50,8 @@ class EventProcessorService(
         if (
             transaction.timestamp > now ||
             !CryptoUtils.verifyTransaction(transaction) ||
-            transactionRepository.existsById(transaction.id) ||
-            !blockRepository.existsById(transaction.referencedBlockId) ||
+            transactionRepository.existsByHash(transaction.hash) ||
+            !blockRepository.existsByHash(transaction.referencedBlockHash) ||
             !transactionService.isActual(transaction)
         ) {
             return
@@ -120,7 +119,7 @@ class EventProcessorService(
     private fun isQuorum(spaceId: String, votes: List<Vote>): Boolean {
         val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
 
-        return votes.count { it.id.voteType == VoteType.VOTE } >= quorum
+        return votes.size >= quorum
     }
 
     fun onProposals(proposals: List<BlockData>) {
@@ -137,7 +136,7 @@ class EventProcessorService(
             }
             .filter { proposal ->
                 val quorum = propertyRepository.getQuorumBySpaceId(proposal.block.spaceId)
-                proposal.votes.count { it.voteType == VoteType.VOTE.name } >= quorum
+                proposal.votes.size >= quorum
             }
             .forEach { blockCandidateService.validateAndSave(it) }
     }

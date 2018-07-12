@@ -1,6 +1,7 @@
 package org.bloqly.machine.controller
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
@@ -10,7 +11,7 @@ import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.vo.VoteList
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,12 +72,12 @@ class VoteControllerTest {
 
         val vote = votes.first()
 
-        voteRepository.deleteById(vote.id)
+        voteRepository.deleteById(vote.id!!)
 
-        assertFalse(voteRepository.existsById(vote.id))
+        assertFalse(voteRepository.existsById(vote.id!!))
 
         restTemplate.postForObject(url, entity, Void.TYPE)
 
-        assertTrue(voteRepository.existsById(vote.id))
+        assertNotNull(voteRepository.findOwnVote(DEFAULT_SPACE, vote.validatorId, vote.height))
     }
 }

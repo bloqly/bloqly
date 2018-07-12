@@ -30,7 +30,7 @@ class TransactionService(
         key: String? = null,
         value: ByteArray,
         transactionType: TransactionType,
-        referencedBlockId: String,
+        referencedBlockHash: String,
         timestamp: Long = Instant.now().toEpochMilli()
     ): Transaction {
 
@@ -39,7 +39,7 @@ class TransactionService(
             originId.toByteArray(),
             destinationId.toByteArray(),
             value,
-            referencedBlockId.toByteArray(),
+            referencedBlockHash.toByteArray(),
             transactionType.name.toByteArray(),
             EncodingUtils.longToBytes(timestamp)
         )
@@ -54,11 +54,9 @@ class TransactionService(
         )
 
         val txHash = CryptoUtils.hash(signature)
-        val transactionId = txHash.encode16()
 
         return transactionRepository.save(
             Transaction(
-                id = transactionId,
                 spaceId = space,
                 origin = origin.id,
                 destination = destinationId,
@@ -66,33 +64,37 @@ class TransactionService(
                 key = key,
                 value = value,
                 transactionType = transactionType,
-                referencedBlockId = referencedBlockId,
+                referencedBlockHash = referencedBlockHash,
                 timestamp = timestamp,
                 signature = signature,
-                publicKey = origin.publicKey!!
+                publicKey = origin.publicKey!!,
+                hash = txHash.encode16()
             )
         )
     }
 
-    fun isActual(transaction: Transaction): Boolean {
+    fun isActual(tx: Transaction): Boolean {
 
-        val referencedBlock = blockRepository.findById(transaction.referencedBlockId).orElseThrow()
-        val lastBlock = blockRepository.getLastBlock(transaction.spaceId)
+        return blockRepository.findByHash(tx.referencedBlockHash)
+            ?.let { referencedBlock ->
+                val lastBlock = blockRepository.getLastBlock(tx.spaceId)
 
-        return lastBlock.height - referencedBlock.height <= MAX_REFERENCED_BLOCK_DEPTH
+                lastBlock.height - referencedBlock.height <= MAX_REFERENCED_BLOCK_DEPTH
+            } ?: false
     }
 
-    fun getPendingTransactions(): List<Transaction> {
+    fun getRecentTransactions(): List<Transaction> {
         val minTimestamp = Instant.now().toEpochMilli() - MAX_TRANSACTION_AGE
         return transactionRepository
-            .findPendingTransactions(minTimestamp)
+            .findRecentTransactions(minTimestamp)
             .filter { isActual(it) }
     }
 
     fun getPendingTransactionsBySpace(spaceId: String): List<Transaction> {
         val minTimestamp = Instant.now().toEpochMilli() - MAX_TRANSACTION_AGE
+        val lastBlock = blockRepository.getLastBlock(spaceId)
         return transactionRepository
-            .findPendingTransactionsBySpaceId(spaceId, minTimestamp)
+            .findPendingTransactionsBySpaceId(spaceId, lastBlock.hash, minTimestamp)
             .filter { isActual(it) }
     }
 }

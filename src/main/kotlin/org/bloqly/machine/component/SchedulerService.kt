@@ -27,7 +27,7 @@ class SchedulerService(
     @Scheduled(fixedDelay = 1000)
     fun sendTransactions() {
 
-        val transactions = transactionService.getPendingTransactions()
+        val transactions = transactionService.getRecentTransactions()
 
         if (transactions.isNotEmpty()) {
 

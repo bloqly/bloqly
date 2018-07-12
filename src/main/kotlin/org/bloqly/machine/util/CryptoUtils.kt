@@ -108,8 +108,8 @@ object CryptoUtils {
         val bos = ByteArrayOutputStream()
 
         votes
-            .sortedBy { it.id.validatorId }
-            .forEach { bos.write(it.signature) }
+            .sortedBy { it.validatorId }
+            .forEach { bos.write(hash(it)) }
 
         return hash(bos.toByteArray())
     }
@@ -139,16 +139,14 @@ object CryptoUtils {
             tx.origin.toByteArray(),
             tx.destination.toByteArray(),
             tx.value,
-            tx.referencedBlockId.toByteArray(),
+            tx.referencedBlockHash.toByteArray(),
             tx.transactionType.name.toByteArray(),
             EncodingUtils.longToBytes(tx.timestamp)
         )
 
-        val txHash = hash(tx.signature)
+        val txHash = hash(tx.signature).encode16()
 
-        val transactionId = txHash.encode16()
-
-        if (transactionId != tx.id) {
+        if (txHash != tx.hash) {
             return false
         }
 
@@ -159,22 +157,20 @@ object CryptoUtils {
         )
     }
 
-    fun verifyVote(vote: Vote): Boolean {
-
-        val dataToVerify = Bytes.concat(
-            vote.id.validatorId.toByteArray(),
-            vote.id.spaceId.toByteArray(),
-            EncodingUtils.longToBytes(vote.id.height),
-            vote.id.voteType.name.toByteArray(),
-            vote.blockId.toByteArray(),
-            EncodingUtils.longToBytes(vote.timestamp)
+    fun hash(vote: Vote): ByteArray {
+        return hash(
+            Bytes.concat(
+                vote.validatorId.decode16(),
+                vote.blockHash.decode16(),
+                EncodingUtils.longToBytes(vote.height),
+                vote.spaceId.toByteArray(),
+                EncodingUtils.longToBytes(vote.timestamp)
+            )
         )
+    }
 
-        val dataHash = hash(dataToVerify)
-
-        val publicKey = vote.publicKey.decode16()
-
-        return verify(dataHash, vote.signature, publicKey)
+    fun verifyVote(vote: Vote, publicKey: ByteArray): Boolean {
+        return verify(hash(vote), vote.signature!!, publicKey)
     }
 
     fun verify(message: ByteArray, signature: ByteArray, publicKey: ByteArray): Boolean {

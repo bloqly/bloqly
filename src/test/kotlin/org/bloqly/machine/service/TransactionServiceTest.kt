@@ -4,8 +4,10 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
+import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.CryptoUtils.verifyTransaction
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
+import org.bloqly.machine.util.encode16
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -49,7 +51,7 @@ class TransactionServiceTest {
 
             transactionType = TransactionType.CREATE,
 
-            referencedBlockId = "",
+            referencedBlockHash = CryptoUtils.hash(arrayOf()).encode16(),
 
             timestamp = Instant.now().toEpochMilli()
 
@@ -87,7 +89,7 @@ class TransactionServiceTest {
 
         assertFalse(
             verifyTransaction(
-                transaction.copy(referencedBlockId = FAKE_DATA)
+                transaction.copy(referencedBlockHash = FAKE_DATA)
             )
         )
     }
@@ -123,13 +125,8 @@ class TransactionServiceTest {
     }
 
     @Test
-    fun testVerifyIdWrong() {
-
-        assertFalse(
-            verifyTransaction(
-                transaction.copy(id = FAKE_DATA)
-            )
-        )
+    fun testVerifyHashWrong() {
+        assertFalse(verifyTransaction(transaction.copy(hash = FAKE_DATA)))
     }
 
     @Test

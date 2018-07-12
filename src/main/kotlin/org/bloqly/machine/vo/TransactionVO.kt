@@ -10,17 +10,17 @@ import org.bloqly.machine.util.encode16
 
 @ValueObject
 data class TransactionVO(
-    val id: String,
     val space: String,
     val destination: String,
     val self: String,
     val key: String?,
     val value: String,
     val transactionType: TransactionType,
-    val referencedBlockId: String,
+    val referencedBlockHash: String,
     val timestamp: Long,
     val signature: String,
-    val publicKey: String
+    val publicKey: String,
+    val hash: String
 ) {
 
     fun toModel(): Transaction {
@@ -32,7 +32,6 @@ data class TransactionVO(
         val transactionType = TransactionType.valueOf(transactionType.name)
 
         return Transaction(
-            id = id,
             spaceId = space,
             origin = origin,
             destination = destination,
@@ -40,10 +39,11 @@ data class TransactionVO(
             key = key,
             value = value.decode64(),
             transactionType = transactionType,
-            referencedBlockId = referencedBlockId,
+            referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
             signature = signature.decode64(),
-            publicKey = publicKey
+            publicKey = publicKey,
+            hash = hash
         )
     }
 }

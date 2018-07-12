@@ -15,10 +15,12 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.time.Instant
 
 @Service
+@Transactional
 class BlockchainService(
     private val blockService: BlockService,
     private val contractExecutorService: ContractExecutorService,
@@ -58,19 +60,6 @@ class BlockchainService(
         val validatorTxHash = ByteArray(0)
         val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
 
-        val firstBlock = blockService.newBlock(
-            spaceId = spaceId,
-            height = height,
-            weight = 0,
-            diff = 0,
-            timestamp = timestamp,
-            parentId = contractBodyHash,
-            producerId = rootId,
-            txHash = null,
-            validatorTxHash = validatorTxHash,
-            round = 0
-        )
-
         val transaction = transactionService.createTransaction(
             space = spaceId,
             originId = rootId,
@@ -79,11 +68,23 @@ class BlockchainService(
             key = null,
             value = contractBody.toByteArray(),
             transactionType = TransactionType.CREATE,
-            referencedBlockId = firstBlock.id,
+            referencedBlockHash = "",
             timestamp = timestamp
         )
 
-        firstBlock.transactions.add(transaction)
+        val firstBlock = blockService.newBlock(
+            spaceId = spaceId,
+            height = height,
+            weight = 0,
+            diff = 0,
+            timestamp = timestamp,
+            parentHash = contractBodyHash,
+            producerId = rootId,
+            txHash = null,
+            validatorTxHash = validatorTxHash,
+            round = 0,
+            transactions = listOf(transaction)
+        )
 
         val propertyContext = PropertyContext(propertyService, contractService)
         transactionProcessor.processTransaction(transaction, propertyContext)

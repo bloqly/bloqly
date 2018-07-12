@@ -91,7 +91,7 @@ class TestService(
             self = DEFAULT_SELF,
             value = writeLong("1"),
             transactionType = TransactionType.CALL,
-            referencedBlockId = lastBlock.id,
+            referencedBlockHash = lastBlock.hash,
             timestamp = Instant.now().toEpochMilli()
         )
     }

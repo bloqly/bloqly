@@ -8,5 +8,5 @@ data class Delta(
     val localHeight: Long,
     val remoteHeight: Long
 ) {
-    fun isStale(): Boolean = localHeight < remoteHeight
+    fun isStale(): Boolean = localHeight < remoteHeight - 1
 }

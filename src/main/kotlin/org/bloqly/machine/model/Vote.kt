@@ -3,39 +3,48 @@ package org.bloqly.machine.model
 import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.VoteVO
 import javax.persistence.Column
-import javax.persistence.EmbeddedId
 import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType.AUTO
+import javax.persistence.Id
+import javax.persistence.Table
 
 @Entity
+@Table(name = "vote")
 data class Vote(
 
-    @EmbeddedId
-    val id: VoteId,
+    @Id
+    @GeneratedValue(strategy = AUTO)
+    var id: Long? = null,
 
     @Column(nullable = false)
-    val blockId: String,
+    val validatorId: String,
+
+    @Column(nullable = false)
+    val blockHash: String,
+
+    @Column(nullable = false)
+    val height: Long,
+
+    @Column(nullable = false)
+    val spaceId: String,
 
     @Column(nullable = false)
     val timestamp: Long,
 
     @Column(nullable = false)
-    val signature: ByteArray,
-
-    @Column(nullable = false)
-    val publicKey: String
+    val signature: ByteArray? = null
 ) {
 
     fun toVO(): VoteVO {
 
         return VoteVO(
-            validatorId = id.validatorId,
-            spaceId = id.spaceId,
-            height = id.height,
-            voteType = id.voteType.name,
-            blockId = blockId,
+            validatorId = validatorId,
+            blockHash = blockHash,
+            height = height,
+            spaceId = spaceId,
             timestamp = timestamp,
-            signature = signature.encode64(),
-            publicKey = publicKey
+            signature = signature.encode64()
         )
     }
 
@@ -51,6 +60,6 @@ data class Vote(
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        return id?.hashCode() ?: 0
     }
 }

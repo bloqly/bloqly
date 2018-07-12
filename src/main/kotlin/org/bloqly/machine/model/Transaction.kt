@@ -4,6 +4,8 @@ import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.TransactionVO
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType.AUTO
 import javax.persistence.Id
 import javax.persistence.Lob
 import javax.persistence.Table
@@ -13,7 +15,8 @@ import javax.persistence.Table
 data class Transaction(
 
     @Id
-    val id: String,
+    @GeneratedValue(strategy = AUTO)
+    var id: Long? = null,
 
     @Column(nullable = false)
     val spaceId: String,
@@ -38,7 +41,7 @@ data class Transaction(
     val transactionType: TransactionType,
 
     @Column(nullable = false)
-    val referencedBlockId: String,
+    val referencedBlockHash: String,
 
     @Column(nullable = false)
     val timestamp: Long,
@@ -47,23 +50,26 @@ data class Transaction(
     val signature: ByteArray,
 
     @Column(nullable = false)
-    val publicKey: String
+    val publicKey: String,
+
+    @Column(nullable = false)
+    val hash: String
 ) {
 
     fun toVO(): TransactionVO {
 
         return TransactionVO(
-            id = id,
             space = spaceId,
             destination = destination,
             self = self,
             key = key,
             value = value.encode64(),
             transactionType = transactionType,
-            referencedBlockId = referencedBlockId,
+            referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
             signature = signature.encode64(),
-            publicKey = publicKey
+            publicKey = publicKey,
+            hash = hash
         )
     }
 
@@ -79,6 +85,6 @@ data class Transaction(
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        return id?.hashCode() ?: 0
     }
 }

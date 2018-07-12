@@ -32,7 +32,7 @@ class BlockService(
         weight: Long,
         diff: Int,
         timestamp: Long,
-        parentId: String,
+        parentHash: String,
         producerId: String,
         txHash: ByteArray? = null,
         validatorTxHash: ByteArray,
@@ -54,7 +54,7 @@ class BlockService(
                         EncodingUtils.intToBytes(diff),
                         EncodingUtils.longToBytes(round),
                         EncodingUtils.longToBytes(timestamp),
-                        parentId.toByteArray(),
+                        parentHash.toByteArray(),
                         producerId.toByteArray(),
                         txHash ?: ByteArray(0),
                         validatorTxHash
@@ -63,24 +63,23 @@ class BlockService(
 
                 val privateKey = proposer.privateKey.decode16()
                 val signature = CryptoUtils.sign(privateKey, dataToSign)
-                val blockHash = CryptoUtils.hash(signature)
-                val blockId = blockHash.encode16()
+                val blockHash = CryptoUtils.hash(signature).encode16()
 
                 Block(
-                    id = blockId,
                     spaceId = spaceId,
                     height = height,
                     weight = weight,
                     diff = diff,
                     round = round,
                     timestamp = timestamp,
-                    parentId = parentId,
+                    parentHash = parentHash,
                     proposerId = producerId,
                     txHash = txHash,
                     validatorTxHash = validatorTxHash,
                     signature = signature,
                     transactions = transactions,
-                    votes = votes
+                    votes = votes,
+                    hash = blockHash
                 )
             }
             .orElseThrow {

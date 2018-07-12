@@ -6,6 +6,8 @@ import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType.AUTO
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.JoinTable
@@ -18,7 +20,8 @@ import javax.persistence.Table
 data class Block(
 
     @Id
-    val id: String,
+    @GeneratedValue(strategy = AUTO)
+    var id: Long? = null,
 
     @Column(nullable = false)
     val spaceId: String,
@@ -39,7 +42,7 @@ data class Block(
     val timestamp: Long,
 
     @Column(nullable = false)
-    val parentId: String,
+    val parentHash: String,
 
     @Column(nullable = false)
     val proposerId: String,
@@ -60,7 +63,7 @@ data class Block(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "transaction_id")]
     )
-    val transactions: MutableList<Transaction> = mutableListOf(),
+    val transactions: List<Transaction> = listOf(),
 
     @ManyToMany(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
     @JoinTable(
@@ -68,24 +71,27 @@ data class Block(
         joinColumns = [JoinColumn(name = "block_id")],
         inverseJoinColumns = [JoinColumn(name = "vote_id")]
     )
-    val votes: MutableList<Vote> = mutableListOf()
+    val votes: List<Vote> = listOf(),
+
+    @Column(nullable = false)
+    val hash: String
 ) {
 
     fun toVO(): BlockVO {
 
         return BlockVO(
-            id = id,
             spaceId = spaceId,
             height = height,
             weight = weight,
             diff = diff,
             round = round,
             timestamp = timestamp,
-            parentHash = parentId,
+            parentHash = parentHash,
             proposerId = proposerId,
             txHash = txHash?.encode16(),
             validatorTxHash = validatorTxHash.encode16(),
-            signature = signature.encode16()
+            signature = signature.encode16(),
+            hash = hash
         )
     }
 
@@ -101,6 +107,6 @@ data class Block(
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        return id?.hashCode() ?: 0
     }
 }

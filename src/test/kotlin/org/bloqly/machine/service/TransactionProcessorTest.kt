@@ -83,7 +83,7 @@ class TransactionProcessorTest {
             self = self,
             value = contractBody.toByteArray(),
             transactionType = TransactionType.CREATE,
-            referencedBlockId = lastBlock.id
+            referencedBlockHash = lastBlock.hash
         )
 
         val propertyContext = PropertyContext(propertyService, contractService)
@@ -107,7 +107,7 @@ class TransactionProcessorTest {
             self = self,
             value = params,
             transactionType = TransactionType.CALL,
-            referencedBlockId = lastBlock.id
+            referencedBlockHash = lastBlock.hash
         )
 
         transactionProcessor.processTransaction(invokeContractTx, propertyContext)

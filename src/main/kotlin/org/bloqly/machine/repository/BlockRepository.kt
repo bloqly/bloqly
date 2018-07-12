@@ -27,4 +27,8 @@ interface BlockRepository : CrudRepository<Block, String> {
     fun getBlocksDelta(spaceId: String, startHeight: Long, endHeight: Long): List<Block>
 
     fun findBySpaceIdAndProposerIdAndRound(spaceId: String, proposerId: String, round: Long): Block?
+
+    fun existsByHash(referencedBlockHash: String): Boolean
+
+    fun findByHash(referencedBlockHash: String): Block?
 }
