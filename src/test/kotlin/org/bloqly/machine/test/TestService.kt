@@ -7,6 +7,7 @@ import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.ResetService
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -16,10 +17,12 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.TransactionService
+import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
+import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.VoteVO
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -77,7 +80,25 @@ class TestService(
         blockchainService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
     }
 
-    fun newTransaction(): Transaction {
+    fun createBlock(parentHash: String, height: Long, proposerId: String): Block {
+        return blockRepository.save(
+            Block(
+                spaceId = DEFAULT_SPACE,
+                height = height + 1,
+                weight = 0,
+                diff = 0,
+                round = 0,
+                timestamp = 0,
+                parentHash = parentHash,
+                proposerId = proposerId,
+                validatorTxHash = byteArrayOf(),
+                signature = byteArrayOf(),
+                hash = CryptoUtils.hash(parentHash.toByteArray()).encode16()
+            )
+        )
+    }
+
+    fun createTransaction(): Transaction {
 
         val lastBlock = blockRepository.getLastBlock(DEFAULT_SPACE)
 

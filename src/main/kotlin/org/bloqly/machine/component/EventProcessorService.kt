@@ -43,21 +43,21 @@ class EventProcessorService(
      * Collecting transactions
      *
      */
-    fun onTransaction(transaction: Transaction) {
+    fun onTransaction(tx: Transaction) {
 
         val now = Instant.now().toEpochMilli()
 
         if (
-            transaction.timestamp > now ||
-            !CryptoUtils.verifyTransaction(transaction) ||
-            transactionRepository.existsByHash(transaction.hash) ||
-            !blockRepository.existsByHash(transaction.referencedBlockHash) ||
-            !transactionService.isActual(transaction)
+            tx.timestamp > now ||
+            !CryptoUtils.verifyTransaction(tx) ||
+            transactionRepository.existsByHash(tx.hash) ||
+            !blockRepository.existsByHash(tx.referencedBlockHash) ||
+            !transactionService.isActual(tx)
         ) {
             return
         }
 
-        transactionRepository.save(transaction)
+        transactionRepository.save(tx)
     }
 
     /**
@@ -114,12 +114,6 @@ class EventProcessorService(
                     blockProcessor.createNextBlock(space.id, producer, round)
                 }
             }
-    }
-
-    private fun isQuorum(spaceId: String, votes: List<Vote>): Boolean {
-        val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
-
-        return votes.size >= quorum
     }
 
     fun onProposals(proposals: List<BlockData>) {

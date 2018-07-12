@@ -53,7 +53,7 @@ class TransactionControllerTest {
 
         val url = APIUtils.getDataPath(node, "transactions")
 
-        val transaction = testService.newTransaction()
+        val transaction = testService.createTransaction()
 
         val transactionPayload = ObjectUtils.writeValueAsString(
             TransactionList.fromTransactions(listOf(transaction))

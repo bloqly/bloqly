@@ -86,7 +86,7 @@ class WorkflowTest {
         // 1. Start first round
         TimeUtils.setTestTime(0)
 
-        val transaction = testService.newTransaction()
+        val transaction = testService.createTransaction()
 
         sendTransactions(listOf(transaction))
 

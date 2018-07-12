@@ -54,8 +54,12 @@ class TransactionServiceTest {
             referencedBlockHash = CryptoUtils.hash(arrayOf()).encode16(),
 
             timestamp = Instant.now().toEpochMilli()
-
         )
+    }
+
+    @Test
+    fun testGetPendingTransactions() {
+
     }
 
     @Test

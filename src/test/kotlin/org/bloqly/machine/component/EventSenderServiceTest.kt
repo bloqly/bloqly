@@ -244,7 +244,7 @@ class EventSenderServiceTest {
         Mockito.verify(restTemplate).postForEntity(path, entity, String::class.java)
     }
 
-    private fun getTransactions(): List<Transaction> = listOf(testService.newTransaction())
+    private fun getTransactions(): List<Transaction> = listOf(testService.createTransaction())
 
     private fun getVotes(): List<Vote> = eventProcessorService.onGetVotes()
 
