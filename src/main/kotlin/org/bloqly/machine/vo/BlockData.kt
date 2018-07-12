@@ -2,8 +2,6 @@ package org.bloqly.machine.vo
 
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.model.Vote
 
 @ValueObject
 data class BlockData(
@@ -16,8 +14,6 @@ data class BlockData(
 
 ) {
     constructor(
-        block: Block,
-        transactions: List<Transaction>,
-        votes: List<Vote>
-    ) : this(block.toVO(), transactions.map { it.toVO() }, votes.map { it.toVO() })
+        block: Block
+    ) : this(block.toVO(), block.transactions.map { it.toVO() }, block.votes.map { it.toVO() })
 }

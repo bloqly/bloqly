@@ -37,11 +37,11 @@ class GenesisService(
 
         val firstBlock = blockRepository.findGenesisBlockBySpaceId(spaceId)
 
-        val transactions = transactionRepository.findByContainingBlockId(firstBlock.id)
+        val transactions = firstBlock.transactions.map { it.toVO() }
 
         val genesis = Genesis(
             block = firstBlock.toVO(),
-            transactions = transactions.map { it.toVO() }
+            transactions = transactions
         )
 
         val json = ObjectUtils.writeValueAsString(genesis)
@@ -129,10 +129,6 @@ class GenesisService(
     private fun validateGenesisTransaction(transaction: Transaction, block: Block, now: Instant) {
         require(CryptoUtils.verifyTransaction(transaction)) {
             "Transaction in genesis is invalid."
-        }
-
-        require(transaction.containingBlockId == block.id) {
-            "Transaction has invalid containingBlockId."
         }
 
         require(transaction.referencedBlockId == block.id) {

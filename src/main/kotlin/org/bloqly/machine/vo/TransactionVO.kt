@@ -18,7 +18,6 @@ data class TransactionVO(
     val value: String,
     val transactionType: TransactionType,
     val referencedBlockId: String,
-    val containingBlockId: String? = null,
     val timestamp: Long,
     val signature: String,
     val publicKey: String
@@ -42,7 +41,6 @@ data class TransactionVO(
             value = value.decode64(),
             transactionType = transactionType,
             referencedBlockId = referencedBlockId,
-            containingBlockId = containingBlockId,
             timestamp = timestamp,
             signature = signature.decode64(),
             publicKey = publicKey

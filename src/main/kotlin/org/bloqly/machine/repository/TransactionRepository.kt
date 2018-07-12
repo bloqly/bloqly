@@ -11,6 +11,4 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
 
     @Query("select t from Transaction t where t.spaceId = ?1 and t.containingBlockId is null and t.timestamp > ?2")
     fun findPendingTransactionsBySpaceId(spaceId: String, minTimestamp: Long): List<Transaction>
-
-    fun findByContainingBlockId(id: String): List<Transaction>
 }

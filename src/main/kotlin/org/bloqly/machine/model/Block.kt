@@ -2,12 +2,19 @@ package org.bloqly.machine.model
 
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.BlockVO
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.FetchType
 import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.JoinTable
 import javax.persistence.Lob
+import javax.persistence.ManyToMany
+import javax.persistence.Table
 
 @Entity
+@Table(name = "block")
 data class Block(
 
     @Id
@@ -45,7 +52,23 @@ data class Block(
 
     @Lob
     @Column(nullable = false)
-    val signature: ByteArray
+    val signature: ByteArray,
+
+    @ManyToMany(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "block_transactions",
+        joinColumns = [JoinColumn(name = "block_id")],
+        inverseJoinColumns = [JoinColumn(name = "transaction_id")]
+    )
+    val transactions: MutableList<Transaction> = mutableListOf(),
+
+    @ManyToMany(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "block_votes",
+        joinColumns = [JoinColumn(name = "block_id")],
+        inverseJoinColumns = [JoinColumn(name = "vote_id")]
+    )
+    val votes: MutableList<Vote> = mutableListOf()
 ) {
 
     fun toVO(): BlockVO {

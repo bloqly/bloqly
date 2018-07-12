@@ -7,7 +7,6 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
-import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
@@ -21,8 +20,7 @@ class BlockProcessor(
     private val voteRepository: VoteRepository,
     private val blockService: BlockService,
     private val blockRepository: BlockRepository,
-    private val transactionProcessor: TransactionProcessor,
-    private val voteService: VoteService
+    private val transactionProcessor: TransactionProcessor
 ) {
 
     fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
@@ -30,11 +28,7 @@ class BlockProcessor(
         val existingBlock = blockRepository.findBySpaceIdAndProposerIdAndRound(spaceId, producer.id, round)
 
         if (existingBlock != null) {
-
-            val transactions = transactionService.findByBlock(existingBlock)
-            val votes = voteService.findByBlock(existingBlock)
-
-            return BlockData(existingBlock, transactions, votes)
+            return BlockData(existingBlock)
         }
 
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
@@ -59,14 +53,13 @@ class BlockProcessor(
             producerId = producer.id,
             txHash = CryptoUtils.digestTransactions(transactions),
             validatorTxHash = CryptoUtils.digestVotes(votes),
-            round = round
+            round = round,
+            transactions = transactions,
+            votes = votes
         )
 
-        blockRepository.save(newBlock)
-
-        val blockData = BlockData(newBlock, transactions, votes)
-
-        return blockData
+        return BlockData(
+            blockRepository.save(newBlock))
     }
 
     private fun getPendingTransactions(spaceId: String): List<Transaction> {

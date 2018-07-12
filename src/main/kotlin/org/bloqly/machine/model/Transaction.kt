@@ -6,8 +6,10 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
 import javax.persistence.Lob
+import javax.persistence.Table
 
 @Entity
+@Table(name = "transaction")
 data class Transaction(
 
     @Id
@@ -38,9 +40,6 @@ data class Transaction(
     @Column(nullable = false)
     val referencedBlockId: String,
 
-    @Column(nullable = true)
-    var containingBlockId: String? = null,
-
     @Column(nullable = false)
     val timestamp: Long,
 
@@ -62,7 +61,6 @@ data class Transaction(
             value = value.encode64(),
             transactionType = transactionType,
             referencedBlockId = referencedBlockId,
-            containingBlockId = containingBlockId,
             timestamp = timestamp,
             signature = signature.encode64(),
             publicKey = publicKey

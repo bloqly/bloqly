@@ -2,11 +2,11 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.SpaceRepository
-import org.bloqly.machine.repository.TransactionRepository
-import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.decode16
@@ -23,8 +23,6 @@ import kotlin.math.min
 class BlockService(
     private val accountRepository: AccountRepository,
     private val blockRepository: BlockRepository,
-    private val transactionRepository: TransactionRepository,
-    private val voteRepository: VoteRepository,
     private val spaceRepository: SpaceRepository
 ) {
 
@@ -38,7 +36,9 @@ class BlockService(
         producerId: String,
         txHash: ByteArray? = null,
         validatorTxHash: ByteArray,
-        round: Long
+        round: Long,
+        transactions: List<Transaction> = listOf(),
+        votes: List<Vote> = listOf()
     ): Block {
 
         return accountRepository
@@ -78,7 +78,9 @@ class BlockService(
                     proposerId = producerId,
                     txHash = txHash,
                     validatorTxHash = validatorTxHash,
-                    signature = signature
+                    signature = signature,
+                    transactions = transactions,
+                    votes = votes
                 )
             }
             .orElseThrow {
@@ -97,13 +99,7 @@ class BlockService(
 
         val blocks = blockRepository.getBlocksDelta(delta.spaceId, startHeight, endHeight)
 
-        return BlockDataList(blocks.map { block ->
-
-            val transactions = transactionRepository.findByContainingBlockId(block.id)
-            val votes = voteRepository.findByBlockId(block.parentId)
-
-            BlockData(block, transactions, votes)
-        })
+        return BlockDataList(blocks.map { BlockData(it) })
     }
 
     fun ensureSpaceEmpty(space: String) {

@@ -80,9 +80,10 @@ class BlockchainService(
             value = contractBody.toByteArray(),
             transactionType = TransactionType.CREATE,
             referencedBlockId = firstBlock.id,
-            containingBlockId = firstBlock.id,
             timestamp = timestamp
         )
+
+        firstBlock.transactions.add(transaction)
 
         val propertyContext = PropertyContext(propertyService, contractService)
         transactionProcessor.processTransaction(transaction, propertyContext)
