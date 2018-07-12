@@ -6,6 +6,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
@@ -23,7 +24,8 @@ import kotlin.math.min
 class BlockService(
     private val accountRepository: AccountRepository,
     private val blockRepository: BlockRepository,
-    private val spaceRepository: SpaceRepository
+    private val spaceRepository: SpaceRepository,
+    private val propertyRepository: PropertyRepository
 ) {
 
     fun newBlock(
@@ -89,6 +91,23 @@ class BlockService(
 
     fun getLastBlockForSpace(spaceId: String): Block {
         return blockRepository.getLastBlock(spaceId)
+    }
+
+    fun getLIBForSpace(spaceId: String): Block {
+
+        val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
+
+        val validatorIds = mutableSetOf<String>()
+
+        var block = blockRepository.getLastBlock(spaceId)
+
+        while (validatorIds.size < quorum && block.height > 0) {
+            block = blockRepository.findByHash(block.parentHash)!!
+
+            validatorIds.add(block.proposerId)
+        }
+
+        return block
     }
 
     fun getBlockDataList(delta: Delta): BlockDataList {
