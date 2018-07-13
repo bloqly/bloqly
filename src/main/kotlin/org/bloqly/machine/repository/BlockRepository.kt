@@ -31,4 +31,6 @@ interface BlockRepository : CrudRepository<Block, String> {
     fun existsByHash(referencedBlockHash: String): Boolean
 
     fun findByHash(referencedBlockHash: String): Block?
+
+    fun findBlockByLibHash(hash: String): Block?
 }

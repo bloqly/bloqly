@@ -77,24 +77,25 @@ class TransactionService(
 
         return blockRepository.findByHash(tx.referencedBlockHash)
             ?.let { referencedBlock ->
+                val referencingBlock = blockRepository.findBlockByLibHash(referencedBlock.hash) ?: return false
+
                 val lastBlock = blockRepository.getLastBlock(tx.spaceId)
 
-                lastBlock.height - referencedBlock.height <= MAX_REFERENCED_BLOCK_DEPTH
+                lastBlock.height - referencingBlock.height < MAX_REFERENCED_BLOCK_DEPTH
             } ?: false
     }
 
     fun getRecentTransactions(): List<Transaction> {
         val minTimestamp = Instant.now().toEpochMilli() - MAX_TRANSACTION_AGE
         return transactionRepository
-            .findRecentTransactions(minTimestamp)
-            .filter { isActual(it) }
+            .findPendingTransactions(minTimestamp)
     }
 
     fun getPendingTransactionsBySpace(spaceId: String): List<Transaction> {
-        val minTimestamp = Instant.now().toEpochMilli() - MAX_TRANSACTION_AGE
         val lastBlock = blockRepository.getLastBlock(spaceId)
+        val minTimestamp = Instant.now().toEpochMilli() - MAX_TRANSACTION_AGE
+        val minHeight = lastBlock.height - MAX_REFERENCED_BLOCK_DEPTH
         return transactionRepository
-            .findPendingTransactionsBySpaceId(spaceId, lastBlock.hash, minTimestamp)
-            .filter { isActual(it) }
+            .findPendingTransactionsBySpaceId(spaceId, lastBlock.hash, minTimestamp, minHeight)
     }
 }
