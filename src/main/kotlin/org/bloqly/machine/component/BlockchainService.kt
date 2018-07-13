@@ -98,11 +98,11 @@ class BlockchainService(
 
         return blockRepository.findByHash(tx.referencedBlockHash)
             ?.let { referencedBlock ->
-                val referencingBlock = blockRepository.findBlockByLibHash(referencedBlock.hash) ?: return false
+                blockRepository.findBlockByLibHash(referencedBlock.hash) ?: return false
 
                 val lib = blockService.getLIBForSpace(tx.spaceId)
 
-                lib.height - referencingBlock.height <= depth
+                lib.height - referencedBlock.height <= depth
             } ?: false
     }
 }

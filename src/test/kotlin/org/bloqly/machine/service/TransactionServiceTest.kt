@@ -84,26 +84,36 @@ class TransactionServiceTest {
 
     @Test
     fun testGetPendingTransactions() {
-        val block0 = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        blockService.getLastBlockForSpace(DEFAULT_SPACE)
 
-        val block1 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 1).block
+        blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 1).block
         val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 2).block
-        val block3 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 3).block
+        blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 3).block
         val block4 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(3), 4).block
         val block5 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 5).block
-        val block6 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 6).block
-        val block7 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 7).block
+        blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 6).block
+        blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 7).block
 
         val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(block4.hash, lib.hash)
 
         val tx4 = createTransaction(block4.hash)
         assertTrue(blockchainService.isActualTransaction(tx4, 2))
+
+        val tx2 = createTransaction(block2.hash)
+
+        assertTrue(blockchainService.isActualTransaction(tx2, 2))
+        assertTrue(blockchainService.isActualTransaction(tx2, 3))
+
+        assertFalse(blockchainService.isActualTransaction(tx2, 1))
+
+        // referencing non-lib block fails
+        val tx5 = createTransaction(block5.hash)
+        assertFalse(blockchainService.isActualTransaction(tx5, 1))
     }
 
     @Test
     fun testVerifyOK() {
-
         assertTrue(verifyTransaction(transaction))
     }
 
@@ -119,7 +129,6 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifyOriginWrong() {
-
         assertFalse(
             verifyTransaction(
                 transaction.copy(origin = FAKE_DATA)
@@ -129,7 +138,6 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifyReferencedBlockIdWrong() {
-
         assertFalse(
             verifyTransaction(
                 transaction.copy(referencedBlockHash = FAKE_DATA)
@@ -139,7 +147,6 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifyTxTypeWrong() {
-
         assertFalse(
             verifyTransaction(
                 transaction.copy(transactionType = TransactionType.CALL)
@@ -149,7 +156,6 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifyAmountWrong() {
-
         assertFalse(
             verifyTransaction(
                 transaction.copy(value = FAKE_DATA.toByteArray())
@@ -159,7 +165,6 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifyTimestampWrong() {
-
         assertFalse(
             verifyTransaction(
                 transaction.copy(timestamp = System.currentTimeMillis() + 1)
@@ -174,7 +179,6 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifySignatureWrong() {
-
         assertFalse(
             verifyTransaction(
                 transaction.copy(signature = transaction.signature.reversed().toByteArray())
@@ -191,7 +195,6 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifySpaceWrong() {
-
         assertFalse(
             verifyTransaction(
                 transaction.copy(spaceId = FAKE_DATA)
