@@ -2,7 +2,6 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.service.BlockCandidateService
 import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.Delta
@@ -15,8 +14,7 @@ class EventSenderService(
     private val nodeService: NodeService,
     private val nodeQueryService: NodeQueryService,
     private val executorService: ExecutorService,
-    private val blockCandidateService: BlockCandidateService,
-    private val eventProcessorService: EventProcessorService
+    private val blockProcessor: BlockProcessor
 ) {
 
     private val log = LoggerFactory.getLogger(EventSenderService::class.simpleName)
@@ -77,10 +75,7 @@ class EventSenderService(
 
                     nodeQueryService.requestDelta(node, delta)
                         ?.sortedBy { it.block.height }
-                        ?.forEach { blockData ->
-                            blockCandidateService.validateAndSave(blockData)
-                            eventProcessorService.onTick()
-                        }
+                        ?.forEach { blockProcessor.processBlock(it) }
                 } catch (e: Exception) {
                     "Could not request deltas from $node. Details: ${e.message}"
                 }

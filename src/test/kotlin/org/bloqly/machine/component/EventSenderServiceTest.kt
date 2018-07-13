@@ -248,5 +248,5 @@ class EventSenderServiceTest {
 
     private fun getVotes(): List<Vote> = eventProcessorService.onGetVotes()
 
-    private fun getProposals(): List<BlockData> = eventProcessorService.onGetProposals()
+    private fun getProposals(): List<BlockData> = eventProcessorService.onProduceBlock()
 }

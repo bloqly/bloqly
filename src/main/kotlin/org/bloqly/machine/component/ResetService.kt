@@ -1,7 +1,6 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.repository.AccountRepository
-import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.ContractRepository
 import org.bloqly.machine.repository.NodeRepository
@@ -23,8 +22,7 @@ class ResetService(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository,
     private val nodeRepository: NodeRepository,
-    private val voteRepository: VoteRepository,
-    private val blockCandidateRepository: BlockCandidateRepository
+    private val voteRepository: VoteRepository
 ) {
 
     fun reset() {
@@ -36,7 +34,6 @@ class ResetService(
         accountRepository.deleteAll()
         nodeRepository.deleteAll()
         voteRepository.deleteAll()
-        blockCandidateRepository.deleteAll()
         TimeUtils.reset()
     }
 }

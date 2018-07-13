@@ -4,7 +4,6 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
@@ -42,9 +41,6 @@ class WorkflowTest {
     @Autowired
     private lateinit var voteRepository: VoteRepository
 
-    @Autowired
-    private lateinit var blockCandidateRepository: BlockCandidateRepository
-
     @Before
     fun init() {
         TimeUtils.setTestTime(0)
@@ -75,7 +71,7 @@ class WorkflowTest {
 
         eventReceiverService.receiveVotes(votes.subList(0, 1))
 
-        val proposals = eventProcessorService.onGetProposals()
+        val proposals = eventProcessorService.onProduceBlock()
 
         assertTrue(proposals.isNotEmpty())
     }
@@ -94,8 +90,6 @@ class WorkflowTest {
         assertEquals(4, voteRepository.findAll().toList().size)
 
         sendProposals()
-
-        selectBestProposal()
 
         assertEquals(1, getHeight())
     }
@@ -117,13 +111,9 @@ class WorkflowTest {
     }
 
     private fun sendProposals() {
-        val proposals = eventProcessorService.onGetProposals()
+        val proposals = eventProcessorService.onProduceBlock()
 
         assertEquals(1, proposals.size)
         eventReceiverService.receiveProposals(proposals)
-    }
-
-    private fun selectBestProposal() {
-        eventProcessorService.onTick()
     }
 }

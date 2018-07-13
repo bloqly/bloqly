@@ -4,7 +4,7 @@ import org.bloqly.machine.model.Block
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 
-interface BlockRepository : CrudRepository<Block, String> {
+interface BlockRepository : CrudRepository<Block, Long> {
 
     fun existsBySpaceId(spaceId: String): Boolean
 
@@ -33,4 +33,12 @@ interface BlockRepository : CrudRepository<Block, String> {
     fun findByHash(referencedBlockHash: String): Block?
 
     fun findBlockByLibHash(hash: String): Block?
+
+    fun existsByHashAndLibHash(hash: String, libHash: String): Boolean
+
+    fun existsByHashAndParentHash(hash: String, parentHash: String): Boolean
+
+    fun existsBySpaceIdAndProducerIdAndHeight(spaceId: String, producerId: String, height: Long): Boolean
+
+    fun existsBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Boolean
 }

@@ -4,12 +4,9 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
-import org.bloqly.machine.model.BlockCandidateId
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
-import org.bloqly.machine.repository.BlockCandidateRepository
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
@@ -17,7 +14,6 @@ import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockDataList
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Ignore
@@ -41,13 +37,7 @@ class BlockControllerTest {
     private lateinit var testService: TestService
 
     @Autowired
-    private lateinit var accountService: AccountService
-
-    @Autowired
     private lateinit var blockRepository: BlockRepository
-
-    @Autowired
-    private lateinit var blockCandidateRepository: BlockCandidateRepository
 
     @Autowired
     private lateinit var eventReceiverService: EventReceiverService
@@ -65,8 +55,6 @@ class BlockControllerTest {
 
     private lateinit var url: String
 
-    private lateinit var blockCandidateId: BlockCandidateId
-
     @Before
     fun init() {
         testService.cleanup()
@@ -79,17 +67,6 @@ class BlockControllerTest {
         eventReceiverService.receiveVotes(testService.getVotes())
 
         url = APIUtils.getDataPath(node, "blocks")
-
-        val validator = accountService.getProducerBySpace(
-            testService.getDefaultSpace(), TimeUtils.getCurrentRound()
-        )
-
-        blockCandidateId = BlockCandidateId(
-            spaceId = DEFAULT_SPACE,
-            height = 1,
-            round = TimeUtils.getCurrentRound(),
-            producerId = validator.id
-        )
     }
 
     @After
@@ -98,7 +75,7 @@ class BlockControllerTest {
     }
 
     private fun getHttpEntity(): HttpEntity<String> {
-        val blocks = eventProcessorService.onGetProposals()
+        val blocks = eventProcessorService.onProduceBlock()
 
         assertTrue(blocks.isNotEmpty())
 
@@ -115,24 +92,24 @@ class BlockControllerTest {
     @Test
     @Ignore
     fun testReceiveBlocks() {
-
         val entity = getHttpEntity()
 
+        assertEquals(2, blockRepository.count())
+        val block = blockRepository.getLastBlock(DEFAULT_SPACE)
+        assertEquals(1, block.height)
+        blockRepository.deleteById(block.id!!)
         assertEquals(1, blockRepository.count())
-        blockCandidateRepository.deleteById(blockCandidateId)
-
-        assertFalse(blockCandidateRepository.existsById(blockCandidateId))
 
         restTemplate.postForObject(url, entity, String::class.java)
 
-        assertEquals(1, blockRepository.count())
-
-        assertTrue(blockCandidateRepository.existsById(blockCandidateId))
+        assertEquals(2, blockRepository.count())
+        val inserted = blockRepository.getLastBlock(DEFAULT_SPACE)
+        assertEquals(block, inserted)
     }
 
     @Test
     fun testReceiveBlocksTwice() {
-        val blocks = eventProcessorService.onGetProposals()
+        val blocks = eventProcessorService.onProduceBlock()
 
         assertTrue(blocks.isNotEmpty())
 
@@ -156,12 +133,15 @@ class BlockControllerTest {
 
         val entity = getHttpEntity()
 
-        blockCandidateRepository.deleteById(blockCandidateId)
-        assertFalse(blockCandidateRepository.existsById(blockCandidateId))
+        assertEquals(2, blockRepository.count())
+        val block = blockRepository.getLastBlock(DEFAULT_SPACE)
+        assertEquals(1, block.height)
+        blockRepository.deleteById(block.id!!)
+        assertEquals(1, blockRepository.count())
 
         TimeUtils.setTestTime(Application.ROUND + 1L)
         restTemplate.postForObject(url, entity, String::class.java)
 
-        assertFalse(blockCandidateRepository.existsById(blockCandidateId))
+        assertEquals(1, blockRepository.count())
     }
 }

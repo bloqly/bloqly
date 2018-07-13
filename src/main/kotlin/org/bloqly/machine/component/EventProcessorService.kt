@@ -4,12 +4,9 @@ import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.AccountService
-import org.bloqly.machine.service.BlockCandidateService
-import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
@@ -34,9 +31,6 @@ class EventProcessorService(
     private val spaceRepository: SpaceRepository,
     private val voteService: VoteService,
     private val transactionRepository: TransactionRepository,
-    private val transactionService: TransactionService,
-    private val blockCandidateService: BlockCandidateService,
-    private val propertyRepository: PropertyRepository,
     private val blockProcessor: BlockProcessor,
     private val blockchainService: BlockchainService
 ) {
@@ -90,23 +84,15 @@ class EventProcessorService(
 
     /**
      * Receive new vote
-     *
-     * validate
-     * save
-     *
-     * If it is a valid vote for an unknown block - OK, return
-     * If it is a valid vote for LIB, H, - OK, return
-     *
-     *
      */
     fun onVote(vote: Vote) {
         voteService.validateAndSave(vote)
     }
 
     /**
-     * Get next block proposal
+     * Produce next block
      */
-    fun onGetProposals(): List<BlockData> {
+    fun onProduceBlock(): List<BlockData> {
 
         val round = TimeUtils.getCurrentRound()
 
@@ -118,37 +104,21 @@ class EventProcessorService(
             }
     }
 
+    /**
+     * Receive block
+     */
     fun onProposals(proposals: List<BlockData>) {
 
         val round = TimeUtils.getCurrentRound()
 
         proposals
-            .filter { it.block.round == TimeUtils.getCurrentRound() }
+            .filter { it.block.round == round }
             .filter {
                 val space = spaceRepository.findById(it.block.spaceId).orElseThrow()
                 val activeValidator = accountService.getProducerBySpace(space, round)
 
                 activeValidator.id == it.block.producerId
             }
-            .filter { proposal ->
-                val quorum = propertyRepository.getQuorumBySpaceId(proposal.block.spaceId)
-                proposal.votes.size >= quorum
-            }
-            .forEach { blockCandidateService.validateAndSave(it) }
-    }
-
-    /**
-     * If it is a valid vote for BC, H + 1 AND BC reached Q then LIB = BC
-     *
-     */
-    fun onTick() {
-        spaceRepository.findAll()
-            .forEach { space ->
-                val lastBlock = blockRepository.getLastBlock(space.id)
-                val newHeight = lastBlock.height + 1
-
-                blockCandidateService.getBestBlockCandidate(space, newHeight)
-                    ?.let { blockRepository.save(it.block.toModel()) }
-            }
+            .forEach { blockProcessor.processBlock(it) }
     }
 }

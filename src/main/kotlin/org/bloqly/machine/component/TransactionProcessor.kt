@@ -56,6 +56,10 @@ class TransactionProcessor(
         propertyContext: PropertyContext
     ): InvocationResult {
 
+        require(CryptoUtils.verifyTransaction(tx)) {
+            "Could not verify transaction ${tx.toVO()}"
+        }
+
         val invocationContext = InvocationContext(
             space = tx.spaceId,
             self = tx.self,

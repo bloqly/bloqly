@@ -2,16 +2,13 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.model.BlockCandidate
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.decode16
-import org.bloqly.machine.vo.BlockData
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -32,10 +29,6 @@ class VoteService(
 
         return voteRepository.findOwnVote(space.id, validator.id, newHeight)
             ?: createVote(validator, lastBlock)
-    }
-
-    private fun getBlockData(blockCandidate: BlockCandidate): BlockData {
-        return ObjectUtils.readValue(blockCandidate.data, BlockData::class.java)
     }
 
     private fun createVote(
@@ -65,7 +58,7 @@ class VoteService(
 
     fun validateAndSave(vote: Vote) {
 
-        validateVote(vote)
+        verifyVote(vote)
 
         if (voteRepository.existsByValidatorIdAndSpaceIdAndHeight(vote.validatorId, vote.spaceId, vote.height)) {
             return
@@ -74,11 +67,7 @@ class VoteService(
         voteRepository.save(vote)
     }
 
-    fun findByBlock(block: Block): List<Vote> {
-        return voteRepository.findByBlockHash(block.hash)
-    }
-
-    private fun validateVote(vote: Vote) {
+    fun verifyVote(vote: Vote) {
         // TODO create a log file where log full stack traces
 
         val validator = accountRepository.findById(vote.validatorId).orElseThrow()

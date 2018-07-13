@@ -175,9 +175,9 @@ class EventProcessorServiceTest {
 
         assertEquals(4, votes.size)
 
-        val proposals1 = eventProcessorService.onGetProposals()
+        val proposals1 = eventProcessorService.onProduceBlock()
 
-        val proposals2 = eventProcessorService.onGetProposals()
+        val proposals2 = eventProcessorService.onProduceBlock()
 
         assertEquals(1, proposals1.size)
         assertEquals(1, proposals2.size)

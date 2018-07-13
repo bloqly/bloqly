@@ -53,7 +53,7 @@ class SchedulerService(
     @Scheduled(fixedDelay = 1000, initialDelay = 500)
     fun sendProposals() {
 
-        val proposals = eventProcessorService.onGetProposals()
+        val proposals = eventProcessorService.onProduceBlock()
 
         if (proposals.isNotEmpty()) {
 
@@ -62,13 +62,7 @@ class SchedulerService(
             eventSenderService.sendProposals(proposals)
         }
     }
-
-    @Scheduled(fixedDelay = 1000, initialDelay = 1000)
-    fun tick() {
-        // TODO repeat without delay if there are new proposals available
-        eventProcessorService.onTick()
-    }
-
+    
     @Scheduled(fixedDelay = 5000)
     fun checkDeltas() {
         val deltas = deltaService.getDeltas()
