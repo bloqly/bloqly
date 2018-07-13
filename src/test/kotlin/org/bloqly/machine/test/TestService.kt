@@ -11,10 +11,10 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
-import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.AccountService
+import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ObjectUtils
@@ -27,20 +27,22 @@ import org.springframework.stereotype.Component
 import java.math.BigInteger
 import java.time.Instant
 import javax.annotation.PostConstruct
+import javax.persistence.EntityManager
 import javax.transaction.Transactional
 
 @Component
 @Transactional
 class TestService(
     private val propertyRepository: PropertyRepository,
-    private val blockRepository: BlockRepository,
+    private val blockService: BlockService,
     private val spaceRepository: SpaceRepository,
     private val eventProcessorService: EventProcessorService,
     private val transactionService: TransactionService,
     private val accountRepository: AccountRepository,
     private val accountService: AccountService,
     private val resetService: ResetService,
-    private val blockchainService: BlockchainService
+    private val blockchainService: BlockchainService,
+    private val entityManager: EntityManager
 ) {
 
     private lateinit var accounts: List<Account>
@@ -79,7 +81,7 @@ class TestService(
 
     fun createTransaction(): Transaction {
 
-        val lastBlock = blockRepository.getLastBlock(DEFAULT_SPACE)
+        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
 
         val root = accountRepository.findById(getRoot().id).orElseThrow()
         val user = accountRepository.findById(getUser().id).orElseThrow()
@@ -91,7 +93,7 @@ class TestService(
             self = DEFAULT_SELF,
             value = writeLong("1"),
             transactionType = TransactionType.CALL,
-            referencedBlockHash = lastBlock.hash,
+            referencedBlockHash = lib.hash,
             timestamp = Instant.now().toEpochMilli()
         )
     }
@@ -142,6 +144,10 @@ class TestService(
 
     fun getDefaultSpace(): Space {
         return spaceRepository.findById(DEFAULT_SPACE).orElseThrow()
+    }
+
+    fun cleanupBlockTransactions() {
+        entityManager.createNativeQuery("delete from block_transactions").executeUpdate()
     }
 
     @ValueObject

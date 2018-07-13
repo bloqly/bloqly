@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.model.Account
@@ -83,6 +84,15 @@ class TransactionServiceTest {
     }
 
     @Test
+    fun testGetPendingTransaction() {
+        testService.createTransaction()
+
+        val txs = transactionService.getPendingTransactionsBySpace(DEFAULT_SPACE, MAX_REFERENCED_BLOCK_DEPTH)
+
+        assertEquals(1, txs.size)
+    }
+
+    @Test
     fun testGetPendingTransactions() {
         blockService.getLastBlockForSpace(DEFAULT_SPACE)
 
@@ -119,7 +129,6 @@ class TransactionServiceTest {
 
     @Test
     fun testVerifyDestinationWrong() {
-
         assertFalse(
             verifyTransaction(
                 transaction.copy(destination = FAKE_DATA)
@@ -158,7 +167,7 @@ class TransactionServiceTest {
     fun testVerifyAmountWrong() {
         assertFalse(
             verifyTransaction(
-                transaction.copy(value = FAKE_DATA.toByteArray())
+                transaction.copy(value = FAKE_DATA)
             )
         )
     }
@@ -181,7 +190,7 @@ class TransactionServiceTest {
     fun testVerifySignatureWrong() {
         assertFalse(
             verifyTransaction(
-                transaction.copy(signature = transaction.signature.reversed().toByteArray())
+                transaction.copy(signature = transaction.signature.reversed())
             )
         )
     }

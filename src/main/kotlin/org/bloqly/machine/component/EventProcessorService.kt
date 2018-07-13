@@ -46,7 +46,7 @@ class EventProcessorService(
         if (
             tx.timestamp > now ||
             !CryptoUtils.verifyTransaction(tx) ||
-            transactionRepository.existsByHash(tx.hash) ||
+            transactionRepository.existsByHash(tx.hash!!) ||
             !blockRepository.existsByHash(tx.referencedBlockHash) ||
             !blockchainService.isActualTransaction(tx, MAX_REFERENCED_BLOCK_DEPTH)
         ) {

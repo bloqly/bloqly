@@ -1,6 +1,5 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.BlockVO
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -11,7 +10,6 @@ import javax.persistence.GenerationType.AUTO
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.JoinTable
-import javax.persistence.Lob
 import javax.persistence.ManyToMany
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
@@ -57,14 +55,13 @@ data class Block(
     val producerId: String,
 
     @Column
-    var txHash: ByteArray? = null,
+    var txHash: String? = null,
 
     @Column(nullable = false)
-    val validatorTxHash: ByteArray,
+    val validatorTxHash: String,
 
-    @Lob
     @Column(nullable = false)
-    val signature: ByteArray,
+    val signature: String,
 
     @ManyToMany(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
     @JoinTable(
@@ -100,9 +97,9 @@ data class Block(
             timestamp = timestamp,
             parentHash = parentHash,
             producerId = producerId,
-            txHash = txHash?.encode16(),
-            validatorTxHash = validatorTxHash.encode16(),
-            signature = signature.encode16(),
+            txHash = txHash,
+            validatorTxHash = validatorTxHash,
+            signature = signature,
             hash = hash,
             libHash = libHash
         )

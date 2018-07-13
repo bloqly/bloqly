@@ -1,13 +1,11 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.TransactionVO
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.AUTO
 import javax.persistence.Id
-import javax.persistence.Lob
 import javax.persistence.Table
 
 @Entity
@@ -33,9 +31,8 @@ data class Transaction(
     @Column(nullable = true)
     var key: String? = null,
 
-    @Lob
-    @Column(nullable = false)
-    val value: ByteArray,
+    @Column(nullable = false, columnDefinition = "text")
+    val value: String,
 
     @Column(nullable = false)
     val transactionType: TransactionType,
@@ -46,14 +43,14 @@ data class Transaction(
     @Column(nullable = false)
     val timestamp: Long,
 
-    @Column(nullable = false)
-    val signature: ByteArray,
+    @Column(nullable = false, columnDefinition = "text") // TODO change to real signature size
+    val signature: String = "",
 
     @Column(nullable = false)
     val publicKey: String,
 
     @Column(nullable = false)
-    val hash: String
+    val hash: String = ""
 ) {
 
     fun toVO(): TransactionVO {
@@ -63,11 +60,11 @@ data class Transaction(
             destination = destination,
             self = self,
             key = key,
-            value = value.encode64(),
+            value = value,
             transactionType = transactionType,
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
-            signature = signature.encode64(),
+            signature = signature,
             publicKey = publicKey,
             hash = hash
         )

@@ -31,9 +31,9 @@ data class BlockVO(
             timestamp = timestamp,
             parentHash = parentHash,
             producerId = producerId,
-            txHash = txHash?.toByteArray(),
-            validatorTxHash = validatorTxHash.toByteArray(),
-            signature = signature.toByteArray(),
+            txHash = txHash,
+            validatorTxHash = validatorTxHash,
+            signature = signature,
             hash = hash,
             libHash = libHash
         )

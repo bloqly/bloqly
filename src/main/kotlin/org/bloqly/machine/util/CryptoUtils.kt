@@ -83,22 +83,19 @@ object CryptoUtils {
     }
 
     fun hash(input: ByteArray): ByteArray {
-
         return MessageDigest.getInstance(SHA_256).digest(input)
     }
 
     fun hash(input: String): ByteArray {
-
         return hash(input.toByteArray())
     }
 
     fun digestTransactions(transactions: List<Transaction>): ByteArray {
-
         val bos = ByteArrayOutputStream()
 
         transactions
             .sortedBy { it.id }
-            .forEach { bos.write(it.signature) }
+            .forEach { bos.write(it.signature.decode64()) }
 
         return hash(bos.toByteArray())
     }
@@ -132,29 +129,43 @@ object CryptoUtils {
         return bos.toByteArray()
     }
 
-    fun verifyTransaction(tx: Transaction): Boolean {
-
-        val dataToVerify = Bytes.concat(
-            tx.spaceId.toByteArray(),
-            tx.origin.toByteArray(),
-            tx.destination.toByteArray(),
-            tx.value,
-            tx.referencedBlockHash.toByteArray(),
-            tx.transactionType.name.toByteArray(),
-            EncodingUtils.longToBytes(tx.timestamp)
+    fun hash(tx: Transaction): ByteArray {
+        return hash(
+            Bytes.concat(
+                tx.spaceId.toByteArray(),
+                tx.origin.toByteArray(),
+                tx.destination.toByteArray(),
+                tx.self.toByteArray(),
+                tx.key?.toByteArray() ?: byteArrayOf(),
+                tx.value.decode64(),
+                tx.referencedBlockHash.decode16(),
+                tx.transactionType.name.toByteArray(),
+                EncodingUtils.longToBytes(tx.timestamp)
+            )
         )
+    }
 
-        val txHash = hash(tx.signature).encode16()
+    fun verifyTransaction(tx: Transaction): Boolean {
+        try {
+            val signature = tx.signature.decode64()
 
-        if (txHash != tx.hash) {
+            val txHash = hash(signature).encode16()
+
+            if (txHash != tx.hash) {
+                return false
+            }
+
+            val txDataHash = hash(tx)
+
+            return verify(
+                message = txDataHash,
+                signature = signature,
+                publicKey = tx.publicKey.decode16()
+            )
+        } catch (e: Exception) {
+            log.error(e.message, e)
             return false
         }
-
-        return verify(
-            message = hash(dataToVerify),
-            signature = tx.signature,
-            publicKey = tx.publicKey.decode16()
-        )
     }
 
     fun hash(vote: Vote): ByteArray {

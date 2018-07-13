@@ -12,6 +12,7 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
+import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
@@ -78,9 +79,9 @@ class BlockService(
                     timestamp = timestamp,
                     parentHash = parentHash,
                     producerId = producerId,
-                    txHash = txHash,
-                    validatorTxHash = validatorTxHash,
-                    signature = signature,
+                    txHash = txHash?.encode64(),
+                    validatorTxHash = validatorTxHash.encode64(),
+                    signature = signature.encode64(),
                     transactions = transactions,
                     votes = votes,
                     hash = blockHash,

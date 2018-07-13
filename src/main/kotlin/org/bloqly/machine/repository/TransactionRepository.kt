@@ -10,13 +10,13 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
         """
         select t.*
         from transaction t
-        inner join block b on b.lib_hash = t.referenced_block_hash
+        inner join block b on b.hash = t.referenced_block_hash
         left outer join block_transactions bt on bt.transaction_id = t.id
         where
         t.space_id = ?1 and
         t.referenced_block_hash = ?2 and
         t.timestamp > ?3 and
-        b.height > ?4 and
+        b.height >= ?4 and
         bt.block_id is null
     """, nativeQuery = true
     )

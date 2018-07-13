@@ -44,6 +44,7 @@ class BlockProcessor(
         val propertyContext = PropertyContext(propertyService, contractService)
 
         try {
+            // TODO check LIB for received block
             val block = blockData.block.toModel()
 
             requireValid(block)
@@ -61,10 +62,12 @@ class BlockProcessor(
                 }
             }
 
-            transactionRepository.saveAll(transactions)
-            voteRepository.saveAll(votes)
-
-            blockRepository.save(block)
+            blockRepository.save(
+                block.copy(
+                    transactions = transactions,
+                    votes = votes
+                )
+            )
             propertyContext.commit()
         } catch (e: Exception) {
             log.error("Could not process block ${blockData.block.hash} of height ${blockData.block.height}", e)

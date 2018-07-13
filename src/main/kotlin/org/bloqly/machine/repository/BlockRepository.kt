@@ -30,7 +30,7 @@ interface BlockRepository : CrudRepository<Block, Long> {
 
     fun existsByHash(referencedBlockHash: String): Boolean
 
-    fun findByHash(referencedBlockHash: String): Block?
+    fun findByHash(hash: String): Block?
 
     fun findBlockByLibHash(hash: String): Block?
 

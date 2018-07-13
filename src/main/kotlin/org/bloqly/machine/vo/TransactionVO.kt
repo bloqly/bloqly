@@ -5,7 +5,6 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
-import org.bloqly.machine.util.decode64
 import org.bloqly.machine.util.encode16
 
 @ValueObject
@@ -37,11 +36,11 @@ data class TransactionVO(
             destination = destination,
             self = self,
             key = key,
-            value = value.decode64(),
+            value = value,
             transactionType = transactionType,
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
-            signature = signature.decode64(),
+            signature = signature,
             publicKey = publicKey,
             hash = hash
         )

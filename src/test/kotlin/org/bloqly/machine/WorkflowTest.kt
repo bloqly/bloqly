@@ -4,6 +4,8 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
@@ -40,6 +42,12 @@ class WorkflowTest {
 
     @Autowired
     private lateinit var voteRepository: VoteRepository
+
+    @Autowired
+    private lateinit var blockRepository: BlockRepository
+
+    @Autowired
+    private lateinit var transactionRepository: TransactionRepository
 
     @Before
     fun init() {
@@ -89,7 +97,7 @@ class WorkflowTest {
         sendVotes()
         assertEquals(4, voteRepository.findAll().toList().size)
 
-        sendProposals()
+        produceAndSendBlocks()
 
         assertEquals(1, getHeight())
     }
@@ -110,10 +118,31 @@ class WorkflowTest {
         eventReceiverService.receiveVotes(votes)
     }
 
-    private fun sendProposals() {
-        val proposals = eventProcessorService.onProduceBlock()
+    private fun produceAndSendBlocks() {
+        val blocks = eventProcessorService.onProduceBlock()
+        assertEquals(1, blocks.size)
 
-        assertEquals(1, proposals.size)
-        eventReceiverService.receiveProposals(proposals)
+        val blockData = blocks.first()
+
+        // remove blocks, transactions and votes
+        val block = blockRepository.findAll().first { it.height == 1L }
+
+        assertEquals(1, blockData.transactions.size)
+        assertTrue(blockData.transactions.all { transactionRepository.existsByHash(it.hash) })
+        assertEquals(4, voteRepository.count())
+
+        blockRepository.delete(block)
+
+        assertEquals(1, blockData.transactions.size)
+        assertTrue(blockData.transactions.all { transactionRepository.existsByHash(it.hash) })
+        assertEquals(4, voteRepository.count())
+
+        testService.cleanupBlockTransactions()
+        transactionRepository.deleteAll()
+        voteRepository.deleteAll()
+
+        eventReceiverService.receiveProposals(blocks)
+        assertEquals(1, blockData.transactions.size)
+        assertEquals(4, voteRepository.count())
     }
 }
