@@ -119,6 +119,6 @@ class EventProcessorService(
 
                 activeValidator.id == it.block.producerId
             }
-            .forEach { blockProcessor.processBlock(it) }
+            .forEach { blockProcessor.processReceivedBlock(it) }
     }
 }

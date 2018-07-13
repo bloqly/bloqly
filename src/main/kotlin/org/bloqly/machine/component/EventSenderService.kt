@@ -75,7 +75,7 @@ class EventSenderService(
 
                     nodeQueryService.requestDelta(node, delta)
                         ?.sortedBy { it.block.height }
-                        ?.forEach { blockProcessor.processBlock(it) }
+                        ?.forEach { blockProcessor.processReceivedBlock(it) }
                 } catch (e: Exception) {
                     "Could not request deltas from $node. Details: ${e.message}"
                 }
