@@ -59,8 +59,16 @@ class BlockServiceTest {
         val block5 = testService.createBlock(block4.hash, block4.height, "proposer1")
         assertEquals(block2, getLIB())
 
-        testService.createBlock(block5.hash, block5.height, "proposer2")
+        val block6 = testService.createBlock(block5.hash, block5.height, "proposer2")
         assertEquals(block3, getLIB())
+
+        // same proposer, nothing changed
+        val block7 = testService.createBlock(block6.hash, block6.height, "proposer2")
+        assertEquals(block3, getLIB())
+
+        // change validator, continue changing LIB
+        testService.createBlock(block7.hash, block7.height, "proposer3")
+        assertEquals(block4, getLIB())
     }
 
     private fun getLIB(): Block = blockService.getLIBForSpace(DEFAULT_SPACE)

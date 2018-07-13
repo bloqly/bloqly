@@ -101,13 +101,21 @@ class BlockService(
 
         var block = blockRepository.getLastBlock(spaceId)
 
+        if (block.height > 0) {
+            validatorIds.add(block.proposerId)
+        }
+
         while (validatorIds.size < quorum && block.height > 0) {
             block = blockRepository.findByHash(block.parentHash)!!
 
             validatorIds.add(block.proposerId)
         }
 
-        return block
+        return if (block.height > 0) {
+            blockRepository.findByHash(block.parentHash)!!
+        } else {
+            block
+        }
     }
 
     fun getBlockDataList(delta: Delta): BlockDataList {
