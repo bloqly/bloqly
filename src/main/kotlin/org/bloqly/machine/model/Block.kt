@@ -74,7 +74,10 @@ data class Block(
     val votes: List<Vote> = listOf(),
 
     @Column(nullable = false)
-    val hash: String
+    val hash: String,
+
+    @Column(nullable = false)
+    val libHash: String
 ) {
 
     fun toVO(): BlockVO {
@@ -91,7 +94,8 @@ data class Block(
             txHash = txHash?.encode16(),
             validatorTxHash = validatorTxHash.encode16(),
             signature = signature.encode16(),
-            hash = hash
+            hash = hash,
+            libHash = libHash
         )
     }
 

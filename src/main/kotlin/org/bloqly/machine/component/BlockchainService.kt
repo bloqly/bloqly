@@ -56,7 +56,6 @@ class BlockchainService(
 
         val timestamp = Instant.now().toEpochMilli()
 
-        val height = 0L
         val validatorTxHash = ByteArray(0)
         val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
 
@@ -74,7 +73,7 @@ class BlockchainService(
 
         val firstBlock = blockService.newBlock(
             spaceId = spaceId,
-            height = height,
+            height = 0,
             weight = 0,
             diff = 0,
             timestamp = timestamp,

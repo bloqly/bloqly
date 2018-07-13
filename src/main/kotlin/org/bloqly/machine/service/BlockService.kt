@@ -67,6 +67,8 @@ class BlockService(
                 val signature = CryptoUtils.sign(privateKey, dataToSign)
                 val blockHash = CryptoUtils.hash(signature).encode16()
 
+                val libHash = if (height > 0) getLIBForSpace(spaceId).hash else ""
+
                 Block(
                     spaceId = spaceId,
                     height = height,
@@ -81,7 +83,8 @@ class BlockService(
                     signature = signature,
                     transactions = transactions,
                     votes = votes,
-                    hash = blockHash
+                    hash = blockHash,
+                    libHash = libHash
                 )
             }
             .orElseThrow {

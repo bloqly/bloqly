@@ -93,7 +93,8 @@ class TestService(
                 proposerId = proposerId,
                 validatorTxHash = byteArrayOf(),
                 signature = byteArrayOf(),
-                hash = CryptoUtils.hash(parentHash.toByteArray()).encode16()
+                hash = CryptoUtils.hash(parentHash.toByteArray()).encode16(),
+                libHash = CryptoUtils.hash(byteArrayOf()).encode16()
             )
         )
     }
