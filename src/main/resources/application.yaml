@@ -2,6 +2,11 @@ spring:
   profiles:
     active: production
 
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
+
   jpa:
     show-sql: false
     open-in-view: false

@@ -5,6 +5,10 @@ spring:
   profiles:
     active: test,server
 
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
   jpa:
     show-sql: false
     open-in-view: false

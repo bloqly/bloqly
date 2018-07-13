@@ -3,12 +3,16 @@ package org.bloqly.machine
 import org.bloqly.machine.util.ApplicationUtils
 import org.bloqly.machine.util.OptionUtils
 import org.springframework.boot.autoconfigure.SpringBootApplication
+import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.scheduling.annotation.EnableScheduling
 
 @EnableScheduling
 @EnableJpaRepositories("org.bloqly.machine.repository")
-@SpringBootApplication(scanBasePackages = ["org.bloqly.machine"])
+@SpringBootApplication(
+    scanBasePackages = ["org.bloqly.machine"],
+    exclude = [ElasticsearchAutoConfiguration::class]
+)
 class Application {
 
     companion object {

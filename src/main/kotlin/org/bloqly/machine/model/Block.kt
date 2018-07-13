@@ -14,9 +14,18 @@ import javax.persistence.JoinTable
 import javax.persistence.Lob
 import javax.persistence.ManyToMany
 import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
 @Entity
-@Table(name = "block")
+@Table(
+    name = "block",
+    uniqueConstraints = [
+        UniqueConstraint(columnNames = ["hash", "libHash"]),
+        UniqueConstraint(columnNames = ["hash", "parentHash"]),
+        UniqueConstraint(columnNames = ["spaceId", "producerId", "height"]),
+        UniqueConstraint(columnNames = ["spaceId", "producerId", "round"])
+    ]
+)
 data class Block(
 
     @Id
@@ -73,7 +82,7 @@ data class Block(
     )
     val votes: List<Vote> = listOf(),
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     val hash: String,
 
     @Column(nullable = false)
