@@ -64,7 +64,7 @@ class GenesisService(
         spaceRepository.save(
             Space(
                 id = block.spaceId,
-                creatorId = genesis.block.proposerId
+                creatorId = genesis.block.producerId
             )
         )
 

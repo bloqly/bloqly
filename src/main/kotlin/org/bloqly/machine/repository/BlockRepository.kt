@@ -26,7 +26,7 @@ interface BlockRepository : CrudRepository<Block, String> {
     @Query("select b from Block b where b.spaceId = ?1 and b.height >= ?2 and b.height < ?3")
     fun getBlocksDelta(spaceId: String, startHeight: Long, endHeight: Long): List<Block>
 
-    fun findBySpaceIdAndProposerIdAndRound(spaceId: String, proposerId: String, round: Long): Block?
+    fun findBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Block?
 
     fun existsByHash(referencedBlockHash: String): Boolean
 

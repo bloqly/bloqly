@@ -45,7 +45,7 @@ data class Block(
     val parentHash: String,
 
     @Column(nullable = false)
-    val proposerId: String,
+    val producerId: String,
 
     @Column
     var txHash: ByteArray? = null,
@@ -90,7 +90,7 @@ data class Block(
             round = round,
             timestamp = timestamp,
             parentHash = parentHash,
-            proposerId = proposerId,
+            producerId = producerId,
             txHash = txHash?.encode16(),
             validatorTxHash = validatorTxHash.encode16(),
             signature = signature.encode16(),

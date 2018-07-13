@@ -12,7 +12,7 @@ data class BlockCandidateId(
 
     val round: Long,
 
-    val proposerId: String
+    val producerId: String
 
 ) : Serializable {
 
@@ -20,6 +20,6 @@ data class BlockCandidateId(
         spaceId = block.spaceId,
         height = block.height,
         round = block.round,
-        proposerId = block.proposerId
+        producerId = block.producerId
     )
 }

@@ -3,6 +3,7 @@ package org.bloqly.machine.component
 import org.bloqly.machine.Application
 import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Space
+import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
@@ -91,5 +92,17 @@ class BlockchainService(
 
         firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction))
         blockRepository.save(firstBlock)
+    }
+
+    fun isActualTransaction(tx: Transaction, depth: Int): Boolean {
+
+        return blockRepository.findByHash(tx.referencedBlockHash)
+            ?.let { referencedBlock ->
+                val referencingBlock = blockRepository.findBlockByLibHash(referencedBlock.hash) ?: return false
+
+                val lib = blockService.getLIBForSpace(tx.spaceId)
+
+                lib.height - referencingBlock.height <= depth
+            } ?: false
     }
 }

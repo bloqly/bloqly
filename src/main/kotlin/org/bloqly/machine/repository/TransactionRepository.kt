@@ -10,16 +10,6 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
         """
         select t.*
         from transaction t
-        where
-        t.timestamp > ?2
-    """, nativeQuery = true
-    )
-    fun findPendingTransactions(minTimestamp: Long): List<Transaction>
-
-    @Query(
-        """
-        select t.*
-        from transaction t
         inner join block b on b.lib_hash = t.referenced_block_hash
         left outer join block_transactions bt on bt.transaction_id = t.id
         where
@@ -30,7 +20,12 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
         bt.block_id is null
     """, nativeQuery = true
     )
-    fun findPendingTransactionsBySpaceId(spaceId: String, libHash: String, minTimestamp: Long, minHeight: Long): List<Transaction>
+    fun findPendingTransactionsBySpaceId(
+        spaceId: String,
+        libHash: String,
+        minTimestamp: Long,
+        minHeight: Long
+    ): List<Transaction>
 
     fun existsByHash(hash: String): Boolean
 }

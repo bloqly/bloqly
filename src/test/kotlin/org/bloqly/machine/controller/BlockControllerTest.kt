@@ -88,7 +88,7 @@ class BlockControllerTest {
             spaceId = DEFAULT_SPACE,
             height = 1,
             round = TimeUtils.getCurrentRound(),
-            proposerId = validator.id
+            producerId = validator.id
         )
     }
 

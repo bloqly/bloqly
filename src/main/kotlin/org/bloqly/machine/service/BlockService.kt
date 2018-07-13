@@ -67,7 +67,7 @@ class BlockService(
                 val signature = CryptoUtils.sign(privateKey, dataToSign)
                 val blockHash = CryptoUtils.hash(signature).encode16()
 
-                val libHash = if (height > 0) getLIBForSpace(spaceId).hash else ""
+                val libHash = if (height > 0) getLIBForSpace(spaceId, producerId).hash else ""
 
                 Block(
                     spaceId = spaceId,
@@ -77,7 +77,7 @@ class BlockService(
                     round = round,
                     timestamp = timestamp,
                     parentHash = parentHash,
-                    proposerId = producerId,
+                    producerId = producerId,
                     txHash = txHash,
                     validatorTxHash = validatorTxHash,
                     signature = signature,
@@ -96,22 +96,24 @@ class BlockService(
         return blockRepository.getLastBlock(spaceId)
     }
 
-    fun getLIBForSpace(spaceId: String): Block {
+    fun getLIBForSpace(spaceId: String, newBlockValidatorId: String? = null): Block {
 
         val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
 
         val validatorIds = mutableSetOf<String>()
 
+        newBlockValidatorId?.let { validatorIds.add(it) }
+
         var block = blockRepository.getLastBlock(spaceId)
 
         if (block.height > 0) {
-            validatorIds.add(block.proposerId)
+            validatorIds.add(block.producerId)
         }
 
         while (validatorIds.size < quorum && block.height > 0) {
             block = blockRepository.findByHash(block.parentHash)!!
 
-            validatorIds.add(block.proposerId)
+            validatorIds.add(block.producerId)
         }
 
         return if (block.height > 0) {

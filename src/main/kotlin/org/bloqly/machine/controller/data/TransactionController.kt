@@ -1,5 +1,6 @@
 package org.bloqly.machine.controller.data
 
+import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.vo.TransactionList
@@ -27,7 +28,7 @@ class TransactionController(
     @GetMapping
     fun getPendingTransactions(): TransactionList {
 
-        val transactions = transactionService.getRecentTransactions()
+        val transactions = transactionService.getRecentTransactions(MAX_REFERENCED_BLOCK_DEPTH)
 
         return TransactionList.fromTransactions(transactions)
     }

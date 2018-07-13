@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.test.TestService
 import org.junit.Assert.assertEquals
@@ -22,6 +23,9 @@ class BlockServiceTest {
     @Autowired
     private lateinit var testService: TestService
 
+    @Autowired
+    private lateinit var blockProcessor: BlockProcessor
+
     @Before
     fun setup() {
         testService.cleanup()
@@ -41,34 +45,42 @@ class BlockServiceTest {
         val block0 = blockService.getLastBlockForSpace(DEFAULT_SPACE)
         assertEquals(0, block0.height)
 
-        assertEquals(block0, getLIB())
+        assertEquals(block0.hash, getLIB().hash)
 
-        val block1 = testService.createBlock(block0.hash, block0.height, "proposer1")
-        assertEquals(block0, getLIB())
+        val block1 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 1).block
+        assertEquals(block0.hash, getLIB().hash)
+        assertEquals(block0.hash, block1.libHash)
 
-        val block2 = testService.createBlock(block1.hash, block1.height, "proposer2")
-        assertEquals(block0, getLIB())
+        val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 2).block
+        assertEquals(block0.hash, getLIB().hash)
+        assertEquals(block0.hash, block2.libHash)
 
-        val block3 = testService.createBlock(block2.hash, block2.height, "proposer3")
-        assertEquals(block0, getLIB())
+        val block3 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 3).block
+        assertEquals(block0.hash, getLIB().hash)
+        assertEquals(block0.hash, block3.libHash)
 
-        val block4 = testService.createBlock(block3.hash, block3.height, "proposer4")
+        val block4 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(3), 4).block
         // now 3 out of 4 validators have built on block1, it is final now
-        assertEquals(block1, getLIB())
+        assertEquals(block1.hash, getLIB().hash)
+        assertEquals(block1.hash, block4.libHash)
 
-        val block5 = testService.createBlock(block4.hash, block4.height, "proposer1")
-        assertEquals(block2, getLIB())
+        val block5 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 5).block
+        assertEquals(block2.hash, getLIB().hash)
+        assertEquals(block2.hash, block5.libHash)
 
-        val block6 = testService.createBlock(block5.hash, block5.height, "proposer2")
-        assertEquals(block3, getLIB())
+        val block6 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 6).block
+        assertEquals(block3.hash, getLIB().hash)
+        assertEquals(block3.hash, block6.libHash)
 
         // same proposer, nothing changed
-        val block7 = testService.createBlock(block6.hash, block6.height, "proposer2")
-        assertEquals(block3, getLIB())
+        val block7 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 7).block
+        assertEquals(block3.hash, getLIB().hash)
+        assertEquals(block3.hash, block7.libHash)
 
         // change validator, continue changing LIB
-        testService.createBlock(block7.hash, block7.height, "proposer3")
-        assertEquals(block4, getLIB())
+        val block8 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 8).block
+        assertEquals(block4.hash, getLIB().hash)
+        assertEquals(block4.hash, block8.libHash)
     }
 
     private fun getLIB(): Block = blockService.getLIBForSpace(DEFAULT_SPACE)

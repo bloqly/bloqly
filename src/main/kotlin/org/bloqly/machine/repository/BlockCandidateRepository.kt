@@ -18,7 +18,7 @@ interface BlockCandidateRepository : CrudRepository<BlockCandidate, BlockCandida
         limit 1
         """, nativeQuery = true
     )
-    fun getBlockCandidate(spaceId: String, height: Long, proposerId: String): BlockCandidate?
+    fun getBlockCandidate(spaceId: String, height: Long, producerId: String): BlockCandidate?
 
     fun getBlockCandidateByBlockId(blockId: String): BlockCandidate?
 

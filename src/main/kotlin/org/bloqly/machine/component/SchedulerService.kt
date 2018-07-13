@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.service.TransactionService
 import org.slf4j.LoggerFactory
@@ -27,7 +28,7 @@ class SchedulerService(
     @Scheduled(fixedDelay = 1000)
     fun sendTransactions() {
 
-        val transactions = transactionService.getRecentTransactions()
+        val transactions = transactionService.getRecentTransactions(MAX_REFERENCED_BLOCK_DEPTH)
 
         if (transactions.isNotEmpty()) {
 

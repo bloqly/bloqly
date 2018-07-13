@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
@@ -36,7 +37,8 @@ class EventProcessorService(
     private val transactionService: TransactionService,
     private val blockCandidateService: BlockCandidateService,
     private val propertyRepository: PropertyRepository,
-    private val blockProcessor: BlockProcessor
+    private val blockProcessor: BlockProcessor,
+    private val blockchainService: BlockchainService
 ) {
 
     /**
@@ -52,7 +54,7 @@ class EventProcessorService(
             !CryptoUtils.verifyTransaction(tx) ||
             transactionRepository.existsByHash(tx.hash) ||
             !blockRepository.existsByHash(tx.referencedBlockHash) ||
-            !transactionService.isActual(tx)
+            !blockchainService.isActualTransaction(tx, MAX_REFERENCED_BLOCK_DEPTH)
         ) {
             return
         }
@@ -126,7 +128,7 @@ class EventProcessorService(
                 val space = spaceRepository.findById(it.block.spaceId).orElseThrow()
                 val activeValidator = accountService.getProducerBySpace(space, round)
 
-                activeValidator.id == it.block.proposerId
+                activeValidator.id == it.block.producerId
             }
             .filter { proposal ->
                 val quorum = propertyRepository.getQuorumBySpaceId(proposal.block.spaceId)

@@ -7,9 +7,9 @@ object TimeUtils {
 
     private var TEST_TIME: Long? = null
 
-    fun getCurrentRound(): Long {
-        return TEST_TIME ?: Instant.now().toEpochMilli() / ROUND
-    }
+    fun getCurrentRound(): Long = getCurrentTime() / ROUND
+
+    fun getCurrentTime(): Long = TEST_TIME ?: Instant.now().toEpochMilli()
 
     fun setTestTime(time: Long) {
         TEST_TIME = time

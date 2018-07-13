@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
@@ -25,7 +26,7 @@ class BlockProcessor(
 
     fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
 
-        val existingBlock = blockRepository.findBySpaceIdAndProposerIdAndRound(spaceId, producer.id, round)
+        val existingBlock = blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.id, round)
 
         if (existingBlock != null) {
             return BlockData(existingBlock)
@@ -59,11 +60,12 @@ class BlockProcessor(
         )
 
         return BlockData(
-            blockRepository.save(newBlock))
+            blockRepository.save(newBlock)
+        )
     }
 
     private fun getPendingTransactions(spaceId: String): List<Transaction> {
-        return transactionService.getPendingTransactionsBySpace(spaceId)
+        return transactionService.getPendingTransactionsBySpace(spaceId, MAX_REFERENCED_BLOCK_DEPTH)
     }
 
     private fun getVotesForBlock(blockHash: String): List<Vote> {

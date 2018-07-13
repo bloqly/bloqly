@@ -2,12 +2,17 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.component.BlockProcessor
+import org.bloqly.machine.component.BlockchainService
+import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
+import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.CryptoUtils.verifyTransaction
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
 import org.bloqly.machine.util.encode16
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -28,14 +33,34 @@ class TransactionServiceTest {
     @Autowired
     private lateinit var accountService: AccountService
 
+    @Autowired
+    private lateinit var blockService: BlockService
+
+    @Autowired
+    private lateinit var testService: TestService
+
+    @Autowired
+    private lateinit var blockchainService: BlockchainService
+
+    @Autowired
+    private lateinit var blockProcessor: BlockProcessor
+
     private lateinit var transaction: Transaction
+
+    private lateinit var root: Account
 
     @Before
     fun init() {
+        testService.cleanup()
+        testService.createBlockchain()
 
-        val root = accountService.createAccount()
+        root = accountService.createAccount()
 
-        transaction = transactionService.createTransaction(
+        transaction = createTransaction()
+    }
+
+    private fun createTransaction(referencedBlockHash: String = CryptoUtils.hash(arrayOf()).encode16()): Transaction {
+        return transactionService.createTransaction(
 
             space = DEFAULT_SPACE,
 
@@ -51,7 +76,7 @@ class TransactionServiceTest {
 
             transactionType = TransactionType.CREATE,
 
-            referencedBlockHash = CryptoUtils.hash(arrayOf()).encode16(),
+            referencedBlockHash = referencedBlockHash,
 
             timestamp = Instant.now().toEpochMilli()
         )
@@ -59,7 +84,21 @@ class TransactionServiceTest {
 
     @Test
     fun testGetPendingTransactions() {
+        val block0 = blockService.getLastBlockForSpace(DEFAULT_SPACE)
 
+        val block1 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 1).block
+        val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 2).block
+        val block3 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 3).block
+        val block4 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(3), 4).block
+        val block5 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 5).block
+        val block6 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 6).block
+        val block7 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 7).block
+
+        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
+        assertEquals(block4.hash, lib.hash)
+
+        val tx4 = createTransaction(block4.hash)
+        assertTrue(blockchainService.isActualTransaction(tx4, 2))
     }
 
     @Test
