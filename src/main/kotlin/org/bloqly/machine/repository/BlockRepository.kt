@@ -32,7 +32,7 @@ interface BlockRepository : CrudRepository<Block, Long> {
 
     fun findByHash(hash: String): Block?
 
-    fun findBlockByLibHash(hash: String): Block?
+    fun findByLibHash(hash: String): Block?
 
     fun existsByHashAndLibHash(hash: String, libHash: String): Boolean
 
@@ -41,4 +41,6 @@ interface BlockRepository : CrudRepository<Block, Long> {
     fun existsBySpaceIdAndProducerIdAndHeight(spaceId: String, producerId: String, height: Long): Boolean
 
     fun existsBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Boolean
+
+    fun findByParentHash(parentHash: String): Block?
 }

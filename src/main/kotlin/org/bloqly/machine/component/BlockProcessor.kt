@@ -5,6 +5,7 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.InvocationResultType
+import org.bloqly.machine.model.Properties
 import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
@@ -128,6 +129,8 @@ class BlockProcessor(
 
         val weight = lastBlock.weight + votes.size
 
+        val currentLIB = blockService.getLIBForSpace(spaceId)
+
         val newBlock = blockService.newBlock(
             spaceId = spaceId,
             height = newHeight,
@@ -145,13 +148,51 @@ class BlockProcessor(
 
         saveTxOutputs(txResults, newBlock)
 
+        checkLIB(currentLIB)
+
         return BlockData(blockRepository.save(newBlock))
+    }
+
+    private fun checkLIB(currentLIB: Block) {
+
+        val newLIB = blockService.getLIBForSpace(currentLIB.spaceId)
+
+        require(newLIB.height >= currentLIB.height)
+
+        if (newLIB == currentLIB) {
+            return
+        }
+
+        // apply transaction outputs if LIB moved forward
+
+        var block = currentLIB
+
+        while (block.height <= newLIB.height) {
+
+            block.transactions.forEach { tx ->
+
+                val txOutput = transactionOutputRepository
+                    .findById(TransactionOutputId(block.hash, tx.hash))
+                    .orElseThrow()
+
+                val properties = ObjectUtils.readProperties(txOutput.output)
+
+                // TODO add check so that property keys are unique
+                propertyService.updateProperties(properties)
+            }
+
+            block = blockRepository.findByParentHash(block.hash)!!
+        }
+
+        require(block == newLIB)
     }
 
     private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block) {
         txResults.forEach { txResult ->
 
-            val output = ObjectUtils.writeValueAsString(txResult.invocationResult.output)
+            val output = ObjectUtils.writeValueAsString(
+                Properties(txResult.invocationResult.output)
+            )
 
             val txOutput = TransactionOutput(
                 TransactionOutputId(block.hash, txResult.transaction.hash),
