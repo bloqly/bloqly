@@ -51,19 +51,32 @@ class BlockProcessor(
 
     fun processReceivedBlock(blockData: BlockData) {
 
-        val propertyContext = PropertyContext(propertyService, contractService)
-
         try {
             // TODO check LIB for received block
             val block = blockData.block.toModel()
-
             requireValid(block)
 
-            val transactions = blockData.transactions.map { it.toModel() }
+            val propertyContext = PropertyContext(propertyService, contractService)
+
+            val currentLIB = blockService.getLIBForSpace(block.spaceId)
+
+            if (currentLIB.height > 0) {
+                var blockToEvaluate = blockRepository.findByParentHash(currentLIB.hash)!!
+
+                while (blockToEvaluate.height < block.height) {
+
+                    evaluateBlock(blockToEvaluate, propertyContext)
+
+                    blockToEvaluate = blockRepository.findByParentHash(blockToEvaluate.hash)!!
+                }
+
+                require(blockToEvaluate.hash == block.parentHash)
+            }
+
             val votes = blockData.votes.map { it.toModel() }
+            votes.forEach { voteService.requireVoteValid(it) }
 
-            votes.forEach { voteService.verifyVote(it) }
-
+            val transactions = blockData.transactions.map { it.toModel() }
             transactions.forEach { tx ->
                 val result = transactionProcessor.processTransaction(tx, propertyContext)
 
@@ -78,9 +91,21 @@ class BlockProcessor(
                     votes = votes
                 )
             )
-            propertyContext.commit()
+
+            moveLIB(currentLIB)
         } catch (e: Exception) {
             log.error("Could not process block ${blockData.block.hash} of height ${blockData.block.height}", e)
+        }
+    }
+
+    private fun evaluateBlock(block: Block, propertyContext: PropertyContext) {
+
+        block.transactions.forEach { tx ->
+            val result = transactionProcessor.processTransaction(tx, propertyContext)
+
+            require(result.isOK())
+
+            propertyContext.updatePropertyValues(result.output)
         }
     }
 
@@ -148,12 +173,12 @@ class BlockProcessor(
 
         saveTxOutputs(txResults, newBlock)
 
-        checkLIB(currentLIB)
+        moveLIB(currentLIB)
 
         return BlockData(blockRepository.save(newBlock))
     }
 
-    private fun checkLIB(currentLIB: Block) {
+    private fun moveLIB(currentLIB: Block) {
 
         val newLIB = blockService.getLIBForSpace(currentLIB.spaceId)
 

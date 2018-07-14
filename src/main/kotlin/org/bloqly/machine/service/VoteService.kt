@@ -58,7 +58,7 @@ class VoteService(
 
     fun validateAndSave(vote: Vote) {
 
-        verifyVote(vote)
+        requireVoteValid(vote)
 
         if (voteRepository.existsByValidatorIdAndSpaceIdAndHeight(vote.validatorId, vote.spaceId, vote.height)) {
             return
@@ -67,7 +67,7 @@ class VoteService(
         voteRepository.save(vote)
     }
 
-    fun verifyVote(vote: Vote) {
+    fun requireVoteValid(vote: Vote) {
         // TODO create a log file where log full stack traces
 
         val validator = accountRepository.findById(vote.validatorId).orElseThrow()

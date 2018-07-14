@@ -62,6 +62,9 @@ data class PropertyContext(
         _properties[property.id] = property
     }
 
+    /**
+     * To call only when create a new blockchain or import genesis block
+     */
     fun commit() {
         propertyService.updateProperties(_properties.values.toList())
         contractService.saveAll(_contracts.values.toList())
