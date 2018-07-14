@@ -11,7 +11,7 @@
 </p> 
 
 <p align="center">
-This is a work in progress/prototype.
+This is a work in progress/prototype, API and implementation detaisl can change.
 </p>     
 
 [Chat](https://riot.im/app/#/room/#bloqly:matrix.org)  

@@ -27,7 +27,7 @@ class VoteService(
 
         val newHeight = lastBlock.height + 1
 
-        return voteRepository.findOwnVote(space.id, validator.id, newHeight)
+        return voteRepository.findBySpaceIdAndValidatorIdAndHeight(space.id, validator.id, newHeight)
             ?: createVote(validator, lastBlock)
     }
 

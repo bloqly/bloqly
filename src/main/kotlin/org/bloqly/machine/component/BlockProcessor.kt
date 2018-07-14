@@ -103,11 +103,8 @@ class BlockProcessor(
 
     fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
 
-        val existingBlock = blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.id, round)
-
-        if (existingBlock != null) {
-            return BlockData(existingBlock)
-        }
+        blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.id, round)
+            ?.let { return BlockData(it) }
 
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
 

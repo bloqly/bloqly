@@ -58,18 +58,6 @@ class EventProcessorService(
 
     /**
      * Create votes
-     *
-     * - It is not allowed to vote > 1 time for the same round
-     * - It is not allowed to vote > 1 time for the same height
-     *
-     * IF already voted for H + 1 THEN
-     *  vote = existing vote for H + 1
-     * ELSE IF exists BCs
-     *  BC = select one from BCs with min R
-     *  vote = vote for BC
-     * ELSE
-     *  vote for the LIB
-     *
      */
     fun onGetVotes(): List<Vote> {
         return spaceRepository.findAll()
@@ -98,9 +86,10 @@ class EventProcessorService(
 
         return spaceRepository.findAll()
             .mapNotNull { space ->
-                accountService.getActiveProducerBySpace(space, round)?.let { producer ->
-                    blockProcessor.createNextBlock(space.id, producer, round)
-                }
+                accountService.getActiveProducerBySpace(space, round)
+                    ?.let { producer ->
+                        blockProcessor.createNextBlock(space.id, producer, round)
+                    }
             }
     }
 

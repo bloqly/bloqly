@@ -8,9 +8,16 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.AUTO
 import javax.persistence.Id
 import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
 @Entity
-@Table(name = "vote")
+@Table(
+    name = "vote",
+    uniqueConstraints = [
+        (UniqueConstraint(columnNames = ["spaceId", "validatorId", "height"])),
+        (UniqueConstraint(columnNames = ["validatorId", "blockHash"]))
+    ]
+)
 data class Vote(
 
     @Id
