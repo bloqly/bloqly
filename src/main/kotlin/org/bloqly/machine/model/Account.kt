@@ -4,6 +4,7 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Id
 
+// TODO introduce nonce
 @Entity
 data class Account(
 

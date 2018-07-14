@@ -18,6 +18,7 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
         t.timestamp > ?3 and
         b.height >= ?4 and
         bt.block_id is null
+        order by t.timestamp asc
     """, nativeQuery = true
     )
     fun findPendingTransactionsBySpaceId(

@@ -3,19 +3,23 @@ package org.bloqly.machine.component
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.InvocationResultType
 import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Transaction
+import org.bloqly.machine.model.TransactionOutput
+import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
-import org.bloqly.machine.repository.TransactionRepository
+import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,18 +27,23 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
+private data class TransactionResult(
+    val transaction: Transaction,
+    val invocationResult: InvocationResult
+)
+
 @Service
 @Transactional
 class BlockProcessor(
     private val transactionService: TransactionService,
     private val voteService: VoteService,
-    private val transactionRepository: TransactionRepository,
     private val voteRepository: VoteRepository,
     private val blockService: BlockService,
     private val blockRepository: BlockRepository,
     private val transactionProcessor: TransactionProcessor,
     private val propertyService: PropertyService,
-    private val contractService: ContractService
+    private val contractService: ContractService,
+    private val transactionOutputRepository: TransactionOutputRepository
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
@@ -106,6 +115,9 @@ class BlockProcessor(
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.id, round)
             ?.let { return BlockData(it) }
 
+        val txResults = getTransactionsForNextBlock(spaceId)
+        val transactions = txResults.map { it.transaction }
+
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
 
         val newHeight = lastBlock.height + 1
@@ -113,8 +125,6 @@ class BlockProcessor(
         val prevVotes = getVotesForBlock(lastBlock.parentHash)
 
         val diff = votes.minus(prevVotes).size
-
-        val transactions = getPendingTransactions(spaceId)
 
         val weight = lastBlock.weight + votes.size
 
@@ -133,9 +143,44 @@ class BlockProcessor(
             votes = votes
         )
 
-        return BlockData(
-            blockRepository.save(newBlock)
-        )
+        saveTxOutputs(txResults, newBlock)
+
+        return BlockData(blockRepository.save(newBlock))
+    }
+
+    private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block) {
+        txResults.forEach { txResult ->
+
+            val output = ObjectUtils.writeValueAsString(txResult.invocationResult.output)
+
+            val txOutput = TransactionOutput(
+                TransactionOutputId(block.hash, txResult.transaction.hash),
+                output
+            )
+            transactionOutputRepository.save(txOutput)
+        }
+    }
+
+    private fun getTransactionsForNextBlock(spaceId: String): List<TransactionResult> {
+        val transactions = getPendingTransactions(spaceId)
+
+        val propertyContext = PropertyContext(propertyService, contractService)
+
+        // TODO take into account nonce
+        return transactions
+            .map { tx ->
+
+                val localPropertyContext = propertyContext.copy()
+
+                val result = transactionProcessor.processTransaction(tx, localPropertyContext)
+
+                if (result.isOK()) {
+                    propertyContext.merge(localPropertyContext)
+                }
+
+                TransactionResult(tx, result)
+            }
+            .filter { it.invocationResult.isOK() }
     }
 
     private fun getPendingTransactions(spaceId: String): List<Transaction> {

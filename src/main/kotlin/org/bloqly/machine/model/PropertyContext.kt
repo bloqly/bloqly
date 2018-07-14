@@ -69,4 +69,9 @@ data class PropertyContext(
 
     fun updatePropertyValues(properties: List<Property>) =
         properties.forEach { updatePropertyValue(it) }
+
+    fun merge(propertyContext: PropertyContext) {
+        _properties.putAll(propertyContext._properties)
+        _contracts.putAll(propertyContext._contracts)
+    }
 }

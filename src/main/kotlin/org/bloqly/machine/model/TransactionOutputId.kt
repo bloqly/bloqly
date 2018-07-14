@@ -5,6 +5,6 @@ import javax.persistence.Embeddable
 
 @Embeddable
 data class TransactionOutputId(
-    val blockId: String,
+    val blockHash: String,
     val transactionId: String
 ) : Serializable
