@@ -1,6 +1,8 @@
 package org.bloqly.machine.util
 
 import org.bouncycastle.asn1.sec.SECNamedCurves
+import org.bouncycastle.util.BigIntegers.asUnsignedByteArray
+import org.bouncycastle.util.BigIntegers.fromUnsignedByteArray
 import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -52,43 +54,52 @@ object BloqlySchnorr {
         return BigInteger(CURVE.n.bitLength(), secureRandom)
     }
 
-    fun sign(message: ByteArray, d: BigInteger): ByteArray {
+    fun sign(message: ByteArray, d: BigInteger): Signature {
+        // compute k
 
-        /*
-        k = sha256(seckey.to_bytes(32, byteorder="big") + msg)
-        R = point_mul(G, k)
-        if jacobi(R[1]) != 1:
-        k = n - k
-        e = sha256(R[0].to_bytes(32, byteorder="big") + bytes_point(point_mul(G, seckey)) + msg)
-        return R[0].to_bytes(32, byteorder="big") + ((k + e * seckey) % n).to_bytes(32, byteorder="big")
-         */
-
-        val bytes = hash(concat(EncodingUtils.bigInt32ToBytes(d), message))
-
-        //BigInteger k = new BigInteger(bytes).mod(CURVE.getN());
-
-        val k = BigInteger(1, bytes)
-
-        val R = CURVE.g.multiply(k).normalize()
-
-        // jacobi?
-        // k = CURVE.getN().subtract(k);
-
-        val e = BigInteger(
+        val k = fromUnsignedByteArray(
             hash(
                 concat(
-                    R.xCoord.toBigInteger().toByteArray(),
-                    CURVE.g.multiply(d).getEncoded(false),
-                    message
+                    message,
+                    asUnsignedByteArray(d)
                 )
             )
-        ).mod(CURVE.n)
-
-        // bytes(x(R)) || bytes(k + ex mod n).
-
-        return concat(
-            R.xCoord.toBigInteger().toByteArray(),
-            k.add(e.multiply(d)).mod(CURVE.n).toByteArray()
         )
+
+        // e = H(m || k * G)
+
+        val kG = CURVE.g.multiply(k).normalize().getEncoded(false)
+
+        val e = fromUnsignedByteArray(hash(concat(message, kG)))
+
+        // s = k – e * x
+
+        val s = k.minus(e.multiply(d))
+
+        return Signature(
+            asUnsignedByteArray(e),
+            asUnsignedByteArray(s)
+        )
+    }
+
+    fun getPublicFormPrivate(d: BigInteger): BigInteger {
+        return fromUnsignedByteArray(CURVE.g.multiply(d).normalize().getEncoded(false))
+    }
+
+    fun verify(message: ByteArray, signature: Signature, p: BigInteger): Boolean {
+        // H(m || s * G + e * P)
+
+        val sG = fromUnsignedByteArray(CURVE.g.multiply(signature.getS()).normalize().getEncoded(false))
+
+        val eP = p.multiply(signature.getE())
+
+        val hash = hash(
+            concat(
+                message,
+                asUnsignedByteArray(sG.add(eP))
+            )
+        )
+
+        return hash.contentEquals(signature.e)
     }
 }
