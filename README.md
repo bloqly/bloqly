@@ -2,7 +2,7 @@
 <p align="center">
 <img src="resources/logo.svg" width="40%"/>
 </p>    
-<p align="center">JavaScript Smart Contracts Engine on a PBFT-inspired blockchain consensus algorithm</p>
+<p align="center">JavaScript Smart Contracts Engine on a pBFT+PoA-inspired blockchain consensus algorithm</p>
 
 
 ---  
