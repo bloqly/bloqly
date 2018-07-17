@@ -192,18 +192,24 @@ class BlockProcessor(
 
         var block = currentLIB
 
+        // iterate and apply all transactions from the block next to the previous LIB including NEW_LIB
+        // in some situations LIB.height + 1 = NEW_LIB.height
+        // but not always
         while (block.height <= newLIB.height) {
 
-            block.transactions.forEach { tx ->
+            if (block.height > 0) {
 
-                val txOutput = transactionOutputRepository
-                    .findById(TransactionOutputId(block.hash, tx.hash))
-                    .orElseThrow()
+                block.transactions.forEach { tx ->
 
-                val properties = ObjectUtils.readProperties(txOutput.output)
+                    val txOutput = transactionOutputRepository
+                        .findById(TransactionOutputId(block.hash, tx.hash))
+                        .orElseThrow()
 
-                // TODO add check so that property keys are unique
-                propertyService.updateProperties(properties)
+                    val properties = ObjectUtils.readProperties(txOutput.output)
+
+                    // TODO add check so that property keys are unique
+                    propertyService.updateProperties(properties)
+                }
             }
 
             block = blockRepository.findByParentHash(block.hash)!!

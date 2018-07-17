@@ -144,4 +144,13 @@ class BlockService(
             "Space '$space' already exists"
         }
     }
+
+    fun loadBlockByHash(hash: String): Block {
+        val block = blockRepository.findByHash(hash)!!
+
+        block.transactions.size
+        block.votes.size
+
+        return block
+    }
 }

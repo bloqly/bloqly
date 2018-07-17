@@ -1,12 +1,19 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -20,10 +27,22 @@ import org.springframework.test.context.junit4.SpringRunner
 class BlockProcessorTest {
 
     @Autowired
+    private lateinit var propertyRepository: PropertyRepository
+
+    @Autowired
+    private lateinit var propertyService: PropertyService
+
+    @Autowired
+    private lateinit var genesisService: GenesisService
+
+    @Autowired
     private lateinit var blockProcessor: BlockProcessor
 
     @Autowired
     private lateinit var blockService: BlockService
+
+    @Autowired
+    private lateinit var blockRepository: BlockRepository
 
     @Autowired
     private lateinit var testService: TestService
@@ -32,8 +51,13 @@ class BlockProcessorTest {
 
     private lateinit var firstBlock: Block
 
+    private lateinit var propertyId: PropertyId
+
     @Before
     fun setup() {
+
+        propertyId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, testService.getUser().id, "balance")
+
         testService.cleanup()
         testService.createBlockchain()
 
@@ -81,8 +105,9 @@ class BlockProcessorTest {
         assertEquals(blocks[4].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[7], blocks[3].block.hash)
 
+        val genesis = genesisService.exportFirst(DEFAULT_SPACE)
         testService.cleanup()
-        testService.createBlockchain()
+        genesisService.importFirst(genesis)
 
         firstBlock = blockService.getLIBForSpace(Application.DEFAULT_SPACE)
         assertEquals(0, firstBlock.height)
@@ -90,6 +115,33 @@ class BlockProcessorTest {
 
     @Test
     fun testBlockProcessed() {
+
+        assertNull(propertyService.findById(propertyId))
+
+        blockProcessor.processReceivedBlock(blocks[0])
+        assertNotNull(blockRepository.findByHash(blocks[0].block.hash))
+
+        assertNull(propertyService.findById(propertyId))
+    }
+
+    @Test
+    fun testPropertyAppliedWhenLIBChanged() {
+        assertNull(propertyService.findById(propertyId))
+
+        blockProcessor.processReceivedBlock(blocks[0])
+        assertNull(propertyService.findById(propertyId))
+        val block0 = blockService.loadBlockByHash(blocks[0].block.hash)
+        assertEquals(1, block0.transactions.size)
+
+        blockProcessor.processReceivedBlock(blocks[1])
+        assertNull(propertyService.findById(propertyId))
+
+        blockProcessor.processReceivedBlock(blocks[2])
+        assertNull(propertyService.findById(propertyId))
+
+        blockProcessor.processReceivedBlock(blocks[3])
+        val property = propertyService.findById(propertyId)
+        assertNotNull(property)
 
     }
 
