@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
@@ -149,8 +150,18 @@ class BlockProcessorTest {
         val block3 = blockService.loadBlockByHash(blocks[3].block.hash)
         assertEquals(1, block3.transactions.size)
 
-        val property = propertyService.findById(propertyId)!!
+        var property: Property = propertyService.findById(propertyId)!!
+
         assertEquals(BInteger("1"), ParameterUtils.readValue(property.value))
+
+        /*
+        blockProcessor.processReceivedBlock(blocks[4])
+        val block4 = blockService.loadBlockByHash(blocks[4].block.hash)
+        assertEquals(1, block4.transactions.size)
+
+        property = propertyService.findById(propertyId)!!
+        assertEquals(BInteger("2"), ParameterUtils.readValue(property.value))
+        */
     }
 
     private fun assertTxReferencesBlock(blockData: BlockData, blockHash: String) {
