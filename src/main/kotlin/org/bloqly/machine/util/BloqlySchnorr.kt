@@ -7,6 +7,8 @@ import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.util.BigIntegers.asUnsignedByteArray
 import org.bouncycastle.util.BigIntegers.fromUnsignedByteArray
 import java.math.BigInteger
+import java.math.BigInteger.ONE
+import java.math.BigInteger.TWO
 import java.security.SecureRandom
 
 object BloqlySchnorr {
@@ -28,14 +30,16 @@ object BloqlySchnorr {
         return asUnsignedByteArray(BigInteger(256, secureRandom))
     }
 
-    private fun jacobi(x: BigInteger): Boolean {
-        // x^(p-1)/2 mod p
+    private fun getP(): BigInteger {
+        return (CURVE.curve as ECCurve.Fp).q
+    }
 
-        val p = (CURVE.curve as ECCurve.Fp).q
+    private fun jacobi(x: BigInteger): BigInteger {
+        val p = getP()
 
-        val power = p.minus(BigInteger.ONE).divide(BigInteger.TWO)
+        val power = p.minus(ONE).divide(TWO)
 
-        return x.modPow(power, p) != BigInteger.ONE
+        return x.modPow(power, p)
     }
 
     fun sign(message: ByteArray, d: BigInteger): Signature {
@@ -51,7 +55,7 @@ object BloqlySchnorr {
 
         val r = CURVE.g.multiply(k).normalize()
 
-        if (jacobi(r.yCoord.toBigInteger())) {
+        if (jacobi(r.yCoord.toBigInteger()) != ONE) {
             k = CURVE.n - k
         }
 
@@ -77,25 +81,38 @@ object BloqlySchnorr {
 
     fun verify(message: ByteArray, signature: Signature, p: ByteArray): Boolean {
 
-        val pub = CURVE.curve.decodePoint(p)
+        try {
+            if (signature.r >= getP() || signature.s >= CURVE.n) {
+                return false
+            }
 
-        val e = fromUnsignedByteArray(
-            CryptoUtils.hash(
-                Bytes.concat(
-                    signature.getR(),
-                    pub.encodePoint(),
-                    message
+            // isValid is called inside
+            val pub = CURVE.curve.decodePoint(p)
+
+            val e = fromUnsignedByteArray(
+                CryptoUtils.hash(
+                    Bytes.concat(
+                        signature.getR(),
+                        pub.encodePoint(),
+                        message
+                    )
                 )
             )
-        )
 
-        val gS = CURVE.g.multiply(signature.s).normalize()
+            val gS = CURVE.g.multiply(signature.s).normalize()
 
-        val pubNE = pub.multiply(CURVE.n.minus(e)).normalize()
+            val pubNE = pub.multiply(CURVE.n.minus(e)).normalize()
 
-        val r = gS.add(pubNE).normalize()
+            val r = gS.add(pubNE).normalize()
 
-        return r.xCoord.toBigInteger() == signature.r
+            //if r >= p or s >= n:
+
+            return r.xCoord.toBigInteger() == signature.r &&
+                !r.isInfinity &&
+                jacobi(r.yCoord.toBigInteger()) == ONE
+        } catch (e: Exception) {
+            return false
+        }
     }
 
     private fun ECPoint.encodePoint(): ByteArray = this.normalize().getEncoded(true)
