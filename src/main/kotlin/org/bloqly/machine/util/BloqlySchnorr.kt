@@ -24,19 +24,18 @@ object BloqlySchnorr {
         return BigInteger(hexString, BASE_16)
     }
 
-    fun newSecretKey(): BigInteger {
-
-        return BigInteger(CURVE.n.bitLength(), secureRandom)
+    fun newSecretKey(): ByteArray {
+        return asUnsignedByteArray(BigInteger(256, secureRandom))
     }
 
     private fun jacobi(x: BigInteger): Boolean {
-        // x(p-1)/2 mod p
+        // x^(p-1)/2 mod p
 
         val p = (CURVE.curve as ECCurve.Fp).q
 
         val power = p.minus(BigInteger.ONE).divide(BigInteger.TWO)
 
-        return x.modPow(power, p) == BigInteger.ONE
+        return x.modPow(power, p) != BigInteger.ONE
     }
 
     fun sign(message: ByteArray, d: BigInteger): Signature {
@@ -44,7 +43,7 @@ object BloqlySchnorr {
         var k = fromUnsignedByteArray(
             CryptoUtils.hash(
                 Bytes.concat(
-                    asUnsignedByteArray(d).pad32(),
+                    asUnsignedByteArray(d).pad(),
                     message
                 )
             )
@@ -52,14 +51,14 @@ object BloqlySchnorr {
 
         val r = CURVE.g.multiply(k).normalize()
 
-        if (jacobi(r.xCoord.toBigInteger())) {
+        if (jacobi(r.yCoord.toBigInteger())) {
             k = CURVE.n - k
         }
 
         val e = fromUnsignedByteArray(
             CryptoUtils.hash(
                 Bytes.concat(
-                    asUnsignedByteArray(r.xCoord.toBigInteger()).pad32(),
+                    asUnsignedByteArray(r.xCoord.toBigInteger()).pad(),
                     CURVE.g.multiply(d).encodePoint(),
                     message
                 )
