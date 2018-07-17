@@ -12,18 +12,18 @@ data class Signature(
     fun getR(): ByteArray = asUnsignedByteArray(32, r)
     fun getS(): ByteArray = asUnsignedByteArray(32, s)
 
-    override fun toString(): String {
-        val bytes = Bytes.concat(
-            getR(),
-            getS()
-        )
+    override fun toString(): String = toByteArray().encode16()
 
-        return bytes.encode16()
-    }
+    fun toByteArray(): ByteArray = Bytes.concat(getR(), getS())
 
     companion object {
         fun fromString(sigStr: String): Signature {
             val sigBytes = sigStr.decode16()
+
+            return fromByteArray(sigStr.decode16())
+        }
+
+        fun fromByteArray(sigBytes: ByteArray): Signature {
 
             val r = fromUnsignedByteArray(sigBytes.slice(0..31).toByteArray())
             val s = fromUnsignedByteArray(sigBytes.slice(32..63).toByteArray())

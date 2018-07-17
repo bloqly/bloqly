@@ -44,7 +44,7 @@ class AccountService(
 
     fun newAccount(): Account {
 
-        val privateKey = CryptoUtils.generatePrivateKey()
+        val privateKey = CryptoUtils.newPrivateKey()
         val publicKey = CryptoUtils.getPublicFor(privateKey)
 
         return Account(

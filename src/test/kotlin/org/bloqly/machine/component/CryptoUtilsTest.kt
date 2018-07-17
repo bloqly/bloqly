@@ -11,7 +11,7 @@ class CryptoUtilsTest {
     @Test
     fun testCrypto() {
 
-        val priv = CryptoUtils.generatePrivateKey()
+        val priv = CryptoUtils.newPrivateKey()
 
         val pub = CryptoUtils.getPublicFor(priv)
 
@@ -27,7 +27,7 @@ class CryptoUtilsTest {
     @Test
     fun testVerifyVote() {
 
-        val priv = CryptoUtils.generatePrivateKey()
+        val priv = CryptoUtils.newPrivateKey()
 
         val pub = CryptoUtils.getPublicFor(priv)
 

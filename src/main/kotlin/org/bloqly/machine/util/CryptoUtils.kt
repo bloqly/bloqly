@@ -3,70 +3,24 @@ package org.bloqly.machine.util
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
-import org.bouncycastle.asn1.ASN1InputStream
-import org.bouncycastle.asn1.ASN1Integer
-import org.bouncycastle.asn1.DERSequenceGenerator
-import org.bouncycastle.asn1.DLSequence
-import org.bouncycastle.asn1.sec.SECNamedCurves
-import org.bouncycastle.asn1.x9.X9ECParameters
-import org.bouncycastle.crypto.digests.SHA256Digest
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator
-import org.bouncycastle.crypto.params.ECDomainParameters
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters
-import org.bouncycastle.crypto.params.ECPublicKeyParameters
-import org.bouncycastle.crypto.signers.ECDSASigner
-import org.bouncycastle.crypto.signers.HMacDSAKCalculator
+import org.bouncycastle.util.BigIntegers
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
-import java.math.BigInteger
 import java.security.MessageDigest
-import java.security.SecureRandom
 
-// TODO change it to using Schnorr https://github.com/sipa/bips/blob/bip-schnorr/bip-schnorr.mediawiki
 object CryptoUtils {
 
     private val log = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
 
-    private val generator: ECKeyPairGenerator = ECKeyPairGenerator()
-
-    private const val CURVE_NAME = "secp256k1"
-
     private const val SHA_256 = "SHA-256"
 
-    init {
-        val secureRandom = SecureRandom.getInstance("SHA1PRNG")
+    fun newPrivateKey(): ByteArray = BloqlySchnorr.newPrivateKey()
 
-        val keygenParams = ECKeyGenerationParameters(getDomain(getCurve()), secureRandom)
+    fun getPublicFor(privateKeyBytes: ByteArray): ByteArray {
 
-        generator.init(keygenParams)
-    }
+        val privateKey = BigIntegers.fromUnsignedByteArray(privateKeyBytes)
 
-    private fun getCurve(): X9ECParameters {
-        return SECNamedCurves.getByName(CURVE_NAME)
-    }
-
-    private fun getDomain(curve: X9ECParameters): ECDomainParameters {
-        return ECDomainParameters(
-            curve.curve,
-            curve.g,
-            curve.n,
-            curve.h
-        )
-    }
-
-    fun generatePrivateKey(): ByteArray {
-
-        val keypair = generator.generateKeyPair()
-
-        val params = keypair.private as ECPrivateKeyParameters
-
-        return params.d.toByteArray()
-    }
-
-    fun getPublicFor(privateKey: ByteArray): ByteArray {
-
-        return getCurve().g.multiply(BigInteger(privateKey)).getEncoded(true)
+        return BloqlySchnorr.getPublicFromPrivate(privateKey)
     }
 
     fun hash(inputs: Array<ByteArray>): ByteArray {
@@ -111,23 +65,8 @@ object CryptoUtils {
         return hash(bos.toByteArray())
     }
 
-    fun sign(privateKey: ByteArray, input: ByteArray): ByteArray {
-
-        val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
-        val privateKeyParams = ECPrivateKeyParameters(BigInteger(privateKey), getDomain(getCurve()))
-
-        signer.init(true, privateKeyParams)
-
-        val signature = signer.generateSignature(input)
-
-        val bos = ByteArrayOutputStream()
-        val sequenceGenerator = DERSequenceGenerator(bos)
-        sequenceGenerator.addObject(ASN1Integer(signature[0]))
-        sequenceGenerator.addObject(ASN1Integer(signature[1]))
-        sequenceGenerator.close()
-
-        return bos.toByteArray()
-    }
+    fun sign(privateKey: ByteArray, input: ByteArray): ByteArray =
+        BloqlySchnorr.sign(input, privateKey).toByteArray()
 
     fun hash(tx: Transaction): ByteArray {
         return hash(
@@ -185,27 +124,9 @@ object CryptoUtils {
     }
 
     fun verify(message: ByteArray, signature: ByteArray, publicKey: ByteArray): Boolean {
-
-        try {
-            val decoder = ASN1InputStream(signature)
-
-            val seq = decoder.readObject() as DLSequence
-            val r = seq.getObjectAt(0) as ASN1Integer
-            val s = seq.getObjectAt(1) as ASN1Integer
-
-            decoder.close()
-
-            val curve = getCurve()
-            val q = curve.curve.decodePoint(publicKey)
-            val pubParams = ECPublicKeyParameters(q, getDomain(curve))
-
-            val signer = ECDSASigner()
-            signer.init(false, pubParams)
-
-            return signer.verifySignature(message, r.positiveValue, s.positiveValue)
-        } catch (e: Exception) {
-            log.error(e.message, e)
+        if (signature.isEmpty()) {
             return false
         }
+        return BloqlySchnorr.verify(message, Signature.fromByteArray(signature), publicKey)
     }
 }

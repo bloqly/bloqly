@@ -13,7 +13,7 @@ class BloqlySchnorrTest {
 
         for (i in 0..50) {
 
-            val d = BloqlySchnorr.newSecretKey()
+            val d = BloqlySchnorr.newPrivateKey()
 
             //val d = "C90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B14E5C7".decode16()
 

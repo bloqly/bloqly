@@ -20,18 +20,18 @@ object BloqlySchnorr {
 
     private var secureRandom = SecureRandom.getInstance(RANDOM)
 
-    private val CURVE = SECNamedCurves.getByName(CURVE_NAME)
+    private val CURVE_PARAMS = SECNamedCurves.getByName(CURVE_NAME)
 
     fun newBigInteger(hexString: String): BigInteger {
         return BigInteger(hexString, BASE_16)
     }
 
-    fun newSecretKey(): ByteArray {
+    fun newPrivateKey(): ByteArray {
         return asUnsignedByteArray(BigInteger(256, secureRandom))
     }
 
     private fun getP(): BigInteger {
-        return (CURVE.curve as ECCurve.Fp).q
+        return (CURVE_PARAMS.curve as ECCurve.Fp).q
     }
 
     private fun jacobi(x: BigInteger): BigInteger {
@@ -40,6 +40,10 @@ object BloqlySchnorr {
         val power = p.minus(ONE).divide(TWO)
 
         return x.modPow(power, p)
+    }
+
+    fun sign(message: ByteArray, privateKey: ByteArray): Signature {
+        return sign(message, fromUnsignedByteArray(privateKey))
     }
 
     fun sign(message: ByteArray, d: BigInteger): Signature {
@@ -53,17 +57,17 @@ object BloqlySchnorr {
             )
         )
 
-        val r = CURVE.g.multiply(k).normalize()
+        val r = CURVE_PARAMS.g.multiply(k).normalize()
 
         if (jacobi(r.yCoord.toBigInteger()) != ONE) {
-            k = CURVE.n - k
+            k = CURVE_PARAMS.n - k
         }
 
         val e = fromUnsignedByteArray(
             CryptoUtils.hash(
                 Bytes.concat(
                     asUnsignedByteArray(r.xCoord.toBigInteger()).pad(),
-                    CURVE.g.multiply(d).encodePoint(),
+                    CURVE_PARAMS.g.multiply(d).encodePoint(),
                     message
                 )
             )
@@ -71,23 +75,23 @@ object BloqlySchnorr {
 
         return Signature(
             r.xCoord.toBigInteger(),
-            k.add(e.multiply(d)).mod(CURVE.n)
+            k.add(e.multiply(d)).mod(CURVE_PARAMS.n)
         )
     }
 
     fun getPublicFromPrivate(d: BigInteger): ByteArray {
-        return CURVE.g.multiply(d).encodePoint()
+        return CURVE_PARAMS.g.multiply(d).encodePoint()
     }
 
     fun verify(message: ByteArray, signature: Signature, p: ByteArray): Boolean {
 
         try {
-            if (signature.r >= getP() || signature.s >= CURVE.n) {
+            if (signature.r >= getP() || signature.s >= CURVE_PARAMS.n) {
                 return false
             }
 
             // isValid is called inside
-            val pub = CURVE.curve.decodePoint(p)
+            val pub = CURVE_PARAMS.curve.decodePoint(p)
 
             val e = fromUnsignedByteArray(
                 CryptoUtils.hash(
@@ -99,13 +103,11 @@ object BloqlySchnorr {
                 )
             )
 
-            val gS = CURVE.g.multiply(signature.s).normalize()
+            val gS = CURVE_PARAMS.g.multiply(signature.s).normalize()
 
-            val pubNE = pub.multiply(CURVE.n.minus(e)).normalize()
+            val pubNE = pub.multiply(CURVE_PARAMS.n.minus(e)).normalize()
 
             val r = gS.add(pubNE).normalize()
-
-            //if r >= p or s >= n:
 
             return r.xCoord.toBigInteger() == signature.r &&
                 !r.isInfinity &&
