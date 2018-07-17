@@ -3,6 +3,7 @@ package org.bloqly.machine.component
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.BlockRepository
@@ -10,6 +11,7 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -135,14 +137,20 @@ class BlockProcessorTest {
 
         blockProcessor.processReceivedBlock(blocks[1])
         assertNull(propertyService.findById(propertyId))
+        val block1 = blockService.loadBlockByHash(blocks[1].block.hash)
+        assertEquals(1, block1.transactions.size)
 
         blockProcessor.processReceivedBlock(blocks[2])
         assertNull(propertyService.findById(propertyId))
+        val block2 = blockService.loadBlockByHash(blocks[2].block.hash)
+        assertEquals(1, block2.transactions.size)
 
         blockProcessor.processReceivedBlock(blocks[3])
-        val property = propertyService.findById(propertyId)
-        assertNotNull(property)
+        val block3 = blockService.loadBlockByHash(blocks[3].block.hash)
+        assertEquals(1, block3.transactions.size)
 
+        val property = propertyService.findById(propertyId)!!
+        assertEquals(BInteger("1"), ParameterUtils.readValue(property.value))
     }
 
     private fun assertTxReferencesBlock(blockData: BlockData, blockHash: String) {

@@ -215,7 +215,7 @@ class BlockProcessor(
             block = blockRepository.findByParentHash(block.hash)!!
         }
 
-        require(block == newLIB)
+        require(block.parentHash == newLIB.hash)
     }
 
     private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block) {
