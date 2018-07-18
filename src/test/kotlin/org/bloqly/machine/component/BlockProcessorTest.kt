@@ -7,11 +7,14 @@ import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
+import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
@@ -31,6 +34,9 @@ class BlockProcessorTest {
 
     @Autowired
     private lateinit var propertyRepository: PropertyRepository
+
+    @Autowired
+    private lateinit var transactionOutputRepository: TransactionOutputRepository
 
     @Autowired
     private lateinit var propertyService: PropertyService
@@ -56,6 +62,10 @@ class BlockProcessorTest {
 
     private lateinit var propertyId: PropertyId
 
+    /**
+     * In this test we send 1 amount to a user in each blocks and check the actual property values
+     * are in tact with block finality logic
+     */
     @Before
     fun setup() {
 
@@ -73,40 +83,66 @@ class BlockProcessorTest {
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[0], firstBlock.hash)
 
+        assertPropertyValueCandidate("1")
+        assertNoPropertyValue()
+
         val tx1 = testService.createTransaction()
         blocks.add(1, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(1), 2))
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[1], firstBlock.hash)
+
+        assertPropertyValueCandidate("2")
+        assertNoPropertyValue()
 
         val tx2 = testService.createTransaction()
         blocks.add(2, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(2), 3))
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[2], firstBlock.hash)
 
+        assertPropertyValueCandidate("3")
+        assertNoPropertyValue()
+
         val tx3 = testService.createTransaction() // lib is first block yet
         blocks.add(3, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(3), 4))
+        // lib changed, for the first time
+        // all transactions from block[0] must be applied
         assertEquals(blocks[0].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[3], firstBlock.hash)
+
+        assertPropertyValueCandidate("4")
+        assertPropertyValue("1")
 
         val tx4 = testService.createTransaction()
         blocks.add(4, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(0), 5))
         assertEquals(blocks[1].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[4], blocks[0].block.hash)
 
+        assertPropertyValueCandidate("5")
+        assertPropertyValue("2")
+
         val tx5 = testService.createTransaction()
         blocks.add(5, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(1), 6))
         assertEquals(blocks[2].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[5], blocks[1].block.hash)
+
+        assertPropertyValueCandidate("6")
+        assertPropertyValue("3")
 
         val tx6 = testService.createTransaction()
         blocks.add(6, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(2), 7))
         assertEquals(blocks[3].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[6], blocks[2].block.hash)
 
+        assertPropertyValueCandidate("7")
+        assertPropertyValue("4")
+
         val tx7 = testService.createTransaction()
         blocks.add(7, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(3), 8))
         assertEquals(blocks[4].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[7], blocks[3].block.hash)
+
+        assertPropertyValueCandidate("8")
+        assertPropertyValue("5")
 
         val genesis = genesisService.exportFirst(DEFAULT_SPACE)
         testService.cleanup()
@@ -136,31 +172,47 @@ class BlockProcessorTest {
         val block0 = blockService.loadBlockByHash(blocks[0].block.hash)
         assertEquals(1, block0.transactions.size)
 
+        assertPropertyValueCandidate("1")
+        assertNoPropertyValue()
+
         blockProcessor.processReceivedBlock(blocks[1])
         assertNull(propertyService.findById(propertyId))
         val block1 = blockService.loadBlockByHash(blocks[1].block.hash)
         assertEquals(1, block1.transactions.size)
+
+        assertPropertyValueCandidate("2")
+        assertNoPropertyValue()
 
         blockProcessor.processReceivedBlock(blocks[2])
         assertNull(propertyService.findById(propertyId))
         val block2 = blockService.loadBlockByHash(blocks[2].block.hash)
         assertEquals(1, block2.transactions.size)
 
+        assertPropertyValueCandidate("3")
+        assertNoPropertyValue()
+
         blockProcessor.processReceivedBlock(blocks[3])
         val block3 = blockService.loadBlockByHash(blocks[3].block.hash)
         assertEquals(1, block3.transactions.size)
 
-        var property: Property = propertyService.findById(propertyId)!!
-
-        assertEquals(BInteger("1"), ParameterUtils.readValue(property.value))
+        assertPropertyValueCandidate("4")
+        assertPropertyValue("1")
 
         blockProcessor.processReceivedBlock(blocks[4])
         val block4 = blockService.loadBlockByHash(blocks[4].block.hash)
         assertEquals(1, block4.transactions.size)
 
-        property = propertyService.findById(propertyId)!!
-        assertEquals(BInteger("2"), ParameterUtils.readValue(property.value))
+        assertPropertyValueCandidate("5")
+        assertPropertyValue("2")
+    }
 
+    private fun assertPropertyValue(value: String) {
+        val property: Property = propertyService.findById(propertyId)!!
+        assertEquals(BInteger(value), ParameterUtils.readValue(property.value))
+    }
+
+    private fun assertNoPropertyValue() {
+        assertNull(propertyService.findById(propertyId))
     }
 
     private fun assertTxReferencesBlock(blockData: BlockData, blockHash: String) {
@@ -169,5 +221,18 @@ class BlockProcessorTest {
 
     private fun getLIB(): Block {
         return blockService.getLIBForSpace(DEFAULT_SPACE)
+    }
+
+    private fun assertPropertyValueCandidate(value: String) {
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val tx = blockService.loadBlockByHash(lastBlock.hash).transactions.first()
+
+        val txOutput = transactionOutputRepository.findById(TransactionOutputId(lastBlock.hash, tx.hash)).orElseThrow()
+
+        val properties = ObjectUtils.readProperties(txOutput.output)
+
+        val property = properties.first { it.id == propertyId }
+
+        assertEquals(BInteger(value), ParameterUtils.readValue(property.value))
     }
 }

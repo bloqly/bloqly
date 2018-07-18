@@ -10,6 +10,7 @@ data class PropertyContext(
     val propertyService: PropertyService,
     val contractService: ContractService
 ) {
+
     private val _properties = mutableMapOf<PropertyId, Property>()
 
     val properties: List<Property>
@@ -79,5 +80,15 @@ data class PropertyContext(
     fun merge(propertyContext: PropertyContext) {
         _properties.putAll(propertyContext._properties)
         _contracts.putAll(propertyContext._contracts)
+    }
+
+    fun getLocalCopy(): PropertyContext {
+        val propertyContext = PropertyContext(propertyService, contractService)
+
+        propertyContext.updatePropertyValues(_properties.values.toList())
+
+        _contracts.values.forEach { propertyContext.saveContract(it) }
+
+        return propertyContext
     }
 }
