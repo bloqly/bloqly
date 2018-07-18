@@ -80,8 +80,8 @@ class EventProcessorServiceTest {
 
         testService.createBlockchain()
 
-        root = accountRepository.findById(testService.getRoot().id).get()
-        user = accountRepository.findById(testService.getUser().id).get()
+        root = accountRepository.findByAccountId(testService.getRoot().accountId)!!
+        user = accountRepository.findByAccountId(testService.getUser().accountId)!!
     }
 
     @Test
@@ -124,7 +124,7 @@ class EventProcessorServiceTest {
 
         assertTrue(
             Sets.newHashSet(propertyRepository.findAll()).contains(
-                Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.id, "balance"), writeLong("999996"))
+                Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.accountId, "balance"), writeLong("999996"))
             )
         )
     }
@@ -132,8 +132,8 @@ class EventProcessorServiceTest {
     @Test
     fun testMoveBalance() {
 
-        val rootBalanceId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.id, "balance")
-        val userBalanceId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, user.id, "balance")
+        val rootBalanceId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.accountId, "balance")
+        val userBalanceId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, user.accountId, "balance")
 
         val rootBalanceBefore = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceBefore = propertyRepository.findById(userBalanceId)
@@ -145,8 +145,8 @@ class EventProcessorServiceTest {
 
         val transaction = transactionService.createTransaction(
             space = DEFAULT_SPACE,
-            originId = root.id,
-            destinationId = user.id,
+            originId = root.accountId,
+            destinationId = user.accountId,
             self = DEFAULT_SELF,
             value = writeLong("1"),
             transactionType = TransactionType.CALL,

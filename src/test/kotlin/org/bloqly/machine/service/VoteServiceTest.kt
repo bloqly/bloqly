@@ -45,6 +45,8 @@ class VoteServiceTest {
 
     private lateinit var space: Space
 
+    private lateinit var validator: Account
+
     @Before
     fun init() {
 
@@ -55,7 +57,7 @@ class VoteServiceTest {
 
         validators = accountService.getValidatorsForSpace(space)
 
-        val validator = validators.first()
+        validator = validators.first()
 
         publicKey = validator.publicKey.decode16()
 
@@ -73,16 +75,17 @@ class VoteServiceTest {
 
         val savedVote = voteRepository.findAll().first()
 
-        val validator = validators.find { it.id == savedVote.validatorId }
+        val validator = validators.find { it.accountId == savedVote.validator.accountId }
 
         assertNotNull(validator)
     }
 
     @Test
     fun testVerifyVote() {
-        val converted = vote.toVO().toModel()
 
-        assertEquals(vote.validatorId, converted.validatorId)
+        val converted = vote.toVO().toModel(validator)
+
+        assertEquals(vote.validator, converted.validator)
         assertEquals(vote.blockHash, converted.blockHash)
         assertEquals(vote.height, converted.height)
         assertEquals(vote.timestamp, converted.timestamp)
@@ -112,7 +115,9 @@ class VoteServiceTest {
     @Test
     fun testVerifyVoteValidatorWrongFails() {
 
-        assertFalse(verifyVote(vote.copy(validatorId = FAKE_DATA), publicKey))
+        val wrongValidator = validator.copy(accountId = FAKE_DATA)
+
+        assertFalse(verifyVote(vote.copy(validator = wrongValidator), publicKey))
     }
 
     @Test

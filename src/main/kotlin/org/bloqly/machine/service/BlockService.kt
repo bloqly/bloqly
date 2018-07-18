@@ -44,53 +44,48 @@ class BlockService(
         votes: List<Vote> = listOf()
     ): Block {
 
-        return accountRepository
-            .findById(producerId)
-            .filter { it.hasKey() }
-            .map { proposer ->
+        val proposer = accountRepository.findByAccountId(producerId)
+            .takeIf { it != null && it.hasKey() }
+            ?: throw IllegalArgumentException("Could not create block in behalf of producer $producerId")
 
-                val dataToSign = CryptoUtils.hash(
-                    arrayOf(
-                        spaceId.toByteArray(),
-                        EncodingUtils.longToBytes(height),
-                        EncodingUtils.longToBytes(weight),
-                        EncodingUtils.intToBytes(diff),
-                        EncodingUtils.longToBytes(round),
-                        EncodingUtils.longToBytes(timestamp),
-                        parentHash.toByteArray(),
-                        producerId.toByteArray(),
-                        txHash ?: ByteArray(0),
-                        validatorTxHash
-                    )
-                )
+        val dataToSign = CryptoUtils.hash(
+            arrayOf(
+                spaceId.toByteArray(),
+                EncodingUtils.longToBytes(height),
+                EncodingUtils.longToBytes(weight),
+                EncodingUtils.intToBytes(diff),
+                EncodingUtils.longToBytes(round),
+                EncodingUtils.longToBytes(timestamp),
+                parentHash.toByteArray(),
+                producerId.toByteArray(),
+                txHash ?: ByteArray(0),
+                validatorTxHash
+            )
+        )
 
-                val privateKey = proposer.privateKey.decode16()
-                val signature = CryptoUtils.sign(privateKey, dataToSign)
-                val blockHash = CryptoUtils.hash(signature).encode16()
+        val privateKey = proposer.privateKey.decode16()
+        val signature = CryptoUtils.sign(privateKey, dataToSign)
+        val blockHash = CryptoUtils.hash(signature).encode16()
 
-                val libHash = if (height > 0) getLIBForSpace(spaceId, producerId).hash else ""
+        val libHash = if (height > 0) getLIBForSpace(spaceId, producerId).hash else ""
 
-                Block(
-                    spaceId = spaceId,
-                    height = height,
-                    weight = weight,
-                    diff = diff,
-                    round = round,
-                    timestamp = timestamp,
-                    parentHash = parentHash,
-                    producerId = producerId,
-                    txHash = txHash?.encode64(),
-                    validatorTxHash = validatorTxHash.encode64(),
-                    signature = signature.encode64(),
-                    transactions = transactions,
-                    votes = votes,
-                    hash = blockHash,
-                    libHash = libHash
-                )
-            }
-            .orElseThrow {
-                IllegalArgumentException("Could not create block in behalf of producer $producerId")
-            }
+        return Block(
+            spaceId = spaceId,
+            height = height,
+            weight = weight,
+            diff = diff,
+            round = round,
+            timestamp = timestamp,
+            parentHash = parentHash,
+            producerId = producerId,
+            txHash = txHash?.encode64(),
+            validatorTxHash = validatorTxHash.encode64(),
+            signature = signature.encode64(),
+            transactions = transactions,
+            votes = votes,
+            hash = blockHash,
+            libHash = libHash
+        )
     }
 
     fun getLastBlockForSpace(spaceId: String): Block {

@@ -2,10 +2,10 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.component.PropertyContext
 import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Property
-import org.bloqly.machine.component.PropertyContext
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.PropertyRepository
@@ -67,7 +67,7 @@ class TransactionProcessorTest {
     @Test
     fun testRunContractArgument() {
 
-        val originId = testService.getValidator(0).id
+        val originId = testService.getValidator(0).accountId
 
         val propertyId1 = PropertyId(DEFAULT_SPACE, self, creator, "value1")
         val propertyId2 = PropertyId(DEFAULT_SPACE, self, self, "value3")

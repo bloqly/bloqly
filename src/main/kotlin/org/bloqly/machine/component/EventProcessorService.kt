@@ -46,7 +46,7 @@ class EventProcessorService(
         if (
             tx.timestamp > now ||
             !CryptoUtils.verifyTransaction(tx) ||
-            transactionRepository.existsByHash(tx.hash!!) ||
+            transactionRepository.existsByHash(tx.hash) ||
             !blockRepository.existsByHash(tx.referencedBlockHash) ||
             !blockchainService.isActualTransaction(tx, MAX_REFERENCED_BLOCK_DEPTH)
         ) {
@@ -74,7 +74,9 @@ class EventProcessorService(
      * Receive new vote
      */
     fun onVote(vote: Vote) {
-        voteService.validateAndSave(vote)
+        spaceRepository.findById(vote.spaceId).ifPresent {
+            voteService.validateAndSave(vote)
+        }
     }
 
     /**
@@ -100,13 +102,16 @@ class EventProcessorService(
 
         val round = TimeUtils.getCurrentRound()
 
+        val spaceIds = spaceRepository.findAll().map { it.id }
+
         proposals
             .filter { it.block.round == round }
+            .filter { it.block.spaceId in spaceIds }
             .filter {
                 val space = spaceRepository.findById(it.block.spaceId).orElseThrow()
                 val activeValidator = accountService.getProducerBySpace(space, round)
 
-                activeValidator.id == it.block.producerId
+                activeValidator.accountId == it.block.producerId
             }
             .forEach { blockProcessor.processReceivedBlock(it) }
     }

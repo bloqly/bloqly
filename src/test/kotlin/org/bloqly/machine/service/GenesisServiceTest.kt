@@ -59,7 +59,6 @@ class GenesisServiceTest {
 
         testService.testPropertiesAreCreated()
         testService.testSpaceCreated()
-        testService.testValidatorsInitialized()
         testService.testValidatorsPowerValues()
     }
 }

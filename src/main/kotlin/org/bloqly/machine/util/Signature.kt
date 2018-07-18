@@ -17,11 +17,7 @@ data class Signature(
     fun toByteArray(): ByteArray = Bytes.concat(getR(), getS())
 
     companion object {
-        fun fromString(sigStr: String): Signature {
-            val sigBytes = sigStr.decode16()
-
-            return fromByteArray(sigStr.decode16())
-        }
+        fun fromString(sigStr: String): Signature = fromByteArray(sigStr.decode16())
 
         fun fromByteArray(sigBytes: ByteArray): Signature {
 

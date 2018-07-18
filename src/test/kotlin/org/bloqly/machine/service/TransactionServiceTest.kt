@@ -65,11 +65,11 @@ class TransactionServiceTest {
 
             space = DEFAULT_SPACE,
 
-            originId = root.id,
+            originId = root.accountId,
 
-            destinationId = root.id,
+            destinationId = root.accountId,
 
-            self = root.id,
+            self = root.accountId,
 
             key = null,
 

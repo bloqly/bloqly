@@ -83,13 +83,13 @@ class TestService(
 
         val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
 
-        val root = accountRepository.findById(getRoot().id).orElseThrow()
-        val user = accountRepository.findById(getUser().id).orElseThrow()
+        val root = accountRepository.findByAccountId(getRoot().accountId)!!
+        val user = accountRepository.findByAccountId(getUser().accountId)!!
 
         return transactionService.createTransaction(
             space = DEFAULT_SPACE,
-            originId = root.id,
-            destinationId = user.id,
+            originId = root.accountId,
+            destinationId = user.accountId,
             self = DEFAULT_SELF,
             value = writeLong("1"),
             transactionType = TransactionType.CALL,
@@ -111,30 +111,30 @@ class TestService(
 
         assertEquals(4, validators.size)
 
-        val validatorsIds = validators.map { it.id }
+        val validatorsIds = validators.map { it.accountId }
 
-        assertTrue(validatorsIds.contains(getValidator(0).id))
-        assertTrue(validatorsIds.contains(getValidator(1).id))
-        assertTrue(validatorsIds.contains(getValidator(2).id))
-        assertTrue(validatorsIds.contains(getValidator(3).id))
+        assertTrue(validatorsIds.contains(getValidator(0).accountId))
+        assertTrue(validatorsIds.contains(getValidator(1).accountId))
+        assertTrue(validatorsIds.contains(getValidator(2).accountId))
+        assertTrue(validatorsIds.contains(getValidator(3).accountId))
     }
 
     fun testValidatorsPowerValues() {
         assertEquals(
             BigInteger.ONE,
-            accountService.getAccountPower(DEFAULT_SPACE, getValidator(0).id)
+            accountService.getAccountPower(DEFAULT_SPACE, getValidator(0).accountId)
         )
         assertEquals(
             BigInteger.ONE,
-            accountService.getAccountPower(DEFAULT_SPACE, getValidator(1).id)
+            accountService.getAccountPower(DEFAULT_SPACE, getValidator(1).accountId)
         )
         assertEquals(
             BigInteger.ONE,
-            accountService.getAccountPower(DEFAULT_SPACE, getValidator(2).id)
+            accountService.getAccountPower(DEFAULT_SPACE, getValidator(2).accountId)
         )
         assertEquals(
             BigInteger.ONE,
-            accountService.getAccountPower(DEFAULT_SPACE, getValidator(3).id)
+            accountService.getAccountPower(DEFAULT_SPACE, getValidator(3).accountId)
         )
     }
 

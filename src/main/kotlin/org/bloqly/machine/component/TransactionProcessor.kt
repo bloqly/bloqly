@@ -12,9 +12,7 @@ import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.decode64
-import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
@@ -75,20 +73,6 @@ class TransactionProcessor(
         tx: Transaction,
         propertyContext: PropertyContext
     ): InvocationResult {
-
-        accountRepository.insertAccountIdIfNotExists(tx.origin)
-        accountRepository.insertAccountIdIfNotExists(tx.destination)
-        accountRepository.insertAccountIdIfNotExists(tx.self)
-
-        val origin = accountRepository.findById(tx.origin).orElseThrow()
-
-        val publicKey = tx.publicKey.decode16()
-
-        val address = CryptoUtils.hash(publicKey).encode16()
-
-        if (origin.publicKey == null && address == origin.id) {
-            accountRepository.save(origin.copy(publicKey = tx.publicKey))
-        }
 
         val result = when (tx.transactionType) {
 

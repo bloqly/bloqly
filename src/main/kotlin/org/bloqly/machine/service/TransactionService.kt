@@ -35,11 +35,11 @@ class TransactionService(
         timestamp: Long = Instant.now().toEpochMilli()
     ): Transaction {
 
-        val origin = accountRepository.findById(originId).orElseThrow()
+        val origin = accountRepository.findByAccountId(originId)!!
 
         val tx = Transaction(
             spaceId = space,
-            origin = origin.id,
+            origin = origin.accountId,
             destination = destinationId,
             self = self,
             key = key,

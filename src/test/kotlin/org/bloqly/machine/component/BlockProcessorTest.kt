@@ -69,7 +69,7 @@ class BlockProcessorTest {
     @Before
     fun setup() {
 
-        propertyId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, testService.getUser().id, "balance")
+        propertyId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, testService.getUser().accountId, "balance")
 
         testService.cleanup()
         testService.createBlockchain()

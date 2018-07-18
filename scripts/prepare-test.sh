@@ -5,31 +5,31 @@ set -x
 #root
 curl -X POST \
   -H "Content-Type: application/json" \
-  -d '{"privateKey":"78CA9AE2A589CB7D0E151E153F2CCCC760CBDAA05FE74C802FBAC6B0CDDCA534"}' \
+  -d '{"privateKey":"1B7B7B3967A819DF91C82F70D99F64143D0F1ACCEF1A4D19825DD09326F432BB"}' \
   http://localhost:9901/api/v1/admin/accounts
 
 #validator1
 curl -X POST \
   -H "Content-Type: application/json" \
-  -d '{"privateKey":"7869F85C5F8138512E75C2E8469DDDA0A6A4EFBCD5FE3F068EECD9B0439601C9"}' \
+  -d '{"privateKey":"77D030FC19D72CDCF25CD869AB05487C6772F1A75FDA314C73564F835BCA5CBF"}' \
   http://localhost:9901/api/v1/admin/accounts
 
 #validator2
 curl -X POST \
   -H "Content-Type: application/json" \
-  -d '{"privateKey":"00B8898555BE47960016E3B5E37D83520188E442BADF3397E4D7CD07D9D54099F4"}' \
+  -d '{"privateKey":"5BE738EC7986195E854C0F5D890A5377950EC1DA75B92DBFBD56CBFB765FF80D"}' \
   http://localhost:9902/api/v1/admin/accounts
 
 #validator3
 curl -X POST \
   -H "Content-Type: application/json" \
-  -d '{"privateKey":"3890ACF98A004E166A864F1444F4425003275DBD1BF84DFCA9F55847BF5E84B4"}' \
+  -d '{"privateKey":"D17EE6A9EBD5F34DF2FD50D22D89AB5EDDC80A350440E4F40F88D71725B36BA6"}' \
   http://localhost:9903/api/v1/admin/accounts
 
 #validator4
 curl -X POST \
   -H "Content-Type: application/json" \
-  -d '{"privateKey":"A115E92725C45AD12D054EDBBFEAA071D12D20512602A66CB6B401D3CD459944"}' \
+  -d '{"privateKey":"D7A50269CE3839A2D1AD47E5BE388CEEF1254EFAD613B17CD2224D0D213043DD"}' \
   http://localhost:9904/api/v1/admin/accounts
 
 # init blockchain

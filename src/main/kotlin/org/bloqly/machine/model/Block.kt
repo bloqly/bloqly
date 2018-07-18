@@ -18,10 +18,22 @@ import javax.persistence.UniqueConstraint
 @Table(
     name = "block",
     uniqueConstraints = [
-        UniqueConstraint(columnNames = ["hash", "libHash"]),
-        UniqueConstraint(columnNames = ["hash", "parentHash"]),
-        UniqueConstraint(columnNames = ["spaceId", "producerId", "height"]),
-        UniqueConstraint(columnNames = ["spaceId", "producerId", "round"])
+        UniqueConstraint(
+            columnNames = ["hash", "libHash"],
+            name = "uq_block_hash_lib_hash"
+        ),
+        UniqueConstraint(
+            columnNames = ["hash", "parentHash"],
+            name = "uq_hash_parent_hash"
+        ),
+        UniqueConstraint(
+            columnNames = ["spaceId", "producerId", "height"],
+            name = "uq_space_producer_height"
+        ),
+        UniqueConstraint(
+            columnNames = ["spaceId", "producerId", "round"],
+            name = "uq_producer_round"
+        )
     ]
 )
 data class Block(

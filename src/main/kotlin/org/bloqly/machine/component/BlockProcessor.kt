@@ -9,6 +9,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
 import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.model.Vote
+import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
@@ -42,7 +43,8 @@ class BlockProcessor(
     private val transactionProcessor: TransactionProcessor,
     private val propertyService: PropertyService,
     private val contractService: ContractService,
-    private val transactionOutputRepository: TransactionOutputRepository
+    private val transactionOutputRepository: TransactionOutputRepository,
+    private val accountRepository: AccountRepository
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
@@ -60,7 +62,9 @@ class BlockProcessor(
 
             evaluateBlocks(currentLIB, receivedBlock.height, propertyContext)
 
-            val votes = blockData.votes.map { it.toModel() }
+            val votes = blockData.votes.map { vote ->
+                vote.toModel(accountRepository.findValidatorByPublicKey(vote.publicKey))
+            }
             votes.forEach { voteService.requireVoteValid(it) }
 
             val transactions = blockData.transactions.map { it.toModel() }
@@ -150,7 +154,7 @@ class BlockProcessor(
 
     fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
 
-        blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.id, round)
+        blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)
             ?.let { return BlockData(it) }
 
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
@@ -185,7 +189,7 @@ class BlockProcessor(
             diff = diff,
             timestamp = Instant.now().toEpochMilli(),
             parentHash = lastBlock.hash,
-            producerId = producer.id,
+            producerId = producer.accountId,
             txHash = CryptoUtils.digestTransactions(transactions),
             validatorTxHash = CryptoUtils.digestVotes(votes),
             round = round,

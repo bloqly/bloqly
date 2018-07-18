@@ -27,7 +27,7 @@ class VoteService(
 
         val newHeight = lastBlock.height + 1
 
-        return voteRepository.findBySpaceIdAndValidatorIdAndHeight(space.id, validator.id, newHeight)
+        return voteRepository.findBySpaceIdAndValidatorAndHeight(space.id, validator, newHeight)
             ?: createVote(validator, lastBlock)
     }
 
@@ -39,7 +39,7 @@ class VoteService(
         val timestamp = Instant.now().toEpochMilli()
 
         val vote = Vote(
-            validatorId = validator.id,
+            validator = validator,
             blockHash = block.hash,
             height = block.height + 1,
             spaceId = block.spaceId,
@@ -60,7 +60,9 @@ class VoteService(
 
         requireVoteValid(vote)
 
-        if (voteRepository.existsByValidatorIdAndSpaceIdAndHeight(vote.validatorId, vote.spaceId, vote.height)) {
+        val validator = accountRepository.findValidatorByPublicKey(vote.validator.publicKey!!)
+
+        if (voteRepository.existsByValidatorAndSpaceIdAndHeight(validator, vote.spaceId, vote.height)) {
             return
         }
 
@@ -70,7 +72,7 @@ class VoteService(
     fun requireVoteValid(vote: Vote) {
         // TODO create a log file where log full stack traces
 
-        val validator = accountRepository.findById(vote.validatorId).orElseThrow()
+        val validator = vote.validator
 
         require(CryptoUtils.verifyVote(vote, validator.publicKey.decode16())) {
             "Could not verify vote."

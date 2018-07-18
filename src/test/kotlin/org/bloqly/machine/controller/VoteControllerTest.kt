@@ -78,6 +78,6 @@ class VoteControllerTest {
 
         restTemplate.postForObject(url, entity, Void.TYPE)
 
-        assertNotNull(voteRepository.findBySpaceIdAndValidatorIdAndHeight(DEFAULT_SPACE, vote.validatorId, vote.height))
+        assertNotNull(voteRepository.findBySpaceIdAndValidatorAndHeight(DEFAULT_SPACE, vote.validator, vote.height))
     }
 }

@@ -2,6 +2,8 @@ package org.bloqly.machine.model
 
 import javax.persistence.Column
 import javax.persistence.Entity
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
 import javax.persistence.Id
 
 // TODO introduce nonce
@@ -9,7 +11,11 @@ import javax.persistence.Id
 data class Account(
 
     @Id
-    var id: String,
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    var id: Long? = null,
+
+    @Column(nullable = false, unique = true)
+    var accountId: String,
 
     @Column
     var publicKey: String? = null,
@@ -32,6 +38,6 @@ data class Account(
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        return id?.hashCode() ?: 0
     }
 }

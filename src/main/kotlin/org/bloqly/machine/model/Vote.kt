@@ -7,6 +7,7 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.AUTO
 import javax.persistence.Id
+import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.persistence.UniqueConstraint
 
@@ -14,8 +15,14 @@ import javax.persistence.UniqueConstraint
 @Table(
     name = "vote",
     uniqueConstraints = [
-        (UniqueConstraint(columnNames = ["spaceId", "validatorId", "height"])),
-        (UniqueConstraint(columnNames = ["validatorId", "blockHash"]))
+        (UniqueConstraint(
+            columnNames = ["spaceId", "validator_id", "height"],
+            name = "uq_vote_space_validator_height"
+        )),
+        (UniqueConstraint(
+            columnNames = ["validator_id", "blockHash"],
+            name = "uq_vote_validator_block_hash"
+        ))
     ]
 )
 data class Vote(
@@ -24,8 +31,8 @@ data class Vote(
     @GeneratedValue(strategy = AUTO)
     var id: Long? = null,
 
-    @Column(nullable = false)
-    val validatorId: String,
+    @ManyToOne(optional = false)
+    val validator: Account,
 
     @Column(nullable = false)
     val blockHash: String,
@@ -46,7 +53,7 @@ data class Vote(
     fun toVO(): VoteVO {
 
         return VoteVO(
-            validatorId = validatorId,
+            publicKey = validator.publicKey!!,
             blockHash = blockHash,
             height = height,
             spaceId = spaceId,

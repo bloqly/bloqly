@@ -33,10 +33,10 @@ class ResetService(
         blockRepository.deleteAll()
         spaceRepository.deleteAll()
         transactionRepository.deleteAll()
-        accountRepository.deleteAll()
         nodeRepository.deleteAll()
         voteRepository.deleteAll()
         transactionOutputRepository.deleteAll()
+        accountRepository.deleteAll()
         TimeUtils.reset()
     }
 }

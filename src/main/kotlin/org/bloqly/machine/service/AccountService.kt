@@ -48,7 +48,7 @@ class AccountService(
         val publicKey = CryptoUtils.getPublicFor(privateKey)
 
         return Account(
-            id = hashAndEncode16(publicKey),
+            accountId = hashAndEncode16(publicKey),
             publicKey = publicKey.encode16(),
             privateKey = privateKey.encode16()
         )
@@ -60,8 +60,8 @@ class AccountService(
         val accountIds = powerProperties.map { it.id.target }
 
         return accountRepository
-            .findAllById(accountIds)
-            .sortedBy { it.id }
+            .findAllByAccountIds(accountIds)
+            .sortedBy { it.accountId }
     }
 
     fun getAccountPower(space: String, accountId: String): BigInteger {
@@ -86,7 +86,7 @@ class AccountService(
         val publicKeyHash = CryptoUtils.hash(publicKeyBytes)
         val accountId = publicKeyHash.encode16()
 
-        require(!accountRepository.existsById(accountId)) {
+        require(!accountRepository.existsByAccountId(accountId)) {
             "Could not import account: $accountId, account already exists."
         }
 
@@ -94,7 +94,7 @@ class AccountService(
 
         return accountRepository.save(
             Account(
-                id = accountId,
+                accountId = accountId,
                 publicKey = publicKey,
                 privateKey = privateKey
             )
