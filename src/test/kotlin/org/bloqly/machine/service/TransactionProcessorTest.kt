@@ -5,7 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Property
-import org.bloqly.machine.model.PropertyContext
+import org.bloqly.machine.component.PropertyContext
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.PropertyRepository

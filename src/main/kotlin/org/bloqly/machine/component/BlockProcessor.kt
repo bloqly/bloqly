@@ -4,9 +4,7 @@ import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.InvocationResult
-import org.bloqly.machine.model.InvocationResultType
 import org.bloqly.machine.model.Properties
-import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
 import org.bloqly.machine.model.TransactionOutputId
@@ -53,59 +51,75 @@ class BlockProcessor(
 
         try {
             // TODO check LIB for received block
-            val block = blockData.block.toModel()
-            requireValid(block)
+            val receivedBlock = blockData.block.toModel()
+            requireValid(receivedBlock)
 
             val propertyContext = PropertyContext(propertyService, contractService)
 
-            val currentLIB = blockService.getLIBForSpace(block.spaceId)
+            val currentLIB = blockService.getLIBForSpace(receivedBlock.spaceId)
 
-            if (currentLIB.height > 0) {
-                var blockToEvaluate = blockRepository.findByParentHash(currentLIB.hash)!!
-
-                while (blockToEvaluate.height < block.height) {
-
-                    evaluateBlock(blockToEvaluate, propertyContext)
-
-                    blockToEvaluate = blockRepository.findByParentHash(blockToEvaluate.hash)!!
-                }
-
-                require(blockToEvaluate.hash == block.parentHash)
-            }
+            evaluateBlocks(currentLIB, receivedBlock, propertyContext)
 
             val votes = blockData.votes.map { it.toModel() }
             votes.forEach { voteService.requireVoteValid(it) }
 
             val transactions = blockData.transactions.map { it.toModel() }
-            transactions.forEach { tx ->
-                val result = transactionProcessor.processTransaction(tx, propertyContext)
 
-                if (result.invocationResultType != InvocationResultType.SUCCESS) {
-                    throw RuntimeException("Could not process transaction $tx")
-                }
-            }
+            evaluateBlock(receivedBlock, propertyContext)
 
             blockRepository.save(
-                block.copy(
+                receivedBlock.copy(
                     transactions = transactions,
                     votes = votes
                 )
             )
 
-            moveLIB(currentLIB)
+            moveLIBIfNeeded(currentLIB)
         } catch (e: Exception) {
             log.error("Could not process block ${blockData.block.hash} of height ${blockData.block.height}", e)
+        }
+    }
+
+    private fun evaluateBlocks(currentLIB: Block, receivedBlock: Block, propertyContext: PropertyContext) {
+
+        blockRepository.findByParentHash(currentLIB.hash)?.let { firstBlockToEvaluate ->
+
+            var blockToEvaluate = firstBlockToEvaluate
+
+            while (blockToEvaluate.height < receivedBlock.height - 1) {
+
+                evaluateBlock(blockToEvaluate, propertyContext)
+
+                blockToEvaluate = blockRepository.findByParentHash(blockToEvaluate.hash)!!
+            }
+
+            require(blockToEvaluate.hash == receivedBlock.parentHash)
         }
     }
 
     private fun evaluateBlock(block: Block, propertyContext: PropertyContext) {
 
         block.transactions.forEach { tx ->
-            val result = transactionProcessor.processTransaction(tx, propertyContext)
 
-            require(result.isOK())
+            // already processed this transaction?
+            val txOutput = transactionOutputRepository
+                .findById(TransactionOutputId(block.hash, tx.hash))
 
-            propertyContext.updatePropertyValues(result.output)
+            val output = if (txOutput.isPresent) {
+                ObjectUtils.readProperties(txOutput.get().output)
+            } else {
+                val invocationResult = transactionProcessor.processTransaction(tx, propertyContext)
+
+                require(invocationResult.isOK()) {
+                    "Could not process transaction $tx"
+                }
+
+                saveTxOutputs(listOf(TransactionResult(tx, invocationResult)), block)
+
+                invocationResult.output
+            }
+
+            propertyContext.updatePropertyValues(output)
         }
     }
 
@@ -173,12 +187,12 @@ class BlockProcessor(
 
         saveTxOutputs(txResults, newBlock)
 
-        moveLIB(currentLIB)
+        moveLIBIfNeeded(currentLIB)
 
         return BlockData(blockRepository.save(newBlock))
     }
 
-    private fun moveLIB(currentLIB: Block) {
+    private fun moveLIBIfNeeded(currentLIB: Block) {
 
         val newLIB = blockService.getLIBForSpace(currentLIB.spaceId)
 
@@ -188,27 +202,37 @@ class BlockProcessor(
             return
         }
 
-        // apply transaction outputs if LIB moved forward
+        log.info(
+            """
+                |Moving LIB from height ${currentLIB.height} to ${newLIB.height}.
+                |currentLIB.hash = ${currentLIB.hash}, newLIB.hash = ${newLIB.hash}.""".trimMargin()
+        )
 
-        var block = currentLIB
+        // Apply transaction outputs if LIB moved forward
+        // Iterate and apply all transactions from the block next to the previous LIB including NEW_LIB
+        // In some situations LIB.height + 1 = NEW_LIB.height
 
-        // iterate and apply all transactions from the block next to the previous LIB including NEW_LIB
-        // in some situations LIB.height + 1 = NEW_LIB.height
-        // but not always
+        var block = blockRepository.findByParentHash(currentLIB.hash)!!
+
         while (block.height <= newLIB.height) {
 
-            if (block.height > 0) {
+            block.transactions.forEach { tx ->
 
-                block.transactions.forEach { tx ->
-
+                try {
                     val txOutput = transactionOutputRepository
                         .findById(TransactionOutputId(block.hash, tx.hash))
                         .orElseThrow()
 
                     val properties = ObjectUtils.readProperties(txOutput.output)
 
+                    properties.forEach { log.info("Applying property $it") }
+
                     // TODO add check so that property keys are unique
                     propertyService.updateProperties(properties)
+                } catch (e: Exception) {
+                    val errorMessage = "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
+                    log.error(errorMessage, e)
+                    throw RuntimeException(errorMessage, e)
                 }
             }
 

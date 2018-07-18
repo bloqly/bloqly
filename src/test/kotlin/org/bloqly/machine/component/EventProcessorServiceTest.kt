@@ -6,7 +6,6 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Property
-import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository

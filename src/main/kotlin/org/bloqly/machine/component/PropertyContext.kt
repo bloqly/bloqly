@@ -1,5 +1,8 @@
-package org.bloqly.machine.model
+package org.bloqly.machine.component
 
+import org.bloqly.machine.model.Contract
+import org.bloqly.machine.model.Property
+import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.service.ContractService
 

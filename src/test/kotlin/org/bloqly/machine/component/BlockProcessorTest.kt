@@ -154,14 +154,13 @@ class BlockProcessorTest {
 
         assertEquals(BInteger("1"), ParameterUtils.readValue(property.value))
 
-        /*
         blockProcessor.processReceivedBlock(blocks[4])
         val block4 = blockService.loadBlockByHash(blocks[4].block.hash)
         assertEquals(1, block4.transactions.size)
 
         property = propertyService.findById(propertyId)!!
         assertEquals(BInteger("2"), ParameterUtils.readValue(property.value))
-        */
+
     }
 
     private fun assertTxReferencesBlock(blockData: BlockData, blockHash: String) {

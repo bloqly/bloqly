@@ -1,6 +1,7 @@
 package org.bloqly.machine.service;
 
 import com.google.common.collect.Lists;
+import org.bloqly.machine.component.PropertyContext;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.*;
 import org.bloqly.machine.util.ParameterUtils;

@@ -6,7 +6,6 @@ import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.InvocationResultType.SUCCESS
-import org.bloqly.machine.model.PropertyContext
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
