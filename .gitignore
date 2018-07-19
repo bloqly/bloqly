@@ -16,3 +16,4 @@ spring-shell.log
 /docs/.bundle
 /docs/.saas-cache
 /test
+/logs/

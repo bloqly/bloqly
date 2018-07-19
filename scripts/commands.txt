@@ -8,7 +8,7 @@ createdb bloqly_test
 
 export BLOQLY_CONFIG="./config/config.yaml"
 
-./release/run.sh -database bloqly_main -port 9901 -nodes localhost:9902,localhost:9903,localhost:9904
+./config/config.yaml ./release/run.sh -database bloqly_main -port 9901 -nodes localhost:9902,localhost:9903,localhost:9904
 ./release/run.sh -database bloqly_rhea -port 9902 -nodes localhost:9901,localhost:9903,localhost:9904
 ./release/run.sh -database bloqly_loge -port 9903 -nodes localhost:9901,localhost:9902,localhost:9904
 ./release/run.sh -database bloqly_ymir -port 9904 -nodes localhost:9901,localhost:9902,localhost:9903

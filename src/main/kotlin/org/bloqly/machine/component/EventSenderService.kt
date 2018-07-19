@@ -28,7 +28,7 @@ class EventSenderService(
                     log.info("Sending votes to node $node")
                     nodeQueryService.sendVotes(node, votes)
                 } catch (e: Exception) {
-                    log.error("Could not send votes to $node. Details: ${e.message}")
+                    log.warn("Could not send votes to $node. Details: ${e.message}")
                 }
             }
         }
