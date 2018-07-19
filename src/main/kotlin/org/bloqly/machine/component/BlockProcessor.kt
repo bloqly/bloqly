@@ -95,20 +95,25 @@ class BlockProcessor(
             return
         }
 
+        getBlocksRange(currentLIB, toBlock).forEach { block ->
+            evaluateBlock(block, propertyContext)
+        }
+    }
+
+    private fun getBlocksRange(afterBlock: Block, toBlock: Block): List<Block> {
         val blocks = mutableListOf<Block>()
         var currentBlock = toBlock
 
-        while (currentBlock.height > currentLIB.height) {
+        while (currentBlock.height > afterBlock.height) {
             blocks.add(currentBlock)
 
             currentBlock = blockRepository.findByHash(currentBlock.parentHash)!!
         }
 
-        require(currentBlock == currentLIB)
+        require(currentBlock == afterBlock)
+        require(!blocks.contains(afterBlock))
 
-        blocks.reversed().forEach { block ->
-            evaluateBlock(block, propertyContext)
-        }
+        return blocks.reversed()
     }
 
     private fun evaluateBlock(block: Block, propertyContext: PropertyContext) {
@@ -234,10 +239,7 @@ class BlockProcessor(
         // Iterate and apply all transactions from the block next to the previous LIB including NEW_LIB
         // In some situations LIB.height + 1 = NEW_LIB.height
 
-        var block = blockRepository.findByParentHash(currentLIB.hash)!!
-
-        while (block.height <= newLIB.height) {
-
+        getBlocksRange(currentLIB, newLIB).forEach { block ->
             block.transactions.forEach { tx ->
 
                 try {
@@ -257,11 +259,7 @@ class BlockProcessor(
                     throw RuntimeException(errorMessage, e)
                 }
             }
-
-            block = blockRepository.findByParentHash(block.hash)!!
         }
-
-        require(block.parentHash == newLIB.hash)
     }
 
     private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block) {
