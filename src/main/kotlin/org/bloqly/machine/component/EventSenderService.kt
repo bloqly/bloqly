@@ -73,11 +73,13 @@ class EventSenderService(
                 try {
                     log.info("Request deltas from node $node")
 
-                    nodeQueryService.requestDelta(node, delta)
+                    val remoteDeltas = nodeQueryService.requestDelta(node, delta)
+
+                    remoteDeltas
                         ?.sortedBy { it.block.height }
                         ?.forEach { blockProcessor.processReceivedBlock(it) }
                 } catch (e: Exception) {
-                    "Could not request deltas from $node. Details: ${e.message}"
+                    log.error("Could not request deltas from $node.", e)
                 }
             }
         }

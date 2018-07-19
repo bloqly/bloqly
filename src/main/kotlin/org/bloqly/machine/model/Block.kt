@@ -1,7 +1,6 @@
 package org.bloqly.machine.model
 
 import org.bloqly.machine.vo.BlockVO
-import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -75,7 +74,7 @@ data class Block(
     @Column(nullable = false)
     val signature: String,
 
-    @ManyToMany(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "block_transactions",
         joinColumns = [JoinColumn(name = "block_id")],
@@ -83,7 +82,7 @@ data class Block(
     )
     val transactions: List<Transaction> = listOf(),
 
-    @ManyToMany(cascade = [CascadeType.PERSIST], fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "block_votes",
         joinColumns = [JoinColumn(name = "block_id")],
@@ -131,4 +130,5 @@ data class Block(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
+
 }

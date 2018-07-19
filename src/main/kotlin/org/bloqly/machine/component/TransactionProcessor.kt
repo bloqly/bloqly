@@ -9,7 +9,7 @@ import org.bloqly.machine.model.InvocationResultType.SUCCESS
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
-import org.bloqly.machine.repository.AccountRepository
+import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode64
@@ -19,7 +19,7 @@ import javax.transaction.Transactional
 @Component
 @Transactional
 class TransactionProcessor(
-    private val accountRepository: AccountRepository,
+    private val accountService: AccountService,
     private val contractExecutorService: ContractExecutorService
 ) {
 
@@ -74,6 +74,8 @@ class TransactionProcessor(
         propertyContext: PropertyContext
     ): InvocationResult {
 
+        accountService.ensureAccount(tx.destination)
+
         val result = when (tx.transactionType) {
 
             CREATE -> {
@@ -89,6 +91,8 @@ class TransactionProcessor(
                 InvocationResult(SUCCESS)
             }
         }
+
+        accountService.ensureAccounts(result)
 
         propertyContext.updatePropertyValues(result.output)
 

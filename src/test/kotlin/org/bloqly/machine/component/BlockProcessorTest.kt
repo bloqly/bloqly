@@ -9,9 +9,10 @@ import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
+import org.bloqly.machine.repository.VoteRepository
+import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.test.TestService
 import org.bloqly.machine.util.ObjectUtils
@@ -33,7 +34,10 @@ import org.springframework.test.context.junit4.SpringRunner
 class BlockProcessorTest {
 
     @Autowired
-    private lateinit var propertyRepository: PropertyRepository
+    private lateinit var accountService: AccountService
+
+    @Autowired
+    private lateinit var voteRepository: VoteRepository
 
     @Autowired
     private lateinit var transactionOutputRepository: TransactionOutputRepository
@@ -161,6 +165,25 @@ class BlockProcessorTest {
         assertNotNull(blockRepository.findByHash(blocks[0].block.hash))
 
         assertNull(propertyService.findById(propertyId))
+    }
+
+    @Test
+    fun testProcessNewBlockWithOldVotes() {
+
+        val votes = blocks[0].votes.map { voteVO ->
+            val account = accountService.getAccountByPublicKey(voteVO.publicKey)
+            voteVO.toModel(account)
+        }
+
+        voteRepository.saveAll(votes)
+
+        blockProcessor.processReceivedBlock(blocks[0])
+    }
+
+    @Test
+    fun testSilentlyRejectsBlockWithTheSameHash() {
+        blockProcessor.processReceivedBlock(blocks[0])
+        blockProcessor.processReceivedBlock(blocks[0])
     }
 
     @Test

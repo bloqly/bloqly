@@ -1,6 +1,6 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.repository.AccountRepository
+import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.TransactionVO
 import org.bloqly.machine.vo.VoteVO
@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class EventReceiverService(
     private val eventProcessorService: EventProcessorService,
-    private val accountRepository: AccountRepository
+    private val accountService: AccountService
 ) {
     private val log = LoggerFactory.getLogger(EventReceiverService::class.simpleName)
 
@@ -24,7 +24,7 @@ class EventReceiverService(
         voteVOs.forEach { vote ->
             try {
                 eventProcessorService.onVote(
-                    vote.toModel(accountRepository.findValidatorByPublicKey(vote.publicKey))
+                    vote.toModel(accountService.getAccountByPublicKey(vote.publicKey))
                 )
             } catch (e: Exception) {
                 log.error("Could not process vote $vote", e)

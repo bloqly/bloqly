@@ -8,13 +8,12 @@ interface BlockRepository : CrudRepository<Block, Long> {
 
     fun existsBySpaceId(spaceId: String): Boolean
 
-    // TODO  add sorting by block_id?
     @Query(
         """
         select * from block
         where
         space_id = ?1
-        order by height desc, diff desc, weight desc, round asc
+        order by height desc, diff desc, weight desc, round, hash
         limit 1
         """, nativeQuery = true
     )

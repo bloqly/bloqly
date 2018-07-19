@@ -4,7 +4,6 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
@@ -18,7 +17,7 @@ import java.time.Instant
 class VoteService(
     private val voteRepository: VoteRepository,
     private val blockRepository: BlockRepository,
-    private val accountRepository: AccountRepository
+    private val accountService: AccountService
 ) {
 
     fun getVote(space: Space, validator: Account): Vote? {
@@ -56,17 +55,17 @@ class VoteService(
         )
     }
 
-    fun validateAndSave(vote: Vote) {
+    fun validateAndSave(vote: Vote): Vote {
 
         requireVoteValid(vote)
 
-        val validator = accountRepository.findValidatorByPublicKey(vote.validator.publicKey!!)
+        val validator = accountService.getAccountByPublicKey(vote.validator.publicKey!!)
 
-        if (voteRepository.existsByValidatorAndSpaceIdAndHeight(validator, vote.spaceId, vote.height)) {
-            return
+        voteRepository.findByValidatorAndSpaceIdAndHeight(validator, vote.spaceId, vote.height)?.let {
+            return it
         }
 
-        voteRepository.save(vote)
+        return voteRepository.save(vote)
     }
 
     fun requireVoteValid(vote: Vote) {

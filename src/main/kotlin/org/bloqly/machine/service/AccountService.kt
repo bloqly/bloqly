@@ -4,11 +4,13 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.decode16
@@ -99,5 +101,38 @@ class AccountService(
                 privateKey = privateKey
             )
         )
+    }
+
+    fun getAccountByPublicKey(publicKey: String): Account {
+        val publicKeyBytes = publicKey.decode16()
+
+        val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)
+
+        ensureAccount(accountId)
+
+        val account = accountRepository.findByAccountId(accountId)!!
+
+        return if (account.publicKey == null) {
+            account.publicKey = publicKey
+            accountRepository.save(account)
+        } else {
+            account
+        }
+    }
+
+    fun ensureAccount(accountId: String) {
+        if (!accountRepository.existsByAccountId(accountId)) {
+            accountRepository.save(Account(accountId = accountId))
+        }
+    }
+
+    fun ensureAccounts(result: InvocationResult) {
+        if (!result.isOK()) {
+            return
+        }
+
+        result.output.forEach { property ->
+            ensureAccount(property.id.target)
+        }
     }
 }

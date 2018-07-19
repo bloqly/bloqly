@@ -6,8 +6,6 @@ import org.springframework.data.repository.CrudRepository
 
 interface AccountRepository : CrudRepository<Account, String> {
 
-    fun findValidatorByPublicKey(publicKey: String): Account
-
     fun existsByAccountId(accountId: String): Boolean
 
     fun findByAccountId(originId: String): Account?

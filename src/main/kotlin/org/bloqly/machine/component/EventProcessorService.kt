@@ -11,6 +11,8 @@ import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Instant
 import javax.transaction.Transactional
@@ -34,6 +36,8 @@ class EventProcessorService(
     private val blockProcessor: BlockProcessor,
     private val blockchainService: BlockchainService
 ) {
+
+    private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
     /**
      * Collecting transactions
@@ -113,6 +117,12 @@ class EventProcessorService(
 
                 activeValidator.accountId == it.block.producerId
             }
-            .forEach { blockProcessor.processReceivedBlock(it) }
+            .forEach { blockData ->
+                try {
+                    blockProcessor.processReceivedBlock(blockData)
+                } catch (e: Exception) {
+                    log.error("Could not process block ${blockData.block.hash} of height ${blockData.block.height}", e)
+                }
+            }
     }
 }

@@ -3,6 +3,7 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
+import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.test.TestService
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -21,6 +22,9 @@ class AccountServiceTest {
 
     @Autowired
     private lateinit var accountService: AccountService
+
+    @Autowired
+    private lateinit var accountRepository: AccountRepository
 
     @Autowired
     private lateinit var testService: TestService
@@ -83,5 +87,19 @@ class AccountServiceTest {
             fail()
         } catch (e: Exception) {
         }
+    }
+
+    @Test
+    fun testGetAccountByPublicKey() {
+        val account = accountService.newAccount()
+
+        val publicKey = account.publicKey!!
+
+        accountRepository.save(account)
+
+        val saved = accountService.getAccountByPublicKey(publicKey)
+
+        assertNotNull(saved)
+        assertEquals(account, saved)
     }
 }

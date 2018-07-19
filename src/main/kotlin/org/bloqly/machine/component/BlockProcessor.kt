@@ -9,11 +9,12 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
 import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
+import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
+import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
@@ -35,6 +36,7 @@ private data class TransactionResult(
 @Service
 @Transactional
 class BlockProcessor(
+    private val transactionRepository: TransactionRepository,
     private val transactionService: TransactionService,
     private val voteService: VoteService,
     private val voteRepository: VoteRepository,
@@ -44,58 +46,68 @@ class BlockProcessor(
     private val propertyService: PropertyService,
     private val contractService: ContractService,
     private val transactionOutputRepository: TransactionOutputRepository,
-    private val accountRepository: AccountRepository
+    private val accountService: AccountService
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
 
     fun processReceivedBlock(blockData: BlockData) {
 
-        try {
-            // TODO check LIB for received block
-            val receivedBlock = blockData.block.toModel()
-            requireValid(receivedBlock)
+        // TODO check LIB for received block
+        val receivedBlock = blockData.block.toModel()
 
-            val propertyContext = PropertyContext(propertyService, contractService)
-
-            val currentLIB = blockService.getLIBForSpace(receivedBlock.spaceId)
-
-            evaluateBlocks(currentLIB, receivedBlock.height, propertyContext)
-
-            val votes = blockData.votes.map { vote ->
-                vote.toModel(accountRepository.findValidatorByPublicKey(vote.publicKey))
-            }
-            votes.forEach { voteService.requireVoteValid(it) }
-
-            val transactions = blockData.transactions.map { it.toModel() }
-
-            val block = receivedBlock.copy(
-                transactions = transactions,
-                votes = votes
-            )
-
-            evaluateBlock(block, propertyContext)
-
-            blockRepository.save(block)
-
-            moveLIBIfNeeded(currentLIB)
-        } catch (e: Exception) {
-            log.error("Could not process block ${blockData.block.hash} of height ${blockData.block.height}", e)
+        if (blockRepository.existsByHash(receivedBlock.hash)) {
+            return
         }
+
+        requireValid(receivedBlock)
+
+        val propertyContext = PropertyContext(propertyService, contractService)
+
+        val currentLIB = blockService.getLIBForSpace(receivedBlock.spaceId)
+
+        evaluateBlocks(currentLIB, receivedBlock, propertyContext)
+
+        val votes = blockData.votes.map { voteVO ->
+            val vote = voteVO.toModel(accountService.getAccountByPublicKey(voteVO.publicKey))
+            voteService.validateAndSave(vote)
+        }
+
+        val transactions = blockData.transactions.map {
+            transactionRepository.save(it.toModel())
+        }
+
+        val block = receivedBlock.copy(
+            transactions = transactions,
+            votes = votes
+        )
+
+        evaluateBlock(block, propertyContext)
+
+        blockRepository.save(block)
+
+        moveLIBIfNeeded(currentLIB)
     }
 
-    private fun evaluateBlocks(currentLIB: Block, newHeight: Long, propertyContext: PropertyContext) {
+    private fun evaluateBlocks(currentLIB: Block, toBlock: Block, propertyContext: PropertyContext) {
 
-        var currentBlock = currentLIB
+        if (currentLIB == toBlock) {
+            return
+        }
 
-        while (currentBlock.height < newHeight) {
+        val blocks = mutableListOf<Block>()
+        var currentBlock = toBlock
 
-            blockRepository.findByParentHash(currentBlock.hash)
-                ?.let {
-                    currentBlock = it
-                    evaluateBlock(currentBlock, propertyContext)
-                }
-                ?: break
+        while (currentBlock.height > currentLIB.height) {
+            blocks.add(currentBlock)
+
+            currentBlock = blockRepository.findByHash(currentBlock.parentHash)!!
+        }
+
+        require(currentBlock == currentLIB)
+
+        blocks.reversed().forEach { block ->
+            evaluateBlock(block, propertyContext)
         }
     }
 
@@ -126,10 +138,6 @@ class BlockProcessor(
     }
 
     private fun requireValid(block: Block) {
-
-        require(!blockRepository.existsByHash(block.hash)) {
-            "Block hash ${block.hash} already exists"
-        }
 
         require(!blockRepository.existsByHashAndLibHash(block.hash, block.libHash)) {
             "Unique constraint violated (hash, block_hash) : (${block.hash}, ${block.libHash})"
@@ -164,7 +172,7 @@ class BlockProcessor(
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        evaluateBlocks(currentLIB, newHeight, propertyContext)
+        evaluateBlocks(currentLIB, lastBlock, propertyContext)
 
         propertyContext.properties.forEach { log.info("Evaluated property $it") }
 
