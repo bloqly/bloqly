@@ -60,6 +60,11 @@ class BlockProcessor(
             return
         }
 
+        if (!blockRepository.existsByHash(receivedBlock.parentHash)) {
+            log.warn("No parent found with hash ${receivedBlock.parentHash}.")
+            return
+        }
+
         requireValid(receivedBlock)
 
         val propertyContext = PropertyContext(propertyService, contractService)
@@ -158,10 +163,6 @@ class BlockProcessor(
 
         require(!blockRepository.existsBySpaceIdAndProducerIdAndRound(block.spaceId, block.producerId, block.round)) {
             "Unique constraint violated (space_id, producer_id, round) : (${block.spaceId}, ${block.producerId}, ${block.round})"
-        }
-
-        require(blockRepository.findByHash(block.parentHash) != null) {
-            "No parent found for block hash: ${block.hash}, parent_hash: ${block.parentHash}"
         }
     }
 
