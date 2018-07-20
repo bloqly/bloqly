@@ -43,7 +43,9 @@ class EventSenderService(
                     log.info("Sending transactions to node $node")
                     nodeQueryService.sendTransactions(node, transactions)
                 } catch (e: Exception) {
-                    log.error("Could not send transactions to $node. Details: ${e.message}")
+                    val errorMessage = "Could not send transactions to $node. Details: ${e.message}"
+                    log.warn(errorMessage)
+                    log.error(errorMessage, e)
                 }
             }
         }
@@ -79,7 +81,9 @@ class EventSenderService(
                     remoteDeltas
                         ?.forEach { blockProcessor.processReceivedBlock(it) }
                 } catch (e: Exception) {
-                    log.error("Could not request deltas from $node.", e)
+                    val errorMessage = "Could not request deltas from $node: ${e.message}"
+                    log.warn(errorMessage)
+                    log.error(errorMessage, e)
                 }
             }
         }

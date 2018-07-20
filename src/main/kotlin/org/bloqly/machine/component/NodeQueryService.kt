@@ -98,7 +98,9 @@ class NodeQueryService(
 
             result = blockDataList?.blocks
         } catch (e: Exception) {
-            log.error("Could not retrieve deltas from $node. Details: ${e.message}")
+            val errorMessage = "Could not retrieve deltas from $node: ${e.message}"
+            log.warn(errorMessage)
+            log.error(errorMessage, e)
         }
 
         return result

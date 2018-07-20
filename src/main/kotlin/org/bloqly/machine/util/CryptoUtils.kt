@@ -102,6 +102,7 @@ object CryptoUtils {
                 publicKey = tx.publicKey.decode16()
             )
         } catch (e: Exception) {
+            log.warn(e.message)
             log.error(e.message, e)
             return false
         }

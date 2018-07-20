@@ -2,6 +2,3 @@ spring:
   datasource:
     username: slava
     password: password
-
-logging:
-  file: ./logs/bloqly-logs-main.log

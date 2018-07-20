@@ -121,7 +121,10 @@ class EventProcessorService(
                 try {
                     blockProcessor.processReceivedBlock(blockData)
                 } catch (e: Exception) {
-                    log.error("Could not process block ${blockData.block.hash} of height ${blockData.block.height}", e)
+                    val errorMessage =
+                        "Could not process block ${blockData.block.hash} of height ${blockData.block.height}"
+                    log.warn(errorMessage)
+                    log.error(errorMessage, e)
                 }
             }
     }

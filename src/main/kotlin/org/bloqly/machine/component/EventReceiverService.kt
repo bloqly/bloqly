@@ -27,7 +27,9 @@ class EventReceiverService(
                     vote.toModel(accountService.getAccountByPublicKey(vote.publicKey))
                 )
             } catch (e: Exception) {
-                log.error("Could not process vote $vote", e)
+                val errorMessage = "Could not process vote $vote"
+                log.warn(errorMessage)
+                log.error(errorMessage, e)
             }
         }
     }

@@ -256,7 +256,7 @@ class BlockProcessor(
                     propertyService.updateProperties(properties)
                 } catch (e: Exception) {
                     val errorMessage = "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
-                    log.error(errorMessage, e)
+                    log.warn(errorMessage, e)
                     throw RuntimeException(errorMessage, e)
                 }
             }

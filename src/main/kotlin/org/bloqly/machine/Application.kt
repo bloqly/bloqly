@@ -2,8 +2,11 @@ package org.bloqly.machine
 
 import org.bloqly.machine.util.ApplicationUtils
 import org.bloqly.machine.util.OptionUtils
+import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.scheduling.annotation.EnableScheduling
 
@@ -14,6 +17,13 @@ import org.springframework.scheduling.annotation.EnableScheduling
     exclude = [ElasticsearchAutoConfiguration::class]
 )
 class Application {
+
+    private val log = LoggerFactory.getLogger(Application::class.simpleName)
+
+    @EventListener(ApplicationReadyEvent::class)
+    fun onStart() {
+        log.info("Server started.")
+    }
 
     companion object {
 
