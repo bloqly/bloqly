@@ -55,8 +55,7 @@ class CryptoUtilsTest {
         val vote = Vote(
             validator = Account(
                 accountId = EncodingUtils.hashAndEncode16(pub),
-                publicKey = pub.encode16(),
-                privateKey = priv.encode16()
+                publicKey = pub.encode16()
             ),
             blockHash = "",
             height = 11,

@@ -73,7 +73,7 @@ class TestService(
         val accountsObject = ObjectUtils.readValue(accountsString, Accounts::class.java)
 
         accountsObject.accounts.forEach { account ->
-            accountService.importAccount(account.privateKey!!)
+            accountService.importAccount(account.privateKey)
         }
 
         blockchainService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)

@@ -1,5 +1,7 @@
 package org.bloqly.machine.model
 
+import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.encode16
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -12,19 +14,35 @@ data class Account(
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    var id: Long? = null,
+    val id: Long? = null,
 
     @Column(nullable = false, unique = true)
-    var accountId: String,
+    val accountId: String,
 
     @Column
     var publicKey: String? = null,
 
     @Column
-    var privateKey: String? = null
+    var privateKeyEncoded: ByteArray? = null
 ) {
 
-    fun hasKey(): Boolean = privateKey != null
+    var privateKey: String
+        get():String {
+            return privateKeyEncoded!!.encode16()
+        }
+        set(value) {
+            privateKeyEncoded = value.decode16()
+        }
+
+    var privateKeyBytes: ByteArray
+        get():ByteArray {
+            return privateKeyEncoded!!
+        }
+        set(value) {
+            privateKeyEncoded = value
+        }
+
+    fun hasKey(): Boolean = privateKeyEncoded != null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

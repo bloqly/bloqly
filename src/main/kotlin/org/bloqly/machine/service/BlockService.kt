@@ -10,7 +10,6 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.BlockData
@@ -63,8 +62,7 @@ class BlockService(
             )
         )
 
-        val privateKey = proposer.privateKey.decode16()
-        val signature = CryptoUtils.sign(privateKey, dataToSign)
+        val signature = CryptoUtils.sign(proposer.privateKeyBytes, dataToSign)
         val blockHash = CryptoUtils.hash(signature).encode16()
 
         val libHash = if (height > 0) getLIBForSpace(spaceId, producerId).hash else ""

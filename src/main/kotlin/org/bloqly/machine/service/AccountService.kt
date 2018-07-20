@@ -49,11 +49,14 @@ class AccountService(
         val privateKey = CryptoUtils.newPrivateKey()
         val publicKey = CryptoUtils.getPublicFor(privateKey)
 
-        return Account(
+        val account = Account(
             accountId = hashAndEncode16(publicKey),
-            publicKey = publicKey.encode16(),
-            privateKey = privateKey.encode16()
+            publicKey = publicKey.encode16()
         )
+
+        account.privateKeyBytes = privateKey
+
+        return account
     }
 
     fun getValidatorsForSpace(space: Space): List<Account> {
@@ -85,8 +88,7 @@ class AccountService(
 
         val privateKeyBytes = privateKey.decode16()
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
-        val publicKeyHash = CryptoUtils.hash(publicKeyBytes)
-        val accountId = publicKeyHash.encode16()
+        val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)
 
         require(!accountRepository.existsByAccountId(accountId)) {
             "Could not import account: $accountId, account already exists."
@@ -94,13 +96,14 @@ class AccountService(
 
         val publicKey = publicKeyBytes.encode16()
 
-        return accountRepository.save(
-            Account(
-                accountId = accountId,
-                publicKey = publicKey,
-                privateKey = privateKey
-            )
+        val account = Account(
+            accountId = accountId,
+            publicKey = publicKey
         )
+
+        account.privateKeyBytes = privateKeyBytes
+
+        return accountRepository.save(account)
     }
 
     fun getAccountByPublicKey(publicKey: String): Account {

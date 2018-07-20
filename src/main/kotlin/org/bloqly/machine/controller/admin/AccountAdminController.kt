@@ -19,9 +19,9 @@ class AccountAdminController(
 ) {
 
     @PostMapping
-    fun import(@RequestBody account: AccountRequest): ResponseEntity<Void> {
+    fun import(@RequestBody accountRequest: AccountRequest): ResponseEntity<Void> {
 
-        accountService.importAccount(account.privateKey)
+        accountService.importAccount(accountRequest.privateKey)
 
         return ResponseEntity(HttpStatus.CREATED)
     }

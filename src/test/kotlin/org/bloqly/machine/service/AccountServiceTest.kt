@@ -42,7 +42,7 @@ class AccountServiceTest {
 
         space = testService.getDefaultSpace()
 
-        accountService.importAccount(account.privateKey!!)
+        accountService.importAccount(account.privateKey)
     }
 
     @Test
@@ -83,7 +83,7 @@ class AccountServiceTest {
     @Test
     fun testImportAccountTwiceFails() {
         try {
-            accountService.importAccount(account.privateKey!!)
+            accountService.importAccount(account.privateKey)
             fail()
         } catch (e: Exception) {
         }

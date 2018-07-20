@@ -65,8 +65,8 @@ object CryptoUtils {
         return hash(bos.toByteArray())
     }
 
-    fun sign(privateKey: ByteArray, input: ByteArray): ByteArray =
-        BloqlySchnorr.sign(input, privateKey).toByteArray()
+    fun sign(privateKey: ByteArray?, input: ByteArray): ByteArray =
+        BloqlySchnorr.sign(input, privateKey!!).toByteArray()
 
     fun hash(tx: Transaction): ByteArray {
         return hash(
