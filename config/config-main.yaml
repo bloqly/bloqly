@@ -1,6 +1,11 @@
 database:
+  name: bloqly_main
   username: slava
   password: password
+
+port: 9901
+
+nodes: localhost:9902,localhost:9903,localhost:9904
 
 keys:
   passphrase_10CA5388: "validator1 password"

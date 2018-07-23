@@ -20,9 +20,13 @@ spring:
 
   datasource:
     pool-size: 30
+    url: jdbc:postgresql:${database.name}
     username: ${database.username}
     password: ${database.password}
 
   jackson:
     serialization:
       FAIL_ON_EMPTY_BEANS: false
+
+server:
+  port: ${port}

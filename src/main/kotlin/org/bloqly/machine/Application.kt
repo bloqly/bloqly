@@ -1,7 +1,6 @@
 package org.bloqly.machine
 
 import org.bloqly.machine.util.ApplicationUtils
-import org.bloqly.machine.util.OptionUtils
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration
@@ -29,13 +28,10 @@ class Application {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            ApplicationUtils.startServer(
-                OptionUtils.parseCommandLine(args)
-            )
+            ApplicationUtils.startServer()
         }
 
         const val REQUEST_THREADS = 5
-        const val DEFAULT_PORT = "9900"
         const val POWER_KEY = "power"
         const val DEFAULT_SPACE = "main"
         const val DEFAULT_SELF = "self"

@@ -1,6 +1,11 @@
 database:
+  name: bloqly_ymir
   username: slava
   password: password
+
+port: 9904
+
+nodes: localhost:9901,localhost:9902,localhost:9903
 
 keys:
   passphrase_DA4A181C: "validator4 password"
