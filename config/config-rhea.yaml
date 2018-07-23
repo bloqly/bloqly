@@ -8,4 +8,4 @@ port: 9902
 nodes: localhost:9901,localhost:9903,localhost:9904
 
 keys:
-  passphrase_9CBDDA16: "validator3 password"
+  passphrase_F7974E0C: "validator2 password"

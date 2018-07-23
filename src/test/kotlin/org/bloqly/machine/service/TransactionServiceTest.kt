@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.BlockchainService
+import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -33,6 +34,9 @@ class TransactionServiceTest {
 
     @Autowired
     private lateinit var accountService: AccountService
+
+    @Autowired
+    private lateinit var passphraseService: PassphraseService
 
     @Autowired
     private lateinit var blockService: BlockService
@@ -64,7 +68,7 @@ class TransactionServiceTest {
 
     private fun validator(n: Int) = testService.getValidator(n)
 
-    private fun passphrase(n: Int) = accountService.getPassphrase(validator(n).accountId)
+    private fun passphrase(n: Int) = passphraseService.getPassphrase(validator(n).accountId)
 
     private fun createTransaction(referencedBlockHash: String = CryptoUtils.hash(arrayOf()).encode16()): Transaction {
         return transactionService.createTransaction(

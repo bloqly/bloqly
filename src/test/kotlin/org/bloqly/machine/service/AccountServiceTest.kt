@@ -1,6 +1,7 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.AccountRepository
@@ -23,6 +24,9 @@ class AccountServiceTest {
 
     @Autowired
     private lateinit var accountService: AccountService
+
+    @Autowired
+    private lateinit var passphraseService: PassphraseService
 
     @Autowired
     private lateinit var accountRepository: AccountRepository
@@ -90,7 +94,7 @@ class AccountServiceTest {
     @Test
     fun testImportAccountTwiceFails() {
         try {
-            val passphrase = accountService.getPassphrase(account.accountId)
+            val passphrase = passphraseService.getPassphrase(account.accountId)
             accountService.importAccount(
                 CryptoUtils.decrypt(account.privateKeyEncoded, passphrase),
                 passphrase

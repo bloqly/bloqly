@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.component.EventProcessorService
+import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.component.ResetService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
@@ -42,7 +43,8 @@ class TestService(
     private val accountService: AccountService,
     private val resetService: ResetService,
     private val blockchainService: BlockchainService,
-    private val entityManager: EntityManager
+    private val entityManager: EntityManager,
+    private val passphraseService: PassphraseService
 ) {
 
     private lateinit var accounts: List<Account>
@@ -72,14 +74,14 @@ class TestService(
         val accountsObject = ObjectUtils.readValue(accountsString, Accounts::class.java)
 
         accountsObject.accounts.forEach { account ->
-            val passphrase = accountService.getPassphrase(account.accountId)
+            val passphrase = passphraseService.getPassphrase(account.accountId)
             accountService.importAccount(account.privateKeyEncoded, passphrase)
         }
 
         blockchainService.createBlockchain(
             DEFAULT_SPACE,
             TEST_BLOCK_BASE_DIR,
-            accountService.getPassphrase(getRoot().accountId)
+            passphraseService.getPassphrase(getRoot().accountId)
         )
     }
 
@@ -93,7 +95,27 @@ class TestService(
         return transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = root.accountId,
-            passphrase = accountService.getPassphrase(root.accountId),
+            passphrase = passphraseService.getPassphrase(root.accountId),
+            destinationId = user.accountId,
+            self = DEFAULT_SELF,
+            value = writeLong("1"),
+            transactionType = TransactionType.CALL,
+            referencedBlockHash = lib.hash,
+            timestamp = Instant.now().toEpochMilli()
+        )
+    }
+
+    fun createInvalidTransaction(): Transaction {
+
+        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
+
+        val root = accountRepository.findByAccountId(getRoot().accountId)!!
+        val user = accountRepository.findByAccountId(getUser().accountId)!!
+
+        return transactionService.createTransaction(
+            space = DEFAULT_SPACE,
+            originId = root.accountId,
+            passphrase = passphraseService.getPassphrase(root.accountId),
             destinationId = user.accountId,
             self = DEFAULT_SELF,
             value = writeLong("1"),

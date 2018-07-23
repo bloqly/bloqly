@@ -37,6 +37,9 @@ class BlockProcessorTest {
     private lateinit var accountService: AccountService
 
     @Autowired
+    private lateinit var passphraseService: PassphraseService
+
+    @Autowired
     private lateinit var voteRepository: VoteRepository
 
     @Autowired
@@ -158,7 +161,7 @@ class BlockProcessorTest {
 
     private fun validator(n: Int) = testService.getValidator(n)
 
-    private fun passphrase(n: Int) = accountService.getPassphrase(validator(n).accountId)
+    private fun passphrase(n: Int) = passphraseService.getPassphrase(validator(n).accountId)
 
     @Test
     fun testBlockProcessed() {
@@ -188,6 +191,10 @@ class BlockProcessorTest {
     fun testSilentlyRejectsBlockWithTheSameHash() {
         blockProcessor.processReceivedBlock(blocks[0])
         blockProcessor.processReceivedBlock(blocks[0])
+    }
+
+    @Test
+    fun testInvalidTransactionNotIncluded() {
     }
 
     @Test

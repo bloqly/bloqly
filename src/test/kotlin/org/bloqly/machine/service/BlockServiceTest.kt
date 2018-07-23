@@ -3,6 +3,7 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.BlockProcessor
+import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.test.TestService
 import org.junit.Assert.assertEquals
@@ -27,7 +28,7 @@ class BlockServiceTest {
     private lateinit var blockProcessor: BlockProcessor
 
     @Autowired
-    private lateinit var accountService: AccountService
+    private lateinit var passphraseService: PassphraseService
 
     @Before
     fun setup() {
@@ -37,7 +38,7 @@ class BlockServiceTest {
 
     private fun validator(n: Int) = testService.getValidator(n)
 
-    private fun passphrase(n: Int) = accountService.getPassphrase(validator(n).accountId)
+    private fun passphrase(n: Int) = passphraseService.getPassphrase(validator(n).accountId)
 
     @Test
     fun testFirstBlockIsFinal() {

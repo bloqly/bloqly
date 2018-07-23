@@ -1,6 +1,7 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
@@ -27,6 +28,9 @@ class VoteServiceTest {
 
     @Autowired
     private lateinit var voteService: VoteService
+
+    @Autowired
+    private lateinit var passphraseService: PassphraseService
 
     @Autowired
     private lateinit var testService: TestService
@@ -61,13 +65,13 @@ class VoteServiceTest {
 
         publicKey = validator.publicKey.decode16()
 
-        vote = voteService.getVote(space, validator, accountService.getPassphrase(validator.accountId))!!
+        vote = voteService.getVote(space, validator, passphraseService.getPassphrase(validator.accountId))!!
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val v1 = voteService.getVote(space, validator, accountService.getPassphrase(validator.accountId))
-        val v2 = voteService.getVote(space, validator, accountService.getPassphrase(validator.accountId))
+        val v1 = voteService.getVote(space, validator, passphraseService.getPassphrase(validator.accountId))
+        val v2 = voteService.getVote(space, validator, passphraseService.getPassphrase(validator.accountId))
 
         assertEquals(v1, v2)
     }

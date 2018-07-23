@@ -40,6 +40,9 @@ class EventProcessorServiceTest {
     private lateinit var propertyRepository: PropertyRepository
 
     @Autowired
+    private lateinit var passphraseService: PassphraseService
+
+    @Autowired
     private lateinit var propertyService: PropertyService
 
     @Autowired
@@ -112,7 +115,7 @@ class EventProcessorServiceTest {
     fun testInitTwiceFails() {
         try {
             blockchainService.createBlockchain(
-                DEFAULT_SPACE, TEST_BLOCK_BASE_DIR, accountService.getPassphrase(root.accountId)
+                DEFAULT_SPACE, TEST_BLOCK_BASE_DIR, passphraseService.getPassphrase(root.accountId)
             )
             fail()
         } catch (e: Exception) {
@@ -123,7 +126,7 @@ class EventProcessorServiceTest {
     @Test
     fun testInitTwiceWithDifferentSpaceOK() {
         blockchainService.createBlockchain(
-            "space1", TEST_BLOCK_BASE_DIR, accountService.getPassphrase(root.accountId)
+            "space1", TEST_BLOCK_BASE_DIR, passphraseService.getPassphrase(root.accountId)
         )
     }
 
@@ -154,7 +157,7 @@ class EventProcessorServiceTest {
         val transaction = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = root.accountId,
-            passphrase = accountService.getPassphrase(root.accountId),
+            passphrase = passphraseService.getPassphrase(root.accountId),
             destinationId = user.accountId,
             self = DEFAULT_SELF,
             value = writeLong("1"),

@@ -34,7 +34,8 @@ class EventProcessorService(
     private val voteService: VoteService,
     private val transactionRepository: TransactionRepository,
     private val blockProcessor: BlockProcessor,
-    private val blockchainService: BlockchainService
+    private val blockchainService: BlockchainService,
+    private val passphraseService: PassphraseService
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
@@ -67,12 +68,12 @@ class EventProcessorService(
         return spaceRepository.findAll()
             .flatMap { space ->
                 accountService.getValidatorsForSpace(space)
-                    .filter { it.hasKey() }
+                    .filter { passphraseService.hasPassphrase(it.accountId) }
                     .mapNotNull { validator ->
                         voteService.getVote(
                             space,
                             validator,
-                            accountService.getPassphrase(validator.accountId)
+                            passphraseService.getPassphrase(validator.accountId)
                         )
                     }
             }
@@ -100,7 +101,7 @@ class EventProcessorService(
             .mapNotNull { space ->
                 accountService.getActiveProducerBySpace(space, round)
                     ?.let { producer ->
-                        val passphrase = accountService.getPassphrase(producer.accountId)
+                        val passphrase = passphraseService.getPassphrase(producer.accountId)
                         blockProcessor.createNextBlock(space.id, producer, passphrase, round)
                     }
             }

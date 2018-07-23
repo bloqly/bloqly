@@ -1,6 +1,7 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
+import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
@@ -25,7 +26,8 @@ class BlockService(
     private val accountRepository: AccountRepository,
     private val blockRepository: BlockRepository,
     private val spaceRepository: SpaceRepository,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val passphraseService: PassphraseService
 ) {
 
     fun newBlock(
@@ -45,7 +47,7 @@ class BlockService(
     ): Block {
 
         val proposer = accountRepository.findByAccountId(producerId)
-            .takeIf { it != null && it.hasKey() }
+            .takeIf { it != null && passphraseService.hasPassphrase(it.accountId) }
             ?: throw IllegalArgumentException("Could not create block in behalf of producer $producerId")
 
         val dataToSign = CryptoUtils.hash(

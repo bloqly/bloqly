@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.component.PropertyContext
 import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.math.BInteger
@@ -32,6 +33,9 @@ class TransactionProcessorTest {
 
     @Autowired
     private lateinit var transactionService: TransactionService
+
+    @Autowired
+    private lateinit var passphraseService: PassphraseService
 
     @Autowired
     private lateinit var contractService: ContractService
@@ -82,7 +86,7 @@ class TransactionProcessorTest {
         val createContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,
-            passphrase = accountService.getPassphrase(originId),
+            passphrase = passphraseService.getPassphrase(originId),
             destinationId = callee,
             self = self,
             value = contractBody.toByteArray(),
@@ -107,7 +111,7 @@ class TransactionProcessorTest {
         val invokeContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,
-            passphrase = accountService.getPassphrase(originId),
+            passphrase = passphraseService.getPassphrase(originId),
             destinationId = callee,
             self = self,
             value = params,

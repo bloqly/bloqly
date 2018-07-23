@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.POWER_KEY
+import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.InvocationResult
@@ -15,7 +16,6 @@ import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
-import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import javax.transaction.Transactional
@@ -25,19 +25,8 @@ import javax.transaction.Transactional
 class AccountService(
     private val accountRepository: AccountRepository,
     private val propertyRepository: PropertyRepository,
-    private val env: Environment
+    private val passphraseService: PassphraseService
 ) {
-
-    companion object {
-        private const val PASSPHRASE_PREFIX = "keys.passphrase_"
-
-        private const val PASSPHRASE_SUFFIX_LENGTH = 8
-    }
-
-    fun getPassphrase(accountId: String): String {
-        val key = PASSPHRASE_PREFIX + accountId.substring(0, PASSPHRASE_SUFFIX_LENGTH)
-        return env.getRequiredProperty(key)
-    }
 
     fun getProducerBySpace(space: Space, round: Long): Account {
 
@@ -49,7 +38,7 @@ class AccountService(
     }
 
     fun getActiveProducerBySpace(space: Space, round: Long): Account? {
-        return getProducerBySpace(space, round).takeIf { it.hasKey() }
+        return getProducerBySpace(space, round).takeIf { passphraseService.hasPassphrase(it.accountId) }
     }
 
     fun createAccount(passphrase: String): Account {
