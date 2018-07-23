@@ -2,6 +2,7 @@ package org.bloqly.machine.controller.admin
 
 import org.bloqly.machine.controller.admin.model.AccountRequest
 import org.bloqly.machine.service.AccountService
+import org.bloqly.machine.util.decode16
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,7 +23,7 @@ class AccountAdminController(
     fun import(@RequestBody accountRequest: AccountRequest): ResponseEntity<Void> {
 
         accountService.importAccount(
-            accountRequest.privateKey.toByteArray(),
+            accountRequest.privateKey.decode16(),
             accountRequest.password
         )
 
