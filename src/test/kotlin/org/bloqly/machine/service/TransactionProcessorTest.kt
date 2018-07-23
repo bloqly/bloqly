@@ -51,6 +51,9 @@ class TransactionProcessorTest {
     @Autowired
     private lateinit var testService: TestService
 
+    @Autowired
+    private lateinit var accountService: AccountService
+
     private val creator = "owner id"
 
     private val callee = "callee id"
@@ -79,6 +82,7 @@ class TransactionProcessorTest {
         val createContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,
+            passphrase = accountService.getPassphrase(originId),
             destinationId = callee,
             self = self,
             value = contractBody.toByteArray(),
@@ -103,6 +107,7 @@ class TransactionProcessorTest {
         val invokeContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,
+            passphrase = accountService.getPassphrase(originId),
             destinationId = callee,
             self = self,
             value = params,

@@ -35,7 +35,7 @@ curl -X POST \
 # init blockchain
 curl -X POST \
   -H "Content-Type: application/json" \
-  -d "{\"space\":\"main\", \"path\": \"$(pwd)/src/test/resources/blocks/currency-js\"}" \
+  -d "{\"space\":\"main\", \"path\": \"$(pwd)/src/test/resources/blocks/currency-js\", \"passphrase\":\"root password\"}" \
   http://localhost:9901/api/v1/admin/blockchain
 
 # export genesis block

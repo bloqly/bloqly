@@ -6,10 +6,23 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.encode16
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CryptoUtilsTest {
+
+    @Test
+    fun testEncrypt() {
+        val secret = CryptoUtils.hash("a secret")
+        val password = "a password"
+
+        val encrypted = CryptoUtils.encrypt(secret, password)
+
+        val decryptedSecret = CryptoUtils.decrypt(encrypted, password)
+
+        assertArrayEquals(secret, decryptedSecret)
+    }
 
     @Test
     fun testNewAccount() {

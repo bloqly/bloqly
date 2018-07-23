@@ -61,13 +61,13 @@ class VoteServiceTest {
 
         publicKey = validator.publicKey.decode16()
 
-        vote = voteService.getVote(space, validator)!!
+        vote = voteService.getVote(space, validator, accountService.getPassphrase(validator.accountId))!!
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val v1 = voteService.getVote(space, validator)
-        val v2 = voteService.getVote(space, validator)
+        val v1 = voteService.getVote(space, validator, accountService.getPassphrase(validator.accountId))
+        val v2 = voteService.getVote(space, validator, accountService.getPassphrase(validator.accountId))
 
         assertEquals(v1, v2)
     }

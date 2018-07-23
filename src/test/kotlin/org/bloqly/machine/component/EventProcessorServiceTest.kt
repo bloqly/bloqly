@@ -12,6 +12,7 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
+import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
@@ -66,6 +67,9 @@ class EventProcessorServiceTest {
     private lateinit var transactionService: TransactionService
 
     @Autowired
+    private lateinit var accountService: AccountService
+
+    @Autowired
     private lateinit var testService: TestService
 
     private lateinit var root: Account
@@ -107,7 +111,9 @@ class EventProcessorServiceTest {
     @Test
     fun testInitTwiceFails() {
         try {
-            blockchainService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
+            blockchainService.createBlockchain(
+                DEFAULT_SPACE, TEST_BLOCK_BASE_DIR, accountService.getPassphrase(root.accountId)
+            )
             fail()
         } catch (e: Exception) {
             // pass
@@ -116,7 +122,9 @@ class EventProcessorServiceTest {
 
     @Test
     fun testInitTwiceWithDifferentSpaceOK() {
-        blockchainService.createBlockchain("space1", TEST_BLOCK_BASE_DIR)
+        blockchainService.createBlockchain(
+            "space1", TEST_BLOCK_BASE_DIR, accountService.getPassphrase(root.accountId)
+        )
     }
 
     @Test
@@ -146,6 +154,7 @@ class EventProcessorServiceTest {
         val transaction = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = root.accountId,
+            passphrase = accountService.getPassphrase(root.accountId),
             destinationId = user.accountId,
             self = DEFAULT_SELF,
             value = writeLong("1"),

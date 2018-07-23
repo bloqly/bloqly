@@ -68,7 +68,13 @@ class EventProcessorService(
             .flatMap { space ->
                 accountService.getValidatorsForSpace(space)
                     .filter { it.hasKey() }
-                    .mapNotNull { validator -> voteService.getVote(space, validator) }
+                    .mapNotNull { validator ->
+                        voteService.getVote(
+                            space,
+                            validator,
+                            accountService.getPassphrase(validator.accountId)
+                        )
+                    }
             }
 
         // TODO send all known votes for blocks with height > H
@@ -94,7 +100,8 @@ class EventProcessorService(
             .mapNotNull { space ->
                 accountService.getActiveProducerBySpace(space, round)
                     ?.let { producer ->
-                        blockProcessor.createNextBlock(space.id, producer, round)
+                        val passphrase = accountService.getPassphrase(producer.accountId)
+                        blockProcessor.createNextBlock(space.id, producer, passphrase, round)
                     }
             }
     }

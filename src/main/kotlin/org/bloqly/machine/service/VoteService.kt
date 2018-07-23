@@ -20,18 +20,19 @@ class VoteService(
     private val accountService: AccountService
 ) {
 
-    fun getVote(space: Space, validator: Account): Vote? {
+    fun getVote(space: Space, validator: Account, passphrase: String): Vote? {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
         val newHeight = lastBlock.height + 1
 
         return voteRepository.findBySpaceIdAndValidatorAndHeight(space.id, validator, newHeight)
-            ?: createVote(validator, lastBlock)
+            ?: createVote(validator, passphrase, lastBlock)
     }
 
     private fun createVote(
         validator: Account,
+        passphrase: String,
         block: Block
     ): Vote {
 
@@ -46,7 +47,7 @@ class VoteService(
         )
 
         val signature = CryptoUtils.sign(
-            validator.privateKeyBytes,
+            CryptoUtils.decrypt(validator.privateKeyEncoded, passphrase),
             CryptoUtils.hash(vote)
         )
 

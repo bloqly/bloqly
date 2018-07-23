@@ -48,28 +48,36 @@ class TransactionServiceTest {
 
     private lateinit var transaction: Transaction
 
-    private lateinit var root: Account
+    private lateinit var user: Account
+
+    private val passphrase = "password"
 
     @Before
     fun init() {
         testService.cleanup()
         testService.createBlockchain()
 
-        root = accountService.createAccount()
+        user = accountService.createAccount(passphrase)
 
         transaction = createTransaction()
     }
+
+    private fun validator(n: Int) = testService.getValidator(n)
+
+    private fun passphrase(n: Int) = accountService.getPassphrase(validator(n).accountId)
 
     private fun createTransaction(referencedBlockHash: String = CryptoUtils.hash(arrayOf()).encode16()): Transaction {
         return transactionService.createTransaction(
 
             space = DEFAULT_SPACE,
 
-            originId = root.accountId,
+            originId = user.accountId,
 
-            destinationId = root.accountId,
+            passphrase = passphrase,
 
-            self = root.accountId,
+            destinationId = user.accountId,
+
+            self = user.accountId,
 
             key = null,
 
@@ -96,13 +104,13 @@ class TransactionServiceTest {
     fun testGetPendingTransactions() {
         blockService.getLastBlockForSpace(DEFAULT_SPACE)
 
-        blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 1).block
-        val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 2).block
-        blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 3).block
-        val block4 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(3), 4).block
-        val block5 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 5).block
-        blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 6).block
-        blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 7).block
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1).block
+        val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2).block
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3).block
+        val block4 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4).block
+        val block5 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5).block
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6).block
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7).block
 
         val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(block4.hash, lib.hash)

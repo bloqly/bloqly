@@ -32,7 +32,7 @@ class BlockchainService(
     private val blockRepository: BlockRepository,
     private val transactionProcessor: TransactionProcessor
 ) {
-    fun createBlockchain(spaceId: String, baseDir: String) {
+    fun createBlockchain(spaceId: String, baseDir: String, passphrase: String) {
 
         blockService.ensureSpaceEmpty(spaceId)
 
@@ -63,6 +63,7 @@ class BlockchainService(
         val transaction = transactionService.createTransaction(
             space = spaceId,
             originId = rootId,
+            passphrase = passphrase,
             destinationId = Application.DEFAULT_SELF,
             self = Application.DEFAULT_SELF,
             key = null,
@@ -80,6 +81,7 @@ class BlockchainService(
             timestamp = timestamp,
             parentHash = contractBodyHash,
             producerId = rootId,
+            passphrase = passphrase,
             txHash = null,
             validatorTxHash = validatorTxHash,
             round = 0,

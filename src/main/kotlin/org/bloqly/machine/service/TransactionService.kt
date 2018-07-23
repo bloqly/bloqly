@@ -25,6 +25,7 @@ class TransactionService(
     fun createTransaction(
         space: String,
         originId: String,
+        passphrase: String,
         destinationId: String,
         self: String,
         key: String? = null,
@@ -50,7 +51,7 @@ class TransactionService(
         )
 
         val signature = CryptoUtils.sign(
-            origin.privateKeyBytes,
+            CryptoUtils.decrypt(origin.privateKeyEncoded, passphrase),
             CryptoUtils.hash(tx)
         )
 

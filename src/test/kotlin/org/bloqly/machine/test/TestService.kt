@@ -73,10 +73,14 @@ class TestService(
 
         accountsObject.accounts.forEach { account ->
             val passphrase = accountService.getPassphrase(account.accountId)
-            accountService.importAccount(account.privateKey, passphrase)
+            accountService.importAccount(account.privateKeyEncoded, passphrase)
         }
 
-        blockchainService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)
+        blockchainService.createBlockchain(
+            DEFAULT_SPACE,
+            TEST_BLOCK_BASE_DIR,
+            accountService.getPassphrase(getRoot().accountId)
+        )
     }
 
     fun createTransaction(): Transaction {
@@ -89,6 +93,7 @@ class TestService(
         return transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = root.accountId,
+            passphrase = accountService.getPassphrase(root.accountId),
             destinationId = user.accountId,
             self = DEFAULT_SELF,
             value = writeLong("1"),

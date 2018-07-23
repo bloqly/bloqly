@@ -166,7 +166,7 @@ class BlockProcessor(
         }
     }
 
-    fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
+    fun createNextBlock(spaceId: String, producer: Account, passphrase: String, round: Long): BlockData {
 
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)
             ?.let { return BlockData(it) }
@@ -204,6 +204,7 @@ class BlockProcessor(
             timestamp = Instant.now().toEpochMilli(),
             parentHash = lastBlock.hash,
             producerId = producer.accountId,
+            passphrase = passphrase,
             txHash = CryptoUtils.digestTransactions(transactions),
             validatorTxHash = CryptoUtils.digestVotes(votes),
             round = round,

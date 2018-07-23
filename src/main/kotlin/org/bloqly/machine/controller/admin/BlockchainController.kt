@@ -20,7 +20,11 @@ class BlockchainController(
     @PostMapping
     fun init(@RequestBody newBlockchainRequest: NewBlockchainRequest): ResponseEntity<Void> {
 
-        blockchainService.createBlockchain(newBlockchainRequest.space, newBlockchainRequest.path)
+        blockchainService.createBlockchain(
+            spaceId = newBlockchainRequest.space,
+            baseDir = newBlockchainRequest.path,
+            passphrase = newBlockchainRequest.passphrase
+        )
 
         return ResponseEntity(HttpStatus.CREATED)
     }

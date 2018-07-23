@@ -52,12 +52,12 @@ class AccountService(
         return getProducerBySpace(space, round).takeIf { it.hasKey() }
     }
 
-    fun createAccount(): Account {
+    fun createAccount(passphrase: String): Account {
 
-        return accountRepository.save(newAccount())
+        return accountRepository.save(newAccount(passphrase))
     }
 
-    fun newAccount(): Account {
+    fun newAccount(passphrase: String): Account {
 
         val privateKey = CryptoUtils.newPrivateKey()
         val publicKey = CryptoUtils.getPublicFor(privateKey)
@@ -67,7 +67,7 @@ class AccountService(
             publicKey = publicKey.encode16()
         )
 
-        account.privateKeyBytes = privateKey
+        account.privateKeyEncoded = CryptoUtils.encrypt(privateKey, passphrase)
 
         return account
     }
@@ -97,9 +97,8 @@ class AccountService(
             .orElseThrow()
     }
 
-    fun importAccount(privateKey: String, password: String): Account {
+    fun importAccount(privateKeyBytes: ByteArray?, passphrase: String): Account {
 
-        val privateKeyBytes = privateKey.decode16()
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
         val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)
 
@@ -114,7 +113,7 @@ class AccountService(
             publicKey = publicKey
         )
 
-        account.privateKeyBytes = privateKeyBytes
+        account.privateKeyEncoded = CryptoUtils.encrypt(privateKeyBytes, passphrase)
 
         return accountRepository.save(account)
     }

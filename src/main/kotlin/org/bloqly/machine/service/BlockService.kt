@@ -36,6 +36,7 @@ class BlockService(
         timestamp: Long,
         parentHash: String,
         producerId: String,
+        passphrase: String,
         txHash: ByteArray? = null,
         validatorTxHash: ByteArray,
         round: Long,
@@ -62,7 +63,10 @@ class BlockService(
             )
         )
 
-        val signature = CryptoUtils.sign(proposer.privateKeyBytes, dataToSign)
+        val signature = CryptoUtils.sign(
+            CryptoUtils.decrypt(proposer.privateKeyEncoded, passphrase),
+            dataToSign
+        )
         val blockHash = CryptoUtils.hash(signature).encode16()
 
         val libHash = if (height > 0) getLIBForSpace(spaceId, producerId).hash else ""

@@ -5,6 +5,7 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.test.TestService
+import org.bloqly.machine.util.CryptoUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
@@ -40,11 +41,14 @@ class AccountServiceTest {
         testService.cleanup()
         testService.createBlockchain()
 
-        account = accountService.newAccount()
+        account = accountService.newAccount(testPassphrase)
 
         space = testService.getDefaultSpace()
 
-        accountService.importAccount(account.privateKey, testPassphrase)
+        accountService.importAccount(
+            CryptoUtils.decrypt(account.privateKeyEncoded, testPassphrase),
+            testPassphrase
+        )
     }
 
     @Test
@@ -71,14 +75,15 @@ class AccountServiceTest {
 
     @Test
     fun testNewAccount() {
-
         for (i in 0..4) {
 
-            val account = accountService.newAccount()
+            val passphrase = "passphrase $i"
+            val account = accountService.newAccount(passphrase)
 
             println("id: ${account.id}")
             println("pub: ${account.publicKey!!.toLowerCase()}")
             println("priv: ${account.privateKey}")
+            println("pass: $passphrase")
         }
     }
 
@@ -86,7 +91,10 @@ class AccountServiceTest {
     fun testImportAccountTwiceFails() {
         try {
             val passphrase = accountService.getPassphrase(account.accountId)
-            accountService.importAccount(account.privateKey, passphrase)
+            accountService.importAccount(
+                CryptoUtils.decrypt(account.privateKeyEncoded, passphrase),
+                passphrase
+            )
             fail()
         } catch (e: Exception) {
         }
@@ -94,7 +102,8 @@ class AccountServiceTest {
 
     @Test
     fun testGetAccountByPublicKey() {
-        val account = accountService.newAccount()
+        val passphrase = "passphrase"
+        val account = accountService.newAccount(passphrase)
 
         val publicKey = account.publicKey!!
 

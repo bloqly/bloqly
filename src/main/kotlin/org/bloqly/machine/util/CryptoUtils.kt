@@ -7,25 +7,65 @@ import org.bouncycastle.util.BigIntegers
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
+import java.security.SecureRandom
 import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 object CryptoUtils {
 
     private val log = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
 
     private const val SHA_256 = "SHA-256"
+    private const val AES = "AES"
+    private const val AES_PADDING = "AES/CBC/PKCS5Padding"
+    private const val AES_IV_SIZE = 16
+    private const val AES_INPUT_SIZE = 32
 
-    private const val AES = "AES/CBC/PKCS5Padding"
+    fun encrypt(input: ByteArray?, passphrase: String): ByteArray {
+        require(input != null)
+        require(input!!.size == AES_INPUT_SIZE)
+        require(passphrase.isNotEmpty())
 
-    fun encrypt(input: ByteArray, password: ByteArray) {
-        val cipher = Cipher.getInstance(AES)
+        val ivSize = AES_IV_SIZE
+        val iv = ByteArray(ivSize)
+        val random = SecureRandom()
+        random.nextBytes(iv)
+        val ivParameterSpec = IvParameterSpec(iv)
 
-        //cipher.
+        val key = SecretKeySpec(hash(passphrase), AES)
+        val cipher = Cipher.getInstance(AES_PADDING)
+        cipher.init(Cipher.ENCRYPT_MODE, key, ivParameterSpec)
+
+        val encrypted = cipher.doFinal(input)
+
+        val encryptedIVAndText = ByteArray(ivSize + encrypted.size)
+        System.arraycopy(iv, 0, encryptedIVAndText, 0, ivSize)
+        System.arraycopy(encrypted, 0, encryptedIVAndText, ivSize, encrypted.size)
+
+        return encryptedIVAndText
+    }
+
+    fun decrypt(input: ByteArray?, passphrase: String): ByteArray {
+        require(input != null)
+
+        val iv = ByteArray(AES_IV_SIZE)
+        System.arraycopy(input, 0, iv, 0, iv.size)
+        val ivParameterSpec = IvParameterSpec(iv)
+
+        val encryptedSize = input!!.size - AES_IV_SIZE
+        val encryptedBytes = ByteArray(encryptedSize)
+        System.arraycopy(input, AES_IV_SIZE, encryptedBytes, 0, encryptedSize)
+
+        val key = SecretKeySpec(hash(passphrase), AES)
+        val cipher = Cipher.getInstance(AES_PADDING)
+        cipher.init(Cipher.DECRYPT_MODE, key, ivParameterSpec)
+        return cipher.doFinal(encryptedBytes)
     }
 
     fun newPrivateKey(): ByteArray = BloqlySchnorr.newPrivateKey()
 
-    fun getPublicFor(privateKeyBytes: ByteArray): ByteArray {
+    fun getPublicFor(privateKeyBytes: ByteArray?): ByteArray {
 
         val privateKey = BigIntegers.fromUnsignedByteArray(privateKeyBytes)
 

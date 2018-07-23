@@ -37,14 +37,6 @@ data class Account(
             privateKeyEncoded = value.decode16()
         }
 
-    var privateKeyBytes: ByteArray
-        get():ByteArray {
-            return privateKeyEncoded!!
-        }
-        set(value) {
-            privateKeyEncoded = value
-        }
-
     fun hasKey(): Boolean = privateKeyEncoded != null
 
     override fun equals(other: Any?): Boolean {

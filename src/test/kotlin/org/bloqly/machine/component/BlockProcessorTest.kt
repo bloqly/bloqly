@@ -78,12 +78,12 @@ class BlockProcessorTest {
         testService.cleanup()
         testService.createBlockchain()
 
-        firstBlock = blockService.getLIBForSpace(Application.DEFAULT_SPACE)
+        firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(firstBlock.hash, getLIB().hash)
         assertEquals(0, firstBlock.height)
 
         val tx0 = testService.createTransaction()
-        blocks.add(0, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(0), 1))
+        blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1))
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[0], firstBlock.hash)
 
@@ -91,7 +91,7 @@ class BlockProcessorTest {
         assertNoPropertyValue()
 
         val tx1 = testService.createTransaction()
-        blocks.add(1, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(1), 2))
+        blocks.add(1, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2))
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[1], firstBlock.hash)
 
@@ -99,7 +99,7 @@ class BlockProcessorTest {
         assertNoPropertyValue()
 
         val tx2 = testService.createTransaction()
-        blocks.add(2, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(2), 3))
+        blocks.add(2, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3))
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[2], firstBlock.hash)
 
@@ -107,7 +107,7 @@ class BlockProcessorTest {
         assertNoPropertyValue()
 
         val tx3 = testService.createTransaction() // lib is first block yet
-        blocks.add(3, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(3), 4))
+        blocks.add(3, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4))
         // lib changed, for the first time
         // all transactions from block[0] must be applied
         assertEquals(blocks[0].block.hash, getLIB().hash)
@@ -117,7 +117,7 @@ class BlockProcessorTest {
         assertPropertyValue("1")
 
         val tx4 = testService.createTransaction()
-        blocks.add(4, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(0), 5))
+        blocks.add(4, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5))
         assertEquals(blocks[1].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[4], blocks[0].block.hash)
 
@@ -125,7 +125,7 @@ class BlockProcessorTest {
         assertPropertyValue("2")
 
         val tx5 = testService.createTransaction()
-        blocks.add(5, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(1), 6))
+        blocks.add(5, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6))
         assertEquals(blocks[2].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[5], blocks[1].block.hash)
 
@@ -133,7 +133,7 @@ class BlockProcessorTest {
         assertPropertyValue("3")
 
         val tx6 = testService.createTransaction()
-        blocks.add(6, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(2), 7))
+        blocks.add(6, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7))
         assertEquals(blocks[3].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[6], blocks[2].block.hash)
 
@@ -141,7 +141,7 @@ class BlockProcessorTest {
         assertPropertyValue("4")
 
         val tx7 = testService.createTransaction()
-        blocks.add(7, blockProcessor.createNextBlock(Application.DEFAULT_SPACE, testService.getValidator(3), 8))
+        blocks.add(7, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 8))
         assertEquals(blocks[4].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[7], blocks[3].block.hash)
 
@@ -152,9 +152,13 @@ class BlockProcessorTest {
         testService.cleanup()
         genesisService.importFirst(genesis)
 
-        firstBlock = blockService.getLIBForSpace(Application.DEFAULT_SPACE)
+        firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(0, firstBlock.height)
     }
+
+    private fun validator(n: Int) = testService.getValidator(n)
+
+    private fun passphrase(n: Int) = accountService.getPassphrase(validator(n).accountId)
 
     @Test
     fun testBlockProcessed() {

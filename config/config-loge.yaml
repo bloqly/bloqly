@@ -1,3 +1,6 @@
 database:
   username: slava
   password: password
+
+keys:
+  passphrase_F7974E0C: "validator2 password"

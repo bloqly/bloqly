@@ -26,11 +26,18 @@ class BlockServiceTest {
     @Autowired
     private lateinit var blockProcessor: BlockProcessor
 
+    @Autowired
+    private lateinit var accountService: AccountService
+
     @Before
     fun setup() {
         testService.cleanup()
         testService.createBlockchain()
     }
+
+    private fun validator(n: Int) = testService.getValidator(n)
+
+    private fun passphrase(n: Int) = accountService.getPassphrase(validator(n).accountId)
 
     @Test
     fun testFirstBlockIsFinal() {
@@ -47,38 +54,38 @@ class BlockServiceTest {
 
         assertEquals(block0.hash, getLIB().hash)
 
-        val block1 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 1).block
+        val block1 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1).block
         assertEquals(block0.hash, getLIB().hash)
         assertEquals(block0.hash, block1.libHash)
 
-        val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 2).block
+        val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2).block
         assertEquals(block0.hash, getLIB().hash)
         assertEquals(block0.hash, block2.libHash)
 
-        val block3 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 3).block
+        val block3 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3).block
         assertEquals(block0.hash, getLIB().hash)
         assertEquals(block0.hash, block3.libHash)
 
-        val block4 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(3), 4).block
+        val block4 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4).block
         // now 3 out of 4 validators have built on block1, it is final now
         assertEquals(block1.hash, getLIB().hash)
         assertEquals(block1.hash, block4.libHash)
 
-        val block5 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(0), 5).block
+        val block5 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5).block
         assertEquals(block2.hash, getLIB().hash)
         assertEquals(block2.hash, block5.libHash)
 
-        val block6 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 6).block
+        val block6 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6).block
         assertEquals(block3.hash, getLIB().hash)
         assertEquals(block3.hash, block6.libHash)
 
         // same proposer, nothing changed
-        val block7 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(1), 7).block
+        val block7 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 7).block
         assertEquals(block3.hash, getLIB().hash)
         assertEquals(block3.hash, block7.libHash)
 
         // change validator, continue changing LIB
-        val block8 = blockProcessor.createNextBlock(DEFAULT_SPACE, testService.getValidator(2), 8).block
+        val block8 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 8).block
         assertEquals(block4.hash, getLIB().hash)
         assertEquals(block4.hash, block8.libHash)
     }
