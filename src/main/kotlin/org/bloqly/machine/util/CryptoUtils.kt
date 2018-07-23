@@ -7,12 +7,21 @@ import org.bouncycastle.util.BigIntegers
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
+import javax.crypto.Cipher
 
 object CryptoUtils {
 
     private val log = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
 
     private const val SHA_256 = "SHA-256"
+
+    private const val AES = "AES/CBC/PKCS5Padding"
+
+    fun encrypt(input: ByteArray, password: ByteArray) {
+        val cipher = Cipher.getInstance(AES)
+
+        //cipher.
+    }
 
     fun newPrivateKey(): ByteArray = BloqlySchnorr.newPrivateKey()
 

@@ -33,6 +33,8 @@ class AccountServiceTest {
 
     private lateinit var space: Space
 
+    private val testPassphrase = "test passphrase"
+
     @Before
     fun setup() {
         testService.cleanup()
@@ -42,7 +44,7 @@ class AccountServiceTest {
 
         space = testService.getDefaultSpace()
 
-        accountService.importAccount(account.privateKey)
+        accountService.importAccount(account.privateKey, testPassphrase)
     }
 
     @Test
@@ -83,7 +85,8 @@ class AccountServiceTest {
     @Test
     fun testImportAccountTwiceFails() {
         try {
-            accountService.importAccount(account.privateKey)
+            val passphrase = accountService.getPassphrase(account.accountId)
+            accountService.importAccount(account.privateKey, passphrase)
             fail()
         } catch (e: Exception) {
         }

@@ -50,7 +50,6 @@ class TestService(
     @PostConstruct
     @Suppress("unused")
     fun init() {
-
         val accountsString = FileUtils.getResourceAsString("/accounts.json")
 
         accounts = ObjectUtils.readValue(accountsString, Accounts::class.java).accounts
@@ -73,7 +72,8 @@ class TestService(
         val accountsObject = ObjectUtils.readValue(accountsString, Accounts::class.java)
 
         accountsObject.accounts.forEach { account ->
-            accountService.importAccount(account.privateKey)
+            val passphrase = accountService.getPassphrase(account.accountId)
+            accountService.importAccount(account.privateKey, passphrase)
         }
 
         blockchainService.createBlockchain(DEFAULT_SPACE, TEST_BLOCK_BASE_DIR)

@@ -20,6 +20,8 @@ spring:
 
   datasource:
     pool-size: 30
+    username: ${database.username}
+    password: ${database.password}
 
   jackson:
     serialization:

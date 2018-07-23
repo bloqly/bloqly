@@ -23,7 +23,10 @@ data class Account(
     var publicKey: String? = null,
 
     @Column
-    var privateKeyEncoded: ByteArray? = null
+    var privateKeyEncoded: ByteArray? = null,
+
+    @Column
+    var salt: ByteArray? = null
 ) {
 
     var privateKey: String

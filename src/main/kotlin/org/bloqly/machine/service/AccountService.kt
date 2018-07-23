@@ -15,6 +15,7 @@ import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
+import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 import java.math.BigInteger
 import javax.transaction.Transactional
@@ -23,8 +24,20 @@ import javax.transaction.Transactional
 @Transactional
 class AccountService(
     private val accountRepository: AccountRepository,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val env: Environment
 ) {
+
+    companion object {
+        private const val PASSPHRASE_PREFIX = "keys.passphrase_"
+
+        private const val PASSPHRASE_SUFFIX_LENGTH = 8
+    }
+
+    fun getPassphrase(accountId: String): String {
+        val key = PASSPHRASE_PREFIX + accountId.substring(0, PASSPHRASE_SUFFIX_LENGTH)
+        return env.getRequiredProperty(key)
+    }
 
     fun getProducerBySpace(space: Space, round: Long): Account {
 
@@ -84,7 +97,7 @@ class AccountService(
             .orElseThrow()
     }
 
-    fun importAccount(privateKey: String): Account {
+    fun importAccount(privateKey: String, password: String): Account {
 
         val privateKeyBytes = privateKey.decode16()
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)

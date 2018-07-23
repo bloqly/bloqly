@@ -1,4 +1,3 @@
-spring:
-  datasource:
-    username: slava
-    password: password
+database:
+  username: slava
+  password: password

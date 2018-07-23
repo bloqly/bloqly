@@ -4,5 +4,6 @@ import org.bloqly.machine.annotation.ValueObject
 
 @ValueObject
 data class AccountRequest(
-    val privateKey: String
+    val privateKey: String,
+    val password: String
 )

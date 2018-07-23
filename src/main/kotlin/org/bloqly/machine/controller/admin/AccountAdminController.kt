@@ -21,7 +21,7 @@ class AccountAdminController(
     @PostMapping
     fun import(@RequestBody accountRequest: AccountRequest): ResponseEntity<Void> {
 
-        accountService.importAccount(accountRequest.privateKey)
+        accountService.importAccount(accountRequest.privateKey, accountRequest.password)
 
         return ResponseEntity(HttpStatus.CREATED)
     }
