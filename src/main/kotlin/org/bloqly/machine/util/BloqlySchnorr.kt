@@ -27,7 +27,7 @@ object BloqlySchnorr {
     }
 
     fun newPrivateKey(): ByteArray {
-        return asUnsignedByteArray(BigInteger(256, secureRandom))
+        return asUnsignedByteArray(BigInteger(256, secureRandom)).pad()
     }
 
     private fun getP(): BigInteger {

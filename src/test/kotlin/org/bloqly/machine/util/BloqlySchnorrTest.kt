@@ -9,6 +9,13 @@ import org.junit.Test
 class BloqlySchnorrTest {
 
     @Test
+    fun testPrivateKeySize() {
+        val d = BloqlySchnorr.newPrivateKey()
+
+        assertEquals(32, d.size)
+    }
+
+    @Test
     fun testSignAndVerify() {
 
         for (i in 0..50) {
