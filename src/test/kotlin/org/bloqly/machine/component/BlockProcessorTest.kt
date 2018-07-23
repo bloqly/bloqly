@@ -14,7 +14,7 @@ import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.BlockData
@@ -31,13 +31,10 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class BlockProcessorTest {
+class BlockProcessorTest : BaseTest() {
 
     @Autowired
     private lateinit var accountService: AccountService
-
-    @Autowired
-    private lateinit var passphraseService: PassphraseService
 
     @Autowired
     private lateinit var voteRepository: VoteRepository
@@ -59,9 +56,6 @@ class BlockProcessorTest {
 
     @Autowired
     private lateinit var blockRepository: BlockRepository
-
-    @Autowired
-    private lateinit var testService: TestService
 
     private val blocks = mutableListOf<BlockData>()
 
@@ -158,10 +152,6 @@ class BlockProcessorTest {
         firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(0, firstBlock.height)
     }
-
-    private fun validator(n: Int) = testService.getValidator(n)
-
-    private fun passphrase(n: Int) = passphraseService.getPassphrase(validator(n).accountId)
 
     @Test
     fun testBlockProcessed() {

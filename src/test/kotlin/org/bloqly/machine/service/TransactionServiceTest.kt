@@ -5,11 +5,10 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.BlockchainService
-import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.CryptoUtils.verifyTransaction
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
@@ -27,7 +26,7 @@ import java.time.Instant
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class TransactionServiceTest {
+class TransactionServiceTest : BaseTest() {
 
     @Autowired
     private lateinit var transactionService: TransactionService
@@ -36,13 +35,7 @@ class TransactionServiceTest {
     private lateinit var accountService: AccountService
 
     @Autowired
-    private lateinit var passphraseService: PassphraseService
-
-    @Autowired
     private lateinit var blockService: BlockService
-
-    @Autowired
-    private lateinit var testService: TestService
 
     @Autowired
     private lateinit var blockchainService: BlockchainService
@@ -65,10 +58,6 @@ class TransactionServiceTest {
 
         transaction = createTransaction()
     }
-
-    private fun validator(n: Int) = testService.getValidator(n)
-
-    private fun passphrase(n: Int) = passphraseService.getPassphrase(validator(n).accountId)
 
     private fun createTransaction(referencedBlockHash: String = CryptoUtils.hash(arrayOf()).encode16()): Transaction {
         return transactionService.createTransaction(

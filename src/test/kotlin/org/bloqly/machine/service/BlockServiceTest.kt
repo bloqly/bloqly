@@ -3,9 +3,8 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.BlockProcessor
-import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -16,29 +15,19 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class BlockServiceTest {
+class BlockServiceTest : BaseTest() {
 
     @Autowired
     private lateinit var blockService: BlockService
 
     @Autowired
-    private lateinit var testService: TestService
-
-    @Autowired
     private lateinit var blockProcessor: BlockProcessor
-
-    @Autowired
-    private lateinit var passphraseService: PassphraseService
 
     @Before
     fun setup() {
         testService.cleanup()
         testService.createBlockchain()
     }
-
-    private fun validator(n: Int) = testService.getValidator(n)
-
-    private fun passphrase(n: Int) = passphraseService.getPassphrase(validator(n).accountId)
 
     @Test
     fun testFirstBlockIsFinal() {

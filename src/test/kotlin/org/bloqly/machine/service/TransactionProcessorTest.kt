@@ -2,7 +2,6 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.component.PropertyContext
 import org.bloqly.machine.component.TransactionProcessor
 import org.bloqly.machine.math.BInteger
@@ -11,7 +10,7 @@ import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.ParameterUtils.writeBoolean
@@ -29,13 +28,10 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class TransactionProcessorTest {
+class TransactionProcessorTest : BaseTest() {
 
     @Autowired
     private lateinit var transactionService: TransactionService
-
-    @Autowired
-    private lateinit var passphraseService: PassphraseService
 
     @Autowired
     private lateinit var contractService: ContractService
@@ -51,12 +47,6 @@ class TransactionProcessorTest {
 
     @Autowired
     private lateinit var blockService: BlockService
-
-    @Autowired
-    private lateinit var testService: TestService
-
-    @Autowired
-    private lateinit var accountService: AccountService
 
     private val creator = "owner id"
 
@@ -86,7 +76,7 @@ class TransactionProcessorTest {
         val createContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,
-            passphrase = passphraseService.getPassphrase(originId),
+            passphrase = passphrase(originId),
             destinationId = callee,
             self = self,
             value = contractBody.toByteArray(),
@@ -111,7 +101,7 @@ class TransactionProcessorTest {
         val invokeContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,
-            passphrase = passphraseService.getPassphrase(originId),
+            passphrase = passphrase(originId),
             destinationId = callee,
             self = self,
             value = params,
