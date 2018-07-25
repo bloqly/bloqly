@@ -50,9 +50,8 @@ class TransactionServiceTest : BaseTest() {
     private val passphrase = "password"
 
     @Before
-    fun init() {
-        testService.cleanup()
-        testService.createBlockchain()
+    fun setup() {
+        create()
 
         user = accountService.createAccount(passphrase)
 

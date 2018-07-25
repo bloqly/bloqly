@@ -47,8 +47,7 @@ class VoteServiceTest : BaseTest() {
     @Before
     fun init() {
 
-        testService.cleanup()
-        testService.createBlockchain()
+        create()
 
         space = testService.getDefaultSpace()
 

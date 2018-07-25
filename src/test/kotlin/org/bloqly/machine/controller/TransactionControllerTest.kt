@@ -7,7 +7,7 @@ import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.TransactionService
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.vo.TransactionList
@@ -29,10 +29,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
-class TransactionControllerTest {
-
-    @Autowired
-    private lateinit var testService: TestService
+class TransactionControllerTest : BaseTest() {
 
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
@@ -52,8 +49,7 @@ class TransactionControllerTest {
 
     @Before
     fun init() {
-        testService.cleanup()
-        testService.createBlockchain()
+        create()
 
         headers.contentType = MediaType.APPLICATION_JSON
 

@@ -9,7 +9,7 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.TimeUtils
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -23,7 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class WorkflowTest {
+class WorkflowTest : BaseTest() {
 
     @Autowired
     private lateinit var deltaService: DeltaService
@@ -33,9 +33,6 @@ class WorkflowTest {
 
     @Autowired
     private lateinit var eventReceiverService: EventReceiverService
-
-    @Autowired
-    private lateinit var testService: TestService
 
     @Autowired
     private lateinit var blockService: BlockService
@@ -50,10 +47,9 @@ class WorkflowTest {
     private lateinit var transactionRepository: TransactionRepository
 
     @Before
-    fun init() {
+    fun setup() {
+        create()
         TimeUtils.setTestTime(0)
-        testService.cleanup()
-        testService.createBlockchain()
     }
 
     @After

@@ -69,11 +69,9 @@ class BlockProcessorTest : BaseTest() {
      */
     @Before
     fun setup() {
+        create()
 
         propertyId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, testService.getUser().accountId, "balance")
-
-        testService.cleanup()
-        testService.createBlockchain()
 
         firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(firstBlock.hash, getLIB().hash)

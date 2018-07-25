@@ -12,6 +12,11 @@ open class BaseTest {
     @Autowired
     protected lateinit var testService: TestService
 
+    protected fun create() {
+        testService.cleanup()
+        testService.createBlockchain()
+    }
+
     fun passphrase(accountId: String): String = passphraseService.getPassphrase(accountId)
 
     fun passphrase(account: Account): String = passphraseService.getPassphrase(account.accountId)

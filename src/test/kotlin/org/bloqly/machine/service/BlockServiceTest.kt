@@ -25,8 +25,7 @@ class BlockServiceTest : BaseTest() {
 
     @Before
     fun setup() {
-        testService.cleanup()
-        testService.createBlockchain()
+        create()
     }
 
     @Test

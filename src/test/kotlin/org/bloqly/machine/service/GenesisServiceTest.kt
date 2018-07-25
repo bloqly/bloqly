@@ -2,7 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.component.GenesisService
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.Genesis
@@ -16,18 +16,14 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class GenesisServiceTest {
+class GenesisServiceTest : BaseTest() {
 
     @Autowired
     private lateinit var genesisService: GenesisService
 
-    @Autowired
-    private lateinit var testService: TestService
-
     @Before
-    fun init() {
-        testService.cleanup()
-        testService.createBlockchain()
+    fun setup() {
+        create()
     }
 
     @Test

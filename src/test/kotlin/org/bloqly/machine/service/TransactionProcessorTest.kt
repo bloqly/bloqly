@@ -56,9 +56,7 @@ class TransactionProcessorTest : BaseTest() {
 
     @Before
     fun setup() {
-        testService.cleanup()
-
-        testService.createBlockchain()
+        create()
     }
 
     @Test

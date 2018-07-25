@@ -35,8 +35,7 @@ class AccountServiceTest : BaseTest() {
 
     @Before
     fun setup() {
-        testService.cleanup()
-        testService.createBlockchain()
+        create()
 
         account = accountService.newAccount(testPassphrase)
 

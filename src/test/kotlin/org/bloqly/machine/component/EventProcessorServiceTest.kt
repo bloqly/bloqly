@@ -12,11 +12,10 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.TimeUtils
@@ -34,13 +33,10 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
-class EventProcessorServiceTest {
+class EventProcessorServiceTest : BaseTest() {
 
     @Autowired
     private lateinit var propertyRepository: PropertyRepository
-
-    @Autowired
-    private lateinit var passphraseService: PassphraseService
 
     @Autowired
     private lateinit var propertyService: PropertyService
@@ -69,23 +65,13 @@ class EventProcessorServiceTest {
     @Autowired
     private lateinit var transactionService: TransactionService
 
-    @Autowired
-    private lateinit var accountService: AccountService
-
-    @Autowired
-    private lateinit var testService: TestService
-
     private lateinit var root: Account
 
     private lateinit var user: Account
 
     @Before
     fun setup() {
-        testService.cleanup()
-
-        assertFalse(spaceRepository.existsById(DEFAULT_SPACE))
-
-        testService.createBlockchain()
+        create()
 
         root = accountRepository.findByAccountId(testService.getRoot().accountId)!!
         user = accountRepository.findByAccountId(testService.getUser().accountId)!!
@@ -115,7 +101,7 @@ class EventProcessorServiceTest {
     fun testInitTwiceFails() {
         try {
             blockchainService.createBlockchain(
-                DEFAULT_SPACE, TEST_BLOCK_BASE_DIR, passphraseService.getPassphrase(root.accountId)
+                DEFAULT_SPACE, TEST_BLOCK_BASE_DIR, passphrase(root.accountId)
             )
             fail()
         } catch (e: Exception) {
@@ -126,7 +112,7 @@ class EventProcessorServiceTest {
     @Test
     fun testInitTwiceWithDifferentSpaceOK() {
         blockchainService.createBlockchain(
-            "space1", TEST_BLOCK_BASE_DIR, passphraseService.getPassphrase(root.accountId)
+            "space1", TEST_BLOCK_BASE_DIR, passphrase(root.accountId)
         )
     }
 
@@ -157,7 +143,7 @@ class EventProcessorServiceTest {
         val transaction = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = root.accountId,
-            passphrase = passphraseService.getPassphrase(root.accountId),
+            passphrase = passphrase(root.accountId),
             destinationId = user.accountId,
             self = DEFAULT_SELF,
             value = writeLong("1"),

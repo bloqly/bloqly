@@ -17,3 +17,5 @@ spring-shell.log
 /docs/.saas-cache
 /test
 /logs/
+
+/LOG_PATH*

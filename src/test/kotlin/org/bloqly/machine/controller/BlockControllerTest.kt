@@ -7,7 +7,7 @@ import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
@@ -31,10 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
-class BlockControllerTest {
-
-    @Autowired
-    private lateinit var testService: TestService
+class BlockControllerTest : BaseTest() {
 
     @Autowired
     private lateinit var blockRepository: BlockRepository
@@ -57,8 +54,7 @@ class BlockControllerTest {
 
     @Before
     fun init() {
-        testService.cleanup()
-        testService.createBlockchain()
+        create()
 
         TimeUtils.setTestTime(0)
 

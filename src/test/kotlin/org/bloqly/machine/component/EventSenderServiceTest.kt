@@ -6,7 +6,7 @@ import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.NodeRepository
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class, EventSenderServiceTest.TestConfiguration::class])
-class EventSenderServiceTest {
+class EventSenderServiceTest : BaseTest() {
 
     @Configuration
     class TestConfiguration {
@@ -62,20 +62,15 @@ class EventSenderServiceTest {
     private lateinit var nodeRepository: NodeRepository
 
     @Autowired
-    private lateinit var testService: TestService
-
-    @Autowired
     private lateinit var restTemplate: RestTemplate
 
     private val node = Node(id = NodeId("127.0.0.1", 8080), addedTime = Instant.now().toEpochMilli())
 
     @Before
     fun init() {
+        create()
+
         Mockito.clearInvocations(restTemplate)
-
-        testService.cleanup()
-
-        testService.createBlockchain()
 
         nodeRepository.save(node)
     }

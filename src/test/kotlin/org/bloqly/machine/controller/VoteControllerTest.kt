@@ -6,7 +6,7 @@ import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.model.Node
 import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.VoteRepository
-import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.vo.VoteList
@@ -27,10 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
-class VoteControllerTest {
-
-    @Autowired
-    private lateinit var testService: TestService
+class VoteControllerTest : BaseTest() {
 
     @Autowired
     private lateinit var restTemplate: TestRestTemplate
@@ -48,8 +45,7 @@ class VoteControllerTest {
 
     @Before
     fun init() {
-        testService.cleanup()
-        testService.createBlockchain()
+        create()
 
         node = Node(NodeId("localhost", port), 0)
     }

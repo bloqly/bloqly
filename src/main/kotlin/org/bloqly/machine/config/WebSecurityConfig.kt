@@ -18,6 +18,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
         web.ignoring().antMatchers("/api/v1/data/**")
     }
 
+    // TODO add simple auth
     override fun configure(http: HttpSecurity) {
         http
             .authorizeRequests()
