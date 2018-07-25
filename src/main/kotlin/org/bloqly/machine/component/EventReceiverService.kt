@@ -1,6 +1,7 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.service.AccountService
+import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.TransactionRequest
@@ -15,7 +16,8 @@ import org.springframework.transaction.annotation.Transactional
 class EventReceiverService(
     private val eventProcessorService: EventProcessorService,
     private val accountService: AccountService,
-    private val transactionService: TransactionService
+    private val transactionService: TransactionService,
+    private val blockService: BlockService
 ) {
     private val log = LoggerFactory.getLogger(EventReceiverService::class.simpleName)
 
@@ -23,8 +25,13 @@ class EventReceiverService(
         transactionVOs.forEach { eventProcessorService.onTransaction(it.toModel()) }
     }
 
-    fun receiveTransactionRequest(transactionRequest: TransactionRequest) {
-        val tx = transactionService.createTransaction(transactionRequest)
+    fun receiveTransactionRequest(transactionRequest: TransactionRequest): TransactionVO {
+
+        val lib = blockService.getLIBForSpace(transactionRequest.space)
+
+        val tx = transactionService.createTransaction(transactionRequest, lib.hash)
+
+        return tx.toVO()
     }
 
     fun receiveVotes(voteVOs: List<VoteVO>) {

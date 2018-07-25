@@ -5,6 +5,7 @@ import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.TransactionRequest
+import org.bloqly.machine.vo.TransactionVO
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -26,9 +27,9 @@ class TransactionController(
         eventReceiverService.receiveTransactions(transactionsList.transactions)
     }
 
-    @PostMapping("/create")
-    fun onCreateTransaction(@RequestBody transactionRequest: TransactionRequest) {
-        eventReceiverService.receiveTransactionRequest(transactionRequest)
+    @PostMapping("/new")
+    fun onCreateTransaction(@RequestBody transactionRequest: TransactionRequest): TransactionVO {
+        return eventReceiverService.receiveTransactionRequest(transactionRequest)
     }
 
     @GetMapping

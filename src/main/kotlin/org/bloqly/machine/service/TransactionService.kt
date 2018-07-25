@@ -27,19 +27,27 @@ class TransactionService(
 ) {
 
     // TODO add blockchain config option - if adding smart contracts allowed
-    fun createTransaction(transactionRequest: TransactionRequest): Transaction {
+    fun createTransaction(
+        transactionRequest: TransactionRequest,
+        referencedBlockHash: String
+    ): Transaction {
 
-        val args: List<Any> = transactionRequest.args
+        @Suppress("IMPLICIT_CAST_TO_ANY")
+        val args: Array<Any> = transactionRequest.args
             .map {
                 when (ArgType.valueOf(it.type)) {
-                    ArgType.STRING -> it.value as Any
+                    ArgType.STRING -> it.value
                     ArgType.INT -> it.value.toInt()
                     ArgType.BIGINT -> BInteger(it.value)
                     ArgType.BOOLEAN -> it.value.toBoolean()
                 }
-            }
+            }.toTypedArray()
 
-        val params = ParameterUtils.writeParams(args.toTypedArray())
+        val params = if (args.size > 1) {
+            ParameterUtils.writeParams(args)
+        } else {
+            ParameterUtils.writeValue(args.first())
+        }
 
         return createTransaction(
             space = transactionRequest.space,
@@ -50,7 +58,7 @@ class TransactionService(
             key = transactionRequest.key,
             value = params,
             transactionType = TransactionType.valueOf(transactionRequest.transactionType),
-            referencedBlockHash = ""
+            referencedBlockHash = referencedBlockHash
         )
     }
 
