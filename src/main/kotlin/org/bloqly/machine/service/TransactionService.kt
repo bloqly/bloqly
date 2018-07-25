@@ -1,6 +1,8 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
+import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.model.ArgType
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
@@ -8,9 +10,11 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.util.encode64
+import org.bloqly.machine.vo.TransactionRequest
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -21,6 +25,34 @@ class TransactionService(
     private val blockRepository: BlockRepository,
     private val spaceRepository: SpaceRepository
 ) {
+
+    // TODO add blockchain config option - if adding smart contracts allowed
+    fun createTransaction(transactionRequest: TransactionRequest): Transaction {
+
+        val args: List<Any> = transactionRequest.args
+            .map {
+                when (ArgType.valueOf(it.type)) {
+                    ArgType.STRING -> it.value as Any
+                    ArgType.INT -> it.value.toInt()
+                    ArgType.BIGINT -> BInteger(it.value)
+                    ArgType.BOOLEAN -> it.value.toBoolean()
+                }
+            }
+
+        val params = ParameterUtils.writeParams(args.toTypedArray())
+
+        return createTransaction(
+            space = transactionRequest.space,
+            originId = transactionRequest.origin,
+            passphrase = transactionRequest.passphrase,
+            destinationId = transactionRequest.destination,
+            self = transactionRequest.self,
+            key = transactionRequest.key,
+            value = params,
+            transactionType = TransactionType.valueOf(transactionRequest.transactionType),
+            referencedBlockHash = ""
+        )
+    }
 
     fun createTransaction(
         space: String,
