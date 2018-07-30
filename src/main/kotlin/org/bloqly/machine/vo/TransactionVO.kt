@@ -19,11 +19,11 @@ data class TransactionVO(
     val timestamp: Long,
     val signature: String,
     val publicKey: String,
-    val hash: String
+    val hash: String,
+    val nonce: String
 ) {
 
     fun toModel(): Transaction {
-        // TODO after introducing Schnorr change it to recover from signature if possible
         val publicKeyBytes = publicKey.decode16()
         val publicKeyHash = CryptoUtils.hash(publicKeyBytes)
         val origin = publicKeyHash.encode16()
@@ -42,7 +42,8 @@ data class TransactionVO(
             timestamp = timestamp,
             signature = signature,
             publicKey = publicKey,
-            hash = hash
+            hash = hash,
+            nonce = nonce
         )
     }
 }

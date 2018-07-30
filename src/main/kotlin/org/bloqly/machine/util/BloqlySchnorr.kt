@@ -14,11 +14,9 @@ import java.security.SecureRandom
 object BloqlySchnorr {
     private const val BASE_16 = 16
 
-    private const val RANDOM = "SHA1PRNG"
-
     private const val CURVE_NAME = "secp256k1"
 
-    private var secureRandom = SecureRandom.getInstance(RANDOM)
+    private var secureRandom = SecureRandom.getInstance(CryptoUtils.RANDOM)
 
     private val CURVE_PARAMS = SECNamedCurves.getByName(CURVE_NAME)
 

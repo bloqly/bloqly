@@ -4,8 +4,10 @@ import com.google.common.primitives.Bytes
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bouncycastle.util.BigIntegers
+import org.bouncycastle.util.BigIntegers.asUnsignedByteArray
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
+import java.math.BigInteger
 import java.security.MessageDigest
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -16,11 +18,17 @@ object CryptoUtils {
 
     private val log = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
 
+    const val RANDOM = "SHA1PRNG"
+
     private const val SHA_256 = "SHA-256"
     private const val AES = "AES"
     private const val AES_PADDING = "AES/CBC/PKCS5Padding"
     private const val AES_IV_SIZE = 16
     private const val AES_INPUT_SIZE = 32
+
+    private val secureRandom = SecureRandom.getInstance(RANDOM)
+
+    fun newNonce(): String = asUnsignedByteArray(BigInteger(256, secureRandom)).encode16()
 
     fun encrypt(input: ByteArray?, passphrase: String): ByteArray {
         require(input != null)

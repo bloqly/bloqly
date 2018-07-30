@@ -87,7 +87,8 @@ class TransactionService(
             transactionType = transactionType,
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
-            publicKey = origin.publicKey!!
+            publicKey = origin.publicKey!!,
+            nonce = CryptoUtils.newNonce()
         )
 
         val signature = CryptoUtils.sign(

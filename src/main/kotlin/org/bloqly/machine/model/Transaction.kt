@@ -50,7 +50,10 @@ data class Transaction(
     val publicKey: String,
 
     @Column(nullable = false, unique = true)
-    val hash: String = ""
+    val hash: String = "",
+
+    @Column(nullable = false, unique = true)
+    val nonce: String
 ) {
 
     fun toVO(): TransactionVO {
@@ -66,7 +69,8 @@ data class Transaction(
             timestamp = timestamp,
             signature = signature,
             publicKey = publicKey,
-            hash = hash
+            hash = hash,
+            nonce = nonce
         )
     }
 

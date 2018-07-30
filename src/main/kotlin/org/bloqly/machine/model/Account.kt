@@ -8,18 +8,9 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Table
-import javax.persistence.UniqueConstraint
 
 @Entity
-@Table(
-    name = "account",
-    uniqueConstraints = [
-        (UniqueConstraint(
-            columnNames = ["accountId", "nonce"],
-            name = "uq_account_account_id_nonce"
-        ))
-    ]
-)
+@Table(name = "account")
 data class Account(
 
     @Id
@@ -29,17 +20,11 @@ data class Account(
     @Column(nullable = false, unique = true)
     val accountId: String,
 
-    @Column(nullable = false)
-    val nonce: Long = 0,
-
     @Column
     var publicKey: String? = null,
 
     @Column
-    var privateKeyEncoded: ByteArray? = null,
-
-    @Column
-    var salt: ByteArray? = null
+    var privateKeyEncoded: ByteArray? = null
 ) {
 
     var privateKey: String
