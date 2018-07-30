@@ -7,9 +7,19 @@ import javax.persistence.Entity
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
+import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
-// TODO introduce nonce
 @Entity
+@Table(
+    name = "account",
+    uniqueConstraints = [
+        (UniqueConstraint(
+            columnNames = ["accountId", "nonce"],
+            name = "uq_account_account_id_nonce"
+        ))
+    ]
+)
 data class Account(
 
     @Id
@@ -18,6 +28,9 @@ data class Account(
 
     @Column(nullable = false, unique = true)
     val accountId: String,
+
+    @Column(nullable = false)
+    val nonce: Long = 0,
 
     @Column
     var publicKey: String? = null,

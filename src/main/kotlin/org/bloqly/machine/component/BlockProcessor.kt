@@ -1,5 +1,7 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
@@ -103,6 +105,17 @@ class BlockProcessor(
         getBlocksRange(currentLIB, toBlock).forEach { block ->
             evaluateBlock(block, propertyContext)
         }
+    }
+
+    fun getLastPropertyValue(key: String, target: String): ByteArray? {
+        val currentLIB = blockService.getLIBForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+
+        val propertyContext = PropertyContext(propertyService, contractService)
+
+        evaluateBlocks(currentLIB, lastBlock, propertyContext)
+
+        return propertyContext.getPropertyValue(DEFAULT_SPACE, DEFAULT_SELF, target, key)
     }
 
     private fun getBlocksRange(afterBlock: Block, toBlock: Block): List<Block> {

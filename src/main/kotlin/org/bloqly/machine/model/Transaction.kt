@@ -49,7 +49,7 @@ data class Transaction(
     @Column(nullable = false)
     val publicKey: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     val hash: String = ""
 ) {
 

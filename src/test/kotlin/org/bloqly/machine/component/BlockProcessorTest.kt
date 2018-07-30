@@ -7,7 +7,6 @@ import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
-import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
@@ -15,7 +14,6 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
@@ -246,15 +244,9 @@ class BlockProcessorTest : BaseTest() {
     }
 
     private fun assertPropertyValueCandidate(value: String) {
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
-        val tx = blockService.loadBlockByHash(lastBlock.hash).transactions.first()
 
-        val txOutput = transactionOutputRepository.findById(TransactionOutputId(lastBlock.hash, tx.hash)).orElseThrow()
+        val lastValue = blockProcessor.getLastPropertyValue(propertyId.key, propertyId.target)!!
 
-        val properties = ObjectUtils.readProperties(txOutput.output)
-
-        val property = properties.first { it.id == propertyId }
-
-        assertEquals(BInteger(value), ParameterUtils.readValue(property.value))
+        assertEquals(BInteger(value), ParameterUtils.readValue(lastValue))
     }
 }

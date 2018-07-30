@@ -20,4 +20,9 @@ class PropertyService(private val propertyRepository: PropertyRepository) {
     }
 
     fun findById(propertyId: PropertyId): Property? = propertyRepository.findById(propertyId).orElse(null)
+
+    fun getNonce(spaceId: String,  accountId: String) {
+
+
+    }
 }
