@@ -1,5 +1,5 @@
 package org.bloqly.machine.model
 
-enum class ArgType {
+enum class ValueType {
     STRING, INT, BIGINT, BOOLEAN
 }

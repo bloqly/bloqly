@@ -27,7 +27,7 @@ class GenesisController(
         return ResponseEntity(GenesisEncoded(genesis), HttpStatus.OK)
     }
 
-    @PostMapping("/{spaceId}")
+    @PostMapping
     fun importGenesis(@RequestBody genesisEncoded: GenesisEncoded): ResponseEntity<Void> {
 
         genesisService.importFirst(genesisEncoded.genesis)

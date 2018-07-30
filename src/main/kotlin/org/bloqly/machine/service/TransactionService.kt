@@ -2,7 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
 import org.bloqly.machine.math.BInteger
-import org.bloqly.machine.model.ArgType
+import org.bloqly.machine.model.ValueType
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.AccountRepository
@@ -35,11 +35,11 @@ class TransactionService(
         @Suppress("IMPLICIT_CAST_TO_ANY")
         val args: Array<Any> = transactionRequest.args
             .map {
-                when (ArgType.valueOf(it.type)) {
-                    ArgType.STRING -> it.value
-                    ArgType.INT -> it.value.toInt()
-                    ArgType.BIGINT -> BInteger(it.value)
-                    ArgType.BOOLEAN -> it.value.toBoolean()
+                when (ValueType.valueOf(it.type)) {
+                    ValueType.STRING -> it.value
+                    ValueType.INT -> it.value.toInt()
+                    ValueType.BIGINT -> BInteger(it.value)
+                    ValueType.BOOLEAN -> it.value.toBoolean()
                 }
             }.toTypedArray()
 

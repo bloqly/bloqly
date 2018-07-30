@@ -42,6 +42,6 @@ curl -X POST \
 GENESIS=$(curl -X GET http://localhost:9901/api/v1/admin/genesis/main)
 
 # import genesis
-curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9902/api/v1/admin/genesis/main
-curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9903/api/v1/admin/genesis/main
-curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9904/api/v1/admin/genesis/main
+curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9902/api/v1/admin/genesis
+curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9903/api/v1/admin/genesis
+curl -X POST -H "Content-Type: application/json" -d "$GENESIS" http://localhost:9904/api/v1/admin/genesis
