@@ -47,8 +47,7 @@ class BlockService(
     ): Block {
 
         val proposer = accountRepository.findByAccountId(producerId)
-            .takeIf { it != null && passphraseService.hasPassphrase(it.accountId) }
-            ?: throw IllegalArgumentException("Could not create block in behalf of producer $producerId")
+            ?: throw IllegalArgumentException("Could not find producer: $producerId")
 
         val dataToSign = CryptoUtils.hash(
             arrayOf(

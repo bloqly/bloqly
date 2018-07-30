@@ -11,4 +11,4 @@ gradle clean assemble
 
 cp ./build/libs/bloqly-*.jar ./release/lib/bloqly.jar
 
-cp ./resources/run.sh ./release
+cp ./scripts/run.sh ./release

@@ -52,13 +52,11 @@ class BInteger {
     }
 
     override fun hashCode(): Int {
-
         return Objects.hash(value)
     }
 
     override fun toString(): String {
-
-        return "BInteger($value)"
+        return value.toString()
     }
 
     companion object {
