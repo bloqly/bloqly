@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @Profile("server")
 @RestController
 @RequestMapping("/api/v1/admin/blockchain")
-class BlockchainController(
+class BlockchainAdminController(
     private val blockchainService: BlockchainService
 ) {
 

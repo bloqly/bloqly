@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import javax.servlet.http.HttpServletRequest
 
 @Profile("server")
 @RestController
@@ -33,7 +34,7 @@ class TransactionController(
     }
 
     @GetMapping
-    fun getPendingTransactions(): TransactionList {
+    fun getPendingTransactions(request: HttpServletRequest): TransactionList {
 
         val transactions = transactionService.getRecentTransactions(MAX_REFERENCED_BLOCK_DEPTH)
 

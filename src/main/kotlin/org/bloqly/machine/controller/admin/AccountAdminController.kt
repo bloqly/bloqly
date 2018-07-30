@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-// TODO only localhost
 @Profile("server")
 @RestController
 @RequestMapping("/api/v1/admin/accounts")

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @Profile("server")
 @RestController
 @RequestMapping("/api/v1/admin/genesis")
-class GenesisController(
+class GenesisAdminController(
     private val genesisService: GenesisService
 ) {
 
