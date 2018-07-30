@@ -1,5 +1,6 @@
 package org.bloqly.machine.controller.data
 
+import org.bloqly.machine.controller.exception.NotFoundException
 import org.bloqly.machine.model.PropertyValue
 import org.bloqly.machine.repository.PropertyService
 import org.springframework.context.annotation.Profile
@@ -22,6 +23,6 @@ class PropertyController(
         @RequestParam("target") target: String,
         @RequestParam("key") key: String
     ): PropertyValue {
-        return propertyService.getProperty(spaceId, self, target, key)
+        return propertyService.getProperty(spaceId, self, target, key) ?: throw NotFoundException()
     }
 }

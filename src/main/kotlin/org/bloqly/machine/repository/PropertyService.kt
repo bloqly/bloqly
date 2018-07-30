@@ -25,19 +25,20 @@ class PropertyService(private val propertyRepository: PropertyRepository) {
 
     fun findById(propertyId: PropertyId): Property? = propertyRepository.findById(propertyId).orElse(null)
 
-    fun getProperty(spaceId: String, self: String, target: String, key: String): PropertyValue {
-        val valueBytes = propertyRepository.findById(PropertyId(spaceId, self, target, key)).orElse(null).value
+    fun getProperty(spaceId: String, self: String, target: String, key: String): PropertyValue? {
+        return propertyRepository.findById(PropertyId(spaceId, self, target, key))
+            .map { property ->
+                val value = ParameterUtils.readValue(property.value)
 
-        val value = ParameterUtils.readValue(valueBytes)
+                val valueType = when (value) {
+                    is Int -> ValueType.INT
+                    is BInteger -> ValueType.BIGINT
+                    is Boolean -> ValueType.BOOLEAN
+                    is String -> ValueType.STRING
+                    else -> throw IllegalArgumentException("Could not detect type of property value $value")
+                }
 
-        val valueType = when (value) {
-            is Int -> ValueType.INT
-            is BInteger -> ValueType.BIGINT
-            is Boolean -> ValueType.BOOLEAN
-            is String -> ValueType.STRING
-            else -> throw IllegalArgumentException("Could not detect type of property value $value")
-        }
-
-        return PropertyValue(value.toString(), valueType)
+                PropertyValue(value.toString(), valueType)
+            }.orElse(null)
     }
 }
