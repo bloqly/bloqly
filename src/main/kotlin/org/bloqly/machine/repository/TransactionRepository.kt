@@ -29,4 +29,5 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
     ): List<Transaction>
 
     fun existsByHash(hash: String): Boolean
+    fun existsByNonce(nonce: String): Boolean
 }

@@ -72,8 +72,13 @@ class TransactionService(
         value: ByteArray,
         transactionType: TransactionType,
         referencedBlockHash: String,
-        timestamp: Long = Instant.now().toEpochMilli()
+        timestamp: Long = Instant.now().toEpochMilli(),
+        nonce: String = CryptoUtils.newNonce()
     ): Transaction {
+
+        require(!transactionRepository.existsByNonce(nonce)) {
+            "Transaction with nonce $nonce already exists"
+        }
 
         val origin = accountRepository.findByAccountId(originId)!!
 
@@ -88,7 +93,7 @@ class TransactionService(
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
             publicKey = origin.publicKey!!,
-            nonce = CryptoUtils.newNonce()
+            nonce = nonce
         )
 
         val signature = CryptoUtils.sign(

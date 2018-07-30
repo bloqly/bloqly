@@ -53,7 +53,8 @@ class EventProcessorService(
             !CryptoUtils.verifyTransaction(tx) ||
             transactionRepository.existsByHash(tx.hash) ||
             !blockRepository.existsByHash(tx.referencedBlockHash) ||
-            !blockchainService.isActualTransaction(tx, MAX_REFERENCED_BLOCK_DEPTH)
+            !blockchainService.isActualTransaction(tx, MAX_REFERENCED_BLOCK_DEPTH) ||
+            transactionRepository.existsByNonce(tx.nonce)
         ) {
             return
         }
