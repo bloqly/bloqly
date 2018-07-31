@@ -1,7 +1,7 @@
 database:
   name: bloqly_ymir
-  username: slava
-  password: password
+  username: user_ymir
+  password: password_ymir
 
 port: 9904
 

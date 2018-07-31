@@ -1,7 +1,7 @@
 database:
   name: bloqly_loge
-  username: slava
-  password: password
+  username: user_loge
+  password: password_loge
 
 port: 9903
 
