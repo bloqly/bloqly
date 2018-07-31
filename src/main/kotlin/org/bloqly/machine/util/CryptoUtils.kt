@@ -28,7 +28,7 @@ object CryptoUtils {
 
     private val secureRandom = SecureRandom.getInstance(RANDOM)
 
-    fun newNonce(): String = asUnsignedByteArray(BigInteger(256, secureRandom)).encode16()
+    fun newNonce(): String = asUnsignedByteArray(BigInteger(256, secureRandom)).pad().encode16()
 
     fun encrypt(input: ByteArray?, passphrase: String): ByteArray {
         require(input != null)
@@ -136,7 +136,8 @@ object CryptoUtils {
                 tx.value.decode64(),
                 tx.referencedBlockHash.decode16(),
                 tx.transactionType.name.toByteArray(),
-                EncodingUtils.longToBytes(tx.timestamp)
+                EncodingUtils.longToBytes(tx.timestamp),
+                tx.nonce.decode16()
             )
         )
     }
