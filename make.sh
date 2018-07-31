@@ -2,6 +2,8 @@
 
 set -x
 
+VERSION="0.1.0"
+
 rm -rf ./release/mac
 rm -rf ./release/linux
 
@@ -23,3 +25,8 @@ cp ./scripts/bq.sh ./release/linux/
 
 cp -r ./release/java-mac/* ./release/mac/java
 cp -r ./release/java-linux/* ./release/linux/java
+
+rm  -rf ./release/bin/*
+
+tar -czf ./release/bin/bloqly-mac-${VERSION}.tar.gz -C ./release/mac/ .
+tar -czf ./release/bin/bloqly-linux-${VERSION}.tar.gz -C ./release/linux/ .
