@@ -55,8 +55,11 @@ class BlockProcessor(
 
     fun processReceivedBlock(blockData: BlockData) {
 
-        // TODO check LIB for received block
         val receivedBlock = blockData.block.toModel()
+
+        if (!blockRepository.existsByHash(receivedBlock.libHash)) {
+            return
+        }
 
         if (blockRepository.existsByHash(receivedBlock.hash)) {
             return
@@ -298,7 +301,6 @@ class BlockProcessor(
     ): List<TransactionResult> {
         val transactions = getPendingTransactions(spaceId)
 
-        // TODO take into account nonce
         return transactions
             .map { tx ->
 

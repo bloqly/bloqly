@@ -4,6 +4,7 @@ import com.google.common.primitives.Bytes
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.math.ec.ECCurve
 import org.bouncycastle.math.ec.ECPoint
+import org.bouncycastle.math.ec.WNafUtil
 import org.bouncycastle.util.BigIntegers.asUnsignedByteArray
 import org.bouncycastle.util.BigIntegers.fromUnsignedByteArray
 import java.math.BigInteger
@@ -11,6 +12,7 @@ import java.math.BigInteger.ONE
 import java.math.BigInteger.TWO
 import java.security.SecureRandom
 
+// TODO read about the "Related Key Attack"
 object BloqlySchnorr {
     private const val BASE_16 = 16
 
@@ -25,7 +27,32 @@ object BloqlySchnorr {
     }
 
     fun newPrivateKey(): ByteArray {
-        return asUnsignedByteArray(BigInteger(256, secureRandom)).pad()
+
+        val n = CURVE_PARAMS.n
+        val nBitLength = n.bitLength()
+        val minWeight = nBitLength.ushr(2)
+
+        var d: BigInteger
+        while (true) {
+            d = BigInteger(nBitLength, secureRandom)
+
+            if (d < TWO || d >= n) {
+                continue
+            }
+
+            // TODO sort out WTF it means
+            if (WNafUtil.getNafWeight(d) < minWeight) {
+                continue
+            }
+
+            break
+        }
+
+        val dBytes = asUnsignedByteArray(d).pad()
+
+        require(32 == dBytes.size)
+
+        return dBytes
     }
 
     private fun getP(): BigInteger {
@@ -41,6 +68,7 @@ object BloqlySchnorr {
     }
 
     fun sign(message: ByteArray, privateKey: ByteArray): Signature {
+        require(32 == privateKey.size)
         return sign(message, fromUnsignedByteArray(privateKey))
     }
 
@@ -78,10 +106,17 @@ object BloqlySchnorr {
     }
 
     fun getPublicFromPrivate(d: BigInteger): ByteArray {
-        return CURVE_PARAMS.g.multiply(d).encodePoint()
+        val pBytes = CURVE_PARAMS.g.multiply(d).encodePoint()
+
+        require(33 == pBytes.size)
+
+        return pBytes
     }
 
     fun verify(message: ByteArray, signature: Signature, p: ByteArray): Boolean {
+
+        require(64 == signature.toByteArray().size)
+        require(33 == p.size)
 
         try {
             if (signature.r >= getP() || signature.s >= CURVE_PARAMS.n) {

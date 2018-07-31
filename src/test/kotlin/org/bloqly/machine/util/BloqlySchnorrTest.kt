@@ -22,15 +22,17 @@ class BloqlySchnorrTest {
 
             val d = BloqlySchnorr.newPrivateKey()
 
-            //val d = "C90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B14E5C7".decode16()
-
             val dBytes = fromUnsignedByteArray(d)
 
             val p = BloqlySchnorr.getPublicFromPrivate(dBytes)
 
+            assertEquals(33, p.size)
+
             val message = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89".decode16()
 
             val signature = BloqlySchnorr.sign(message, dBytes)
+
+            assertEquals(64, signature.toByteArray().size)
             assertEquals(signature.toString(), Signature.fromString(signature.toString()).toString())
 
             assertTrue(BloqlySchnorr.verify(message, signature, p))
@@ -149,5 +151,4 @@ class BloqlySchnorrTest {
 
         assertFalse(BloqlySchnorr.verify(m, signature, p))
     }
-
 }

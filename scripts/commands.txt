@@ -5,7 +5,22 @@ createuser -s postgres
 createdb bloqly_test
 
 
-LOG_PATH=./logs/main  BLOQLY_CONFIG="../../config/config-main.yaml" ./release/mac/bq.sh
-LOG_PATH=./logs/rhea  BLOQLY_CONFIG="../../config/config-rhea.yaml" ./release/mac/bq.sh
-LOG_PATH=./logs/loge  BLOQLY_CONFIG="../../config/config-loge.yaml" ./release/mac/bq.sh
-LOG_PATH=./logs/ymir  BLOQLY_CONFIG="../../config/config-ymir.yaml" ./release/mac/bq.sh
+LOG_PATH=./logs/main  BLOQLY_CONFIG=../../config/config-main.yaml ./release/mac/bq.sh
+LOG_PATH=./logs/rhea  BLOQLY_CONFIG=../../config/config-rhea.yaml ./release/mac/bq.sh
+LOG_PATH=./logs/loge  BLOQLY_CONFIG=../../config/config-loge.yaml ./release/mac/bq.sh
+LOG_PATH=./logs/ymir  BLOQLY_CONFIG=../../config/config-ymir.yaml ./release/mac/bq.sh
+
+
+# Linux machine:
+
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib
+
+sudo -su postgres
+
+createuser bloqly_user
+createdb bloqly
+
+psql -d bloqly -c "alter user bloqly_user with password 'password';"
+
+LOG_PATH=./logs BLOQLY_CONFIG=/home/slava/bloqly/bloqly.yaml ./dist/bq.sh

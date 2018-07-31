@@ -1,6 +1,5 @@
 package org.bloqly.machine.math
 
-import org.apache.commons.lang3.Validate
 import java.math.BigInteger
 import java.math.BigInteger.TEN
 import java.util.Objects
@@ -65,7 +64,7 @@ class BInteger {
 
         private fun assertValueInRange(value: BigInteger) {
 
-            Validate.isTrue(value <= MAX_VALUE)
+            require(value <= MAX_VALUE)
         }
     }
 }
