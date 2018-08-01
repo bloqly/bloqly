@@ -3,6 +3,8 @@ server:
 
 admin:
   port: 9910
+  username: admin
+  password: admin
 
 spring:
   profiles:

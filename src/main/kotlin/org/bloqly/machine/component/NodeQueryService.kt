@@ -38,12 +38,12 @@ class NodeQueryService(
 
         val path = APIUtils.getDataPath(node, "nodes")
 
-        log.info("Query host $node for nodes")
+        log.debug("Query host $node for nodes")
 
         val nodeList = try {
             restTemplate.getForObject(path, NodeList::class.java)
         } catch (e: Exception) {
-            log.info("Could not query path $path for nodes. ${e.message}")
+            log.warn("Could not query path $path for nodes. ${e.message}")
             NodeList(nodes = emptyList())
         }
 

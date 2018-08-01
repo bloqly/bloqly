@@ -7,6 +7,8 @@ port: 9903
 
 admin:
   port: 9913
+  username: loge_admin
+  password: loge_password
 
 nodes: localhost:9901,localhost:9902,localhost:9904
 

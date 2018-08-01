@@ -7,6 +7,8 @@ port: 9904
 
 admin:
   port: 9914
+  username: ymir_admin
+  password: ymir_password
 
 nodes: localhost:9901,localhost:9902,localhost:9903
 
