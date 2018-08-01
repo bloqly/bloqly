@@ -5,6 +5,9 @@ database:
 
 port: 9901
 
+admin:
+  port: 9911
+
 nodes: localhost:9902,localhost:9903,localhost:9904
 
 keys:

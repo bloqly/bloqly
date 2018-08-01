@@ -70,7 +70,6 @@ class VoteService(
     }
 
     fun requireVoteValid(vote: Vote) {
-        // TODO create a log file where log full stack traces
 
         val validator = vote.validator
 

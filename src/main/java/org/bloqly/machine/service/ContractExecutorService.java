@@ -40,6 +40,7 @@ public class ContractExecutorService {
         };
     }
 
+    // TODO cache engine?
     private Invocable getEngine(PropertyContext propertyContext, InvocationContext invocationContext) throws Exception {
 
         var contract = propertyContext.getContract(invocationContext.getSelf());

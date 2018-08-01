@@ -30,3 +30,5 @@ spring:
 
 server:
   port: ${port}
+
+# TODO sort out management context and port

@@ -43,7 +43,7 @@ data class Transaction(
     @Column(nullable = false)
     val timestamp: Long,
 
-    @Column(nullable = false, columnDefinition = "text") // TODO change to real signature size
+    @Column(nullable = false)
     val signature: String = "",
 
     @Column(nullable = false)

@@ -1,6 +1,9 @@
 server:
   port: 9900
 
+admin:
+  port: 9910
+
 spring:
   profiles:
     active: test,server

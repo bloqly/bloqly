@@ -17,13 +17,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class WebConfig : WebMvcConfigurer {
 
     override fun configureContentNegotiation(configurer: ContentNegotiationConfigurer) {
-
         configurer.defaultContentType(MediaType.APPLICATION_JSON)
     }
 
     @Bean
     fun jackson2HttpMessageConverter(): MappingJackson2HttpMessageConverter {
-
         val mapper = ObjectMapper()
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         return MappingJackson2HttpMessageConverter(mapper)
