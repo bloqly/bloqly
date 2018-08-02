@@ -2,6 +2,8 @@
 
 cd "$(dirname "$0")"
 
-BLOQLY_CONFIG="${BLOQLY_CONFIG:-./config/config.yaml}"
+BLOQLY_HOME="${BLOQLY_HOME:-.}"
 
-./java/bin/java -Dspring.config.location=${BLOQLY_CONFIG},classpath:application.yaml -jar ./lib/bloqly.jar $@
+LOG_PATH=${BLOQLY_HOME}/logs
+
+./java/bin/java -Dspring.config.location=${BLOQLY_HOME}/config/bloqly-config.yaml,classpath:application.yaml -jar ./lib/bloqly.jar $@

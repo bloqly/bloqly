@@ -23,8 +23,13 @@ cp ./build/libs/bloqly-*.jar ./release/linux/lib/bloqly.jar
 cp ./scripts/bq.sh ./release/mac/
 cp ./scripts/bq.sh ./release/linux/
 
+# copy java to release folders
 cp -r ./release/java-mac/* ./release/mac/java
 cp -r ./release/java-linux/* ./release/linux/java
+
+# copy demo dir
+cp -r ./demo ./release/mac
+cp -r ./demo ./release/linux
 
 rm  -rf ./release/bin/*
 
