@@ -41,10 +41,17 @@ For **MacOS** just run `brew install postgres`
 After Postgres is installed, lets create test databases and users:
 
 ```bash
+sudo -su postgres
+
 createdb bloqly_main
 createdb bloqly_rhea
 createdb bloqly_loge
 createdb bloqly_ymir
+
+createuser user_main
+createuser user_rhea
+createuser user_loge
+createuser user_ymir
 
 psql -d bloqly_main -c "alter user user_main with password 'password_main';"
 psql -d bloqly_rhea -c "alter user user_rhea with password 'password_rhea';"
