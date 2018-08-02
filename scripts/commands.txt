@@ -5,10 +5,10 @@ createuser -s postgres
 createdb bloqly_test
 
 
-BLOQLY_HOME=../../demo/main ./release/mac/bq.sh
-BLOQLY_HOME=../../demo/rhea ./release/mac/bq.sh
-BLOQLY_HOME=../../demo/loge ./release/mac/bq.sh
-BLOQLY_HOME=../../demo/ymir ./release/mac/bq.sh
+BLOQLY_HOME=./demo/home/main ./bq.sh
+BLOQLY_HOME=./demo/home/rhea ./bq.sh
+BLOQLY_HOME=./demo/home/loge ./bq.sh
+BLOQLY_HOME=./demo/home/ymir ./bq.sh
 
 # Linux machine:
 

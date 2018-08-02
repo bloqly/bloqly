@@ -76,7 +76,7 @@ class TransactionControllerTest : BaseTest() {
 
     @Test
     fun testUserCreateTransaction() {
-        val url = APIUtils.getDataPath(node, "transactions") + "/new"
+        val url = APIUtils.getDataPath(node, "transactions")
 
         // TODO rename "contract" function name to "main" everywhere
         val transactionRequestPayload = """
@@ -106,13 +106,11 @@ class TransactionControllerTest : BaseTest() {
             ).size
         )
 
-        val tx = restTemplate.postForObject(url, entity, TransactionVO::class.java)
+        restTemplate.put(url, entity, TransactionVO::class.java)
 
         val pendingTransactions = transactionService.getPendingTransactionsBySpace(
             DEFAULT_SPACE, MAX_REFERENCED_BLOCK_DEPTH
         )
         assertEquals(1, pendingTransactions.size)
-
-        assertEquals(tx, pendingTransactions.first().toVO())
     }
 }

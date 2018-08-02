@@ -1,8 +1,8 @@
 package org.bloqly.machine.controller.data
 
+import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.controller.exception.NotFoundException
 import org.bloqly.machine.model.PropertyValue
-import org.bloqly.machine.repository.PropertyService
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/data/properties")
 class PropertyController(
-    private val propertyService: PropertyService
+    private val blockProcessor: BlockProcessor
 ) {
 
     @GetMapping
@@ -23,6 +23,7 @@ class PropertyController(
         @RequestParam("target") target: String,
         @RequestParam("key") key: String
     ): PropertyValue {
-        return propertyService.getProperty(spaceId, self, target, key) ?: throw NotFoundException()
+        val value = blockProcessor.getLastPropertyValue(key, target) ?: throw NotFoundException()
+        return PropertyValue.of(value)
     }
 }

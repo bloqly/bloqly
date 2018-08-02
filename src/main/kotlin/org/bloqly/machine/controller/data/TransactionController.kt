@@ -9,6 +9,7 @@ import org.bloqly.machine.vo.TransactionVO
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -28,7 +29,7 @@ class TransactionController(
         eventReceiverService.receiveTransactions(transactionsList.transactions)
     }
 
-    @PostMapping("/new")
+    @PutMapping
     fun onCreateTransaction(@RequestBody transactionRequest: TransactionRequest): TransactionVO {
         return eventReceiverService.receiveTransactionRequest(transactionRequest)
     }
