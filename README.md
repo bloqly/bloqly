@@ -44,7 +44,7 @@ BLOQLY_HOME=./demo/home/loge ./bq.sh
 BLOQLY_HOME=./demo/home/ymir ./bq.sh
 ```
 
-`BLOQLY_HOME` is name of folder which contains configuration of a node and where log files will be created. 
+`BLOQLY_HOME` is name of a folder which contains configuration of a node and where log files will be created. 
 
 For these wondering, the names of the configurations are the names of the moons of Saturn (well, except "main").
 
@@ -60,8 +60,7 @@ curl -X POST \
   -u main_admin:main_password \
   http://localhost:9911/api/v1/admin/accounts
 ```
-
-### Create 4 validators, 1 per node.
+### Create 4 validators, single validator per node.
 
 ```bash
 curl -X POST \
@@ -97,7 +96,7 @@ curl -X POST \
 
 ### Initialize blockchain
 
-The default blockchain smart contract sources can be found in `contract/currency` folder. It contains a very simple simple toy 
+The default blockchain smart contract sources can be found in `contract/currency` folder. It contains a very simple toy 
 implementation of a cryptocurrency and intended to just demonstrate the idea behind Bloqly as a scriptable blockchain engine
 with JavaScript smart contracts support. 
 
@@ -106,7 +105,7 @@ Lets initialize new blockchain using it:
 ```bash
 curl -X POST \
   -H "Content-Type: application/json" \
-  -d "{\"space\":\"main\", \"path\": \"$(pwd)/src/test/resources/blocks/currency-js\", \"passphrase\":\"root password\"}" \
+  -d "{\"space\":\"main\", \"path\": \"$(pwd)/demo/contract/currency\", \"passphrase\":\"root password\"}" \
   -u main_admin:main_password \
   http://localhost:9911/api/v1/admin/blockchain
 ``` 
@@ -151,14 +150,12 @@ curl -X POST \
 Now lets check the value of `root` account's property `balance` :
 
 ```bash
-curl -X GET \
-  'http://localhost:9901/api/v1/data/properties?space=main&self=self&target=58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607&key=balance' \
-  2>&1
+curl -X GET 'http://localhost:9901/api/v1/data/properties?space=main&self=self&target=58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607&key=balance'
 ```
 
 Should output:
 
-```bash
+```json
 {"value":"999996","type":"BIGINT"}
 ```
 
@@ -205,10 +202,33 @@ In response you should receive JSON representation of created transaction simila
 }
 ```
 
+Now, lets check balances of the first user again:
+
+```bash
+curl -X GET 'http://localhost:9901/api/v1/data/properties?space=main&self=self&target=58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607&key=balance'
+```
+
+Outputs:
+
+```json
+{"value":"999896","type":"BIGINT"}
+```
+
+And balance of a user we moved funds to:
+
+```bash
+curl -X GET 'http://localhost:9901/api/v1/data/properties?space=main&self=self&target=5CA1EEF9AA50625F3B7AC637D35655174CAA2C4FAB559B294D6E7C924C9AA6D4&key=balance'
+```
+
+Outputs:
+
+```json
+{"value":"100","type":"BIGINT"}
+```
+
 ## Consensus engine prototype, functional smart contracts, code samples
 
 Smart contract code sample:
-
 
 ```JavaScript
 
