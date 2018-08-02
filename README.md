@@ -19,14 +19,49 @@ This is a work in progress/prototype, API and implementation detaisl can change.
 
 ## Installation
 
+### Install Bloqly
+
+Download and unpack the latest binary distribution for your platform from https://github.com/bloqly/bloqly/releases
+
+Note 1: right now **MacOS** and **Linux** are supported natively. 
+For **Windows** please use Linux Bash Shell for Windows (it works great actually).
+
+Note 2:  Bloqly uses Java under the hood, but you don't need to download and install JVM in order to get it working, 
+it is already packed up into the distribution archives.
+
+### Install Postgres
+
+For **Linux** I find these instructions of installing Postgres very well written and easy to follow:
+
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04
+
+For **MacOS** just run `brew install postgres`
+
+After Postgres is installed, lets create test databases and users:
+
+```bash
+createdb bloqly_main
+createdb bloqly_rhea
+createdb bloqly_loge
+createdb bloqly_ymir
+
+psql -d bloqly_main -c "alter user user_main with password 'password_main';"
+psql -d bloqly_rhea -c "alter user user_rhea with password 'password_rhea';"
+psql -d bloqly_loge -c "alter user user_loge with password 'password_loge';"
+psql -d bloqly_ymir -c "alter user user_ymir with password 'password_ymir';"
+```
+
 ## Quick start
+
+Bloqly comes with preconfigured demo settings for a simplest blockchain network consisting of 4 nodes running a simplified cryptocurrency.
+It is for demo purposes only and not of a production quality yet. Please don't create an ICO on it.
 
 ### Start nodes
 
 In order to test if things are working at all you can use provided demo configuration - four nodes with pre-configured settings.
 
-Open new bash windows and run from the Bloqly installation directory:
-
+Lets start nodes first. Open new bash windows and run from the Bloqly installation directory:
 
 ```bash
 BLOQLY_HOME=./demo/home/main ./bq.sh
@@ -60,7 +95,7 @@ curl -X POST \
   -u main_admin:main_password \
   http://localhost:9911/api/v1/admin/accounts
 ```
-### Create 4 validators, single validator per node.
+### Create 4 validator accounts, single validator per node.
 
 ```bash
 curl -X POST \
@@ -225,6 +260,8 @@ Outputs:
 ```json
 {"value":"100","type":"BIGINT"}
 ```
+
+That's it for now!
 
 ## Consensus engine prototype, functional smart contracts, code samples
 
