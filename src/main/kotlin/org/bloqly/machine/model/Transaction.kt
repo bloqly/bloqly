@@ -7,9 +7,22 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.AUTO
 import javax.persistence.Id
 import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
 @Entity
-@Table(name = "transaction")
+@Table(
+    name = "transaction",
+    uniqueConstraints = [
+        UniqueConstraint(
+            columnNames = ["hash"],
+            name = "transaction.uq_hash"
+        ),
+        UniqueConstraint(
+            columnNames = ["nonce"],
+            name = "transaction.uq_nonce"
+        )
+    ]
+)
 data class Transaction(
 
     @Id
@@ -49,10 +62,10 @@ data class Transaction(
     @Column(nullable = false)
     val publicKey: String,
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     val hash: String = "",
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     val nonce: String
 ) {
 

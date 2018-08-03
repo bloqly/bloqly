@@ -17,11 +17,11 @@ import javax.persistence.UniqueConstraint
     uniqueConstraints = [
         (UniqueConstraint(
             columnNames = ["spaceId", "validator_id", "height"],
-            name = "uq_vote_space_validator_height"
+            name = "vote.uq_space_validator_height"
         )),
         (UniqueConstraint(
             columnNames = ["validator_id", "blockHash"],
-            name = "uq_vote_validator_block_hash"
+            name = "vote.uq_validator_block_hash"
         ))
     ]
 )

@@ -19,19 +19,23 @@ import javax.persistence.UniqueConstraint
     uniqueConstraints = [
         UniqueConstraint(
             columnNames = ["hash", "libHash"],
-            name = "uq_block_hash_lib_hash"
+            name = "block.uq_hash_lib_hash"
         ),
         UniqueConstraint(
             columnNames = ["hash", "parentHash"],
-            name = "uq_hash_parent_hash"
+            name = "block.uq_hash_parent_hash"
         ),
         UniqueConstraint(
             columnNames = ["spaceId", "producerId", "height"],
-            name = "uq_space_producer_height"
+            name = "block.uq_space_producer_height"
         ),
         UniqueConstraint(
             columnNames = ["spaceId", "producerId", "round"],
-            name = "uq_producer_round"
+            name = "block.uq_producer_round"
+        ),
+        UniqueConstraint(
+            columnNames = ["hash"],
+            name = "block.uq_producer_round"
         )
     ]
 )
@@ -90,7 +94,7 @@ data class Block(
     )
     val votes: List<Vote> = listOf(),
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     val hash: String,
 
     @Column(nullable = false)
@@ -130,5 +134,4 @@ data class Block(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
 }
