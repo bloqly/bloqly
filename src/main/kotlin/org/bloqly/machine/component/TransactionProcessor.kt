@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.INIT_KEY
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
+import org.bloqly.machine.model.InvocationResultType.ERROR
 import org.bloqly.machine.model.InvocationResultType.SUCCESS
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
@@ -13,6 +14,7 @@ import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode64
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import javax.transaction.Transactional
 
@@ -22,6 +24,7 @@ class TransactionProcessor(
     private val accountService: AccountService,
     private val contractExecutorService: ContractExecutorService
 ) {
+    private val log = LoggerFactory.getLogger(TransactionProcessor::class.simpleName)
 
     private fun processCreateContract(
         tx: Transaction,
@@ -74,28 +77,33 @@ class TransactionProcessor(
         propertyContext: PropertyContext
     ): InvocationResult {
 
-        accountService.ensureAccount(tx.destination)
+        try {
+            accountService.ensureAccount(tx.destination)
 
-        val result = when (tx.transactionType) {
+            val result = when (tx.transactionType) {
 
-            CREATE -> {
-                processCreateContract(tx, propertyContext)
+                CREATE -> {
+                    processCreateContract(tx, propertyContext)
+                }
+
+                CALL -> {
+                    processCall(tx, propertyContext)
+                }
+
+                else -> {
+                    // do nothing
+                    InvocationResult(SUCCESS)
+                }
             }
 
-            CALL -> {
-                processCall(tx, propertyContext)
-            }
+            accountService.ensureAccounts(result)
 
-            else -> {
-                // do nothing
-                InvocationResult(SUCCESS)
-            }
+            propertyContext.updatePropertyValues(result.output)
+
+            return result
+        } catch (e: Exception) {
+            log.error(e.message, e)
+            return InvocationResult(ERROR)
         }
-
-        accountService.ensureAccounts(result)
-
-        propertyContext.updatePropertyValues(result.output)
-
-        return result
     }
 }

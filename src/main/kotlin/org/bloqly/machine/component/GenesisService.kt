@@ -117,8 +117,11 @@ class GenesisService(
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        transactions.forEach {
-            transactionProcessor.processTransaction(it, propertyContext)
+        transactions.forEach { tx ->
+            val result = transactionProcessor.processTransaction(tx, propertyContext)
+            require(result.isOK()) {
+                "Could not process transaction ${tx.toVO()}"
+            }
         }
 
         propertyContext.commit()

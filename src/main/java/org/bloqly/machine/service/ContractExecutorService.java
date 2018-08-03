@@ -130,6 +130,9 @@ public class ContractExecutorService {
         }
     }
 
+    /**
+     * This is used primarily to invoke `init` function
+     */
     @SuppressWarnings("unchecked")
     public List<PropertyResult> invokeFunction(String name, String body) {
         try {

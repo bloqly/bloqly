@@ -89,7 +89,12 @@ class BlockchainService(
         )
 
         val propertyContext = PropertyContext(propertyService, contractService)
-        transactionProcessor.processTransaction(transaction, propertyContext)
+        val result = transactionProcessor.processTransaction(transaction, propertyContext)
+
+        require(result.isOK()) {
+            "Could not process genesis block transaction ${transaction.toVO()}"
+        }
+
         propertyContext.commit()
 
         firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction)).encode64()

@@ -269,7 +269,6 @@ class BlockProcessor(
 
                     properties.forEach { log.info("Applying property $it") }
 
-                    // TODO add check so that property keys are unique
                     propertyService.updateProperties(properties)
                 } catch (e: Exception) {
                     val errorMessage = "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
