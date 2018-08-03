@@ -38,7 +38,7 @@ First, small contract code sample:
  * @return {Object}  Array of properties to set after function execution
  */
 
-function contract(context, orig, dest, amount) {
+function main(context, orig, dest, amount) {
 
     let origBalance = getProperty(orig, 'balance', zero);
     let destBalance = getProperty(dest, 'balance', zero);
@@ -250,7 +250,7 @@ curl -X PUT \
     "destination": "5CA1EEF9AA50625F3B7AC637D35655174CAA2C4FAB559B294D6E7C924C9AA6D4",
     "transactionType": "CALL",
     "self": "self",
-    "key": "contract",
+    "key": "main",
     "args": [
         {
             "type": "BIGINT",
@@ -268,7 +268,7 @@ In response you should receive JSON representation of created transaction simila
   "space": "main",
   "destination": "5CA1EEF9AA50625F3B7AC637D35655174CAA2C4FAB559B294D6E7C924C9AA6D4",
   "self": "self",
-  "key": "contract",
+  "key": "main",
   "value": "AwAAAAAAAABk",
   "transactionType": "CALL",
   "referencedBlockHash": "0611039429DB47FCE0E5B9E59B6D530300448A8463386565DC794F5FF0E759BA",

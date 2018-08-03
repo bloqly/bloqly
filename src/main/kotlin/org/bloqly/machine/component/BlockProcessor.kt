@@ -37,6 +37,7 @@ private data class TransactionResult(
 
 @Service
 @Transactional
+// TODO add test for rejected transaction
 class BlockProcessor(
     private val transactionRepository: TransactionRepository,
     private val transactionService: TransactionService,

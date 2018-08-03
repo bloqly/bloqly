@@ -80,6 +80,7 @@ class TransactionProcessor(
         try {
             accountService.ensureAccount(tx.destination)
 
+            // TODO check results are unique
             val result = when (tx.transactionType) {
 
                 CREATE -> {

@@ -1,6 +1,6 @@
 var BigInteger = Java.type("org.bloqly.machine.math.BInteger");
 
-function contract(context, orig, dest, arg1, arg2, arg3, arg4) {
+function main(context, orig, dest, arg1, arg2, arg3, arg4) {
 
     return [
         { target: orig, value1: arg1 },

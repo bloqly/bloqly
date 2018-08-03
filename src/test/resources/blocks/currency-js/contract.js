@@ -5,7 +5,7 @@ const validatorPower = validatorAmount;
 
 const zero = new BigInteger('0');
 
-function contract(context, orig, dest, amount) {
+function main(context, orig, dest, amount) {
 
     let origBalance = getProperty(orig, 'balance', zero);
     let destBalance = getProperty(dest, 'balance', zero);

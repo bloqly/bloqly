@@ -78,7 +78,6 @@ class TransactionControllerTest : BaseTest() {
     fun testUserCreateTransaction() {
         val url = APIUtils.getDataPath(node, "transactions")
 
-        // TODO rename "contract" function name to "main" everywhere
         val transactionRequestPayload = """
             {
                 "space": "$DEFAULT_SPACE",
@@ -87,7 +86,7 @@ class TransactionControllerTest : BaseTest() {
                 "destination": "${testService.getUser().accountId}",
                 "transactionType": "CALL",
                 "self": "self",
-                "key": "contract",
+                "key": "main",
                 "args": [
                     {
                         "type": "BIGINT",
