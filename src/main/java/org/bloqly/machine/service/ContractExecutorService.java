@@ -8,6 +8,7 @@ import org.bloqly.machine.util.ParameterUtils;
 import org.springframework.stereotype.Service;
 
 import javax.script.Invocable;
+import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.transaction.Transactional;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.bloqly.machine.model.InvocationResultType.SUCCESS;
 
 @Service
 public class ContractExecutorService {
@@ -49,25 +51,21 @@ public class ContractExecutorService {
 
         invocationContext.setOwner(contract.getOwner());
 
-        System.setProperty("nashorn.args", "--language=es6");
-
-        var engine = new ScriptEngineManager().getEngineByName("nashorn");
+        var engine = getEngine(contract.getBody());
 
         engine.put("getProperty", getPropertyFunction(propertyContext, invocationContext));
-
-        engine.eval(contract.getBody());
 
         return (Invocable) engine;
     }
 
-    private Invocable getEngine(String body) throws Exception {
+    private ScriptEngine getEngine(String body) throws Exception {
         System.setProperty("nashorn.args", "--language=es6");
 
         var engine = new ScriptEngineManager().getEngineByName("nashorn");
 
         engine.eval(body);
 
-        return (Invocable) engine;
+        return engine;
     }
 
     private PropertyResult getEntry(Map<String, Object> item) {
@@ -102,7 +100,7 @@ public class ContractExecutorService {
 
         var properties = invokeFunction(propertyContext, invocationContext, arg);
 
-        return new InvocationResult(InvocationResultType.SUCCESS, properties);
+        return new InvocationResult(SUCCESS, properties);
     }
 
     @SuppressWarnings("unchecked")
@@ -137,7 +135,7 @@ public class ContractExecutorService {
     public List<PropertyResult> invokeFunction(String name, String body) {
         try {
 
-            var engine = getEngine(body);
+            var engine = (Invocable) getEngine(body);
 
             var results = (Map<String, Object>) engine.invokeFunction(name);
 
