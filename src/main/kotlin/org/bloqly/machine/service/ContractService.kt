@@ -3,9 +3,11 @@ package org.bloqly.machine.service
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.repository.ContractRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 class ContractService(
     private val contractRepository: ContractRepository
 ) {

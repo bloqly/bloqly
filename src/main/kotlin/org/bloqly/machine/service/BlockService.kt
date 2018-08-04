@@ -16,10 +16,12 @@ import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import kotlin.math.min
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 class BlockService(
     private val accountRepository: AccountRepository,
     private val blockRepository: BlockRepository,

@@ -14,6 +14,7 @@ import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
@@ -26,7 +27,7 @@ import java.time.Instant
  * R    - voting round
  */
 @Component
-@Transactional
+@Transactional(isolation = SERIALIZABLE)
 class EventProcessorService(
     private val blockRepository: BlockRepository,
     private val accountService: AccountService,

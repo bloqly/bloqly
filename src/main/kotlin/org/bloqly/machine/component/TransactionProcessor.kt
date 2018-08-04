@@ -16,10 +16,11 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode64
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import javax.transaction.Transactional
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
+import org.springframework.transaction.annotation.Transactional
 
 @Component
-@Transactional
+@Transactional(isolation = SERIALIZABLE)
 class TransactionProcessor(
     private val accountService: AccountService,
     private val contractExecutorService: ContractExecutorService

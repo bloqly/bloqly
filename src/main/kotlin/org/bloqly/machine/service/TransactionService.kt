@@ -16,10 +16,12 @@ import org.bloqly.machine.util.encode16
 import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.TransactionRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 class TransactionService(
     private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,

@@ -28,7 +28,7 @@ data class Account(
 ) {
 
     var privateKey: String
-        get():String {
+        get(): String {
             return privateKeyEncoded!!.encode16()
         }
         set(value) {

@@ -5,9 +5,11 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.vo.Delta
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 class DeltaService(
     private val voteRepository: VoteRepository,
     private val spaceRepository: SpaceRepository,

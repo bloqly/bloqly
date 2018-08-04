@@ -27,6 +27,7 @@ import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
@@ -36,6 +37,7 @@ private data class TransactionResult(
 )
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 // TODO add test for rejected transaction
 class BlockProcessor(
     private val transactionRepository: TransactionRepository,

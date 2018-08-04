@@ -11,10 +11,11 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.TimeUtils
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional
+@Transactional(isolation = SERIALIZABLE)
 class ResetService(
     private val contractRepository: ContractRepository,
     private val propertyRepository: PropertyRepository,

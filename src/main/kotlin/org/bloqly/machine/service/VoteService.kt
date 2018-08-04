@@ -9,10 +9,12 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 class VoteService(
     private val voteRepository: VoteRepository,
     private val blockRepository: BlockRepository,

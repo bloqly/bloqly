@@ -18,10 +18,12 @@ import org.bloqly.machine.util.decode64
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.Genesis
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 class GenesisService(
     private val blockRepository: BlockRepository,
     private val transactionRepository: TransactionRepository,

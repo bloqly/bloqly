@@ -5,11 +5,13 @@ import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.NodeRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import javax.annotation.PostConstruct
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 class NodeService(
     private val nodeRepository: NodeRepository,
     @Value("\${nodes:}") private val nodes: Array<String>,

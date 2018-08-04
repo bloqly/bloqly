@@ -17,10 +17,12 @@ import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 
 @Service
+@Transactional(isolation = SERIALIZABLE)
 class AccountService(
     private val accountRepository: AccountRepository,
     private val propertyRepository: PropertyRepository,

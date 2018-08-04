@@ -16,12 +16,13 @@ import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.util.encode64
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.time.Instant
 
 @Service
-@Transactional
+@Transactional(isolation = SERIALIZABLE)
 class BlockchainService(
     private val blockService: BlockService,
     private val contractExecutorService: ContractExecutorService,
