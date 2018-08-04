@@ -2,9 +2,9 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
 import org.bloqly.machine.math.BInteger
-import org.bloqly.machine.model.ValueType
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
+import org.bloqly.machine.model.ValueType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.SpaceRepository
@@ -16,6 +16,7 @@ import org.bloqly.machine.util.encode16
 import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.TransactionRequest
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
@@ -27,6 +28,7 @@ class TransactionService(
 ) {
 
     // TODO add blockchain config option - if adding smart contracts allowed
+    @Transactional
     fun createTransaction(
         transactionRequest: TransactionRequest,
         referencedBlockHash: String
@@ -62,6 +64,7 @@ class TransactionService(
         )
     }
 
+    @Transactional
     fun createTransaction(
         space: String,
         originId: String,
@@ -111,11 +114,13 @@ class TransactionService(
         )
     }
 
+    @Transactional(readOnly = true)
     fun getRecentTransactions(depth: Int): List<Transaction> {
         return spaceRepository.findAll()
             .flatMap { getPendingTransactionsBySpace(it.id, depth) }
     }
 
+    @Transactional(readOnly = true)
     fun getPendingTransactionsBySpace(spaceId: String, depth: Int): List<Transaction> {
         val lastBlock = blockRepository.getLastBlock(spaceId)
         val minTimestamp = TimeUtils.getCurrentTime() - MAX_TRANSACTION_AGE

@@ -1,7 +1,6 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
-import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
@@ -17,19 +16,18 @@ import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
 import org.springframework.stereotype.Service
-import javax.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 import kotlin.math.min
 
 @Service
-@Transactional
 class BlockService(
     private val accountRepository: AccountRepository,
     private val blockRepository: BlockRepository,
     private val spaceRepository: SpaceRepository,
-    private val propertyRepository: PropertyRepository,
-    private val passphraseService: PassphraseService
+    private val propertyRepository: PropertyRepository
 ) {
 
+    @Transactional(readOnly = true)
     fun newBlock(
         spaceId: String,
         height: Long,
@@ -91,10 +89,12 @@ class BlockService(
         )
     }
 
+    @Transactional(readOnly = true)
     fun getLastBlockForSpace(spaceId: String): Block {
         return blockRepository.getLastBlock(spaceId)
     }
 
+    @Transactional(readOnly = true)
     fun getLIBForSpace(spaceId: String, newBlockValidatorId: String? = null): Block {
 
         val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
@@ -122,6 +122,7 @@ class BlockService(
         }
     }
 
+    @Transactional(readOnly = true)
     fun getBlockDataList(delta: Delta): BlockDataList {
 
         val startHeight = delta.localHeight
@@ -132,6 +133,7 @@ class BlockService(
         return BlockDataList(blocks.map { BlockData(it) })
     }
 
+    @Transactional(readOnly = true)
     fun ensureSpaceEmpty(space: String) {
 
         require(!blockRepository.existsBySpaceId(space)) {
@@ -143,6 +145,7 @@ class BlockService(
         }
     }
 
+    @Transactional(readOnly = true)
     fun loadBlockByHash(hash: String): Block {
         val block = blockRepository.findByHash(hash)!!
 

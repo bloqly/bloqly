@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
-@Transactional
 class GenesisService(
     private val blockRepository: BlockRepository,
     private val transactionRepository: TransactionRepository,
@@ -33,6 +32,7 @@ class GenesisService(
     private val blockService: BlockService
 ) {
 
+    @Transactional(readOnly = true)
     fun exportFirst(spaceId: String): String {
 
         val firstBlock = blockRepository.findGenesisBlockBySpaceId(spaceId)
@@ -49,6 +49,7 @@ class GenesisService(
         return json.toByteArray().encode16()
     }
 
+    @Transactional
     fun importFirst(genesisString: String) {
 
         val now = Instant.now()

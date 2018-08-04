@@ -36,7 +36,6 @@ private data class TransactionResult(
 )
 
 @Service
-@Transactional
 // TODO add test for rejected transaction
 class BlockProcessor(
     private val transactionRepository: TransactionRepository,
@@ -54,6 +53,7 @@ class BlockProcessor(
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
 
+    @Transactional
     fun processReceivedBlock(blockData: BlockData) {
 
         val receivedBlock = blockData.block.toModel()
@@ -111,6 +111,7 @@ class BlockProcessor(
         }
     }
 
+    @Transactional(readOnly = true)
     fun getLastPropertyValue(key: String, target: String): ByteArray? {
         val currentLIB = blockService.getLIBForSpace(DEFAULT_SPACE)
         val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
@@ -122,6 +123,7 @@ class BlockProcessor(
         return propertyContext.getPropertyValue(DEFAULT_SPACE, DEFAULT_SELF, target, key)
     }
 
+    @Transactional(readOnly = true)
     private fun getBlocksRange(afterBlock: Block, toBlock: Block): List<Block> {
         val blocks = mutableListOf<Block>()
         var currentBlock = toBlock
@@ -183,6 +185,7 @@ class BlockProcessor(
         }
     }
 
+    @Transactional
     fun createNextBlock(spaceId: String, producer: Account, passphrase: String, round: Long): BlockData {
 
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)

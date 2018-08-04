@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional
 class DeltaService(
     private val voteRepository: VoteRepository,
     private val spaceRepository: SpaceRepository,
     private val blockRepository: BlockRepository
 ) {
 
+    @Transactional(readOnly = true)
     fun getDeltas(): List<Delta> {
         val spaces = spaceRepository.findAll()
 

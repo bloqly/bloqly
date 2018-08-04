@@ -13,13 +13,13 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
-@Transactional
 class VoteService(
     private val voteRepository: VoteRepository,
     private val blockRepository: BlockRepository,
     private val accountService: AccountService
 ) {
 
+    @Transactional
     fun getVote(space: Space, validator: Account, passphrase: String): Vote? {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
@@ -56,6 +56,7 @@ class VoteService(
         )
     }
 
+    @Transactional
     fun validateAndSave(vote: Vote): Vote {
 
         requireVoteValid(vote)

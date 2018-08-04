@@ -14,8 +14,8 @@ import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import javax.transaction.Transactional
 
 /**
  * Processes the most important events
@@ -42,12 +42,12 @@ class EventProcessorService(
 
     /**
      * Collecting transactions
-     *
      */
     fun onTransaction(tx: Transaction) {
 
         val now = Instant.now().toEpochMilli()
 
+        // TODO move to a separate method
         if (
             tx.timestamp > now ||
             !CryptoUtils.verifyTransaction(tx) ||
