@@ -112,7 +112,7 @@ class BlockService(
 
         var block = blockRepository.getLastBlock(spaceId)
 
-        if (isHyperConfirmed(block)) {
+        if (isHyperFinalizer(block)) {
             return blockRepository.findByHash(block.parentHash)!!
         }
 
@@ -130,7 +130,7 @@ class BlockService(
         return block
     }
 
-    fun isHyperConfirmed(currBlock: Block): Boolean {
+    fun isHyperFinalizer(currBlock: Block): Boolean {
 
         if (currBlock.height < 2) {
             return false
@@ -141,9 +141,9 @@ class BlockService(
         val prevBlock = blockRepository.findByHash(currBlock.parentHash)!!
 
         val prevBlockValidators = prevBlock.votes.map { it.validator.accountId }.toSet()
-        val currBlockValidators = prevBlock.votes.map { it.validator.accountId }.toSet()
+        val currBlockValidators = currBlock.votes.map { it.validator.accountId }.toSet()
 
-        return currBlockValidators == prevBlockValidators && currBlockValidators.size >= quorum
+        return currBlockValidators.intersect(prevBlockValidators).size >= quorum
     }
 
     @Transactional(readOnly = true)

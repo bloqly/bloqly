@@ -33,6 +33,9 @@ import org.springframework.test.context.junit4.SpringRunner
 class BlockProcessorTest : BaseTest() {
 
     @Autowired
+    private lateinit var eventProcessorService: EventProcessorService
+
+    @Autowired
     private lateinit var accountService: AccountService
 
     @Autowired
@@ -77,12 +80,11 @@ class BlockProcessorTest : BaseTest() {
         firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(firstBlock.hash, getLIB().hash)
         assertEquals(0, firstBlock.height)
-
-        populateBlocks()
     }
 
     @Test
     fun testBlockProcessed() {
+        populateBlocks()
 
         assertNull(propertyService.findById(propertyId))
 
@@ -94,6 +96,7 @@ class BlockProcessorTest : BaseTest() {
 
     @Test
     fun testProcessNewBlockWithOldVotes() {
+        populateBlocks()
 
         val votes = blocks[0].votes.map { voteVO ->
             val account = accountService.getAccountByPublicKey(voteVO.publicKey)
@@ -107,6 +110,7 @@ class BlockProcessorTest : BaseTest() {
 
     @Test
     fun testSilentlyRejectsBlockWithTheSameHash() {
+        populateBlocks()
         blockProcessor.processReceivedBlock(blocks[0])
         blockProcessor.processReceivedBlock(blocks[0])
     }
@@ -117,6 +121,8 @@ class BlockProcessorTest : BaseTest() {
 
     @Test
     fun testPropertyAppliedWhenLIBChanged() {
+        populateBlocks()
+
         assertNull(propertyService.findById(propertyId))
 
         blockProcessor.processReceivedBlock(blocks[0])

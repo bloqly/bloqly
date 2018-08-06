@@ -3,9 +3,15 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.BlockProcessor
+import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.BaseTest
+import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,6 +22,12 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class BlockServiceTest : BaseTest() {
+
+    @Autowired
+    private lateinit var voteRepository: VoteRepository
+
+    @Autowired
+    private lateinit var eventProcessorService: EventProcessorService
 
     @Autowired
     private lateinit var blockService: BlockService
@@ -79,5 +91,89 @@ class BlockServiceTest : BaseTest() {
         assertEquals(block4.hash, block8.libHash)
     }
 
+    @Test
+    fun testHyperFinalization() {
+        eventProcessorService.onGetVotes()
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+
+        eventProcessorService.onGetVotes()
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+
+        assertTrue(isHyperFinalizer(block))
+    }
+
+    @Test
+    fun testHyperFinalizationNoPrevQuorum() {
+        val votes1 = eventProcessorService.onGetVotes()
+        voteRepository.deleteAll(votes1.sortedBy { it.validator.accountId }.takeLast(2))
+
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+
+        eventProcessorService.onGetVotes()
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+
+        assertFalse(isHyperFinalizer(block))
+    }
+
+    @Test
+    fun testHyperFinalizationNoCurrQuorum() {
+        eventProcessorService.onGetVotes()
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+
+        val votes2 = eventProcessorService.onGetVotes()
+        voteRepository.deleteAll(votes2.sortedBy { it.validator.accountId }.takeLast(2))
+
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+
+        assertFalse(isHyperFinalizer(block))
+    }
+
+    @Test
+    fun testHyperFinalizationExactPrevQuorum() {
+        val votes1 = eventProcessorService.onGetVotes()
+        voteRepository.deleteAll(votes1.take(1))
+
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+
+        eventProcessorService.onGetVotes()
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+
+        assertTrue(isHyperFinalizer(block))
+    }
+
+    @Test
+    fun testHyperFinalizationExactCurrQuorum() {
+        eventProcessorService.onGetVotes()
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+
+        val votes2 = eventProcessorService.onGetVotes()
+        voteRepository.deleteAll(votes2.take(1))
+
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+
+        assertTrue(isHyperFinalizer(block))
+    }
+
+    @Test
+    fun testHyperFinalizationNotSameValidatorsQuorum() {
+        val votes1 = eventProcessorService.onGetVotes()
+        val first = votes1.sortedBy { it.validator.accountId }.first()
+        voteRepository.delete(first)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+
+        val votes2 = eventProcessorService.onGetVotes()
+        val last = votes2.sortedBy { it.validator.accountId }.last()
+        voteRepository.delete(last)
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+
+        assertNotEquals(first, last)
+        assertFalse(isHyperFinalizer(block))
+    }
+
     private fun getLIB(): Block = blockService.getLIBForSpace(DEFAULT_SPACE)
+
+    private fun isHyperFinalizer(blockData: BlockData): Boolean =
+        blockService.isHyperFinalizer(
+            blockService.loadBlockByHash(blockData.block.hash)
+        )
 }
