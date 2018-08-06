@@ -104,11 +104,17 @@ class BlockService(
     @Transactional(readOnly = true)
     fun getLIBForSpace(spaceId: String, newBlockValidatorId: String? = null): Block {
 
+        // TODO calculate quorum taking into account the current block producer
+        // also, being a block producer, don't create a vote as it is unnecessary -
+        // you already vote with your block
+        // introduce method "isQuorum(block: Block): Boolean"
         val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
 
-        // check if we have "hyper-confirmation"
-
         var block = blockRepository.getLastBlock(spaceId)
+
+        if (isHyperConfirmed(block)) {
+            return blockRepository.findByHash(block.parentHash)!!
+        }
 
         val validatorIds = mutableSetOf<String>()
 
@@ -122,6 +128,22 @@ class BlockService(
         }
 
         return block
+    }
+
+    fun isHyperConfirmed(currBlock: Block): Boolean {
+
+        if (currBlock.height < 2) {
+            return false
+        }
+
+        val quorum = propertyRepository.getQuorumBySpaceId(currBlock.spaceId)
+
+        val prevBlock = blockRepository.findByHash(currBlock.parentHash)!!
+
+        val prevBlockValidators = prevBlock.votes.map { it.validator.accountId }.toSet()
+        val currBlockValidators = prevBlock.votes.map { it.validator.accountId }.toSet()
+
+        return currBlockValidators == prevBlockValidators && currBlockValidators.size >= quorum
     }
 
     @Transactional(readOnly = true)
