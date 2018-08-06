@@ -7,6 +7,7 @@ import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
@@ -61,6 +62,8 @@ class BlockProcessorTest : BaseTest() {
 
     private lateinit var propertyId: PropertyId
 
+    private val txs = arrayOfNulls<Transaction>(8)
+
     /**
      * In this test we send 1 amount to a user in each blocks and check the actual property values
      * are in tact with block finality logic
@@ -75,7 +78,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(firstBlock.hash, getLIB().hash)
         assertEquals(0, firstBlock.height)
 
-        val tx0 = testService.createTransaction()
+        txs[0] = testService.createTransaction()
         blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1))
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[0], firstBlock.hash)
@@ -83,7 +86,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("1")
         assertNoPropertyValue()
 
-        val tx1 = testService.createTransaction()
+        txs[1] = testService.createTransaction()
         blocks.add(1, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2))
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[1], firstBlock.hash)
@@ -91,7 +94,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("2")
         assertNoPropertyValue()
 
-        val tx2 = testService.createTransaction()
+        txs[2] = testService.createTransaction()
         blocks.add(2, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3))
         assertEquals(firstBlock.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[2], firstBlock.hash)
@@ -99,7 +102,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("3")
         assertNoPropertyValue()
 
-        val tx3 = testService.createTransaction() // lib is first block yet
+        txs[3] = testService.createTransaction() // lib is first block yet
         blocks.add(3, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4))
         // lib changed, for the first time
         // all transactions from block[0] must be applied
@@ -109,7 +112,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("4")
         assertPropertyValue("1")
 
-        val tx4 = testService.createTransaction()
+        txs[4] = testService.createTransaction()
         blocks.add(4, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5))
         assertEquals(blocks[1].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[4], blocks[0].block.hash)
@@ -117,7 +120,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("5")
         assertPropertyValue("2")
 
-        val tx5 = testService.createTransaction()
+        txs[5] = testService.createTransaction()
         blocks.add(5, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6))
         assertEquals(blocks[2].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[5], blocks[1].block.hash)
@@ -125,7 +128,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("6")
         assertPropertyValue("3")
 
-        val tx6 = testService.createTransaction()
+        txs[6] = testService.createTransaction()
         blocks.add(6, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7))
         assertEquals(blocks[3].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[6], blocks[2].block.hash)
@@ -133,7 +136,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("7")
         assertPropertyValue("4")
 
-        val tx7 = testService.createTransaction()
+        txs[7] = testService.createTransaction()
         blocks.add(7, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 8))
         assertEquals(blocks[4].block.hash, getLIB().hash)
         assertTxReferencesBlock(blocks[7], blocks[3].block.hash)
