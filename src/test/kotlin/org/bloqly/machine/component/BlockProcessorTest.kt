@@ -78,78 +78,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(firstBlock.hash, getLIB().hash)
         assertEquals(0, firstBlock.height)
 
-        txs[0] = testService.createTransaction()
-        blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1))
-        assertEquals(firstBlock.hash, getLIB().hash)
-        assertTxReferencesBlock(blocks[0], firstBlock.hash)
-
-        assertPropertyValueCandidate("1")
-        assertNoPropertyValue()
-
-        txs[1] = testService.createTransaction()
-        blocks.add(1, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2))
-        assertEquals(firstBlock.hash, getLIB().hash)
-        assertTxReferencesBlock(blocks[1], firstBlock.hash)
-
-        assertPropertyValueCandidate("2")
-        assertNoPropertyValue()
-
-        txs[2] = testService.createTransaction()
-        blocks.add(2, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3))
-        assertEquals(firstBlock.hash, getLIB().hash)
-        assertTxReferencesBlock(blocks[2], firstBlock.hash)
-
-        assertPropertyValueCandidate("3")
-        assertNoPropertyValue()
-
-        txs[3] = testService.createTransaction() // lib is first block yet
-        blocks.add(3, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4))
-        // lib changed, for the first time
-        // all transactions from block[0] must be applied
-        assertEquals(blocks[0].block.hash, getLIB().hash)
-        assertTxReferencesBlock(blocks[3], firstBlock.hash)
-
-        assertPropertyValueCandidate("4")
-        assertPropertyValue("1")
-
-        txs[4] = testService.createTransaction()
-        blocks.add(4, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5))
-        assertEquals(blocks[1].block.hash, getLIB().hash)
-        assertTxReferencesBlock(blocks[4], blocks[0].block.hash)
-
-        assertPropertyValueCandidate("5")
-        assertPropertyValue("2")
-
-        txs[5] = testService.createTransaction()
-        blocks.add(5, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6))
-        assertEquals(blocks[2].block.hash, getLIB().hash)
-        assertTxReferencesBlock(blocks[5], blocks[1].block.hash)
-
-        assertPropertyValueCandidate("6")
-        assertPropertyValue("3")
-
-        txs[6] = testService.createTransaction()
-        blocks.add(6, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7))
-        assertEquals(blocks[3].block.hash, getLIB().hash)
-        assertTxReferencesBlock(blocks[6], blocks[2].block.hash)
-
-        assertPropertyValueCandidate("7")
-        assertPropertyValue("4")
-
-        txs[7] = testService.createTransaction()
-        blocks.add(7, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 8))
-        assertEquals(blocks[4].block.hash, getLIB().hash)
-        assertTxReferencesBlock(blocks[7], blocks[3].block.hash)
-
-        assertPropertyValueCandidate("8")
-        assertPropertyValue("5")
-
-        val genesis = genesisService.exportFirst(DEFAULT_SPACE)
-        testService.cleanup()
-        genesisService.importFirst(genesis)
-
-        firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
-        assertEquals(0, firstBlock.height)
+        populateBlocks()
     }
 
     @Test
@@ -251,5 +180,80 @@ class BlockProcessorTest : BaseTest() {
         val lastValue = blockProcessor.getLastPropertyValue(propertyId.key, propertyId.target)!!
 
         assertEquals(BInteger(value), ParameterUtils.readValue(lastValue))
+    }
+
+    private fun populateBlocks() {
+        txs[0] = testService.createTransaction()
+        blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1))
+        assertEquals(firstBlock.hash, getLIB().hash)
+        assertTxReferencesBlock(blocks[0], firstBlock.hash)
+
+        assertPropertyValueCandidate("1")
+        assertNoPropertyValue()
+
+        txs[1] = testService.createTransaction()
+        blocks.add(1, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2))
+        assertEquals(firstBlock.hash, getLIB().hash)
+        assertTxReferencesBlock(blocks[1], firstBlock.hash)
+
+        assertPropertyValueCandidate("2")
+        assertNoPropertyValue()
+
+        txs[2] = testService.createTransaction()
+        blocks.add(2, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3))
+        assertEquals(firstBlock.hash, getLIB().hash)
+        assertTxReferencesBlock(blocks[2], firstBlock.hash)
+
+        assertPropertyValueCandidate("3")
+        assertNoPropertyValue()
+
+        txs[3] = testService.createTransaction() // lib is first block yet
+        blocks.add(3, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4))
+        // lib changed, for the first time
+        // all transactions from block[0] must be applied
+        assertEquals(blocks[0].block.hash, getLIB().hash)
+        assertTxReferencesBlock(blocks[3], firstBlock.hash)
+
+        assertPropertyValueCandidate("4")
+        assertPropertyValue("1")
+
+        txs[4] = testService.createTransaction()
+        blocks.add(4, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5))
+        assertEquals(blocks[1].block.hash, getLIB().hash)
+        assertTxReferencesBlock(blocks[4], blocks[0].block.hash)
+
+        assertPropertyValueCandidate("5")
+        assertPropertyValue("2")
+
+        txs[5] = testService.createTransaction()
+        blocks.add(5, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6))
+        assertEquals(blocks[2].block.hash, getLIB().hash)
+        assertTxReferencesBlock(blocks[5], blocks[1].block.hash)
+
+        assertPropertyValueCandidate("6")
+        assertPropertyValue("3")
+
+        txs[6] = testService.createTransaction()
+        blocks.add(6, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7))
+        assertEquals(blocks[3].block.hash, getLIB().hash)
+        assertTxReferencesBlock(blocks[6], blocks[2].block.hash)
+
+        assertPropertyValueCandidate("7")
+        assertPropertyValue("4")
+
+        txs[7] = testService.createTransaction()
+        blocks.add(7, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 8))
+        assertEquals(blocks[4].block.hash, getLIB().hash)
+        assertTxReferencesBlock(blocks[7], blocks[3].block.hash)
+
+        assertPropertyValueCandidate("8")
+        assertPropertyValue("5")
+
+        val genesis = genesisService.exportFirst(DEFAULT_SPACE)
+        testService.cleanup()
+        genesisService.importFirst(genesis)
+
+        firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
+        assertEquals(0, firstBlock.height)
     }
 }

@@ -96,32 +96,32 @@ class BlockService(
         return blockRepository.getLastBlock(spaceId)
     }
 
+    /**
+     * @param newBlockValidatorId - when creating a new block, we need to include LIB value into it.
+     *      this LIB value can differ so that a new block's LIB is the the previous LIB + 1 because
+     *      new block introduces new validator into the chain of confirmations.
+     */
     @Transactional(readOnly = true)
     fun getLIBForSpace(spaceId: String, newBlockValidatorId: String? = null): Block {
 
         val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
 
+        // check if we have "hyper-confirmation"
+
+        var block = blockRepository.getLastBlock(spaceId)
+
         val validatorIds = mutableSetOf<String>()
 
         newBlockValidatorId?.let { validatorIds.add(it) }
 
-        var block = blockRepository.getLastBlock(spaceId)
-
-        if (block.height > 0) {
-            validatorIds.add(block.producerId)
-        }
-
         while (validatorIds.size < quorum && block.height > 0) {
-            block = blockRepository.findByHash(block.parentHash)!!
 
             validatorIds.add(block.producerId)
+
+            block = blockRepository.findByHash(block.parentHash)!!
         }
 
-        return if (block.height > 0) {
-            blockRepository.findByHash(block.parentHash)!!
-        } else {
-            block
-        }
+        return block
     }
 
     @Transactional(readOnly = true)
