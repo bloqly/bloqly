@@ -12,9 +12,7 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
-import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
-import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
@@ -45,9 +43,6 @@ class EventProcessorServiceTest : BaseTest() {
     private lateinit var contractService: ContractService
 
     @Autowired
-    private lateinit var eventProcessorService: EventProcessorService
-
-    @Autowired
     private lateinit var transactionProcessor: TransactionProcessor
 
     @Autowired
@@ -58,12 +53,6 @@ class EventProcessorServiceTest : BaseTest() {
 
     @Autowired
     private lateinit var blockchainService: BlockchainService
-
-    @Autowired
-    private lateinit var blockService: BlockService
-
-    @Autowired
-    private lateinit var transactionService: TransactionService
 
     private lateinit var root: Account
 

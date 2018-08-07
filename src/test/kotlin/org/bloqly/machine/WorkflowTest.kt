@@ -1,13 +1,9 @@
 package org.bloqly.machine
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.TransactionRepository
-import org.bloqly.machine.repository.VoteRepository
-import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.TimeUtils
@@ -27,22 +23,10 @@ class WorkflowTest : BaseTest() {
     private lateinit var deltaService: DeltaService
 
     @Autowired
-    private lateinit var eventProcessorService: EventProcessorService
-
-    @Autowired
     private lateinit var eventReceiverService: EventReceiverService
 
     @Autowired
-    private lateinit var blockService: BlockService
-
-    @Autowired
-    private lateinit var voteRepository: VoteRepository
-
-    @Autowired
     private lateinit var blockRepository: BlockRepository
-
-    @Autowired
-    private lateinit var transactionRepository: TransactionRepository
 
     @Test
     fun testNoDelta() {

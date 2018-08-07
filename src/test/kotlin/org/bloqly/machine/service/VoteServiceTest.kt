@@ -4,7 +4,6 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils.verifyVote
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
@@ -30,9 +29,6 @@ class VoteServiceTest : BaseTest() {
 
     @Autowired
     private lateinit var accountService: AccountService
-
-    @Autowired
-    private lateinit var voteRepository: VoteRepository
 
     private lateinit var vote: Vote
 

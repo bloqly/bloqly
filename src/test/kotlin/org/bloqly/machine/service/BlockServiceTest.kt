@@ -2,10 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.component.BlockProcessor
-import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
@@ -14,25 +11,12 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class BlockServiceTest : BaseTest() {
-
-    @Autowired
-    private lateinit var voteRepository: VoteRepository
-
-    @Autowired
-    private lateinit var eventProcessorService: EventProcessorService
-
-    @Autowired
-    private lateinit var blockService: BlockService
-
-    @Autowired
-    private lateinit var blockProcessor: BlockProcessor
 
     @Test
     fun testFirstBlockIsFinal() {

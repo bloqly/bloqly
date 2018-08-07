@@ -30,9 +30,6 @@ import org.springframework.test.context.junit4.SpringRunner
 class TransactionProcessorTest : BaseTest() {
 
     @Autowired
-    private lateinit var transactionService: TransactionService
-
-    @Autowired
     private lateinit var contractService: ContractService
 
     @Autowired
@@ -43,9 +40,6 @@ class TransactionProcessorTest : BaseTest() {
 
     @Autowired
     private lateinit var propertyRepository: PropertyRepository
-
-    @Autowired
-    private lateinit var blockService: BlockService
 
     private val creator = "owner id"
 

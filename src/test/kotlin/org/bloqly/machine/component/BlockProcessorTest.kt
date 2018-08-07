@@ -11,9 +11,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
-import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
-import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.BlockData
@@ -33,13 +31,7 @@ import org.springframework.test.context.junit4.SpringRunner
 class BlockProcessorTest : BaseTest() {
 
     @Autowired
-    private lateinit var eventProcessorService: EventProcessorService
-
-    @Autowired
     private lateinit var accountService: AccountService
-
-    @Autowired
-    private lateinit var voteRepository: VoteRepository
 
     @Autowired
     private lateinit var transactionOutputRepository: TransactionOutputRepository
@@ -49,12 +41,6 @@ class BlockProcessorTest : BaseTest() {
 
     @Autowired
     private lateinit var genesisService: GenesisService
-
-    @Autowired
-    private lateinit var blockProcessor: BlockProcessor
-
-    @Autowired
-    private lateinit var blockService: BlockService
 
     @Autowired
     private lateinit var blockRepository: BlockRepository

@@ -3,7 +3,6 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
-import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
@@ -29,19 +28,10 @@ import java.time.Instant
 class TransactionServiceTest : BaseTest() {
 
     @Autowired
-    private lateinit var transactionService: TransactionService
-
-    @Autowired
     private lateinit var accountService: AccountService
 
     @Autowired
-    private lateinit var blockService: BlockService
-
-    @Autowired
     private lateinit var blockchainService: BlockchainService
-
-    @Autowired
-    private lateinit var blockProcessor: BlockProcessor
 
     private lateinit var transaction: Transaction
 
