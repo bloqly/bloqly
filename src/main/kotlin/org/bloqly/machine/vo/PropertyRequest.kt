@@ -1,4 +1,4 @@
-package org.bloqly.machine.controller.data.model
+package org.bloqly.machine.vo
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE

@@ -1,7 +1,7 @@
 package org.bloqly.machine.controller.admin
 
 import org.bloqly.machine.component.BlockchainService
-import org.bloqly.machine.controller.admin.model.NewBlockchainRequest
+import org.bloqly.machine.vo.NewBlockchainRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus

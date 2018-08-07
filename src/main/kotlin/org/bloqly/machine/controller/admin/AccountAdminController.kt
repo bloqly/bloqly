@@ -1,8 +1,8 @@
 package org.bloqly.machine.controller.admin
 
-import org.bloqly.machine.controller.admin.model.AccountImportRequest
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.util.decode16
+import org.bloqly.machine.vo.AccountImportRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus

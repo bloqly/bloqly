@@ -14,7 +14,7 @@ import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.util.encode64
-import org.bloqly.machine.controller.data.model.TransactionRequest
+import org.bloqly.machine.vo.TransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional

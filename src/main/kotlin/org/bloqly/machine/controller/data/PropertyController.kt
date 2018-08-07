@@ -1,7 +1,7 @@
 package org.bloqly.machine.controller.data
 
 import org.bloqly.machine.component.BlockProcessor
-import org.bloqly.machine.controller.data.model.PropertyRequest
+import org.bloqly.machine.vo.PropertyRequest
 import org.bloqly.machine.controller.exception.NotFoundException
 import org.bloqly.machine.model.PropertyValue
 import org.bloqly.machine.repository.PropertyService

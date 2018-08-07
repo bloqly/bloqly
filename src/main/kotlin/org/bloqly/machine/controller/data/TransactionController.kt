@@ -4,7 +4,7 @@ import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.vo.TransactionList
-import org.bloqly.machine.controller.data.model.TransactionRequest
+import org.bloqly.machine.vo.TransactionRequest
 import org.bloqly.machine.vo.TransactionVO
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PostMapping
