@@ -1,19 +1,13 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
-import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Block
-import org.bloqly.machine.model.Property
-import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -37,9 +31,6 @@ class BlockProcessorTest : BaseTest() {
     private lateinit var transactionOutputRepository: TransactionOutputRepository
 
     @Autowired
-    private lateinit var propertyService: PropertyService
-
-    @Autowired
     private lateinit var genesisService: GenesisService
 
     @Autowired
@@ -48,8 +39,6 @@ class BlockProcessorTest : BaseTest() {
     private val blocks = mutableListOf<BlockData>()
 
     private lateinit var firstBlock: Block
-
-    private lateinit var propertyId: PropertyId
 
     private val txs = arrayOfNulls<Transaction>(8)
 
@@ -60,8 +49,6 @@ class BlockProcessorTest : BaseTest() {
     @Before
     override fun setup() {
         super.setup()
-
-        propertyId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, testService.getUser().accountId, "balance")
 
         firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(firstBlock.hash, getLIB().hash)
@@ -150,30 +137,12 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValue("2")
     }
 
-    private fun assertPropertyValue(value: String) {
-        val property: Property = propertyService.findById(propertyId)!!
-        assertEquals(BInteger(value), ParameterUtils.readValue(property.value))
-    }
-
-    private fun assertNoPropertyValue() {
-        assertNull(propertyService.findById(propertyId))
-    }
-
     private fun assertTxReferencesBlock(blockData: BlockData, blockHash: String) {
         assertTrue(blockData.transactions.count { it.referencedBlockHash == blockHash } == 1)
     }
 
     private fun getLIB(): Block {
         return blockService.getLIBForSpace(DEFAULT_SPACE)
-    }
-
-    private fun assertPropertyValueCandidate(value: String) {
-
-        val lastValue = blockProcessor.getLastPropertyValue(
-            DEFAULT_SPACE, DEFAULT_SELF, propertyId.target, propertyId.key
-        )!!
-
-        assertEquals(BInteger(value), ParameterUtils.readValue(lastValue))
     }
 
     private fun populateBlocks() {

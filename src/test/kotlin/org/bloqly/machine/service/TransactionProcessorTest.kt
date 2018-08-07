@@ -9,7 +9,6 @@ import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.PropertyRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils
@@ -31,9 +30,6 @@ class TransactionProcessorTest : BaseTest() {
 
     @Autowired
     private lateinit var contractService: ContractService
-
-    @Autowired
-    private lateinit var propertyService: PropertyService
 
     @Autowired
     private lateinit var transactionProcessor: TransactionProcessor
