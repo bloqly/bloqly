@@ -56,7 +56,7 @@ class NodeQueryService(
 
     fun sendTransactions(node: Node, transactions: List<Transaction>) {
 
-        val path = APIUtils.getDataPath(node, "transactions")
+        val path = APIUtils.getEventPath(node, "transactions")
 
         val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
@@ -65,7 +65,7 @@ class NodeQueryService(
 
     fun sendVotes(node: Node, votes: List<Vote>) {
 
-        val path = APIUtils.getDataPath(node, "votes")
+        val path = APIUtils.getEventPath(node, "votes")
 
         val entity = HttpEntity(VoteList.fromVotes(votes))
 
@@ -74,7 +74,7 @@ class NodeQueryService(
 
     fun sendProposals(node: Node, proposals: List<BlockData>) {
 
-        val path = APIUtils.getDataPath(node, "blocks")
+        val path = APIUtils.getEventPath(node, "blocks")
 
         val entity = HttpEntity(BlockDataList(proposals))
 

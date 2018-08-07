@@ -228,7 +228,14 @@ curl -X POST \
 Now lets check the value of `root` account's property `balance` :
 
 ```bash
-curl -X GET 'http://localhost:9901/api/v1/data/properties?space=main&self=self&target=58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607&key=balance'
+curl -X POST \
+-H 'Content-Type: application/json' \
+-d '
+{
+    "target": "58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607",
+    "key": "balance"
+}
+' http://localhost:9901/api/v1/data/properties/search
 ```
 
 Should output:
@@ -244,13 +251,9 @@ curl -X PUT \
 -H 'Content-Type: application/json' \
 -d '
 {
-    "space": "main",
     "origin": "58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607",
     "passphrase": "root password",
     "destination": "5CA1EEF9AA50625F3B7AC637D35655174CAA2C4FAB559B294D6E7C924C9AA6D4",
-    "transactionType": "CALL",
-    "self": "self",
-    "key": "main",
     "args": [
         {
             "type": "BIGINT",
@@ -283,7 +286,14 @@ In response you should receive JSON representation of created transaction simila
 Now, lets check balances of the first user again:
 
 ```bash
-curl -X GET 'http://localhost:9901/api/v1/data/properties?space=main&self=self&target=58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607&key=balance'
+curl -X POST \
+-H 'Content-Type: application/json' \
+-d '
+{
+    "target": "58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607",
+    "key": "balance"
+}
+' http://localhost:9901/api/v1/data/properties/search
 ```
 
 Outputs:
@@ -295,7 +305,14 @@ Outputs:
 And balance of a user we moved funds to:
 
 ```bash
-curl -X GET 'http://localhost:9901/api/v1/data/properties?space=main&self=self&target=5CA1EEF9AA50625F3B7AC637D35655174CAA2C4FAB559B294D6E7C924C9AA6D4&key=balance'
+curl -X POST \
+-H 'Content-Type: application/json' \
+-d '
+{
+    "target": "5CA1EEF9AA50625F3B7AC637D35655174CAA2C4FAB559B294D6E7C924C9AA6D4",
+    "key": "balance"
+}
+' http://localhost:9901/api/v1/data/properties/search
 ```
 
 Outputs:

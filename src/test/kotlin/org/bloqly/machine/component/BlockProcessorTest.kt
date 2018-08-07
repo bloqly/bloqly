@@ -183,7 +183,9 @@ class BlockProcessorTest : BaseTest() {
 
     private fun assertPropertyValueCandidate(value: String) {
 
-        val lastValue = blockProcessor.getLastPropertyValue(propertyId.key, propertyId.target)!!
+        val lastValue = blockProcessor.getLastPropertyValue(
+            DEFAULT_SPACE, DEFAULT_SELF, propertyId.key, propertyId.target
+        )!!
 
         assertEquals(BInteger(value), ParameterUtils.readValue(lastValue))
     }

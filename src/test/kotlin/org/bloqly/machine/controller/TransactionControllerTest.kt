@@ -9,11 +9,8 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.APIUtils
-import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.TransactionVO
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,24 +54,6 @@ class TransactionControllerTest : BaseTest() {
     }
 
     @Test
-    fun testReceiveTransactions() {
-
-        val url = APIUtils.getDataPath(node, "transactions")
-
-        val transaction = testService.createTransaction()
-
-        val transactionPayload = ObjectUtils.writeValueAsString(
-            TransactionList.fromTransactions(listOf(transaction))
-        )
-
-        val entity = HttpEntity(transactionPayload, headers)
-
-        restTemplate.postForObject(url, entity, String::class.java)
-
-        assertTrue(transactionRepository.existsByHash(transaction.hash))
-    }
-
-    @Test
     fun testUserCreateTransaction() {
         val url = APIUtils.getDataPath(node, "transactions")
 
@@ -105,11 +84,13 @@ class TransactionControllerTest : BaseTest() {
             ).size
         )
 
-        restTemplate.put(url, entity, TransactionVO::class.java)
+        val tx = restTemplate.postForObject(url, entity, TransactionVO::class.java)
 
         val pendingTransactions = transactionService.getPendingTransactionsBySpace(
             DEFAULT_SPACE, MAX_REFERENCED_BLOCK_DEPTH
         )
+
         assertEquals(1, pendingTransactions.size)
+        assertEquals(pendingTransactions.first().toVO(), tx)
     }
 }

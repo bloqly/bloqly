@@ -1,6 +1,6 @@
 package org.bloqly.machine.controller.admin
 
-import org.bloqly.machine.controller.admin.model.AccountRequest
+import org.bloqly.machine.controller.admin.model.AccountImportRequest
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.util.decode16
 import org.springframework.beans.factory.annotation.Value
@@ -23,15 +23,15 @@ class AccountAdminController(
 
     @PostMapping
     fun import(
-        @RequestBody accountRequest: AccountRequest,
+        @RequestBody accountImportRequest: AccountImportRequest,
         request: HttpServletRequest
     ): ResponseEntity<Void> {
 
         require(request.localPort == adminPort)
 
         accountService.importAccount(
-            accountRequest.privateKey.decode16(),
-            accountRequest.password
+            accountImportRequest.privateKey.decode16(),
+            accountImportRequest.password
         )
 
         return ResponseEntity(HttpStatus.CREATED)

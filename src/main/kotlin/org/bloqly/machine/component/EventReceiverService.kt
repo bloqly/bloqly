@@ -4,7 +4,7 @@ import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.vo.BlockData
-import org.bloqly.machine.vo.TransactionRequest
+import org.bloqly.machine.controller.data.model.TransactionRequest
 import org.bloqly.machine.vo.TransactionVO
 import org.bloqly.machine.vo.VoteVO
 import org.slf4j.LoggerFactory

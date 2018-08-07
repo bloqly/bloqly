@@ -90,7 +90,7 @@ class EventSenderServiceTest : BaseTest() {
     fun testSendProposals() {
         eventReceiverService.receiveVotes(testService.getVotes())
 
-        val path = APIUtils.getDataPath(node, "blocks")
+        val path = APIUtils.getEventPath(node, "blocks")
 
         val proposals = getProposals()
 
@@ -111,7 +111,7 @@ class EventSenderServiceTest : BaseTest() {
     fun testSendProposalsFailed() {
         eventReceiverService.receiveVotes(testService.getVotes())
 
-        val path = APIUtils.getDataPath(node, "blocks")
+        val path = APIUtils.getEventPath(node, "blocks")
 
         val proposals = getProposals()
 
@@ -141,7 +141,7 @@ class EventSenderServiceTest : BaseTest() {
     @Test
     fun testSendVotes() {
 
-        val path = APIUtils.getDataPath(node, "votes")
+        val path = APIUtils.getEventPath(node, "votes")
 
         val votes = getVotes()
 
@@ -160,7 +160,7 @@ class EventSenderServiceTest : BaseTest() {
     @Test
     fun testSendVotesFailed() {
 
-        val path = APIUtils.getDataPath(node, "votes")
+        val path = APIUtils.getEventPath(node, "votes")
 
         val votes = getVotes()
 
@@ -201,7 +201,7 @@ class EventSenderServiceTest : BaseTest() {
     @Test
     fun testSendTransactions() {
 
-        val path = APIUtils.getDataPath(node, "transactions")
+        val path = APIUtils.getEventPath(node, "transactions")
 
         val transactions = getTransactions()
 
@@ -222,7 +222,7 @@ class EventSenderServiceTest : BaseTest() {
     @Test
     fun testSendTransactionsFailed() {
 
-        val path = APIUtils.getDataPath(node, "transactions")
+        val path = APIUtils.getEventPath(node, "transactions")
 
         val transactions = getTransactions()
 
