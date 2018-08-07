@@ -115,8 +115,8 @@ class BlockProcessor(
     fun getLastPropertyValue(
         space: String,
         self: String,
-        key: String,
-        target: String
+        target: String,
+        key: String
     ): ByteArray? {
         val currentLIB = blockService.getLIBForSpace(space)
         val lastBlock = blockService.getLastBlockForSpace(space)

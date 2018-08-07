@@ -247,7 +247,7 @@ Should output:
 ### Creating transaction
 
 ```bash
-curl -X PUT \
+curl -X POST \
 -H 'Content-Type: application/json' \
 -d '
 {
