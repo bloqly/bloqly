@@ -34,8 +34,8 @@ class AccountServiceTest : BaseTest() {
     private val testPassphrase = "test passphrase"
 
     @Before
-    fun setup() {
-        create()
+    override fun setup() {
+        super.setup()
 
         account = accountService.newAccount(testPassphrase)
 

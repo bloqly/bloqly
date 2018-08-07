@@ -72,8 +72,8 @@ class BlockProcessorTest : BaseTest() {
      * are in tact with block finality logic
      */
     @Before
-    fun setup() {
-        create()
+    override fun setup() {
+        super.setup()
 
         propertyId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, testService.getUser().accountId, "balance")
 

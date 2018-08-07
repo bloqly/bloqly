@@ -7,7 +7,6 @@ import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.Genesis
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,11 +19,6 @@ class GenesisServiceTest : BaseTest() {
 
     @Autowired
     private lateinit var genesisService: GenesisService
-
-    @Before
-    fun setup() {
-        create()
-    }
 
     @Test
     fun testExportGenesis() {

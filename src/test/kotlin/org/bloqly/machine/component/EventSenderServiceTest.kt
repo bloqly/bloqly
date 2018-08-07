@@ -67,8 +67,8 @@ class EventSenderServiceTest : BaseTest() {
     private val node = Node(id = NodeId("127.0.0.1", 8080), addedTime = Instant.now().toEpochMilli())
 
     @Before
-    fun init() {
-        create()
+    override fun setup() {
+        super.setup()
 
         Mockito.clearInvocations(restTemplate)
 

@@ -19,7 +19,6 @@ import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.ParameterUtils.writeString
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -53,11 +52,6 @@ class TransactionProcessorTest : BaseTest() {
     private val callee = "callee id"
 
     private val self = "test.js.self"
-
-    @Before
-    fun setup() {
-        create()
-    }
 
     @Test
     fun testRunContractArgument() {

@@ -2,6 +2,8 @@ package org.bloqly.machine.test
 
 import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.util.TimeUtils
+import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 
 open class BaseTest {
@@ -12,7 +14,9 @@ open class BaseTest {
     @Autowired
     protected lateinit var testService: TestService
 
-    protected fun create() {
+    @Before
+    open fun setup() {
+        TimeUtils.setTestTime(0)
         testService.cleanup()
         testService.createBlockchain()
     }

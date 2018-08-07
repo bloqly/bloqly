@@ -45,9 +45,8 @@ class VoteServiceTest : BaseTest() {
     private lateinit var validator: Account
 
     @Before
-    fun init() {
-
-        create()
+    override fun setup() {
+        super.setup()
 
         space = testService.getDefaultSpace()
 

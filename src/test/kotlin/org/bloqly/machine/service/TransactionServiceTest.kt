@@ -50,8 +50,8 @@ class TransactionServiceTest : BaseTest() {
     private val passphrase = "password"
 
     @Before
-    fun setup() {
-        create()
+    override fun setup() {
+        super.setup()
 
         user = accountService.createAccount(passphrase)
 

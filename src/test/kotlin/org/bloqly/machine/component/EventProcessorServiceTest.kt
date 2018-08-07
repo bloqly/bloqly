@@ -70,8 +70,8 @@ class EventProcessorServiceTest : BaseTest() {
     private lateinit var user: Account
 
     @Before
-    fun setup() {
-        create()
+    override fun setup() {
+        super.setup()
 
         root = accountRepository.findByAccountId(testService.getRoot().accountId)!!
         user = accountRepository.findByAccountId(testService.getUser().accountId)!!
