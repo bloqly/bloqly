@@ -14,7 +14,7 @@
 This is a work in progress/prototype, API and implementation details can change.
 </p>     
 
-[Chat](https://riot.im/app/#/room/#bloqly:matrix.org)  
+[Telegram](https://t.me/joinchat/B45otRIISgdmc6u2AwC9Cg)
 [Twitter](https://twitter.com/slava_snezhkov)
 
 ## What's this?
