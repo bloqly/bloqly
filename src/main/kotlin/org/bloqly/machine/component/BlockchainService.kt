@@ -98,7 +98,7 @@ class BlockchainService(
 
         propertyContext.commit()
 
-        firstBlock.txHash = CryptoUtils.digestTransactions(listOf(transaction)).encode64()
+        firstBlock.txHash = CryptoUtils.hashTransactions(listOf(transaction)).encode64()
         blockRepository.save(firstBlock)
     }
 

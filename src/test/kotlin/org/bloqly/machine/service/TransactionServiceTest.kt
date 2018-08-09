@@ -48,7 +48,7 @@ class TransactionServiceTest : BaseTest() {
         transaction = createTransaction()
     }
 
-    private fun createTransaction(referencedBlockHash: String = CryptoUtils.hash(arrayOf()).encode16()): Transaction {
+    private fun createTransaction(referencedBlockHash: String = CryptoUtils.hash(ByteArray(0)).encode16()): Transaction {
         return transactionService.createTransaction(
 
             space = DEFAULT_SPACE,

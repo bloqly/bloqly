@@ -49,11 +49,13 @@ class CryptoUtilsTest {
 
         val pub = CryptoUtils.getPublicFor(priv)
 
-        val signature = CryptoUtils.sign(priv, "test".toByteArray())
+        val message = CryptoUtils.hash("test".toByteArray())
+
+        val signature = CryptoUtils.sign(priv, message)
 
         println("signature.length = " + signature.size)
 
-        val verified = CryptoUtils.verify("test".toByteArray(), signature, pub)
+        val verified = CryptoUtils.verify(message, signature, pub)
 
         assertTrue(verified)
     }

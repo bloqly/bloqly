@@ -74,6 +74,8 @@ object BloqlySchnorr {
 
     fun sign(message: ByteArray, d: BigInteger): Signature {
 
+        require(32 == message.size)
+
         var k = fromUnsignedByteArray(
             CryptoUtils.hash(
                 Bytes.concat(

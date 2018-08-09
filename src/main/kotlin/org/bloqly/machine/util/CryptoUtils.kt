@@ -1,6 +1,7 @@
 package org.bloqly.machine.util
 
 import com.google.common.primitives.Bytes
+import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bouncycastle.util.BigIntegers
@@ -80,19 +81,6 @@ object CryptoUtils {
         return BloqlySchnorr.getPublicFromPrivate(privateKey)
     }
 
-    fun hash(inputs: Array<ByteArray>): ByteArray {
-
-        ByteArrayOutputStream().use { bos ->
-
-            for (input in inputs) {
-                bos.write(input)
-            }
-
-            return MessageDigest.getInstance(SHA_256)
-                .digest(bos.toByteArray())
-        }
-    }
-
     fun hash(input: ByteArray): ByteArray {
         return MessageDigest.getInstance(SHA_256).digest(input)
     }
@@ -101,7 +89,7 @@ object CryptoUtils {
         return hash(input.toByteArray())
     }
 
-    fun digestTransactions(transactions: List<Transaction>): ByteArray {
+    fun hashTransactions(transactions: List<Transaction>): ByteArray {
         val bos = ByteArrayOutputStream()
 
         transactions
@@ -111,7 +99,7 @@ object CryptoUtils {
         return hash(bos.toByteArray())
     }
 
-    fun digestVotes(votes: List<Vote>): ByteArray {
+    fun hashVotes(votes: List<Vote>): ByteArray {
 
         val bos = ByteArrayOutputStream()
 
@@ -174,6 +162,23 @@ object CryptoUtils {
                 EncodingUtils.longToBytes(vote.height),
                 vote.spaceId.toByteArray(),
                 EncodingUtils.longToBytes(vote.timestamp)
+            )
+        )
+    }
+
+    fun hash(block: Block, txHash: ByteArray = ByteArray(0), validatorTxHash: ByteArray): ByteArray {
+        return hash(
+            Bytes.concat(
+                block.spaceId.toByteArray(),
+                EncodingUtils.longToBytes(block.height),
+                EncodingUtils.longToBytes(block.weight),
+                EncodingUtils.intToBytes(block.diff),
+                EncodingUtils.longToBytes(block.round),
+                EncodingUtils.longToBytes(block.timestamp),
+                block.parentHash.toByteArray(),
+                block.producerId.toByteArray(),
+                txHash,
+                validatorTxHash
             )
         )
     }

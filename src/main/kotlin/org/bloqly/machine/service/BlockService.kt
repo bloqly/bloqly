@@ -1,5 +1,6 @@
 package org.bloqly.machine.service
 
+import com.google.common.primitives.Bytes
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
@@ -50,7 +51,7 @@ class BlockService(
             ?: throw IllegalArgumentException("Could not find producer: $producerId")
 
         val dataToSign = CryptoUtils.hash(
-            arrayOf(
+            Bytes.concat(
                 spaceId.toByteArray(),
                 EncodingUtils.longToBytes(height),
                 EncodingUtils.longToBytes(weight),
@@ -66,7 +67,7 @@ class BlockService(
 
         val signature = CryptoUtils.sign(
             CryptoUtils.decrypt(proposer.privateKeyEncoded, passphrase),
-            dataToSign
+            CryptoUtils.hash(dataToSign)
         )
         val blockHash = CryptoUtils.hash(signature).encode16()
 

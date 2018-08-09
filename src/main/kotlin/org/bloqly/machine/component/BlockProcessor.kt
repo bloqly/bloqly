@@ -229,8 +229,8 @@ class BlockProcessor(
             parentHash = lastBlock.hash,
             producerId = producer.accountId,
             passphrase = passphrase,
-            txHash = CryptoUtils.digestTransactions(transactions),
-            validatorTxHash = CryptoUtils.digestVotes(votes),
+            txHash = CryptoUtils.hashTransactions(transactions),
+            validatorTxHash = CryptoUtils.hashVotes(votes),
             round = round,
             transactions = transactions,
             votes = votes
