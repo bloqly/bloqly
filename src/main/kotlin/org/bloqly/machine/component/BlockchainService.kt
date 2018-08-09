@@ -14,7 +14,6 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.encode16
-import org.bloqly.machine.util.encode64
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
@@ -98,7 +97,7 @@ class BlockchainService(
 
         propertyContext.commit()
 
-        firstBlock.txHash = CryptoUtils.hashTransactions(listOf(transaction)).encode64()
+        firstBlock.txHash = CryptoUtils.hashTransactions(listOf(transaction)).encode16()
         blockRepository.save(firstBlock)
     }
 

@@ -13,7 +13,7 @@ import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.decode64
+import org.bloqly.machine.util.decode16
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
@@ -46,7 +46,7 @@ class TransactionProcessor(
                 id = tx.self,
                 space = tx.spaceId,
                 owner = tx.origin,
-                body = String(tx.value.decode64())
+                body = String(tx.value.decode16())
             )
         )
 
@@ -70,7 +70,7 @@ class TransactionProcessor(
             callee = tx.destination
         )
 
-        return contractExecutorService.invokeContract(propertyContext, invocationContext, tx.value.decode64())
+        return contractExecutorService.invokeContract(propertyContext, invocationContext, tx.value.decode16())
     }
 
     fun processTransaction(

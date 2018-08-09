@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.util.encode64
+import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.VoteVO
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -58,7 +58,7 @@ data class Vote(
             height = height,
             spaceId = spaceId,
             timestamp = timestamp,
-            signature = signature.encode64()
+            signature = signature.encode16()
         )
     }
 

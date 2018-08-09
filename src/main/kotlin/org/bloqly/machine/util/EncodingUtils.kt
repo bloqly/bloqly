@@ -1,15 +1,12 @@
 package org.bloqly.machine.util
 
-import com.google.common.io.BaseEncoding
 import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 import java.nio.ByteBuffer
 
-fun String?.decode16(): ByteArray = BaseEncoding.base16().decode(this!!)
-fun String?.decode64(): ByteArray = BaseEncoding.base64().decode(this!!)
+fun String?.decode16(): ByteArray = Hex.decode(this)
 
-fun ByteArray?.encode16(): String = BaseEncoding.base16().encode(this!!)
-fun ByteArray?.encode64(): String = BaseEncoding.base64().encode(this!!)
+fun ByteArray?.encode16(): String = String(Hex.encode(this!!)).toUpperCase()
 
 fun String.toHexBigInteger() = BigInteger(1, Hex.decode(this))
 

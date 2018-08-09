@@ -14,7 +14,6 @@ import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.decode16
-import org.bloqly.machine.util.decode64
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.Genesis
 import org.springframework.stereotype.Service
@@ -93,7 +92,7 @@ class GenesisService(
 
         val contractBody = transaction.toModel().value
 
-        val contractBodyHash = CryptoUtils.hash(contractBody.decode64()).encode16()
+        val contractBodyHash = CryptoUtils.hash(contractBody.decode16()).encode16()
 
         require(block.parentHash == contractBodyHash) {
             "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."

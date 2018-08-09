@@ -67,7 +67,7 @@ class TestService(
 
     fun getValidator(n: Int): Account = accounts[n + 1]
 
-    fun createBlockchain() {
+    fun importAccounts() {
 
         val accountsString = FileUtils.getResourceAsString("/accounts.json")
 
@@ -77,6 +77,11 @@ class TestService(
             val passphrase = passphraseService.getPassphrase(account.accountId)
             accountService.importAccount(account.privateKeyEncoded, passphrase)
         }
+    }
+
+    fun createBlockchain() {
+
+        importAccounts()
 
         blockchainService.createBlockchain(
             DEFAULT_SPACE,

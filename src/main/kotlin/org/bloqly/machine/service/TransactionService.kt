@@ -13,7 +13,6 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
-import org.bloqly.machine.util.encode64
 import org.bloqly.machine.vo.TransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
@@ -93,7 +92,7 @@ class TransactionService(
             destination = destinationId,
             self = self,
             key = key,
-            value = value.encode64(),
+            value = value.encode16(),
             transactionType = transactionType,
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
@@ -110,7 +109,7 @@ class TransactionService(
 
         return transactionRepository.save(
             tx.copy(
-                signature = signature.encode64(),
+                signature = signature.encode16(),
                 hash = hash.encode16()
             )
         )

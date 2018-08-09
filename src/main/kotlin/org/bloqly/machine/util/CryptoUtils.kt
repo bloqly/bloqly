@@ -94,7 +94,7 @@ object CryptoUtils {
 
         transactions
             .sortedBy { it.id }
-            .forEach { bos.write(it.signature.decode64()) }
+            .forEach { bos.write(it.signature.decode16()) }
 
         return hash(bos.toByteArray())
     }
@@ -121,7 +121,7 @@ object CryptoUtils {
                 tx.destination.toByteArray(),
                 tx.self.toByteArray(),
                 tx.key?.toByteArray() ?: byteArrayOf(),
-                tx.value.decode64(),
+                tx.value.decode16(),
                 tx.referencedBlockHash.decode16(),
                 tx.transactionType.name.toByteArray(),
                 EncodingUtils.longToBytes(tx.timestamp),
@@ -132,7 +132,7 @@ object CryptoUtils {
 
     fun verifyTransaction(tx: Transaction): Boolean {
         try {
-            val signature = tx.signature.decode64()
+            val signature = tx.signature.decode16()
 
             val txHash = hash(signature).encode16()
 
@@ -183,6 +183,10 @@ object CryptoUtils {
         )
     }
 
+    fun hash(block: Block): ByteArray {
+        return hash(block, block.txHash!!.decode16(), block.validatorTxHash.decode16())
+    }
+
     fun verifyVote(vote: Vote, publicKey: ByteArray): Boolean {
         return verify(hash(vote), vote.signature!!, publicKey)
     }
@@ -192,5 +196,13 @@ object CryptoUtils {
             return false
         }
         return BloqlySchnorr.verify(message, Signature.fromByteArray(signature), publicKey)
+    }
+
+    fun verifyBlock(block: Block, publicKey: ByteArray): Boolean {
+        return verify(
+            hash(block),
+            block.signature.decode16(),
+            publicKey
+        )
     }
 }

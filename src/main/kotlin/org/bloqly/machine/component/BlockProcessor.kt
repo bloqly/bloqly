@@ -9,6 +9,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
 import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.model.Vote
+import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
@@ -21,6 +22,7 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
+import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,7 +50,8 @@ class BlockProcessor(
     private val propertyService: PropertyService,
     private val contractService: ContractService,
     private val transactionOutputRepository: TransactionOutputRepository,
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val accountRepository: AccountRepository
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
@@ -60,12 +63,6 @@ class BlockProcessor(
 
         requireValid(receivedBlock)
 
-        val propertyContext = PropertyContext(propertyService, contractService)
-
-        val currentLIB = blockService.getLIBForSpace(receivedBlock.spaceId)
-
-        evaluateBlocks(currentLIB, receivedBlock, propertyContext)
-
         val votes = blockData.votes.map { voteVO ->
             val vote = voteVO.toModel(accountService.getAccountByPublicKey(voteVO.publicKey))
             voteService.validateAndSave(vote)
@@ -74,6 +71,12 @@ class BlockProcessor(
         val transactions = blockData.transactions.map {
             transactionRepository.save(it.toModel())
         }
+
+        val propertyContext = PropertyContext(propertyService, contractService)
+
+        val currentLIB = blockService.getLIBForSpace(receivedBlock.spaceId)
+
+        evaluateBlocks(currentLIB, receivedBlock, propertyContext)
 
         val block = receivedBlock.copy(
             transactions = transactions,
@@ -159,6 +162,12 @@ class BlockProcessor(
     }
 
     private fun requireValid(block: Block) {
+
+        val producer = accountRepository.findByAccountId(block.producerId)!!
+
+        require(CryptoUtils.verifyBlock(block, producer.publicKey.decode16())) {
+            "Cold not verify block ${block.hash}"
+        }
 
         require(blockRepository.existsByHash(block.libHash)) {
             "No LIB found by hash ${block.libHash}."

@@ -221,6 +221,7 @@ class BlockProcessorTest : BaseTest() {
 
         val genesis = genesisService.exportFirst(DEFAULT_SPACE)
         testService.cleanup()
+        testService.importAccounts()
         genesisService.importFirst(genesis)
 
         firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)

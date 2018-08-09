@@ -134,6 +134,7 @@ class AccountService(
 
     @Transactional
     fun ensureAccount(accountId: String) {
+        // TODO revisit storing "self" accounts
         if (!accountRepository.existsByAccountId(accountId)) {
             accountRepository.save(Account(accountId = accountId))
         }

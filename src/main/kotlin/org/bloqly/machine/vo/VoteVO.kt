@@ -3,7 +3,7 @@ package org.bloqly.machine.vo
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.util.decode64
+import org.bloqly.machine.util.decode16
 
 @ValueObject
 data class VoteVO(
@@ -22,7 +22,7 @@ data class VoteVO(
             height = height,
             spaceId = spaceId,
             timestamp = timestamp,
-            signature = signature.decode64()
+            signature = signature.decode16()
         )
     }
 }
