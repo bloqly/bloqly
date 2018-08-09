@@ -49,19 +49,17 @@ class BlockService(
         val proposer = accountRepository.findByAccountId(producerId)
             ?: throw IllegalArgumentException("Could not find producer: $producerId")
 
-        val dataToSign = CryptoUtils.hash(
-            Bytes.concat(
-                spaceId.toByteArray(),
-                EncodingUtils.longToBytes(height),
-                EncodingUtils.longToBytes(weight),
-                EncodingUtils.intToBytes(diff),
-                EncodingUtils.longToBytes(round),
-                EncodingUtils.longToBytes(timestamp),
-                parentHash.toByteArray(),
-                producerId.toByteArray(),
-                txHash ?: ByteArray(0),
-                validatorTxHash
-            )
+        val dataToSign = Bytes.concat(
+            spaceId.toByteArray(),
+            EncodingUtils.longToBytes(height),
+            EncodingUtils.longToBytes(weight),
+            EncodingUtils.intToBytes(diff),
+            EncodingUtils.longToBytes(round),
+            EncodingUtils.longToBytes(timestamp),
+            parentHash.toByteArray(),
+            producerId.toByteArray(),
+            txHash ?: ByteArray(0),
+            validatorTxHash
         )
 
         val signature = CryptoUtils.sign(

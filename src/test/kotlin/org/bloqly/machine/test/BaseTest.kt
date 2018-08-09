@@ -9,6 +9,7 @@ import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
+import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -21,6 +22,9 @@ import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 
 open class BaseTest {
+
+    @Autowired
+    protected lateinit var accountRepository: AccountRepository
 
     @Autowired
     protected lateinit var propertyService: PropertyService

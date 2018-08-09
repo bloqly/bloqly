@@ -3,7 +3,6 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
-import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
 import org.junit.Assert.assertEquals
@@ -23,9 +22,6 @@ class AccountServiceTest : BaseTest() {
 
     @Autowired
     private lateinit var accountService: AccountService
-
-    @Autowired
-    private lateinit var accountRepository: AccountRepository
 
     private lateinit var account: Account
 

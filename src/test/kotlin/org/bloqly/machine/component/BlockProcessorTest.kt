@@ -8,6 +8,8 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.BaseTest
+import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -54,6 +56,16 @@ class BlockProcessorTest : BaseTest() {
         firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
         assertEquals(firstBlock.hash, getLIB().hash)
         assertEquals(0, firstBlock.height)
+    }
+
+    @Test
+    fun testVerifyBlock() {
+        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+        val producer = accountRepository.findByAccountId(blockData.block.producerId)!!
+
+        val block = blockRepository.findByHash(blockData.block.hash)!!
+
+        assertTrue(CryptoUtils.verifyBlock(block, producer.publicKey.decode16()))
     }
 
     @Test
