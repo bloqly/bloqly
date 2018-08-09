@@ -2,7 +2,7 @@
 
 set -x
 
-VERSION="0.1.1"
+VERSION="0.1.2"
 
 rm -rf ./release/mac
 rm -rf ./release/linux
