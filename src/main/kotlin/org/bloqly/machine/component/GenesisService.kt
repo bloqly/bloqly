@@ -81,9 +81,6 @@ class GenesisService(
         block: Block,
         now: Instant
     ) {
-        // TODO
-        // require(CryptoUtils.isBlockValid())
-
         require(block.height == 0L) {
             "Genesis block should have height 0, found ${block.height} instead."
         }

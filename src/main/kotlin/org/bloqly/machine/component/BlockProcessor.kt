@@ -58,19 +58,6 @@ class BlockProcessor(
 
         val receivedBlock = blockData.block.toModel()
 
-        if (!blockRepository.existsByHash(receivedBlock.libHash)) {
-            return
-        }
-
-        if (blockRepository.existsByHash(receivedBlock.hash)) {
-            return
-        }
-
-        if (!blockRepository.existsByHash(receivedBlock.parentHash)) {
-            log.warn("No parent found with hash ${receivedBlock.parentHash}.")
-            return
-        }
-
         requireValid(receivedBlock)
 
         val propertyContext = PropertyContext(propertyService, contractService)
@@ -173,6 +160,18 @@ class BlockProcessor(
 
     private fun requireValid(block: Block) {
 
+        require(blockRepository.existsByHash(block.libHash)) {
+            "No LIB found by hash ${block.libHash}."
+        }
+
+        require(!blockRepository.existsByHash(block.hash)) {
+            "Block hash already exists ${block.hash}."
+        }
+
+        require(blockRepository.existsByHash(block.parentHash)) {
+            "No parent found with hash ${block.parentHash}."
+        }
+
         require(!blockRepository.existsByHashAndLibHash(block.hash, block.libHash)) {
             "Unique constraint violated (hash, block_hash) : (${block.hash}, ${block.libHash})"
         }
@@ -245,6 +244,8 @@ class BlockProcessor(
 
         return blockData
     }
+
+    // TODO validate block
 
     private fun moveLIBIfNeeded(currentLIB: Block) {
 

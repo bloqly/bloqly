@@ -13,6 +13,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -82,10 +83,16 @@ class BlockProcessorTest : BaseTest() {
     }
 
     @Test
-    fun testSilentlyRejectsBlockWithTheSameHash() {
+    fun testRejectsBlockWithTheSameHash() {
         populateBlocks()
         blockProcessor.processReceivedBlock(blocks[0])
-        blockProcessor.processReceivedBlock(blocks[0])
+
+        try {
+            blockProcessor.processReceivedBlock(blocks[0])
+            fail()
+        } catch (e: Exception) {
+
+        }
     }
 
     @Test
