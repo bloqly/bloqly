@@ -15,7 +15,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +58,21 @@ class BlockProcessorTest : BaseTest() {
     }
 
     @Test
+    fun testGetBlockRange() {
+        populateBlocks(cleanup = false)
+
+        val blocksRange = blockProcessor.getBlocksRange(
+            blocks.first().block.toModel(),
+            blocks.last().block.toModel()
+        )
+
+        val blockHashes = blocks.drop(1).map { it.block.hash }
+        val rangeBlockHashes = blocksRange.map { it.hash }
+
+        assertEquals(blockHashes, rangeBlockHashes)
+    }
+
+    @Test
     fun testVerifyBlock() {
         val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
         val producer = accountRepository.findByAccountId(blockData.block.producerId)!!
@@ -98,13 +112,7 @@ class BlockProcessorTest : BaseTest() {
     fun testRejectsBlockWithTheSameHash() {
         populateBlocks()
         blockProcessor.processReceivedBlock(blocks[0])
-
-        try {
-            blockProcessor.processReceivedBlock(blocks[0])
-            fail()
-        } catch (e: Exception) {
-
-        }
+        blockProcessor.processReceivedBlock(blocks[0])
     }
 
     @Test
@@ -164,7 +172,7 @@ class BlockProcessorTest : BaseTest() {
         return blockService.getLIBForSpace(DEFAULT_SPACE)
     }
 
-    private fun populateBlocks() {
+    private fun populateBlocks(cleanup: Boolean = true) {
         txs[0] = testService.createTransaction()
         blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1))
         assertEquals(firstBlock.hash, getLIB().hash)
@@ -231,12 +239,14 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("8")
         assertPropertyValue("5")
 
-        val genesis = genesisService.exportFirst(DEFAULT_SPACE)
-        testService.cleanup()
-        testService.importAccounts()
-        genesisService.importFirst(genesis)
+        if (cleanup) {
+            val genesis = genesisService.exportFirst(DEFAULT_SPACE)
+            testService.cleanup()
+            testService.importAccounts()
+            genesisService.importFirst(genesis)
 
-        firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
-        assertEquals(0, firstBlock.height)
+            firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
+            assertEquals(0, firstBlock.height)
+        }
     }
 }

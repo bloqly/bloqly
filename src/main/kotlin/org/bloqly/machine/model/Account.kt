@@ -8,16 +8,24 @@ import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
 @Entity
-@Table(name = "account")
+@Table(
+    name = "account",
+    uniqueConstraints = [
+        UniqueConstraint(
+            columnNames = ["accountId"],
+            name = "account.uq_account_id"
+        )]
+)
 data class Account(
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null,
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     val accountId: String,
 
     @Column

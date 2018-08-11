@@ -61,6 +61,11 @@ class BlockProcessor(
 
         val receivedBlock = blockData.block.toModel()
 
+        if (blockRepository.existsByHash(receivedBlock.hash)) {
+            log.warn("Block hash already exists: ${receivedBlock.hash}")
+            return
+        }
+
         requireValid(receivedBlock)
 
         val votes = blockData.votes.map { voteVO ->
@@ -118,19 +123,21 @@ class BlockProcessor(
         return propertyContext.getPropertyValue(space, self, target, key)
     }
 
+    /**
+     * Returns blocks range (afterBlock, toBlock]
+     */
     @Transactional(readOnly = true)
-    private fun getBlocksRange(afterBlock: Block, toBlock: Block): List<Block> {
-        val blocks = mutableListOf<Block>()
+    internal fun getBlocksRange(afterBlock: Block, toBlock: Block): List<Block> {
+
         var currentBlock = toBlock
+
+        val blocks = mutableListOf<Block>()
 
         while (currentBlock.height > afterBlock.height) {
             blocks.add(currentBlock)
 
             currentBlock = blockRepository.findByHash(currentBlock.parentHash)!!
         }
-
-        require(currentBlock == afterBlock)
-        require(!blocks.contains(afterBlock))
 
         return blocks.reversed()
     }
@@ -171,10 +178,6 @@ class BlockProcessor(
 
         require(blockRepository.existsByHash(block.libHash)) {
             "No LIB found by hash ${block.libHash}."
-        }
-
-        require(!blockRepository.existsByHash(block.hash)) {
-            "Block hash already exists ${block.hash}."
         }
 
         require(blockRepository.existsByHash(block.parentHash)) {
@@ -260,7 +263,8 @@ class BlockProcessor(
 
         val newLIB = blockService.getLIBForSpace(currentLIB.spaceId)
 
-        require(newLIB.height >= currentLIB.height)
+        // TODO bug
+        //require(newLIB.height >= currentLIB.height)
 
         if (newLIB == currentLIB) {
             return
