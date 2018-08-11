@@ -61,8 +61,15 @@ class BlockProcessor(
 
         val receivedBlock = blockData.block.toModel()
 
+        // TODO do something about it?
         if (blockRepository.existsByHash(receivedBlock.hash)) {
             log.warn("Block hash already exists: ${receivedBlock.hash}")
+            return
+        }
+
+        // TODO do something about it? Introduce block memory storage?
+        if (!blockRepository.existsByHash(receivedBlock.parentHash)) {
+            log.warn("No parent found with hash ${receivedBlock.parentHash}.")
             return
         }
 
@@ -178,10 +185,6 @@ class BlockProcessor(
 
         require(blockRepository.existsByHash(block.libHash)) {
             "No LIB found by hash ${block.libHash}."
-        }
-
-        require(blockRepository.existsByHash(block.parentHash)) {
-            "No parent found with hash ${block.parentHash}."
         }
 
         require(!blockRepository.existsByHashAndLibHash(block.hash, block.libHash)) {

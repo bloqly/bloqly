@@ -40,6 +40,4 @@ interface BlockRepository : CrudRepository<Block, Long> {
     fun existsBySpaceIdAndProducerIdAndHeight(spaceId: String, producerId: String, height: Long): Boolean
 
     fun existsBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Boolean
-
-    fun findByParentHash(parentHash: String): Block?
 }

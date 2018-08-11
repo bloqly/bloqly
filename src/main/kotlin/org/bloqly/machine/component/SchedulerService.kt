@@ -20,6 +20,8 @@ class SchedulerService(
 
     private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
 
+    // TODO review timeouts
+
     @Scheduled(fixedDelay = 1000)
     fun queryForNodes() {
         nodeQueryService.queryForNodes()

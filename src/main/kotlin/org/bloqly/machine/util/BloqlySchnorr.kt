@@ -22,10 +22,6 @@ object BloqlySchnorr {
 
     private val CURVE_PARAMS = SECNamedCurves.getByName(CURVE_NAME)
 
-    fun newBigInteger(hexString: String): BigInteger {
-        return BigInteger(hexString, BASE_16)
-    }
-
     fun newPrivateKey(): ByteArray {
 
         val n = CURVE_PARAMS.n

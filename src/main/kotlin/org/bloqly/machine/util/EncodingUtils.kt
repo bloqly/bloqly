@@ -24,7 +24,7 @@ fun ByteArray.pad(): ByteArray {
 object EncodingUtils {
 
     const val LONG_BYTES = 8
-    const val INT_BYTES = 4
+    private const val INT_BYTES = 4
 
     fun longToBytes(value: Long): ByteArray = ByteBuffer.allocate(LONG_BYTES).putLong(value).array()
 

@@ -11,8 +11,4 @@ object APIUtils {
     fun getEventPath(node: Node, noun: String): String {
         return "http://${node.id}/api/v1/data/event/$noun"
     }
-
-    fun geAdminPath(node: Node, noun: String): String {
-        return "http://${node.id}/api/v1/admin/$noun"
-    }
 }

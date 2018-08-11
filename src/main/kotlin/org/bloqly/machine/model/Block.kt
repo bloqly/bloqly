@@ -41,7 +41,7 @@ import javax.persistence.UniqueConstraint
     ],
     indexes = [
         Index(
-            columnList = "height desc, diff desc, weight desc, round, hash",
+            columnList = "height DESC, diff DESC, weight DESC, round, hash",
             name = "block.last_block_idx"
         ),
         Index(

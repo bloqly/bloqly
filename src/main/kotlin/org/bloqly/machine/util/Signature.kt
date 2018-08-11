@@ -10,7 +10,7 @@ data class Signature(
     val s: BigInteger
 ) {
     fun getR(): ByteArray = asUnsignedByteArray(32, r)
-    fun getS(): ByteArray = asUnsignedByteArray(32, s)
+    private fun getS(): ByteArray = asUnsignedByteArray(32, s)
 
     override fun toString(): String = toByteArray().encode16()
 
