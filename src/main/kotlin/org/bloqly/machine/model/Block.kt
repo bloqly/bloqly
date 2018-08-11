@@ -7,6 +7,7 @@ import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType.AUTO
 import javax.persistence.Id
+import javax.persistence.Index
 import javax.persistence.JoinColumn
 import javax.persistence.JoinTable
 import javax.persistence.ManyToMany
@@ -36,6 +37,16 @@ import javax.persistence.UniqueConstraint
         UniqueConstraint(
             columnNames = ["hash"],
             name = "block.uq_hash"
+        )
+    ],
+    indexes = [
+        Index(
+            columnList = "height desc, diff desc, weight desc, round, hash",
+            name = "block.last_block_idx"
+        ),
+        Index(
+            columnList = "spaceId",
+            name = "block.space_idx"
         )
     ]
 )
