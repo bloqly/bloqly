@@ -263,12 +263,12 @@ class BlockProcessor(
 
         val newLIB = blockService.getLIBForSpace(currentLIB.spaceId)
 
-        // TODO bug
-        //require(newLIB.height >= currentLIB.height)
-
         if (newLIB == currentLIB) {
             return
         }
+
+        // TODO bug
+        //require(newLIB.height > currentLIB.height)
 
         log.info(
             """

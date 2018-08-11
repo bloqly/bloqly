@@ -35,7 +35,7 @@ import javax.persistence.UniqueConstraint
         ),
         UniqueConstraint(
             columnNames = ["hash"],
-            name = "block.uq_producer_round"
+            name = "block.uq_hash"
         )
     ]
 )

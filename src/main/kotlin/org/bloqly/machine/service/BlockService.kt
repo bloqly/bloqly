@@ -136,6 +136,7 @@ class BlockService(
 
         val quorum = propertyRepository.getQuorumBySpaceId(currBlock.spaceId)
 
+        // TODO bug, returns not unique results
         val prevBlock = blockRepository.findByHash(currBlock.parentHash)!!
 
         val prevBlockValidators = prevBlock.votes.map { it.validator.accountId }.toSet()
