@@ -1,8 +1,6 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.service.DeltaService
-import org.bloqly.machine.service.TransactionService
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
@@ -12,9 +10,9 @@ import org.springframework.stereotype.Component
 @Profile("scheduler")
 class SchedulerService(
     private val nodeQueryService: NodeQueryService,
-    private val transactionService: TransactionService,
     private val eventSenderService: EventSenderService,
     private val eventProcessorService: EventProcessorService,
+    private val blockProcessor: BlockProcessor,
     private val deltaService: DeltaService
 ) {
 
@@ -30,7 +28,7 @@ class SchedulerService(
     @Scheduled(fixedDelay = 1000)
     fun sendTransactions() {
 
-        val transactions = transactionService.getRecentTransactions(MAX_REFERENCED_BLOCK_DEPTH)
+        val transactions = blockProcessor.getPendingTransactions()
 
         if (transactions.isNotEmpty()) {
 

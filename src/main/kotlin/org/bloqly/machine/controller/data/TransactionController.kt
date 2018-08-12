@@ -1,8 +1,7 @@
 package org.bloqly.machine.controller.data
 
-import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
+import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.EventReceiverService
-import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.vo.TransactionList
 import org.bloqly.machine.vo.TransactionRequest
 import org.bloqly.machine.vo.TransactionVO
@@ -18,7 +17,7 @@ import javax.servlet.http.HttpServletRequest
 @RequestMapping("/api/v1/data")
 class TransactionController(
     private val eventReceiverService: EventReceiverService,
-    private val transactionService: TransactionService
+    private val blockProcessor: BlockProcessor
 ) {
 
     @PostMapping("/transactions")
@@ -28,7 +27,7 @@ class TransactionController(
 
     @PostMapping("/transactions/search")
     fun searchPendingTransactions(request: HttpServletRequest): TransactionList {
-        val transactions = transactionService.getRecentTransactions(MAX_REFERENCED_BLOCK_DEPTH)
+        val transactions = blockProcessor.getPendingTransactions()
 
         return TransactionList.fromTransactions(transactions)
     }

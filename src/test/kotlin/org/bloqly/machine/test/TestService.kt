@@ -92,7 +92,7 @@ class TestService(
 
     fun createTransaction(): Transaction {
 
-        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
+        val libHash = blockService.getLIBForSpace(DEFAULT_SPACE).libHash
 
         val root = accountRepository.findByAccountId(getRoot().accountId)!!
         val user = accountRepository.findByAccountId(getUser().accountId)!!
@@ -105,7 +105,7 @@ class TestService(
             self = DEFAULT_SELF,
             value = writeLong("1"),
             transactionType = TransactionType.CALL,
-            referencedBlockHash = lib.hash,
+            referencedBlockHash = libHash,
             timestamp = Instant.now().toEpochMilli()
         )
     }

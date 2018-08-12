@@ -1,6 +1,6 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
+import org.bloqly.machine.Application
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.InvocationResult
@@ -12,6 +12,7 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyService
+import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -22,6 +23,7 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
@@ -40,7 +42,6 @@ private data class TransactionResult(
 @Transactional(isolation = SERIALIZABLE)
 // TODO add test for rejected transaction
 class BlockProcessor(
-    private val transactionRepository: TransactionRepository,
     private val transactionService: TransactionService,
     private val voteService: VoteService,
     private val voteRepository: VoteRepository,
@@ -51,7 +52,9 @@ class BlockProcessor(
     private val contractService: ContractService,
     private val transactionOutputRepository: TransactionOutputRepository,
     private val accountService: AccountService,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val spaceRepository: SpaceRepository,
+    private val transactionRepository: TransactionRepository
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
@@ -73,7 +76,7 @@ class BlockProcessor(
         }
 
         val transactions = blockData.transactions.map {
-            transactionRepository.save(it.toModel())
+            transactionService.save(it.toModel())
         }
 
         val propertyContext = PropertyContext(propertyService, contractService)
@@ -267,6 +270,7 @@ class BlockProcessor(
             block.transactions.forEach { tx ->
 
                 try {
+
                     val txOutput = transactionOutputRepository
                         .findById(TransactionOutputId(block.hash, tx.hash))
                         .orElseThrow()
@@ -304,7 +308,7 @@ class BlockProcessor(
         spaceId: String,
         propertyContext: PropertyContext
     ): List<TransactionResult> {
-        val transactions = getPendingTransactions(spaceId)
+        val transactions = getPendingTransactionsBySpace(spaceId)
 
         return transactions
             .map { tx ->
@@ -322,11 +326,41 @@ class BlockProcessor(
             .filter { it.invocationResult.isOK() }
     }
 
-    private fun getPendingTransactions(spaceId: String): List<Transaction> {
-        return transactionService.getPendingTransactionsBySpace(spaceId, MAX_REFERENCED_BLOCK_DEPTH)
-    }
-
     private fun getVotesForBlock(blockHash: String): List<Vote> {
         return voteRepository.findByBlockHash(blockHash)
+    }
+
+    @Transactional(readOnly = true)
+    fun getPendingTransactions(depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH): List<Transaction> =
+        spaceRepository.findAll()
+            .flatMap { getPendingTransactionsBySpace(it.id, depth) }
+
+    @Transactional(readOnly = true)
+    fun getPendingTransactionsBySpace(
+        spaceId: String,
+        depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH
+    ): List<Transaction> {
+
+        val lastBlock = blockService.getLastBlockForSpace(spaceId)
+        val minTimestamp = TimeUtils.getCurrentTime() - Application.MAX_TRANSACTION_AGE
+
+        val libHash = if (lastBlock.height > 0) {
+            lastBlock.libHash
+        } else {
+            lastBlock.hash
+        }
+
+        val lib = blockService.findByHash(libHash)!!
+        val minHeight = lib.height - depth
+
+        return transactionRepository
+            // TODO fixme
+            .findAll()
+            .filter { tx ->
+                // TODO try to optimize it to avoid repeated calls to dbs
+                val referencedBlock = blockService.findByHash(tx.referencedBlockHash)!!
+                tx.timestamp > minTimestamp &&
+                    referencedBlock.height > minHeight
+            }
     }
 }

@@ -11,8 +11,11 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.service.AccountService
+import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
+import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -20,10 +23,11 @@ import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-@Transactional(isolation = SERIALIZABLE)
 class TransactionProcessor(
     private val accountService: AccountService,
-    private val contractExecutorService: ContractExecutorService
+    private val contractExecutorService: ContractExecutorService,
+    private val transactionService: TransactionService,
+    private val blockService: BlockService
 ) {
     private val log = LoggerFactory.getLogger(TransactionProcessor::class.simpleName)
 
@@ -73,6 +77,7 @@ class TransactionProcessor(
         return contractExecutorService.invokeContract(propertyContext, invocationContext, tx.value.decode16())
     }
 
+    @Transactional(isolation = SERIALIZABLE)
     fun processTransaction(
         tx: Transaction,
         propertyContext: PropertyContext
@@ -107,5 +112,14 @@ class TransactionProcessor(
             log.error(e.message, e)
             return InvocationResult(ERROR)
         }
+    }
+
+    fun isTransactionAcceptable(tx: Transaction): Boolean {
+        // TODO add log warnings
+        return tx.timestamp < TimeUtils.getCurrentTime() &&
+            !transactionService.existsByHash(tx.hash) &&
+            blockService.existsByHash(tx.referencedBlockHash) &&
+            blockService.isActualTransaction(tx) &&
+            !transactionService.existsByNonce(tx.nonce)
     }
 }

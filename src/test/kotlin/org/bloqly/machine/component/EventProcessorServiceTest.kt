@@ -121,7 +121,7 @@ class EventProcessorServiceTest : BaseTest() {
 
         val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
 
-        val transaction = transactionService.createTransaction(
+        val tx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = root.accountId,
             passphrase = passphrase(root.accountId),
@@ -134,7 +134,7 @@ class EventProcessorServiceTest : BaseTest() {
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        transactionProcessor.processTransaction(transaction, propertyContext)
+        transactionProcessor.processTransaction(tx, propertyContext)
 
         propertyContext.commit()
 

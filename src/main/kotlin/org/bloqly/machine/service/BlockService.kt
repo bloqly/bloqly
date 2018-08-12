@@ -2,6 +2,7 @@ package org.bloqly.machine.service
 
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
+import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
@@ -72,7 +73,7 @@ class BlockService(
         )
         val blockHash = CryptoUtils.hash(signature).encode16()
 
-        val libHash = if (height > 0) getLIBForSpace(spaceId, producerId).hash else ""
+        val libHash = if (height > 0) getLIBForSpace(spaceId, producerId).hash else blockHash
 
         return Block(
             spaceId = spaceId,
@@ -227,4 +228,23 @@ class BlockService(
 
         return block
     }
+
+    @Transactional(readOnly = true)
+    fun isActualTransaction(tx: Transaction, depth: Int = MAX_REFERENCED_BLOCK_DEPTH): Boolean {
+
+        return blockRepository.findByHash(tx.referencedBlockHash)
+            ?.let { referencedBlock ->
+                // is not LIB
+                if (!blockRepository.existsByLibHash(referencedBlock.hash)) {
+                    return false
+                }
+
+                val lib = getLIBForSpace(tx.spaceId)
+
+                lib.height - referencedBlock.height <= depth
+            } ?: false
+    }
+
+    @Transactional(readOnly = true)
+    fun findByHash(hash: String): Block? = blockRepository.findByHash(hash)
 }

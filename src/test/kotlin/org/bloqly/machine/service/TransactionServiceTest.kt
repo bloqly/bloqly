@@ -2,7 +2,6 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
@@ -77,7 +76,7 @@ class TransactionServiceTest : BaseTest() {
     fun testGetPendingTransaction() {
         testService.createTransaction()
 
-        val txs = transactionService.getPendingTransactionsBySpace(DEFAULT_SPACE, MAX_REFERENCED_BLOCK_DEPTH)
+        val txs = blockProcessor.getPendingTransactionsBySpace(DEFAULT_SPACE)
 
         assertEquals(1, txs.size)
     }
@@ -98,18 +97,18 @@ class TransactionServiceTest : BaseTest() {
         assertEquals(block4.hash, lib.hash)
 
         val tx4 = createTransaction(block4.hash)
-        assertTrue(blockchainService.isActualTransaction(tx4, 2))
+        assertTrue(blockService.isActualTransaction(tx4, 2))
 
         val tx2 = createTransaction(block2.hash)
 
-        assertTrue(blockchainService.isActualTransaction(tx2, 2))
-        assertTrue(blockchainService.isActualTransaction(tx2, 3))
+        assertTrue(blockService.isActualTransaction(tx2, 2))
+        assertTrue(blockService.isActualTransaction(tx2, 3))
 
-        assertFalse(blockchainService.isActualTransaction(tx2, 1))
+        assertFalse(blockService.isActualTransaction(tx2, 1))
 
         // referencing non-lib block fails
         val tx5 = createTransaction(block5.hash)
-        assertFalse(blockchainService.isActualTransaction(tx5, 1))
+        assertFalse(blockService.isActualTransaction(tx5, 1))
     }
 
     @Test

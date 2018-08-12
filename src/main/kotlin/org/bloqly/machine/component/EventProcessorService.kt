@@ -1,20 +1,16 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.AccountService
-import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.time.Instant
 
 /**
  * Processes the most important events
@@ -27,12 +23,11 @@ import java.time.Instant
 @Component
 class EventProcessorService(
     private val accountService: AccountService,
-    private val blockService: BlockService,
     private val voteService: VoteService,
     private val transactionService: TransactionService,
     private val spaceService: SpaceService,
     private val blockProcessor: BlockProcessor,
-    private val blockchainService: BlockchainService,
+    private val transactionProcessor: TransactionProcessor,
     private val passphraseService: PassphraseService
 ) {
 
@@ -43,17 +38,7 @@ class EventProcessorService(
      */
     fun onTransaction(tx: Transaction) {
 
-        val now = Instant.now().toEpochMilli()
-
-        // TODO move to a separate method
-        if (
-            tx.timestamp > now ||
-            !CryptoUtils.verifyTransaction(tx) ||
-            transactionService.existsByHash(tx.hash) ||
-            !blockService.existsByHash(tx.referencedBlockHash) ||
-            !blockchainService.isActualTransaction(tx, MAX_REFERENCED_BLOCK_DEPTH) ||
-            transactionService.existsByNonce(tx.nonce)
-        ) {
+        if (!transactionProcessor.isTransactionAcceptable(tx)) {
             return
         }
 

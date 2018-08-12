@@ -1,17 +1,13 @@
 package org.bloqly.machine.service
 
-import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.ValueType
 import org.bloqly.machine.repository.AccountRepository
-import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ParameterUtils
-import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.TransactionRequest
 import org.springframework.stereotype.Service
@@ -23,9 +19,7 @@ import java.time.Instant
 @Transactional(isolation = SERIALIZABLE)
 class TransactionService(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository,
-    private val blockRepository: BlockRepository,
-    private val spaceRepository: SpaceRepository
+    private val transactionRepository: TransactionRepository
 ) {
 
     // TODO add blockchain config option - if adding smart contracts allowed
@@ -116,11 +110,6 @@ class TransactionService(
     }
 
     @Transactional(readOnly = true)
-    fun getRecentTransactions(depth: Int): List<Transaction> =
-        spaceRepository.findAll()
-            .flatMap { getPendingTransactionsBySpace(it.id, depth) }
-
-    @Transactional(readOnly = true)
     fun existsByHash(hash: String): Boolean =
         transactionRepository.existsByHash(hash)
 
@@ -129,23 +118,12 @@ class TransactionService(
         transactionRepository.existsByNonce(nonce)
 
     @Transactional
-    fun save(tx: Transaction) = transactionRepository.save(tx)
+    fun save(tx: Transaction): Transaction {
 
-    @Transactional(readOnly = true)
-    fun getPendingTransactionsBySpace(spaceId: String, depth: Int): List<Transaction> {
-        val lastBlock = blockRepository.getLastBlock(spaceId)
-        val minTimestamp = TimeUtils.getCurrentTime() - MAX_TRANSACTION_AGE
-
-        val libHash = if (lastBlock.height > 0) {
-            lastBlock.libHash
-        } else {
-            lastBlock.hash
+        require(CryptoUtils.verifyTransaction(tx)) {
+            "Could not verify transaction $tx"
         }
 
-        val lib = blockRepository.findByHash(libHash)!!
-        val minHeight = lib.height - depth
-
-        return transactionRepository
-            .findPendingTransactionsBySpaceId(spaceId, libHash, minTimestamp, minHeight)
+        return transactionRepository.save(tx)
     }
 }
