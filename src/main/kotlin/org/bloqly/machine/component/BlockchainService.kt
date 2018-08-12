@@ -32,6 +32,7 @@ class BlockchainService(
     private val blockRepository: BlockRepository,
     private val transactionProcessor: TransactionProcessor
 ) {
+    @Transactional
     fun createBlockchain(spaceId: String, baseDir: String, passphrase: String) {
 
         blockService.ensureSpaceEmpty(spaceId)
@@ -101,11 +102,16 @@ class BlockchainService(
         blockRepository.save(firstBlock)
     }
 
+    @Transactional(readOnly = true)
     fun isActualTransaction(tx: Transaction, depth: Int): Boolean {
 
         return blockRepository.findByHash(tx.referencedBlockHash)
             ?.let { referencedBlock ->
-                blockRepository.findByLibHash(referencedBlock.hash) ?: return false
+                // is not LIB
+                // TODO set referencedBlock to LIB which is present in at least single block
+                if (!blockRepository.existsByLibHash(referencedBlock.hash)) {
+                    return false
+                }
 
                 val lib = blockService.getLIBForSpace(tx.spaceId)
 

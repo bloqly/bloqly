@@ -101,7 +101,7 @@ class AccountServiceTest : BaseTest() {
 
         accountRepository.save(account)
 
-        val saved = accountService.getAccountByPublicKey(publicKey)
+        val saved = accountService.getByPublicKey(publicKey)
 
         assertNotNull(saved)
         assertEquals(account, saved)

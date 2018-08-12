@@ -17,8 +17,7 @@ import java.time.Instant
 @Transactional(isolation = SERIALIZABLE)
 class VoteService(
     private val voteRepository: VoteRepository,
-    private val blockRepository: BlockRepository,
-    private val accountService: AccountService
+    private val blockRepository: BlockRepository
 ) {
 
     @Transactional
@@ -59,15 +58,21 @@ class VoteService(
     }
 
     @Transactional
-    fun validateAndSave(vote: Vote): Vote {
+    fun validateAndSaveIfNotExists(vote: Vote) {
+
+        if (voteRepository.existsByValidatorAndSpaceIdAndHeight(vote.validator, vote.spaceId, vote.height)) {
+            return
+        }
 
         requireVoteValid(vote)
 
-        val validator = accountService.getAccountByPublicKey(vote.validator.publicKey!!)
+        voteRepository.save(vote)
+    }
 
-        voteRepository.findByValidatorAndSpaceIdAndHeight(validator, vote.spaceId, vote.height)?.let {
-            return it
-        }
+    @Transactional
+    fun save(vote: Vote): Vote {
+
+        requireVoteValid(vote)
 
         return voteRepository.save(vote)
     }

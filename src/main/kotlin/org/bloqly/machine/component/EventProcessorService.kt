@@ -85,7 +85,7 @@ class EventProcessorService(
      */
     fun onVote(vote: Vote) {
         spaceService.findById(vote.spaceId)?.let {
-            voteService.validateAndSave(vote)
+            voteService.validateAndSaveIfNotExists(vote)
         }
     }
 

@@ -35,9 +35,8 @@ class EventReceiverService(
     fun receiveVotes(voteVOs: List<VoteVO>) {
         voteVOs.forEach { vote ->
             try {
-                eventProcessorService.onVote(
-                    vote.toModel(accountService.getAccountByPublicKey(vote.publicKey))
-                )
+                val validator = accountService.getByPublicKey(vote.publicKey)
+                eventProcessorService.onVote(vote.toModel(validator))
             } catch (e: Exception) {
                 val errorMessage = "Could not process vote $vote"
                 log.warn(errorMessage)

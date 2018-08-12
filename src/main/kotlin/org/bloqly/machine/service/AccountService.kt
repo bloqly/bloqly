@@ -115,7 +115,7 @@ class AccountService(
     }
 
     @Transactional(readOnly = true)
-    fun getAccountByPublicKey(publicKey: String): Account {
+    fun getByPublicKey(publicKey: String): Account {
         val publicKeyBytes = publicKey.decode16()
 
         val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)

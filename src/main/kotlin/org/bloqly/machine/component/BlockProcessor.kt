@@ -68,8 +68,8 @@ class BlockProcessor(
         requireValid(receivedBlock)
 
         val votes = blockData.votes.map { voteVO ->
-            val vote = voteVO.toModel(accountService.getAccountByPublicKey(voteVO.publicKey))
-            voteService.validateAndSave(vote)
+            val vote = voteVO.toModel(accountService.getByPublicKey(voteVO.publicKey))
+            voteService.save(vote)
         }
 
         val transactions = blockData.transactions.map {
