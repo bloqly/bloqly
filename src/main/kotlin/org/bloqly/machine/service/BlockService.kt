@@ -90,9 +90,12 @@ class BlockService(
     }
 
     @Transactional(readOnly = true)
-    fun getLastBlockForSpace(spaceId: String): Block {
-        return blockRepository.getLastBlock(spaceId)
-    }
+    fun getLastBlockForSpace(spaceId: String): Block =
+        blockRepository.getLastBlock(spaceId)
+
+    @Transactional(readOnly = true)
+    fun existsByHash(hash: String): Boolean =
+        blockRepository.existsByHash(hash)
 
     /**
      * @param newBlockValidatorId - when creating a new block, we need to include LIB value into it.

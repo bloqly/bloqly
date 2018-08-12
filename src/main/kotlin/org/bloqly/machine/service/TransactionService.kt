@@ -116,10 +116,20 @@ class TransactionService(
     }
 
     @Transactional(readOnly = true)
-    fun getRecentTransactions(depth: Int): List<Transaction> {
-        return spaceRepository.findAll()
+    fun getRecentTransactions(depth: Int): List<Transaction> =
+        spaceRepository.findAll()
             .flatMap { getPendingTransactionsBySpace(it.id, depth) }
-    }
+
+    @Transactional(readOnly = true)
+    fun existsByHash(hash: String): Boolean =
+        transactionRepository.existsByHash(hash)
+
+    @Transactional(readOnly = true)
+    fun existsByNonce(nonce: String): Boolean =
+        transactionRepository.existsByNonce(nonce)
+
+    @Transactional
+    fun save(tx: Transaction) = transactionRepository.save(tx)
 
     @Transactional(readOnly = true)
     fun getPendingTransactionsBySpace(spaceId: String, depth: Int): List<Transaction> {

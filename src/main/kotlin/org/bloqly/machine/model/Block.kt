@@ -74,6 +74,7 @@ data class Block(
     @Column(nullable = false)
     val timestamp: Long,
 
+    // TODO define string column length more precisely
     @Column(nullable = false)
     val parentHash: String,
 

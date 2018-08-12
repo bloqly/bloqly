@@ -183,6 +183,10 @@ class BlockProcessor(
             "Cold not verify block ${block.hash}"
         }
 
+        // TODO move these checks to separate method and call them when block received and when it is planned to save
+        // move it to blockService
+        // change to returning boolean and log warning
+
         require(blockRepository.existsByHash(block.libHash)) {
             "No LIB found by hash ${block.libHash}."
         }

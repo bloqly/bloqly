@@ -3,10 +3,10 @@ package org.bloqly.machine.component
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.SpaceRepository
-import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.AccountService
+import org.bloqly.machine.service.BlockService
+import org.bloqly.machine.service.SpaceService
+import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
@@ -14,8 +14,6 @@ import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
-import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 /**
@@ -27,13 +25,12 @@ import java.time.Instant
  * R    - voting round
  */
 @Component
-@Transactional(isolation = SERIALIZABLE)
 class EventProcessorService(
-    private val blockRepository: BlockRepository,
     private val accountService: AccountService,
-    private val spaceRepository: SpaceRepository,
+    private val blockService: BlockService,
     private val voteService: VoteService,
-    private val transactionRepository: TransactionRepository,
+    private val transactionService: TransactionService,
+    private val spaceService: SpaceService,
     private val blockProcessor: BlockProcessor,
     private val blockchainService: BlockchainService,
     private val passphraseService: PassphraseService
@@ -52,22 +49,22 @@ class EventProcessorService(
         if (
             tx.timestamp > now ||
             !CryptoUtils.verifyTransaction(tx) ||
-            transactionRepository.existsByHash(tx.hash) ||
-            !blockRepository.existsByHash(tx.referencedBlockHash) ||
+            transactionService.existsByHash(tx.hash) ||
+            !blockService.existsByHash(tx.referencedBlockHash) ||
             !blockchainService.isActualTransaction(tx, MAX_REFERENCED_BLOCK_DEPTH) ||
-            transactionRepository.existsByNonce(tx.nonce)
+            transactionService.existsByNonce(tx.nonce)
         ) {
             return
         }
 
-        transactionRepository.save(tx)
+        transactionService.save(tx)
     }
 
     /**
      * Create votes
      */
     fun onGetVotes(): List<Vote> {
-        return spaceRepository.findAll()
+        return spaceService.findAll()
             .flatMap { space ->
                 accountService.getValidatorsForSpace(space)
                     .filter { passphraseService.hasPassphrase(it.accountId) }
@@ -87,7 +84,7 @@ class EventProcessorService(
      * Receive new vote
      */
     fun onVote(vote: Vote) {
-        spaceRepository.findById(vote.spaceId).ifPresent {
+        spaceService.findById(vote.spaceId)?.let {
             voteService.validateAndSave(vote)
         }
     }
@@ -99,7 +96,7 @@ class EventProcessorService(
 
         val round = TimeUtils.getCurrentRound()
 
-        return spaceRepository.findAll()
+        return spaceService.findAll()
             .mapNotNull { space ->
                 accountService.getActiveProducerBySpace(space, round)
                     ?.let { producer ->
@@ -116,13 +113,13 @@ class EventProcessorService(
 
         val round = TimeUtils.getCurrentRound()
 
-        val spaceIds = spaceRepository.findAll().map { it.id }
+        val spaceIds = spaceService.findAll().map { it.id }
 
         proposals
             .filter { it.block.round == round }
             .filter { it.block.spaceId in spaceIds }
             .filter {
-                val space = spaceRepository.findById(it.block.spaceId).orElseThrow()
+                val space = spaceService.findById(it.block.spaceId)!!
                 val activeValidator = accountService.getProducerBySpace(space, round)
 
                 activeValidator.accountId == it.block.producerId
