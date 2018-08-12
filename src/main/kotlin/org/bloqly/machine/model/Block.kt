@@ -20,33 +20,33 @@ import javax.persistence.UniqueConstraint
     uniqueConstraints = [
         UniqueConstraint(
             columnNames = ["hash", "libHash"],
-            name = "block.uq_hash_lib_hash"
+            name = "block_uq_hash_lib_hash"
         ),
         UniqueConstraint(
             columnNames = ["hash", "parentHash"],
-            name = "block.uq_hash_parent_hash"
+            name = "block_uq_hash_parent_hash"
         ),
         UniqueConstraint(
             columnNames = ["spaceId", "producerId", "height"],
-            name = "block.uq_space_producer_height"
+            name = "block_uq_space_producer_height"
         ),
         UniqueConstraint(
             columnNames = ["spaceId", "producerId", "round"],
-            name = "block.uq_producer_round"
+            name = "block_uq_producer_round"
         ),
         UniqueConstraint(
             columnNames = ["hash"],
-            name = "block.uq_hash"
+            name = "block_uq_hash"
         )
     ],
     indexes = [
         Index(
             columnList = "height DESC, diff DESC, weight DESC, round, hash",
-            name = "block.last_block_idx"
+            name = "block_last_block_idx"
         ),
         Index(
             columnList = "spaceId",
-            name = "block.space_idx"
+            name = "block_space_idx"
         )
     ]
 )

@@ -15,11 +15,11 @@ import javax.persistence.UniqueConstraint
     uniqueConstraints = [
         UniqueConstraint(
             columnNames = ["hash"],
-            name = "transaction.uq_hash"
+            name = "transaction_uq_hash"
         ),
         UniqueConstraint(
             columnNames = ["nonce"],
-            name = "transaction.uq_nonce"
+            name = "transaction_uq_nonce"
         )
     ]
 )

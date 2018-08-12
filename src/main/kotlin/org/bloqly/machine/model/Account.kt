@@ -16,7 +16,7 @@ import javax.persistence.UniqueConstraint
     uniqueConstraints = [
         UniqueConstraint(
             columnNames = ["accountId"],
-            name = "account.uq_account_id"
+            name = "account_uq_account_id"
         )]
 )
 data class Account(
