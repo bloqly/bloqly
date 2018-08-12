@@ -61,15 +61,7 @@ class BlockProcessor(
 
         val receivedBlock = blockData.block.toModel()
 
-        // TODO do something about it?
-        if (blockRepository.existsByHash(receivedBlock.hash)) {
-            log.warn("Block hash already exists: ${receivedBlock.hash}")
-            return
-        }
-
-        // TODO do something about it? Introduce block memory storage?
-        if (!blockRepository.existsByHash(receivedBlock.parentHash)) {
-            log.warn("No parent found with hash ${receivedBlock.parentHash}.")
+        if (!blockService.isAcceptable(receivedBlock)) {
             return
         }
 
@@ -97,9 +89,17 @@ class BlockProcessor(
 
         evaluateBlock(block, propertyContext)
 
-        blockRepository.save(block)
+        saveBlock(block)
 
         moveLIBIfNeeded(currentLIB)
+    }
+
+    private fun saveBlock(block: Block): Block {
+        require(blockService.isAcceptable(block)) {
+            // TODO improve block logging, add producer etc
+            "Block is not acceptable: ${block.hash}"
+        }
+        return blockRepository.save(block)
     }
 
     private fun evaluateBlocks(currentLIB: Block, toBlock: Block, propertyContext: PropertyContext) {
@@ -182,30 +182,6 @@ class BlockProcessor(
         require(CryptoUtils.verifyBlock(block, producer.publicKey.decode16())) {
             "Cold not verify block ${block.hash}"
         }
-
-        // TODO move these checks to separate method and call them when block received and when it is planned to save
-        // move it to blockService
-        // change to returning boolean and log warning
-
-        require(blockRepository.existsByHash(block.libHash)) {
-            "No LIB found by hash ${block.libHash}."
-        }
-
-        require(!blockRepository.existsByHashAndLibHash(block.hash, block.libHash)) {
-            "Unique constraint violated (hash, block_hash) : (${block.hash}, ${block.libHash})"
-        }
-
-        require(!blockRepository.existsByHashAndParentHash(block.hash, block.parentHash)) {
-            "Unique constraint violated (hash, parent_hash) : (${block.hash}, ${block.parentHash})"
-        }
-
-        require(!blockRepository.existsBySpaceIdAndProducerIdAndHeight(block.spaceId, block.producerId, block.height)) {
-            "Unique constraint violated (space_id, producer_id, height) : (${block.spaceId}, ${block.producerId}, ${block.height})"
-        }
-
-        require(!blockRepository.existsBySpaceIdAndProducerIdAndRound(block.spaceId, block.producerId, block.round)) {
-            "Unique constraint violated (space_id, producer_id, round) : (${block.spaceId}, ${block.producerId}, ${block.round})"
-        }
     }
 
     @Transactional
@@ -257,7 +233,7 @@ class BlockProcessor(
 
         saveTxOutputs(txResults, newBlock)
 
-        val blockData = BlockData(blockRepository.save(newBlock))
+        val blockData = BlockData(saveBlock(newBlock))
 
         moveLIBIfNeeded(currentLIB)
 

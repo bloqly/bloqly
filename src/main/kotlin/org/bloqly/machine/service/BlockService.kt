@@ -15,6 +15,8 @@ import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.Delta
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
@@ -28,6 +30,8 @@ class BlockService(
     private val spaceRepository: SpaceRepository,
     private val propertyRepository: PropertyRepository
 ) {
+
+    private val log: Logger = LoggerFactory.getLogger(BlockService::class.simpleName)
 
     @Transactional(readOnly = true)
     fun newBlock(
@@ -96,6 +100,49 @@ class BlockService(
     @Transactional(readOnly = true)
     fun existsByHash(hash: String): Boolean =
         blockRepository.existsByHash(hash)
+
+    @Transactional(readOnly = true)
+    fun isAcceptable(block: Block): Boolean {
+
+        // TODO do something about it?
+        if (blockRepository.existsByHash(block.hash)) {
+            log.warn("Block hash already exists: ${block.hash}")
+            return false
+        }
+
+        // TODO do something about it? Introduce block memory storage?
+        if (!blockRepository.existsByHash(block.parentHash)) {
+            log.warn("No parent found with hash ${block.parentHash}.")
+            return false
+        }
+
+        if (!blockRepository.existsByHash(block.libHash)) {
+            log.warn("No LIB found by hash ${block.libHash}.")
+            return false
+        }
+
+        if (blockRepository.existsByHashAndLibHash(block.hash, block.libHash)) {
+            log.warn("Unique constraint violated (hash, block_hash) : (${block.hash}, ${block.libHash})")
+            return false
+        }
+
+        if (blockRepository.existsByHashAndParentHash(block.hash, block.parentHash)) {
+            log.warn("Unique constraint violated (hash, parent_hash) : (${block.hash}, ${block.parentHash})")
+            return false
+        }
+
+        if (blockRepository.existsBySpaceIdAndProducerIdAndHeight(block.spaceId, block.producerId, block.height)) {
+            log.warn("Unique constraint violated (space_id, producer_id, height) : (${block.spaceId}, ${block.producerId}, ${block.height})")
+            return false
+        }
+
+        if (blockRepository.existsBySpaceIdAndProducerIdAndRound(block.spaceId, block.producerId, block.round)) {
+            log.warn("Unique constraint violated (space_id, producer_id, round) : (${block.spaceId}, ${block.producerId}, ${block.round})")
+            return false
+        }
+
+        return true
+    }
 
     /**
      * @param newBlockValidatorId - when creating a new block, we need to include LIB value into it.
