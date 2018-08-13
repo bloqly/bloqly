@@ -7,10 +7,8 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.CryptoUtils.verifyTransaction
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
-import org.bloqly.machine.util.encode16
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -44,10 +42,12 @@ class TransactionServiceTest : BaseTest() {
 
         user = accountService.createAccount(passphrase)
 
-        transaction = createTransaction()
+        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
+
+        transaction = createTransaction(lib.hash)
     }
 
-    private fun createTransaction(referencedBlockHash: String = CryptoUtils.hash(ByteArray(0)).encode16()): Transaction {
+    private fun createTransaction(referencedBlockHash: String): Transaction {
         return transactionService.createTransaction(
 
             space = DEFAULT_SPACE,
@@ -62,7 +62,7 @@ class TransactionServiceTest : BaseTest() {
 
             key = null,
 
-            value = "true".toByteArray(),
+            value = "function init() {return [];}".toByteArray(),
 
             transactionType = TransactionType.CREATE,
 
@@ -74,16 +74,19 @@ class TransactionServiceTest : BaseTest() {
 
     @Test
     fun testGetPendingTransaction() {
+        val txs = blockProcessor.getPendingTransactionsBySpace(DEFAULT_SPACE)
+        assertEquals(1, txs.size)
+        assertEquals(transaction.hash, txs.first().hash)
+
         testService.createTransaction()
 
-        val txs = blockProcessor.getPendingTransactionsBySpace(DEFAULT_SPACE)
-
-        assertEquals(1, txs.size)
+        assertEquals(2, blockProcessor.getPendingTransactionsBySpace(DEFAULT_SPACE).size)
     }
 
     @Test
     fun testGetPendingTransactions() {
-        blockService.getLastBlockForSpace(DEFAULT_SPACE)
+
+        //assertEquals(1, transactionRepository.getPendingTransactionsBySpace(DEFAULT_SPACE).size)
 
         blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1).block
         val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2).block

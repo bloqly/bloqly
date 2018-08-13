@@ -1,9 +1,11 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.model.FinalizedTransaction
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.BlockService
@@ -29,7 +31,8 @@ class BlockchainService(
     private val spaceRepository: SpaceRepository,
     private val transactionService: TransactionService,
     private val blockRepository: BlockRepository,
-    private val transactionProcessor: TransactionProcessor
+    private val transactionProcessor: TransactionProcessor,
+    private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
     @Transactional
     fun createBlockchain(spaceId: String, baseDir: String, passphrase: String) {
@@ -73,7 +76,7 @@ class BlockchainService(
             timestamp = timestamp
         )
 
-        transactionService.save(tx)
+        val savedTx = transactionService.save(tx)
 
         val firstBlock = blockService.newBlock(
             spaceId = spaceId,
@@ -100,6 +103,13 @@ class BlockchainService(
         propertyContext.commit()
 
         firstBlock.txHash = CryptoUtils.hashTransactions(listOf(tx)).encode16()
-        blockRepository.save(firstBlock)
+        val savedFirstBlock = blockRepository.save(firstBlock)
+
+        finalizedTransactionRepository.save(
+            FinalizedTransaction(
+                transaction = savedTx,
+                block = savedFirstBlock
+            )
+        )
     }
 }

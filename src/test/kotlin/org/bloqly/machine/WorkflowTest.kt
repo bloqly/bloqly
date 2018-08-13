@@ -4,6 +4,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.TimeUtils
@@ -27,6 +28,9 @@ class WorkflowTest : BaseTest() {
 
     @Autowired
     private lateinit var blockRepository: BlockRepository
+
+    @Autowired
+    private lateinit var finalizedTransactionRepository: FinalizedTransactionRepository
 
     @Test
     fun testNoDelta() {
@@ -105,6 +109,7 @@ class WorkflowTest : BaseTest() {
         assertEquals(4, voteRepository.count())
 
         testService.cleanupBlockTransactions()
+        finalizedTransactionRepository.deleteAll()
         transactionRepository.deleteAll()
         voteRepository.deleteAll()
 

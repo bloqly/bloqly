@@ -2,10 +2,12 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.FinalizedTransaction
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
@@ -30,7 +32,8 @@ class GenesisService(
     private val propertyService: PropertyService,
     private val contractService: ContractService,
     private val transactionProcessor: TransactionProcessor,
-    private val blockService: BlockService
+    private val blockService: BlockService,
+    private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
 
     @Transactional(readOnly = true)
@@ -125,7 +128,14 @@ class GenesisService(
 
         propertyContext.commit()
 
-        transactionRepository.saveAll(transactions)
+        transactionRepository.saveAll(transactions).forEach { tx ->
+            finalizedTransactionRepository.save(
+                FinalizedTransaction(
+                    transaction = tx,
+                    block = block
+                )
+            )
+        }
     }
 
     private fun validateGenesisTransaction(transaction: Transaction, block: Block, now: Instant) {

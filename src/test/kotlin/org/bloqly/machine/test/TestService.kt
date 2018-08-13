@@ -92,7 +92,9 @@ class TestService(
 
     fun createTransaction(): Transaction {
 
-        val libHash = blockService.getLIBForSpace(DEFAULT_SPACE).libHash
+        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
+
+        val libHash = lib.hash
 
         val root = accountRepository.findByAccountId(getRoot().accountId)!!
         val user = accountRepository.findByAccountId(getUser().accountId)!!

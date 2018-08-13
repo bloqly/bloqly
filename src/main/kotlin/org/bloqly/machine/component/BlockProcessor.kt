@@ -1,8 +1,10 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.FinalizedTransaction
 import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.Properties
 import org.bloqly.machine.model.Transaction
@@ -11,6 +13,7 @@ import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
@@ -23,7 +26,6 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
@@ -54,7 +56,8 @@ class BlockProcessor(
     private val accountService: AccountService,
     private val accountRepository: AccountRepository,
     private val spaceRepository: SpaceRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
@@ -280,8 +283,16 @@ class BlockProcessor(
                     properties.forEach { log.info("Applying property $it") }
 
                     propertyService.updateProperties(properties)
+
+                    finalizedTransactionRepository.save(
+                        FinalizedTransaction(
+                            transaction = tx,
+                            block = block
+                        )
+                    )
                 } catch (e: Exception) {
-                    val errorMessage = "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
+                    val errorMessage =
+                        "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
                     log.warn(errorMessage, e)
                     throw RuntimeException(errorMessage, e)
                 }
@@ -342,7 +353,7 @@ class BlockProcessor(
     ): List<Transaction> {
 
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
-        val minTimestamp = TimeUtils.getCurrentTime() - Application.MAX_TRANSACTION_AGE
+        val minTimestamp = lastBlock.timestamp - MAX_TRANSACTION_AGE
 
         val libHash = if (lastBlock.height > 0) {
             lastBlock.libHash
@@ -353,14 +364,22 @@ class BlockProcessor(
         val lib = blockService.findByHash(libHash)!!
         val minHeight = lib.height - depth
 
-        return transactionRepository
-            // TODO fixme
-            .findAll()
-            .filter { tx ->
-                // TODO try to optimize it to avoid repeated calls to dbs
-                val referencedBlock = blockService.findByHash(tx.referencedBlockHash)!!
-                tx.timestamp > minTimestamp &&
-                    referencedBlock.height > minHeight
-            }
+        // Not finalized blocks, current branch
+        val blocksAfterLIB = getBlocksRange(lib, lastBlock).mapNotNull { it.id }
+
+        // Not finalized tx ids, current branch
+        val txsAfterLIB = if (blocksAfterLIB.isNotEmpty()) {
+            transactionRepository.getTransactionsByBlockIds(blocksAfterLIB)
+        } else {
+            listOf()
+        }
+
+        val pendingTransactions = transactionRepository.getPendingTransactionsBySpace(spaceId)
+
+        return pendingTransactions.subtract(txsAfterLIB).filter { tx ->
+            // TODO try to optimize it to avoid repeated calls to dbs
+            val referencedBlock = blockService.findByHash(tx.referencedBlockHash)!!
+            tx.timestamp > minTimestamp && referencedBlock.height > minHeight
+        }
     }
 }
