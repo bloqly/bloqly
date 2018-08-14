@@ -84,7 +84,7 @@ class TransactionProcessor(
     ): InvocationResult {
 
         try {
-            accountService.saveIfNotExists(tx.destination)
+            //accountService.saveIfNotExists(tx.destination)
 
             // TODO check results are unique
             val result = when (tx.transactionType) {
@@ -103,7 +103,7 @@ class TransactionProcessor(
                 }
             }
 
-            accountService.ensureAccounts(result)
+            //accountService.ensureAccounts(result)
 
             propertyContext.updatePropertyValues(result.output)
 

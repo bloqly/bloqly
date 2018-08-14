@@ -5,7 +5,6 @@ import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.AccountRepository
@@ -120,33 +119,12 @@ class AccountService(
 
         val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)
 
-        saveIfNotExists(accountId)
-
-        val account = accountRepository.findByAccountId(accountId)!!
-
-        return if (account.publicKey == null) {
-            accountRepository.save(account.copy(publicKey = publicKey))
-        } else {
-            account
-        }
-    }
-
-    @Transactional
-    fun saveIfNotExists(accountId: String) {
-        // TODO revisit storing "self" accounts
-        if (!accountRepository.existsByAccountId(accountId)) {
-            accountRepository.save(Account(accountId = accountId))
-        }
-    }
-
-    @Transactional
-    fun ensureAccounts(result: InvocationResult) {
-        if (!result.isOK()) {
-            return
-        }
-
-        result.output.forEach { property ->
-            saveIfNotExists(property.id.target)
-        }
+        return accountRepository.findByAccountId(accountId)
+            ?: accountRepository.save(
+                Account(
+                    accountId = accountId,
+                    publicKey = publicKeyBytes.encode16()
+                )
+            )
     }
 }
