@@ -117,6 +117,13 @@ class BlockProcessorTest : BaseTest() {
 
     @Test
     fun testInvalidTransactionNotIncluded() {
+
+        testService.createTransaction()
+        testService.createInvalidTransaction()
+
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+
+        assertEquals(1, block.transactions.size)
     }
 
     @Test

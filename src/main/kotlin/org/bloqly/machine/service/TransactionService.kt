@@ -67,6 +67,7 @@ class TransactionService(
         destinationId: String,
         self: String,
         key: String? = null,
+        // TODO do we ned byte-array here?
         value: ByteArray,
         transactionType: TransactionType,
         referencedBlockHash: String,

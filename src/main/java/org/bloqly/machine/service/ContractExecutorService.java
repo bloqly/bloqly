@@ -8,9 +8,10 @@ import org.bloqly.machine.util.CryptoUtils;
 import org.bloqly.machine.util.ParameterUtils;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.script.*;
-import javax.transaction.Transactional;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.bloqly.machine.model.InvocationResultType.SUCCESS;
+import static org.springframework.transaction.annotation.Isolation.SERIALIZABLE;
 
 @Service
 public class ContractExecutorService {
@@ -106,9 +108,8 @@ public class ContractExecutorService {
         );
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE, propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public InvocationResult invokeContract(PropertyContext propertyContext, InvocationContext invocationContext, byte[] arg) {
-
         var properties = invokeFunction(propertyContext, invocationContext, arg);
 
         return new InvocationResult(SUCCESS, properties);
@@ -133,7 +134,6 @@ public class ContractExecutorService {
             return results.values().stream()
                     .map(item -> prepareResults((Map<String, Object>) item, invocationContext))
                     .collect(toList());
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

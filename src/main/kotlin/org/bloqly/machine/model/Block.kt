@@ -56,6 +56,7 @@ data class Block(
     @GeneratedValue(strategy = AUTO)
     var id: Long? = null,
 
+    // TODO add Nonnull annotation?
     @Column(nullable = false)
     val spaceId: String,
 

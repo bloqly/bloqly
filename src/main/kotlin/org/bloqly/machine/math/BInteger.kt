@@ -1,5 +1,6 @@
 package org.bloqly.machine.math
 
+import org.bloqly.machine.exception.BloqlyArithmeticException
 import java.math.BigInteger
 import java.math.BigInteger.TEN
 import java.util.Objects
@@ -31,15 +32,27 @@ class BInteger {
     }
 
     @Suppress("unused")
-    fun add(another: BInteger): BInteger {
+    fun add(another: BInteger, max: BInteger): BInteger {
 
-        return BInteger(value.add(another.value))
+        val result = value.add(another.value)
+
+        if (result > max.value) {
+            throw BloqlyArithmeticException("The resulting value is too big $result > ${max.value}")
+        }
+
+        return BInteger(result)
     }
 
     @Suppress("unused")
     fun subtract(another: BInteger): BInteger {
 
-        return BInteger(value.subtract(another.value))
+        val result = value.subtract(another.value)
+
+        if (result.signum() < 0) {
+            throw BloqlyArithmeticException("Negative value: $result")
+        }
+
+        return BInteger(result)
     }
 
     override fun equals(other: Any?): Boolean {

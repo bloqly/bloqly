@@ -26,7 +26,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.springframework.stereotype.Component
 import java.math.BigInteger
-import java.time.Instant
 import javax.annotation.PostConstruct
 import javax.persistence.EntityManager
 import javax.transaction.Transactional
@@ -107,8 +106,7 @@ class TestService(
             self = DEFAULT_SELF,
             value = writeLong("1"),
             transactionType = TransactionType.CALL,
-            referencedBlockHash = libHash,
-            timestamp = Instant.now().toEpochMilli()
+            referencedBlockHash = libHash
         )
     }
 
@@ -121,14 +119,14 @@ class TestService(
 
         return transactionService.createTransaction(
             space = DEFAULT_SPACE,
-            originId = root.accountId,
-            passphrase = passphraseService.getPassphrase(root.accountId),
-            destinationId = user.accountId,
+            originId = user.accountId,
+            passphrase = passphraseService.getPassphrase(user.accountId),
+            destinationId = root.accountId,
             self = DEFAULT_SELF,
-            value = writeLong("1"),
+            // got no money
+            value = writeLong("100"),
             transactionType = TransactionType.CALL,
-            referencedBlockHash = lib.hash,
-            timestamp = Instant.now().toEpochMilli()
+            referencedBlockHash = lib.hash
         )
     }
 
