@@ -3,6 +3,7 @@ package org.bloqly.machine.component
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.AccountService
+import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
@@ -28,7 +29,8 @@ class EventProcessorService(
     private val spaceService: SpaceService,
     private val blockProcessor: BlockProcessor,
     private val transactionProcessor: TransactionProcessor,
-    private val passphraseService: PassphraseService
+    private val passphraseService: PassphraseService,
+    private val blockService: BlockService
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
@@ -49,7 +51,9 @@ class EventProcessorService(
      * Create votes
      */
     fun onGetVotes(): List<Vote> {
+
         return spaceService.findAll()
+            .filter { blockService.existsBySpace(it) }
             .flatMap { space ->
                 accountService.getValidatorsForSpace(space)
                     .filter { passphraseService.hasPassphrase(it.accountId) }
@@ -82,6 +86,7 @@ class EventProcessorService(
         val round = TimeUtils.getCurrentRound()
 
         return spaceService.findAll()
+            .filter { blockService.existsBySpace(it) }
             .mapNotNull { space ->
                 accountService.getActiveProducerBySpace(space, round)
                     ?.let { producer ->

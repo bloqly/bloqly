@@ -352,6 +352,10 @@ class BlockProcessor(
         depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH
     ): List<Transaction> {
 
+        if (!blockRepository.existsBySpaceId(spaceId)) {
+            return listOf()
+        }
+
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
         val minTimestamp = lastBlock.timestamp - MAX_TRANSACTION_AGE
 

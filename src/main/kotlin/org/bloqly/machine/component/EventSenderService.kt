@@ -45,7 +45,6 @@ class EventSenderService(
                 } catch (e: Exception) {
                     val errorMessage = "Could not send transactions to $node. Details: ${e.message}"
                     log.warn(errorMessage)
-                    log.error(errorMessage, e)
                 }
             }
         }
@@ -60,7 +59,8 @@ class EventSenderService(
                     log.info("Sending proposals to node $node")
                     nodeQueryService.sendProposals(node, proposals)
                 } catch (e: Exception) {
-                    "Could not send proposals to $node. Details: ${e.message}"
+                    val errorMessage = "Could not send proposals to $node. Details: ${e.message}"
+                    log.warn(errorMessage)
                 }
             }
         }
@@ -83,7 +83,6 @@ class EventSenderService(
                 } catch (e: Exception) {
                     val errorMessage = "Could not request deltas from $node: ${e.message}"
                     log.warn(errorMessage)
-                    log.error(errorMessage, e)
                 }
             }
         }

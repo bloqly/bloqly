@@ -17,9 +17,8 @@ class DeltaService(
 
     @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getDeltas(): List<Delta> {
-        val spaces = spaceRepository.findAll()
-
-        return spaces
+        return spaceRepository.findAll()
+            .filter { blockRepository.existsBySpaceId(it.id) }
             .map { space ->
                 val vote = voteRepository.findLastForSpace(space.id)
 

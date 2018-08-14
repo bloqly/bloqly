@@ -4,6 +4,7 @@ import com.google.common.primitives.Bytes
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
@@ -247,4 +248,6 @@ class BlockService(
 
     @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun findByHash(hash: String): Block? = blockRepository.findByHash(hash)
+
+    fun existsBySpace(space: Space): Boolean = blockRepository.existsBySpaceId(space.id)
 }
