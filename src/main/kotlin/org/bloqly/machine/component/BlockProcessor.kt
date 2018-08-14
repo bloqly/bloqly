@@ -42,7 +42,7 @@ private data class TransactionResult(
 
 @Service
 @Transactional(isolation = SERIALIZABLE)
-// TODO add test for rejected transaction
+// TODO add more test for rejected transaction
 class BlockProcessor(
     private val transactionService: TransactionService,
     private val voteService: VoteService,
@@ -74,8 +74,9 @@ class BlockProcessor(
         requireValid(receivedBlock)
 
         val votes = blockData.votes.map { voteVO ->
-            val vote = voteVO.toModel(accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey))
-            voteService.save(vote)
+            val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
+            val vote = voteVO.toModel(validator)
+            voteService.validateAndSaveIfNotExists(vote)
         }
 
         val transactions = blockData.transactions.map {

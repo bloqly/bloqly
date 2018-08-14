@@ -58,19 +58,11 @@ class VoteService(
     }
 
     @Transactional
-    fun validateAndSaveIfNotExists(vote: Vote) {
+    fun validateAndSaveIfNotExists(vote: Vote): Vote {
 
         if (voteRepository.existsByValidatorAndSpaceIdAndHeight(vote.validator, vote.spaceId, vote.height)) {
-            return
+            return vote
         }
-
-        requireVoteValid(vote)
-
-        voteRepository.save(vote)
-    }
-
-    @Transactional
-    fun save(vote: Vote): Vote {
 
         requireVoteValid(vote)
 
@@ -85,6 +77,7 @@ class VoteService(
             "Could not verify vote."
         }
 
+        // TODO get timestamp from last block maybe?
         val now = Instant.now().toEpochMilli()
 
         require(vote.timestamp < now) {
