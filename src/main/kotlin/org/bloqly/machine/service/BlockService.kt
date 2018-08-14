@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional
 import kotlin.math.min
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class BlockService(
     private val accountRepository: AccountRepository,
     private val blockRepository: BlockRepository,
@@ -34,7 +33,7 @@ class BlockService(
 
     private val log: Logger = LoggerFactory.getLogger(BlockService::class.simpleName)
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun newBlock(
         spaceId: String,
         height: Long,
@@ -94,15 +93,15 @@ class BlockService(
         )
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getLastBlockForSpace(spaceId: String): Block =
         blockRepository.getLastBlock(spaceId)
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun existsByHash(hash: String): Boolean =
         blockRepository.existsByHash(hash)
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun isAcceptable(block: Block): Boolean {
 
         // TODO do something about it?
@@ -150,7 +149,7 @@ class BlockService(
      *      this LIB value can differ so that a new block's LIB is the the previous LIB + 1 because
      *      new block introduces new validator into the chain of confirmations.
      */
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getLIBForSpace(spaceId: String, newBlockValidatorId: String? = null): Block {
 
         // TODO calculate quorum taking into account the current block producer
@@ -179,6 +178,7 @@ class BlockService(
         return block
     }
 
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun isHyperFinalizer(currBlock: Block): Boolean {
 
         if (currBlock.height < 2) {
@@ -196,7 +196,7 @@ class BlockService(
         return currBlockValidators.intersect(prevBlockValidators).size >= quorum
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getBlockDataList(delta: Delta): BlockDataList {
 
         val startHeight = delta.localHeight
@@ -207,7 +207,7 @@ class BlockService(
         return BlockDataList(blocks.map { BlockData(it) })
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun ensureSpaceEmpty(space: String) {
 
         require(!blockRepository.existsBySpaceId(space)) {
@@ -219,7 +219,7 @@ class BlockService(
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun loadBlockByHash(hash: String): Block {
         val block = blockRepository.findByHash(hash)!!
 
@@ -229,7 +229,7 @@ class BlockService(
         return block
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun isActualTransaction(tx: Transaction, depth: Int = MAX_REFERENCED_BLOCK_DEPTH): Boolean {
 
         return blockRepository.findByHash(tx.referencedBlockHash)
@@ -245,6 +245,6 @@ class BlockService(
             } ?: false
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun findByHash(hash: String): Block? = blockRepository.findByHash(hash)
 }

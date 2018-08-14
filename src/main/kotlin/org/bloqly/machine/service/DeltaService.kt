@@ -9,14 +9,13 @@ import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class DeltaService(
     private val voteRepository: VoteRepository,
     private val spaceRepository: SpaceRepository,
     private val blockRepository: BlockRepository
 ) {
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getDeltas(): List<Delta> {
         val spaces = spaceRepository.findAll()
 

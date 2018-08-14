@@ -16,14 +16,13 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class TransactionService(
     private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository
 ) {
 
     // TODO add blockchain config option - if adding smart contracts allowed
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun createTransaction(
         transactionRequest: TransactionRequest,
         referencedBlockHash: String
@@ -59,7 +58,7 @@ class TransactionService(
         )
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun createTransaction(
         space: String,
         originId: String,
@@ -110,15 +109,15 @@ class TransactionService(
         )
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun existsByHash(hash: String): Boolean =
         transactionRepository.existsByHash(hash)
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun existsByNonce(nonce: String): Boolean =
         transactionRepository.existsByNonce(nonce)
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun save(tx: Transaction): Transaction {
 
         require(CryptoUtils.verifyTransaction(tx)) {

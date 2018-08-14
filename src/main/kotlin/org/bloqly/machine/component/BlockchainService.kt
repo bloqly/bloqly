@@ -22,7 +22,6 @@ import java.io.File
 import java.time.Instant
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class BlockchainService(
     private val blockService: BlockService,
     private val contractExecutorService: ContractExecutorService,
@@ -34,7 +33,8 @@ class BlockchainService(
     private val transactionProcessor: TransactionProcessor,
     private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
-    @Transactional
+
+    @Transactional(isolation = SERIALIZABLE)
     fun createBlockchain(spaceId: String, baseDir: String, passphrase: String) {
 
         blockService.ensureSpaceEmpty(spaceId)

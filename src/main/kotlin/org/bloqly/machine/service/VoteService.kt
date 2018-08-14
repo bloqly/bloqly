@@ -14,13 +14,12 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class VoteService(
     private val voteRepository: VoteRepository,
     private val blockRepository: BlockRepository
 ) {
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun getVote(space: Space, validator: Account, passphrase: String): Vote? {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
@@ -57,7 +56,7 @@ class VoteService(
         )
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun validateAndSaveIfNotExists(vote: Vote): Vote {
 
         if (voteRepository.existsByValidatorAndSpaceIdAndHeight(vote.validator, vote.spaceId, vote.height)) {

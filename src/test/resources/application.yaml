@@ -26,7 +26,12 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
 
   datasource:
-    pool-size: 30
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 5
+      pool-name: bloqly-db-pool
+      auto-commit: false
+      transaction-isolation: TRANSACTION_SERIALIZABLE
     url: jdbc:postgresql:bloqly_test
     username: postgres
     password:

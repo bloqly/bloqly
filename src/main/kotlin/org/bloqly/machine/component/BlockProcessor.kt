@@ -41,7 +41,6 @@ private data class TransactionResult(
 )
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 // TODO add more test for rejected transaction
 class BlockProcessor(
     private val transactionService: TransactionService,
@@ -62,7 +61,7 @@ class BlockProcessor(
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun processReceivedBlock(blockData: BlockData) {
 
         val receivedBlock = blockData.block.toModel()
@@ -120,7 +119,7 @@ class BlockProcessor(
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getLastPropertyValue(
         space: String,
         self: String,
@@ -140,7 +139,7 @@ class BlockProcessor(
     /**
      * Returns blocks range (afterBlock, toBlock]
      */
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     internal fun getBlocksRange(afterBlock: Block, toBlock: Block): List<Block> {
 
         var currentBlock = toBlock
@@ -191,7 +190,7 @@ class BlockProcessor(
         }
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun createNextBlock(spaceId: String, producer: Account, passphrase: String, round: Long): BlockData {
 
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)
@@ -342,12 +341,12 @@ class BlockProcessor(
         return voteRepository.findByBlockHash(blockHash)
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getPendingTransactions(depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH): List<Transaction> =
         spaceRepository.findAll()
             .flatMap { getPendingTransactionsBySpace(it.id, depth) }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getPendingTransactionsBySpace(
         spaceId: String,
         depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH

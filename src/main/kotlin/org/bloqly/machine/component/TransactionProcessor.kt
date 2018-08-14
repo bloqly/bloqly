@@ -10,7 +10,6 @@ import org.bloqly.machine.model.InvocationResultType.SUCCESS
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.service.TransactionService
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class TransactionProcessor(
-    private val accountService: AccountService,
     private val contractExecutorService: ContractExecutorService,
     private val transactionService: TransactionService,
     private val blockService: BlockService
@@ -84,7 +82,6 @@ class TransactionProcessor(
     ): InvocationResult {
 
         try {
-            //accountService.saveIfNotExists(tx.destination)
 
             // TODO check results are unique
             val result = when (tx.transactionType) {
@@ -102,8 +99,6 @@ class TransactionProcessor(
                     InvocationResult(SUCCESS)
                 }
             }
-
-            //accountService.ensureAccounts(result)
 
             propertyContext.updatePropertyValues(result.output)
 

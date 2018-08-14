@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class ResetService(
     private val contractRepository: ContractRepository,
     private val propertyRepository: PropertyRepository,
@@ -30,6 +29,7 @@ class ResetService(
     private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
 
+    @Transactional(isolation = SERIALIZABLE)
     fun reset() {
         finalizedTransactionRepository.deleteAll()
         contractRepository.deleteAll()

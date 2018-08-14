@@ -7,14 +7,13 @@ import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class ContractService(
     private val contractRepository: ContractRepository
 ) {
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun findById(self: String): Contract? = contractRepository.findById(self).orElse(null)
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun saveAll(contracts: List<Contract>) {
         contractRepository.saveAll(contracts)
     }

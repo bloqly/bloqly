@@ -11,7 +11,7 @@ spring:
     show-sql: false
     open-in-view: false
     hibernate:
-        ddl-auto: update
+      ddl-auto: update
     properties:
       hibernate:
         temp:
@@ -19,7 +19,12 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQL9Dialect
 
   datasource:
-    pool-size: 30
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 10
+      pool-name: bloqly-db-pool
+      auto-commit: false
+      transaction-isolation: TRANSACTION_SERIALIZABLE
     url: jdbc:postgresql:${database.name}
     username: ${database.username}
     password: ${database.password}

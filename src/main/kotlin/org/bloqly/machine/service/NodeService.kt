@@ -11,7 +11,6 @@ import java.time.Instant
 import javax.annotation.PostConstruct
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class NodeService(
     private val nodeRepository: NodeRepository,
     @Value("\${nodes:}") private val nodes: Array<String>,
@@ -19,6 +18,7 @@ class NodeService(
 ) {
 
     @PostConstruct
+    @Transactional(isolation = SERIALIZABLE)
     fun init() {
         parseAndAddNodes(nodes)
     }
@@ -46,7 +46,7 @@ class NodeService(
             }
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun addNode(node: Node) {
 
         if (node.id.port == serverPort) {
@@ -65,13 +65,13 @@ class NodeService(
         )
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getAllNodes(): List<Node> {
 
         return nodeRepository.findAll().toList()
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getNodesToQuery(): List<Node> {
 
         return nodeRepository.findAll().filter { it.id.port != serverPort }

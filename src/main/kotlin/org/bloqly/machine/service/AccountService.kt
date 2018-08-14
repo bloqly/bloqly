@@ -21,14 +21,13 @@ import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 
 @Service
-@Transactional(isolation = SERIALIZABLE)
 class AccountService(
     private val accountRepository: AccountRepository,
     private val propertyRepository: PropertyRepository,
     private val passphraseService: PassphraseService
 ) {
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getProducerBySpace(space: Space, round: Long): Account {
 
         val validators = getValidatorsForSpace(space)
@@ -38,12 +37,12 @@ class AccountService(
         return validators[validatorIndex.toInt()]
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getActiveProducerBySpace(space: Space, round: Long): Account? {
         return getProducerBySpace(space, round).takeIf { passphraseService.hasPassphrase(it.accountId) }
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun createAccount(passphrase: String): Account {
 
         return accountRepository.save(newAccount(passphrase))
@@ -64,7 +63,7 @@ class AccountService(
         return account
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getValidatorsForSpace(space: Space): List<Account> {
 
         val powerProperties = propertyRepository.findBySpaceAndKey(space.id, POWER_KEY)
@@ -75,7 +74,7 @@ class AccountService(
             .sortedBy { it.accountId }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(isolation = SERIALIZABLE, readOnly = true)
     fun getAccountPower(space: String, accountId: String): BigInteger {
 
         val propertyKey = PropertyId(
@@ -91,7 +90,7 @@ class AccountService(
             .orElseThrow()
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun importAccount(privateKeyBytes: ByteArray?, passphrase: String): Account {
 
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
@@ -113,7 +112,7 @@ class AccountService(
         return accountRepository.save(account)
     }
 
-    @Transactional
+    @Transactional(isolation = SERIALIZABLE)
     fun ensureExistsAndGetByPublicKey(publicKey: String): Account {
         val publicKeyBytes = publicKey.decode16()
 
