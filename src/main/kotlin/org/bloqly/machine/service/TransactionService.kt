@@ -118,7 +118,11 @@ class TransactionService(
         transactionRepository.existsByNonce(nonce)
 
     @Transactional(isolation = SERIALIZABLE)
-    fun save(tx: Transaction): Transaction {
+    fun verifyAndSaveIfNotExists(tx: Transaction): Transaction {
+
+        transactionRepository.findByHash(tx.hash)?.let {
+            return it
+        }
 
         require(CryptoUtils.verifyTransaction(tx)) {
             "Could not verify transaction $tx"

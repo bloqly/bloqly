@@ -79,7 +79,7 @@ class BlockProcessor(
         }
 
         val transactions = blockData.transactions.map {
-            transactionService.save(it.toModel())
+            transactionService.verifyAndSaveIfNotExists(it.toModel())
         }
 
         val propertyContext = PropertyContext(propertyService, contractService)

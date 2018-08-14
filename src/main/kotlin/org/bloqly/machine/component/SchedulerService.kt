@@ -20,7 +20,7 @@ class SchedulerService(
 
     // TODO review timeouts
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 30000)
     fun queryForNodes() {
         nodeQueryService.queryForNodes()
     }

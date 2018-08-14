@@ -59,8 +59,8 @@ class VoteService(
     @Transactional(isolation = SERIALIZABLE)
     fun validateAndSaveIfNotExists(vote: Vote): Vote {
 
-        if (voteRepository.existsByValidatorAndSpaceIdAndHeight(vote.validator, vote.spaceId, vote.height)) {
-            return vote
+        voteRepository.findBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)?.let {
+            return it
         }
 
         requireVoteValid(vote)

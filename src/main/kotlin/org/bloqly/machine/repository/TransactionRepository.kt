@@ -31,4 +31,6 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
         """, nativeQuery = true
     )
     fun getPendingTransactionsBySpace(spaceId: String): List<Transaction>
+
+    fun findByHash(hash: String): Transaction?
 }

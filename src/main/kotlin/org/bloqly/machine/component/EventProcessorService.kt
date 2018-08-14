@@ -44,7 +44,7 @@ class EventProcessorService(
             return
         }
 
-        transactionService.save(tx)
+        transactionService.verifyAndSaveIfNotExists(tx)
     }
 
     /**
