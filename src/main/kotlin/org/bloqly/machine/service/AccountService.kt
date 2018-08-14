@@ -114,26 +114,25 @@ class AccountService(
         return accountRepository.save(account)
     }
 
-    @Transactional(readOnly = true)
-    fun getByPublicKey(publicKey: String): Account {
+    @Transactional
+    fun ensureExistsAndGetByPublicKey(publicKey: String): Account {
         val publicKeyBytes = publicKey.decode16()
 
         val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)
 
-        ensureAccount(accountId)
+        saveIfNotExists(accountId)
 
         val account = accountRepository.findByAccountId(accountId)!!
 
         return if (account.publicKey == null) {
-            account.publicKey = publicKey
-            accountRepository.save(account)
+            accountRepository.save(account.copy(publicKey = publicKey))
         } else {
             account
         }
     }
 
     @Transactional
-    fun ensureAccount(accountId: String) {
+    fun saveIfNotExists(accountId: String) {
         // TODO revisit storing "self" accounts
         if (!accountRepository.existsByAccountId(accountId)) {
             accountRepository.save(Account(accountId = accountId))
@@ -147,7 +146,7 @@ class AccountService(
         }
 
         result.output.forEach { property ->
-            ensureAccount(property.id.target)
+            saveIfNotExists(property.id.target)
         }
     }
 }

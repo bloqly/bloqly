@@ -99,7 +99,7 @@ class BlockProcessorTest : BaseTest() {
         populateBlocks()
 
         val votes = blocks[0].votes.map { voteVO ->
-            val account = accountService.getByPublicKey(voteVO.publicKey)
+            val account = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
             voteVO.toModel(account)
         }
 

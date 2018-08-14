@@ -84,7 +84,7 @@ class TransactionProcessor(
     ): InvocationResult {
 
         try {
-            accountService.ensureAccount(tx.destination)
+            accountService.saveIfNotExists(tx.destination)
 
             // TODO check results are unique
             val result = when (tx.transactionType) {

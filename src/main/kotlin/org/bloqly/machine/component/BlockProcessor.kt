@@ -74,7 +74,7 @@ class BlockProcessor(
         requireValid(receivedBlock)
 
         val votes = blockData.votes.map { voteVO ->
-            val vote = voteVO.toModel(accountService.getByPublicKey(voteVO.publicKey))
+            val vote = voteVO.toModel(accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey))
             voteService.save(vote)
         }
 
