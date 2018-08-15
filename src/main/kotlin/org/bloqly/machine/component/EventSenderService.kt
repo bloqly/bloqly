@@ -4,7 +4,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.vo.BlockData
-import org.bloqly.machine.vo.Delta
+import org.bloqly.machine.vo.BlockRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.ExecutorService
@@ -66,11 +66,11 @@ class EventSenderService(
         }
     }
 
-    fun requestDeltas(deltas: List<Delta>) {
+    fun requestDeltas(blockRequests: List<BlockRequest>) {
         val nodes = nodeService.getNodesToQuery()
         val node = nodes.shuffled().first()
 
-        deltas.forEach { delta ->
+        blockRequests.forEach { delta ->
             executorService.submit {
                 try {
                     log.info("Request deltas from node $node")

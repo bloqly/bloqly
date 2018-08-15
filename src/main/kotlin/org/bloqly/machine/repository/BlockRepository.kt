@@ -22,7 +22,7 @@ interface BlockRepository : CrudRepository<Block, Long> {
     @Query("select b from Block b where b.height = 0 and spaceId = ?1")
     fun findGenesisBlockBySpaceId(spaceId: String): Block
 
-    @Query("select b from Block b where b.spaceId = ?1 and b.height >= ?2 and b.height < ?3")
+    @Query("select b from Block b where b.spaceId = ?1 and b.height >= ?2 and b.height < ?3 order by height desc")
     fun getBlocksDelta(spaceId: String, startHeight: Long, endHeight: Long): List<Block>
 
     fun findBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Block?

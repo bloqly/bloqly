@@ -3,7 +3,7 @@ package org.bloqly.machine.service
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.VoteRepository
-import org.bloqly.machine.vo.Delta
+import org.bloqly.machine.vo.BlockRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
@@ -16,7 +16,7 @@ class DeltaService(
 ) {
 
     @Transactional(isolation = SERIALIZABLE, readOnly = true)
-    fun getDeltas(): List<Delta> {
+    fun getDeltas(): List<BlockRequest> {
         return spaceRepository.findAll()
             .filter { blockRepository.existsBySpaceId(it.id) }
             .map { space ->
@@ -24,10 +24,10 @@ class DeltaService(
 
                 val lastBlock = blockRepository.getLastBlock(space.id)
 
-                Delta(
+                BlockRequest(
                     spaceId = space.id,
-                    localHeight = lastBlock.height,
-                    remoteHeight = vote.height
+                    startHeight = lastBlock.height,
+                    endHeight = vote.height
                 )
             }
             .filter { it.isStale() }
