@@ -18,7 +18,6 @@ import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Component
@@ -75,7 +74,7 @@ class TransactionProcessor(
         return contractExecutorService.invokeContract(propertyContext, invocationContext, tx.value.decode16())
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun processTransaction(
         tx: Transaction,
         propertyContext: PropertyContext
@@ -109,8 +108,10 @@ class TransactionProcessor(
         }
     }
 
+    @Transactional
     fun isTransactionAcceptable(tx: Transaction): Boolean {
         // TODO add log warnings
+        // TODO use block timestamp?
         return tx.timestamp < TimeUtils.getCurrentTime() &&
             blockService.existsByHash(tx.referencedBlockHash) &&
             blockService.isActualTransaction(tx)

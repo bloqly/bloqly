@@ -19,7 +19,6 @@ import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.Genesis
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
@@ -35,7 +34,7 @@ class GenesisService(
     private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun exportFirst(spaceId: String): String {
 
         val firstBlock = blockRepository.findGenesisBlockBySpaceId(spaceId)
@@ -52,7 +51,7 @@ class GenesisService(
         return json.toByteArray().encode16()
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun importFirst(genesisString: String) {
 
         val now = Instant.now()

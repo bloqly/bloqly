@@ -25,14 +25,13 @@ import org.bloqly.machine.vo.VoteVO
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 import javax.annotation.PostConstruct
 import javax.persistence.EntityManager
 
 @Component
-@Transactional(isolation = SERIALIZABLE)
+@Transactional
 class TestService(
     private val propertyRepository: PropertyRepository,
     private val blockService: BlockService,

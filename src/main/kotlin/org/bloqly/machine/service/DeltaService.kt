@@ -5,7 +5,6 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.vo.BlockRequest
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -15,7 +14,7 @@ class DeltaService(
     private val blockRepository: BlockRepository
 ) {
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getDeltas(): List<BlockRequest> {
         return spaceRepository.findAll()
             .filter { blockRepository.existsBySpaceId(it.id) }

@@ -11,7 +11,6 @@ import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.TransactionRequest
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
@@ -22,7 +21,7 @@ class TransactionService(
 ) {
 
     // TODO add blockchain config option - if adding smart contracts allowed
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun createTransaction(
         transactionRequest: TransactionRequest,
         referencedBlockHash: String
@@ -58,7 +57,7 @@ class TransactionService(
         )
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun createTransaction(
         space: String,
         originId: String,
@@ -90,7 +89,7 @@ class TransactionService(
             transactionType = transactionType,
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
-            publicKey = origin.publicKey!!,
+            publicKey = origin.publicKey,
             nonce = nonce
         )
 
@@ -109,15 +108,7 @@ class TransactionService(
         )
     }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
-    fun existsByHash(hash: String): Boolean =
-        transactionRepository.existsByHash(hash)
-
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
-    fun existsByNonce(nonce: String): Boolean =
-        transactionRepository.existsByNonce(nonce)
-
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun verifyAndSaveIfNotExists(tx: Transaction): Transaction {
 
         transactionRepository.findByHash(tx.hash)?.let {

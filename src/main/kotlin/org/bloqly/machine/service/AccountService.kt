@@ -16,7 +16,6 @@ import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 
@@ -27,7 +26,7 @@ class AccountService(
     private val passphraseService: PassphraseService
 ) {
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getProducerBySpace(space: Space, round: Long): Account {
 
         val validators = getValidatorsForSpace(space)
@@ -37,12 +36,12 @@ class AccountService(
         return validators[validatorIndex.toInt()]
     }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getActiveProducerBySpace(space: Space, round: Long): Account? {
         return getProducerBySpace(space, round).takeIf { passphraseService.hasPassphrase(it.accountId) }
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun createAccount(passphrase: String): Account {
 
         return accountRepository.save(newAccount(passphrase))
@@ -63,7 +62,7 @@ class AccountService(
         return account
     }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getValidatorsForSpace(space: Space): List<Account> {
 
         val powerProperties = propertyRepository.findBySpaceAndKey(space.id, POWER_KEY)
@@ -74,7 +73,7 @@ class AccountService(
             .sortedBy { it.accountId }
     }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getAccountPower(space: String, accountId: String): BigInteger {
 
         val propertyKey = PropertyId(
@@ -90,7 +89,7 @@ class AccountService(
             .orElseThrow()
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun importAccount(privateKeyBytes: ByteArray?, passphrase: String): Account {
 
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
@@ -112,7 +111,7 @@ class AccountService(
         return accountRepository.save(account)
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun ensureExistsAndGetByPublicKey(publicKey: String): Account {
         val publicKeyBytes = publicKey.decode16()
 

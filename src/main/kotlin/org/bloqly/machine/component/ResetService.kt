@@ -12,7 +12,6 @@ import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.TimeUtils
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -29,7 +28,7 @@ class ResetService(
     private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun reset() {
         finalizedTransactionRepository.deleteAll()
         contractRepository.deleteAll()

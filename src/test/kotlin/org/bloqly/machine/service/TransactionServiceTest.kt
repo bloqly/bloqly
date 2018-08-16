@@ -86,8 +86,6 @@ class TransactionServiceTest : BaseTest() {
     @Test
     fun testGetPendingTransactions() {
 
-        //assertEquals(1, transactionRepository.getPendingTransactionsBySpace(DEFAULT_SPACE).size)
-
         blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1).block
         val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2).block
         blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3).block

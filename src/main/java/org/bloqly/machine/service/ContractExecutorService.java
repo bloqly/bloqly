@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.bloqly.machine.model.InvocationResultType.SUCCESS;
-import static org.springframework.transaction.annotation.Isolation.SERIALIZABLE;
 
 @Service
 public class ContractExecutorService {
@@ -108,7 +107,7 @@ public class ContractExecutorService {
         );
     }
 
-    @Transactional(isolation = SERIALIZABLE, propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public InvocationResult invokeContract(PropertyContext propertyContext, InvocationContext invocationContext, byte[] arg) {
         var properties = invokeFunction(propertyContext, invocationContext, arg);
 

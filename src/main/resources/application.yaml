@@ -24,7 +24,7 @@ spring:
       maximum-pool-size: 10
       pool-name: bloqly-db-pool
       auto-commit: false
-      transaction-isolation: TRANSACTION_SERIALIZABLE
+      transaction-isolation: TRANSACTION_READ_COMMITTED
     url: jdbc:postgresql:${database.name}
     username: ${database.username}
     password: ${database.password}

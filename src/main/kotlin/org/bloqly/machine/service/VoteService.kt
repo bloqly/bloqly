@@ -9,7 +9,6 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
@@ -19,7 +18,7 @@ class VoteService(
     private val blockRepository: BlockRepository
 ) {
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun getVote(space: Space, validator: Account, passphrase: String): Vote? {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
@@ -56,7 +55,7 @@ class VoteService(
         )
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun validateAndSaveIfNotExists(vote: Vote): Vote {
 
         voteRepository.findBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)?.let {

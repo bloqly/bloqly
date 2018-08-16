@@ -16,7 +16,6 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
 import java.time.Instant
@@ -34,7 +33,7 @@ class BlockchainService(
     private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun createBlockchain(spaceId: String, baseDir: String, passphrase: String) {
 
         blockService.ensureSpaceEmpty(spaceId)

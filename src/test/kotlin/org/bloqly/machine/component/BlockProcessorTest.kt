@@ -109,6 +109,23 @@ class BlockProcessorTest : BaseTest() {
     }
 
     @Test
+    fun testBlockWithManyTransactions() {
+        populateBlocks()
+
+        val txCount = 100
+
+        repeat(txCount) {
+            testService.createTransaction()
+        }
+
+        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(4), passphrase(4), 9)
+
+        assertEquals(txCount, blockData.transactions.size)
+
+        blockProcessor.processReceivedBlock(blockData)
+    }
+
+    @Test
     fun testRejectsBlockWithTheSameHash() {
         populateBlocks()
         blockProcessor.processReceivedBlock(blocks[0])

@@ -12,6 +12,9 @@ import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Processes the most important events
@@ -35,6 +38,8 @@ class EventProcessorService(
 
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
+    private val executor = Executors.newSingleThreadExecutor()
+
     /**
      * Collecting transactions
      */
@@ -43,8 +48,9 @@ class EventProcessorService(
         if (!transactionProcessor.isTransactionAcceptable(tx)) {
             return
         }
-
-        transactionService.verifyAndSaveIfNotExists(tx)
+        executor.submit {
+            transactionService.verifyAndSaveIfNotExists(tx)
+        }.get(1000, TimeUnit.MILLISECONDS)
     }
 
     /**
@@ -58,11 +64,13 @@ class EventProcessorService(
                 accountService.getValidatorsForSpace(space)
                     .filter { passphraseService.hasPassphrase(it.accountId) }
                     .mapNotNull { validator ->
-                        voteService.getVote(
-                            space,
-                            validator,
-                            passphraseService.getPassphrase(validator.accountId)
-                        )
+                        executor.submit(Callable<Vote> {
+                            voteService.getVote(
+                                space,
+                                validator,
+                                passphraseService.getPassphrase(validator.accountId)
+                            )
+                        }).get(1000, TimeUnit.MILLISECONDS)
                     }
             }
 
@@ -74,7 +82,9 @@ class EventProcessorService(
      */
     fun onVote(vote: Vote) {
         spaceService.findById(vote.spaceId)?.let {
-            voteService.validateAndSaveIfNotExists(vote)
+            executor.submit {
+                voteService.validateAndSaveIfNotExists(vote)
+            }.get(1000, TimeUnit.MILLISECONDS)
         }
     }
 
@@ -91,7 +101,12 @@ class EventProcessorService(
                 accountService.getActiveProducerBySpace(space, round)
                     ?.let { producer ->
                         val passphrase = passphraseService.getPassphrase(producer.accountId)
-                        blockProcessor.createNextBlock(space.id, producer, passphrase, round)
+
+                        // TODO exception on single block producer will stop other spaces
+                        // add try/catch
+                        executor.submit(Callable<BlockData> {
+                            blockProcessor.createNextBlock(space.id, producer, passphrase, round)
+                        }).get(1000, TimeUnit.MILLISECONDS)
                     }
             }
     }
@@ -116,7 +131,9 @@ class EventProcessorService(
             }
             .forEach { blockData ->
                 try {
-                    blockProcessor.processReceivedBlock(blockData)
+                    executor.submit {
+                        blockProcessor.processReceivedBlock(blockData)
+                    }.get(1000, TimeUnit.MILLISECONDS)
                 } catch (e: Exception) {
                     val errorMessage =
                         "Could not process block ${blockData.block.hash} of height ${blockData.block.height}"

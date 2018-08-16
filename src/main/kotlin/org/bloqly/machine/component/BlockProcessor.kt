@@ -61,7 +61,7 @@ class BlockProcessor(
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun processReceivedBlock(blockData: BlockData) {
 
         val receivedBlock = blockData.block.toModel()
@@ -119,7 +119,7 @@ class BlockProcessor(
         }
     }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getLastPropertyValue(
         space: String,
         self: String,
@@ -139,7 +139,7 @@ class BlockProcessor(
     /**
      * Returns blocks range (afterBlock, toBlock]
      */
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     internal fun getBlocksRange(afterBlock: Block, toBlock: Block): List<Block> {
 
         var currentBlock = toBlock
@@ -252,12 +252,9 @@ class BlockProcessor(
 
         val newLIB = blockService.getLIBForSpace(currentLIB.spaceId)
 
-        if (newLIB == currentLIB) {
+        if (newLIB == currentLIB || newLIB.height <= currentLIB.height) {
             return
         }
-
-        // TODO bug
-        //require(newLIB.height > currentLIB.height)
 
         log.info(
             """
@@ -341,12 +338,12 @@ class BlockProcessor(
         return voteRepository.findByBlockHash(blockHash)
     }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getPendingTransactions(depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH): List<Transaction> =
         spaceRepository.findAll()
             .flatMap { getPendingTransactionsBySpace(it.id, depth) }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getPendingTransactionsBySpace(
         spaceId: String,
         depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH

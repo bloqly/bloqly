@@ -5,7 +5,6 @@ import org.bloqly.machine.model.NodeId
 import org.bloqly.machine.repository.NodeRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import javax.annotation.PostConstruct
@@ -18,7 +17,7 @@ class NodeService(
 ) {
 
     @PostConstruct
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun init() {
         parseAndAddNodes(nodes)
     }
@@ -46,7 +45,7 @@ class NodeService(
             }
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun addNode(node: Node) {
 
         if (node.id.port == serverPort) {
@@ -65,13 +64,13 @@ class NodeService(
         )
     }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getAllNodes(): List<Node> {
 
         return nodeRepository.findAll().toList()
     }
 
-    @Transactional(isolation = SERIALIZABLE, readOnly = true)
+    @Transactional(readOnly = true)
     fun getNodesToQuery(): List<Node> {
 
         return nodeRepository.findAll().filter { it.id.port != serverPort }
