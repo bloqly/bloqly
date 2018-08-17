@@ -211,7 +211,7 @@ class BlockProcessor(
 
         evaluateBlocks(currentLIB, lastBlock, propertyContext)
 
-        val txResults = getTransactionResultsForNextBlock(spaceId, propertyContext)
+        val txResults = getTransactionResultsForNextBlock(lastBlock, propertyContext)
 
         val transactions = txResults.map { it.transaction }
 
@@ -312,10 +312,10 @@ class BlockProcessor(
     }
 
     private fun getTransactionResultsForNextBlock(
-        spaceId: String,
+        lastBlock: Block,
         propertyContext: PropertyContext
     ): List<TransactionResult> {
-        val transactions = getPendingTransactionsBySpace(spaceId)
+        val transactions = getPendingTransactionsByLastBlock(lastBlock)
 
         val hashes = transactions.map { it.hash }
 
@@ -346,19 +346,16 @@ class BlockProcessor(
     @Transactional(readOnly = true)
     fun getPendingTransactions(depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH): List<Transaction> =
         spaceRepository.findAll()
-            .flatMap { getPendingTransactionsBySpace(it.id, depth) }
+            .flatMap {
+                val lastBlock = blockRepository.getLastBlock(it.id)
+                getPendingTransactionsByLastBlock(lastBlock, depth)
+            }
 
     @Transactional(readOnly = true)
-    fun getPendingTransactionsBySpace(
-        spaceId: String,
+    fun getPendingTransactionsByLastBlock(
+        lastBlock: Block,
         depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH
     ): List<Transaction> {
-
-        if (!blockRepository.existsBySpaceId(spaceId)) {
-            return listOf()
-        }
-
-        val lastBlock = blockService.getLastBlockForSpace(spaceId)
 
         val libHash = if (lastBlock.height > 0) {
             lastBlock.libHash
@@ -379,7 +376,7 @@ class BlockProcessor(
             listOf()
         }
 
-        val pendingTransactions = transactionRepository.getPendingTransactionsBySpace(spaceId)
+        val pendingTransactions = transactionRepository.getPendingTransactionsBySpace(lastBlock.spaceId)
 
         val minTimestamp = lastBlock.timestamp - MAX_TRANSACTION_AGE
 
