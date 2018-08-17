@@ -10,6 +10,8 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.TransactionRequest
+import org.hibernate.exception.ConstraintViolationException
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -111,14 +113,20 @@ class TransactionService(
     @Transactional
     fun verifyAndSaveIfNotExists(tx: Transaction): Transaction {
 
-        transactionRepository.findByHash(tx.hash)?.let {
-            return it
-        }
-
         require(CryptoUtils.verifyTransaction(tx)) {
             "Could not verify transaction $tx"
         }
 
-        return transactionRepository.save(tx)
+        return try {
+            transactionRepository.save(tx)
+        } catch (e: Exception) {
+            when (e) {
+                is DataIntegrityViolationException,
+                is ConstraintViolationException -> {
+                    transactionRepository.getByHash(tx.hash)
+                }
+                else -> throw e
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.AccountService
@@ -12,9 +14,6 @@ import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.concurrent.Callable
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 /**
  * Processes the most important events
@@ -38,7 +37,7 @@ class EventProcessorService(
 
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
-    private val executor = Executors.newSingleThreadExecutor()
+    private val timeout = 1000L
 
     /**
      * Collecting transactions
@@ -48,6 +47,7 @@ class EventProcessorService(
         if (!transactionProcessor.isTransactionAcceptable(tx)) {
             return
         }
+
         transactionService.verifyAndSaveIfNotExists(tx)
     }
 
@@ -94,15 +94,15 @@ class EventProcessorService(
             .mapNotNull { space ->
                 accountService.getActiveProducerBySpace(space, round)
                     ?.let { producer ->
-                        val passphrase = passphraseService.getPassphrase(producer.accountId)
-
-                        // TODO exception on single block producer will stop other spaces
-                        // add try/catch
-                        executor.submit(Callable<BlockData> {
-                            blockProcessor.createNextBlock(space.id, producer, passphrase, round)
-                        }).get(1000, TimeUnit.MILLISECONDS)
+                        createNextBlock(space, producer, round)
                     }
             }
+    }
+
+    private fun createNextBlock(space: Space, producer: Account, round: Long): BlockData {
+        val passphrase = passphraseService.getPassphrase(producer.accountId)
+
+        return blockProcessor.createNextBlock(space.id, producer, passphrase, round)
     }
 
     /**
@@ -126,16 +126,7 @@ class EventProcessorService(
                 isActiveValidator && isAcceptable
             }
             .forEach { blockData ->
-                try {
-                    executor.submit {
-                        blockProcessor.processReceivedBlock(blockData)
-                    }.get(1000, TimeUnit.MILLISECONDS)
-                } catch (e: Exception) {
-                    val errorMessage =
-                        "Could not process block ${blockData.block.hash} of height ${blockData.block.height}"
-                    log.warn(errorMessage)
-                    log.error(errorMessage, e)
-                }
+                blockProcessor.processReceivedBlock(blockData)
             }
     }
 }
