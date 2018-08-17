@@ -48,9 +48,7 @@ class EventProcessorService(
         if (!transactionProcessor.isTransactionAcceptable(tx)) {
             return
         }
-        executor.submit {
-            transactionService.verifyAndSaveIfNotExists(tx)
-        }.get(1000, TimeUnit.MILLISECONDS)
+        transactionService.verifyAndSaveIfNotExists(tx)
     }
 
     /**
@@ -64,13 +62,11 @@ class EventProcessorService(
                 accountService.getValidatorsForSpace(space)
                     .filter { passphraseService.hasPassphrase(it.accountId) }
                     .mapNotNull { validator ->
-                        executor.submit(Callable<Vote> {
-                            voteService.getVote(
-                                space,
-                                validator,
-                                passphraseService.getPassphrase(validator.accountId)
-                            )
-                        }).get(1000, TimeUnit.MILLISECONDS)
+                        voteService.getVote(
+                            space,
+                            validator,
+                            passphraseService.getPassphrase(validator.accountId)
+                        )
                     }
             }
 
@@ -82,9 +78,7 @@ class EventProcessorService(
      */
     fun onVote(vote: Vote) {
         spaceService.findById(vote.spaceId)?.let {
-            executor.submit {
-                voteService.validateAndSaveIfNotExists(vote)
-            }.get(1000, TimeUnit.MILLISECONDS)
+            voteService.validateAndSaveIfNotExists(vote)
         }
     }
 
@@ -126,8 +120,10 @@ class EventProcessorService(
             .filter {
                 val space = spaceService.findById(it.block.spaceId)!!
                 val activeValidator = accountService.getProducerBySpace(space, round)
+                val isActiveValidator = activeValidator.accountId == it.block.producerId
+                val isAcceptable = blockService.isAcceptable(it.block.toModel())
 
-                activeValidator.accountId == it.block.producerId
+                isActiveValidator && isAcceptable
             }
             .forEach { blockData ->
                 try {

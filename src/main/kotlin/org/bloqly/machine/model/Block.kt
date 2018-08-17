@@ -111,7 +111,7 @@ data class Block(
     val hash: String,
 
     @Column(nullable = false)
-    val libHash: String
+    val libHash: String = ""
 ) {
 
     fun toVO(): BlockVO {

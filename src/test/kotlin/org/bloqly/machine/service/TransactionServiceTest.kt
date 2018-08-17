@@ -42,7 +42,7 @@ class TransactionServiceTest : BaseTest() {
 
         user = accountService.createAccount(passphrase)
 
-        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
+        val lib = getLIB()
 
         transaction = createTransaction(lib.hash)
     }
@@ -84,32 +84,37 @@ class TransactionServiceTest : BaseTest() {
     }
 
     @Test
-    fun testGetPendingTransactions() {
+    fun testIsActualTransactions() {
 
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1).block
-        val block2 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2).block
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3).block
-        val block4 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4).block
-        val block5 = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5).block
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6).block
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7).block
+        val blocks = listOf(
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7).block
+        )
 
-        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
-        assertEquals(block4.hash, lib.hash)
+        assertEquals(blocks[3].hash, blocks[6].libHash)
 
-        val tx4 = createTransaction(block4.hash)
-        assertTrue(blockService.isActualTransaction(tx4, 2))
+        val tx0 = createTransaction(blocks[3].hash)
+        assertTrue(blockService.isActualTransaction(tx0, 0))
 
-        val tx2 = createTransaction(block2.hash)
+        val tx1 = createTransaction(blocks[2].hash)
+        assertTrue(blockService.isActualTransaction(tx1, 1))
+        assertFalse(blockService.isActualTransaction(tx1, 0))
 
+        val tx2 = createTransaction(blocks[1].hash)
         assertTrue(blockService.isActualTransaction(tx2, 2))
-        assertTrue(blockService.isActualTransaction(tx2, 3))
-
         assertFalse(blockService.isActualTransaction(tx2, 1))
+        assertFalse(blockService.isActualTransaction(tx2, 0))
 
-        // referencing non-lib block fails
-        val tx5 = createTransaction(block5.hash)
-        assertFalse(blockService.isActualTransaction(tx5, 1))
+        val tx3 = createTransaction(blocks[0].hash)
+        assertTrue(blockService.isActualTransaction(tx3, 3))
+        assertFalse(blockService.isActualTransaction(tx3, 2))
+        assertFalse(blockService.isActualTransaction(tx3, 1))
+        assertFalse(blockService.isActualTransaction(tx3, 0))
     }
 
     @Test

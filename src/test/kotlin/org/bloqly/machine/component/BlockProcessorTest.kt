@@ -15,6 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,17 +45,11 @@ class BlockProcessorTest : BaseTest() {
 
     private val txs = arrayOfNulls<Transaction>(8)
 
-    /**
-     * In this test we send 1 amount to a user in each blocks and check the actual property values
-     * are in tact with block finality logic
-     */
     @Before
     override fun setup() {
         super.setup()
 
-        firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
-        assertEquals(firstBlock.hash, getLIB().hash)
-        assertEquals(0, firstBlock.height)
+        firstBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
     }
 
     @Test
@@ -121,15 +116,18 @@ class BlockProcessorTest : BaseTest() {
         val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(4), passphrase(4), 9)
 
         assertEquals(txCount, blockData.transactions.size)
-
-        blockProcessor.processReceivedBlock(blockData)
     }
 
     @Test
     fun testRejectsBlockWithTheSameHash() {
         populateBlocks()
         blockProcessor.processReceivedBlock(blocks[0])
-        blockProcessor.processReceivedBlock(blocks[0])
+        try {
+            blockProcessor.processReceivedBlock(blocks[0])
+            fail()
+        } catch (e: Exception) {
+
+        }
     }
 
     @Test
@@ -188,14 +186,10 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValue("2")
     }
 
-    private fun getLIB(): Block {
-        return blockService.getLIBForSpace(DEFAULT_SPACE)
-    }
-
     private fun populateBlocks(cleanup: Boolean = true) {
         txs[0] = testService.createTransaction()
         blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1))
-        assertEquals(firstBlock.hash, getLIB().hash)
+        assertEquals(firstBlock.hash,  blocks[0].block.libHash)
         assertEquals(firstBlock.hash, txs[0]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("1")
@@ -207,7 +201,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[1]!!.hash, blocks[1].transactions.first().hash)
         assertEquals(1, blocks[1].transactions.size)
 
-        assertEquals(firstBlock.hash, getLIB().hash)
+        assertEquals(firstBlock.hash, blocks[1].block.libHash)
         assertEquals(firstBlock.hash, txs[1]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("2")
@@ -219,7 +213,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[2]!!.hash, blocks[2].transactions.first().hash)
         assertEquals(1, blocks[2].transactions.size)
 
-        assertEquals(firstBlock.hash, getLIB().hash)
+        assertEquals(firstBlock.hash, blocks[2].block.libHash)
         assertEquals(firstBlock.hash, txs[2]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("3")
@@ -233,7 +227,7 @@ class BlockProcessorTest : BaseTest() {
 
         // lib changed, for the first time
         // all transactions from block[0] must be applied
-        assertEquals(blocks[0].block.hash, getLIB().hash)
+        assertEquals(blocks[0].block.hash, blocks[3].block.libHash)
         assertEquals(firstBlock.hash, txs[3]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("4")
@@ -245,7 +239,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[4]!!.hash, blocks[4].transactions.first().hash)
         assertEquals(1, blocks[4].transactions.size)
 
-        assertEquals(blocks[1].block.hash, getLIB().hash)
+        assertEquals(blocks[1].block.hash, blocks[4].block.libHash)
         assertEquals(blocks[0].block.hash, txs[4]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("5")
@@ -257,7 +251,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[5]!!.hash, blocks[5].transactions.first().hash)
         assertEquals(1, blocks[5].transactions.size)
 
-        assertEquals(blocks[2].block.hash, getLIB().hash)
+        assertEquals(blocks[2].block.hash, blocks[5].block.libHash)
         assertEquals(blocks[1].block.hash, txs[5]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("6")
@@ -269,7 +263,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[6]!!.hash, blocks[6].transactions.first().hash)
         assertEquals(1, blocks[6].transactions.size)
 
-        assertEquals(blocks[3].block.hash, getLIB().hash)
+        assertEquals(blocks[3].block.hash, blocks[6].block.libHash)
         assertEquals(blocks[2].block.hash, txs[6]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("7")
@@ -281,7 +275,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[7]!!.hash, blocks[7].transactions.first().hash)
         assertEquals(1, blocks[7].transactions.size)
 
-        assertEquals(blocks[4].block.hash, getLIB().hash)
+        assertEquals(blocks[4].block.hash, blocks[7].block.libHash)
         assertEquals(blocks[3].block.hash, txs[7]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("8")
@@ -292,9 +286,6 @@ class BlockProcessorTest : BaseTest() {
             testService.cleanup()
             testService.importAccounts()
             genesisService.importFirst(genesis)
-
-            firstBlock = blockService.getLIBForSpace(DEFAULT_SPACE)
-            assertEquals(0, firstBlock.height)
         }
     }
 }

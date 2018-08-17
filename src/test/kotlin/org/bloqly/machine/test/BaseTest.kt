@@ -7,6 +7,7 @@ import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.AccountRepository
@@ -88,5 +89,10 @@ open class BaseTest {
 
     protected fun assertNoPropertyValue() {
         Assert.assertNull(propertyService.findById(propertyId))
+    }
+
+    fun getLIB(): Block {
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        return blockService.getByHash(lastBlock.libHash)
     }
 }

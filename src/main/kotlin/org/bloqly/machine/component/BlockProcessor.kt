@@ -66,11 +66,11 @@ class BlockProcessor(
 
         val receivedBlock = blockData.block.toModel()
 
-        if (!blockService.isAcceptable(receivedBlock)) {
-            return
-        }
-
         requireValid(receivedBlock)
+
+        val lastBlock = blockService.getLastBlockForSpace(receivedBlock.spaceId)
+
+        val currentLIB = blockService.calculateLIBForBlock(lastBlock)
 
         val votes = blockData.votes.map { voteVO ->
             val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
@@ -84,8 +84,6 @@ class BlockProcessor(
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        val currentLIB = blockService.getLIBForSpace(receivedBlock.spaceId)
-
         evaluateBlocks(currentLIB, receivedBlock, propertyContext)
 
         val block = receivedBlock.copy(
@@ -95,9 +93,9 @@ class BlockProcessor(
 
         evaluateBlock(block, propertyContext)
 
-        saveBlock(block)
+        val savedNewBlock = saveBlock(block)
 
-        moveLIBIfNeeded(currentLIB)
+        moveLIBIfNeeded(currentLIB, savedNewBlock)
     }
 
     private fun saveBlock(block: Block): Block {
@@ -121,19 +119,19 @@ class BlockProcessor(
 
     @Transactional(readOnly = true)
     fun getLastPropertyValue(
-        space: String,
+        spaceId: String,
         self: String,
         target: String,
         key: String
     ): ByteArray? {
-        val currentLIB = blockService.getLIBForSpace(space)
-        val lastBlock = blockService.getLastBlockForSpace(space)
+        val lastBlock = blockService.getLastBlockForSpace(spaceId)
+        val lib = blockService.getByHash(lastBlock.libHash)
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        evaluateBlocks(currentLIB, lastBlock, propertyContext)
+        evaluateBlocks(lib, lastBlock, propertyContext)
 
-        return propertyContext.getPropertyValue(space, self, target, key)
+        return propertyContext.getPropertyValue(spaceId, self, target, key)
     }
 
     /**
@@ -199,19 +197,13 @@ class BlockProcessor(
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
         val newHeight = lastBlock.height + 1
 
-        val currentLIB = blockService.getLIBForSpace(spaceId)
+        val currentLIB = blockService.getByHash(lastBlock.libHash)
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
         evaluateBlocks(currentLIB, lastBlock, propertyContext)
 
-        propertyContext.properties.forEach { log.info("Evaluated property $it") }
-
         val txResults = getTransactionResultsForNextBlock(spaceId, propertyContext)
-
-        txResults
-            .map { it.invocationResult }
-            .forEach { log.info("Calculated transaction result $it") }
 
         val transactions = txResults.map { it.transaction }
 
@@ -241,16 +233,21 @@ class BlockProcessor(
 
         val blockData = BlockData(saveBlock(newBlock))
 
-        moveLIBIfNeeded(currentLIB)
+        moveLIBIfNeeded(currentLIB, newBlock)
 
         return blockData
     }
 
     // TODO validate block
 
-    private fun moveLIBIfNeeded(currentLIB: Block) {
+    /**
+     * Apply transaction outputs if LIB moved forward
+     * Iterate and apply all transactions from the block next to the previous LIB including NEW_LIB
+     * In some situations LIB.height + 1 = NEW_LIB.height
+     */
+    private fun moveLIBIfNeeded(currentLIB: Block, lastBlock: Block) {
 
-        val newLIB = blockService.getLIBForSpace(currentLIB.spaceId)
+        val newLIB = blockService.getByHash(lastBlock.libHash)
 
         if (newLIB == currentLIB || newLIB.height <= currentLIB.height) {
             return
@@ -261,10 +258,6 @@ class BlockProcessor(
                 Moving LIB from height ${currentLIB.height} to ${newLIB.height}.
                 currentLIB.hash = ${currentLIB.hash}, newLIB.hash = ${newLIB.hash}.""".trimIndent()
         )
-
-        // Apply transaction outputs if LIB moved forward
-        // Iterate and apply all transactions from the block next to the previous LIB including NEW_LIB
-        // In some situations LIB.height + 1 = NEW_LIB.height
 
         getBlocksRange(currentLIB, newLIB).forEach { block ->
             block.transactions.forEach { tx ->
@@ -362,7 +355,7 @@ class BlockProcessor(
             lastBlock.hash
         }
 
-        val lib = blockService.findByHash(libHash)!!
+        val lib = blockService.getByHash(libHash)
         val minHeight = lib.height - depth
 
         // Not finalized blocks, current branch
@@ -379,7 +372,7 @@ class BlockProcessor(
 
         return pendingTransactions.subtract(txsAfterLIB).filter { tx ->
             // TODO try to optimize it to avoid repeated calls to dbs
-            val referencedBlock = blockService.findByHash(tx.referencedBlockHash)!!
+            val referencedBlock = blockService.getByHash(tx.referencedBlockHash)
             tx.timestamp > minTimestamp && referencedBlock.height > minHeight
         }
     }

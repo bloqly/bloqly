@@ -2,7 +2,6 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.model.Block
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
@@ -148,10 +147,6 @@ class BlockServiceTest : BaseTest() {
         assertFalse(isHyperFinalizer(block))
     }
 
-    private fun getLIB(): Block = blockService.getLIBForSpace(DEFAULT_SPACE)
-
     private fun isHyperFinalizer(blockData: BlockData): Boolean =
-        blockService.isHyperFinalizer(
-            blockService.loadBlockByHash(blockData.block.hash)
-        )
+        blockService.isHyperFinalizer(blockService.loadBlockByHash(blockData.block.hash), 3)
 }

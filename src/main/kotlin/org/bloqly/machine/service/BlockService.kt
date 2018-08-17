@@ -72,9 +72,7 @@ class BlockService(
         )
         val blockHash = CryptoUtils.hash(signature).encode16()
 
-        val libHash = if (height > 0) getLIBForSpace(spaceId, producerId).hash else blockHash
-
-        return Block(
+        val newBlock = Block(
             spaceId = spaceId,
             height = height,
             weight = weight,
@@ -88,9 +86,16 @@ class BlockService(
             signature = signature.encode16(),
             transactions = transactions,
             votes = votes,
-            hash = blockHash,
-            libHash = libHash
+            hash = blockHash
         )
+
+        val libHash = if (height > 0) {
+            calculateLIBForBlock(newBlock).hash
+        } else {
+            ""
+        }
+
+        return newBlock.copy(libHash = libHash)
     }
 
     @Transactional(readOnly = true)
@@ -150,17 +155,17 @@ class BlockService(
      *      new block introduces new validator into the chain of confirmations.
      */
     @Transactional(readOnly = true)
-    fun getLIBForSpace(spaceId: String, newBlockValidatorId: String? = null): Block {
+    fun calculateLIBForBlock(lastBlock: Block, newBlockValidatorId: String? = null): Block {
 
         // TODO calculate quorum taking into account the current block producer
         // also, being a block producer, don't create a vote as it is unnecessary -
         // you already vote with your block
         // introduce method "isQuorum(block: Block): Boolean"
-        val quorum = propertyRepository.getQuorumBySpaceId(spaceId)
+        val quorum = propertyRepository.getQuorumBySpaceId(lastBlock.spaceId)
 
-        var block = blockRepository.getLastBlock(spaceId)
+        var block = lastBlock
 
-        if (isHyperFinalizer(block)) {
+        if (isHyperFinalizer(block, quorum)) {
             return blockRepository.findByHash(block.parentHash)!!
         }
 
@@ -179,13 +184,11 @@ class BlockService(
     }
 
     @Transactional(readOnly = true)
-    fun isHyperFinalizer(currBlock: Block): Boolean {
+    fun isHyperFinalizer(currBlock: Block, quorum: Int): Boolean {
 
         if (currBlock.height < 2) {
             return false
         }
-
-        val quorum = propertyRepository.getQuorumBySpaceId(currBlock.spaceId)
 
         // TODO bug, returns not unique results
         val prevBlock = blockRepository.findByHash(currBlock.parentHash)!!
@@ -229,6 +232,9 @@ class BlockService(
         return block
     }
 
+    /**
+     * Asserts that referencedBlock is LIB and LIB(lastBlock).height - referencedBlock.height >= depth
+     */
     @Transactional(readOnly = true)
     fun isActualTransaction(tx: Transaction, depth: Int = MAX_REFERENCED_BLOCK_DEPTH): Boolean {
 
@@ -239,14 +245,28 @@ class BlockService(
                     return false
                 }
 
-                val lib = getLIBForSpace(tx.spaceId)
+                val lastBlock = blockRepository.getLastBlock(tx.spaceId)
 
-                lib.height - referencedBlock.height <= depth
+                val lib = blockRepository.getByHash(lastBlock.libHash)
+
+                val actualDepth = lib.height - referencedBlock.height
+
+                actualDepth in 0..depth
             } ?: false
     }
 
     @Transactional(readOnly = true)
     fun findByHash(hash: String): Block? = blockRepository.findByHash(hash)
 
+    @Transactional(readOnly = true)
+    fun getByHash(hash: String): Block {
+        return if (hash.isNotBlank()) {
+            blockRepository.getByHash(hash)
+        } else {
+            blockRepository.getFirst()
+        }
+    }
+
+    @Transactional(readOnly = true)
     fun existsBySpace(space: Space): Boolean = blockRepository.existsBySpaceId(space.id)
 }

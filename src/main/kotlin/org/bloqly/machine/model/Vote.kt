@@ -53,7 +53,7 @@ data class Vote(
     fun toVO(): VoteVO {
 
         return VoteVO(
-            publicKey = validator.publicKey!!,
+            publicKey = validator.publicKey,
             blockHash = blockHash,
             height = height,
             spaceId = spaceId,

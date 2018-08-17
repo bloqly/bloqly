@@ -91,7 +91,9 @@ class TestService(
 
     fun createTransaction(): Transaction {
 
-        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+
+        val lib = blockService.getByHash(lastBlock.libHash)
 
         val libHash = lib.hash
 
@@ -112,7 +114,9 @@ class TestService(
 
     fun createInvalidTransaction(): Transaction {
 
-        val lib = blockService.getLIBForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+
+        val lib = blockService.getByHash(lastBlock.libHash)
 
         val root = accountRepository.findByAccountId(getRoot().accountId)!!
         val user = accountRepository.findByAccountId(getUser().accountId)!!

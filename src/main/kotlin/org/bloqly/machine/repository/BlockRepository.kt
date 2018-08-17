@@ -22,7 +22,16 @@ interface BlockRepository : CrudRepository<Block, Long> {
     @Query("select b from Block b where b.height = 0 and spaceId = ?1")
     fun findGenesisBlockBySpaceId(spaceId: String): Block
 
-    @Query("select b from Block b where b.spaceId = ?1 and b.height >= ?2 and b.height < ?3 order by height desc")
+    @Query(
+        """
+        select b from Block b
+        where
+        b.spaceId = ?1 and
+        b.height >= ?2 and
+        b.height < ?3
+        order by height desc
+        """
+    )
     fun getBlocksDelta(spaceId: String, startHeight: Long, endHeight: Long): List<Block>
 
     fun findBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Block?
@@ -30,6 +39,8 @@ interface BlockRepository : CrudRepository<Block, Long> {
     fun existsByHash(referencedBlockHash: String): Boolean
 
     fun findByHash(hash: String): Block?
+
+    fun getByHash(hash: String): Block
 
     fun existsByLibHash(hash: String): Boolean
 
@@ -40,4 +51,7 @@ interface BlockRepository : CrudRepository<Block, Long> {
     fun existsBySpaceIdAndProducerIdAndHeight(spaceId: String, producerId: String, height: Long): Boolean
 
     fun existsBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Boolean
+
+    @Query("from Block where height = 0")
+    fun getFirst(): Block
 }
