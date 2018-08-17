@@ -15,6 +15,10 @@ import javax.persistence.UniqueConstraint
         UniqueConstraint(
             columnNames = ["transaction_id", "block_id"],
             name = "fin_tx_uq_tx_id_block_id"
+        ),
+        UniqueConstraint(
+            columnNames = ["transaction_id"],
+            name = "fin_tx_uq_tx_id"
         )
     ]
 )
