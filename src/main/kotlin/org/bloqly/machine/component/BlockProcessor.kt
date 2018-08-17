@@ -75,11 +75,19 @@ class BlockProcessor(
         val votes = blockData.votes.map { voteVO ->
             val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
             val vote = voteVO.toModel(validator)
-            voteService.verifyAndSaveIfNotExists(vote)
+            try {
+                voteService.verifyAndSave(vote)
+            } catch (e: Exception) {
+                voteService.findVote(vote) ?: throw e
+            }
         }
 
         val transactions = blockData.transactions.map {
-            transactionService.verifyAndSaveIfNotExists(it.toModel())
+            try {
+                transactionService.verifyAndSave(it.toModel())
+            } catch (e: Exception) {
+                transactionService.findByHash(it.hash) ?: throw e
+            }
         }
 
         val propertyContext = PropertyContext(propertyService, contractService)

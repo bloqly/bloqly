@@ -13,6 +13,4 @@ interface VoteRepository : CrudRepository<Vote, Long> {
     fun findLastForSpace(spaceId: String): Vote
 
     fun findBySpaceIdAndValidatorAndHeight(spaceId: String, validator: Account, height: Long): Vote?
-
-    fun getBySpaceIdAndValidatorAndHeight(spaceId: String, validator: Account, height: Long): Vote
 }

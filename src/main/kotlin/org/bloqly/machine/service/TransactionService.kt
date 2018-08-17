@@ -10,18 +10,15 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.TransactionRequest
-import org.hibernate.exception.ConstraintViolationException
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import javax.persistence.EntityManager
 
 @Service
 class TransactionService(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository,
-    private val entityManager: EntityManager
+    private val transactionRepository: TransactionRepository
 ) {
 
     // TODO add blockchain config option - if adding smart contracts allowed
@@ -112,25 +109,16 @@ class TransactionService(
         )
     }
 
-    @Transactional
-    fun verifyAndSaveIfNotExists(tx: Transaction): Transaction {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun verifyAndSave(tx: Transaction): Transaction {
 
         require(CryptoUtils.verifyTransaction(tx)) {
             "Could not verify transaction $tx"
         }
 
-        return try {
-            val savedTx = transactionRepository.save(tx)
-            entityManager.flush()
-            savedTx
-        } catch (e: Exception) {
-            when (e.cause) {
-                is DataIntegrityViolationException,
-                is ConstraintViolationException -> {
-                    transactionRepository.getByHash(tx.hash)
-                }
-                else -> throw e
-            }
-        }
+        return transactionRepository.save(tx)
     }
+
+    fun findByHash(hash: String): Transaction? =
+        transactionRepository.findByHash(hash)
 }

@@ -53,7 +53,13 @@ class EventProcessorService(
             return
         }
 
-        transactionService.verifyAndSaveIfNotExists(tx)
+        try {
+            transactionService.verifyAndSave(tx)
+        } catch (e: Exception) {
+            transactionService.findByHash(tx.hash)?.let {
+                log.warn("Transaction already exists ${tx.hash}")
+            }
+        }
     }
 
     /**
@@ -67,7 +73,7 @@ class EventProcessorService(
                 accountService.getValidatorsForSpace(space)
                     .filter { passphraseService.hasPassphrase(it.accountId) }
                     .mapNotNull { validator ->
-                        voteService.getVote(
+                        voteService.findVote(
                             space,
                             validator,
                             passphraseService.getPassphrase(validator.accountId)
@@ -82,8 +88,14 @@ class EventProcessorService(
      * Receive new vote
      */
     fun onVote(vote: Vote) {
-        spaceService.findById(vote.spaceId)?.let {
-            voteService.verifyAndSaveIfNotExists(vote)
+        if (spaceService.existsById(vote.spaceId)) {
+            try {
+                voteService.verifyAndSave(vote)
+            } catch (e: Exception) {
+                voteService.findVote(vote)?.let {
+                    log.warn("Vote already exists ${it.toVO()}")
+                }
+            }
         }
     }
 

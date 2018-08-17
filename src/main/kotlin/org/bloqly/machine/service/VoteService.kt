@@ -8,22 +8,19 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
-import org.hibernate.exception.ConstraintViolationException
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import javax.persistence.EntityManager
 
 @Service
 class VoteService(
     private val voteRepository: VoteRepository,
-    private val blockRepository: BlockRepository,
-    private val entityManager: EntityManager
+    private val blockRepository: BlockRepository
 ) {
 
     @Transactional
-    fun getVote(space: Space, validator: Account, passphrase: String): Vote? {
+    fun findVote(space: Space, validator: Account, passphrase: String): Vote? {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
@@ -59,25 +56,17 @@ class VoteService(
         )
     }
 
-    @Transactional
-    fun verifyAndSaveIfNotExists(vote: Vote): Vote {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun verifyAndSave(vote: Vote): Vote {
 
         requireVoteValid(vote)
 
-        return try {
-            val savedVote = voteRepository.save(vote)
-            entityManager.flush()
-            savedVote
-        } catch (e: Exception) {
-            when (e.cause) {
-                is DataIntegrityViolationException,
-                is ConstraintViolationException -> {
-                    voteRepository.getBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)
-                }
-                else -> throw e
-            }
-        }
+        return voteRepository.save(vote)
     }
+
+    @Transactional
+    fun findVote(vote: Vote): Vote? =
+        voteRepository.findBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)
 
     fun requireVoteValid(vote: Vote) {
 

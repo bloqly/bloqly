@@ -75,8 +75,6 @@ class BlockchainService(
             timestamp = timestamp
         )
 
-        val savedTx = transactionService.verifyAndSaveIfNotExists(tx)
-
         val firstBlock = blockService.newBlock(
             spaceId = spaceId,
             height = 0,
@@ -106,7 +104,7 @@ class BlockchainService(
 
         finalizedTransactionRepository.save(
             FinalizedTransaction(
-                transaction = savedTx,
+                transaction = tx,
                 block = savedFirstBlock
             )
         )
