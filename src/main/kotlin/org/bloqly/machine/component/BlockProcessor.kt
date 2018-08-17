@@ -76,7 +76,7 @@ class BlockProcessor(
             val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
             val vote = voteVO.toModel(validator)
             try {
-                voteService.verifyAndSave(vote)
+                voteService.findVote(vote) ?: voteService.verifyAndSave(vote)
             } catch (e: Exception) {
                 voteService.findVote(vote) ?: throw e
             }
@@ -84,7 +84,7 @@ class BlockProcessor(
 
         val transactions = blockData.transactions.map {
             try {
-                transactionService.verifyAndSave(it.toModel())
+                transactionService.verifyAndSaveIfNotExists(it.toModel())
             } catch (e: Exception) {
                 transactionService.findByHash(it.hash) ?: throw e
             }

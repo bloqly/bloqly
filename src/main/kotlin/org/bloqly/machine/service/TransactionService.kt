@@ -110,7 +110,13 @@ class TransactionService(
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun verifyAndSave(tx: Transaction): Transaction {
+    fun verifyAndSaveIfNotExists(tx: Transaction): Transaction {
+
+        if (transactionRepository.existsByHash(tx.hash)) {
+            return transactionRepository.getByHash(tx.hash)
+        }
+
+        // TODO where to check nonce?
 
         require(CryptoUtils.verifyTransaction(tx)) {
             "Could not verify transaction $tx"
@@ -119,6 +125,11 @@ class TransactionService(
         return transactionRepository.save(tx)
     }
 
+    @Transactional
     fun findByHash(hash: String): Transaction? =
         transactionRepository.findByHash(hash)
+
+    @Transactional
+    fun existsByHash(hash: String): Boolean =
+        transactionRepository.existsByHash(hash)
 }

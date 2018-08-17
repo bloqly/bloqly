@@ -49,12 +49,14 @@ class EventProcessorService(
      */
     fun onTransaction(tx: Transaction) {
 
-        if (!transactionProcessor.isTransactionAcceptable(tx)) {
+        if (!transactionProcessor.isTransactionAcceptable(tx) ||
+            transactionService.existsByHash(tx.hash)
+        ) {
             return
         }
 
         try {
-            transactionService.verifyAndSave(tx)
+            transactionService.verifyAndSaveIfNotExists(tx)
         } catch (e: Exception) {
             transactionService.findByHash(tx.hash)?.let {
                 log.warn("Transaction already exists ${tx.hash}")
@@ -90,7 +92,7 @@ class EventProcessorService(
     fun onVote(vote: Vote) {
         if (spaceService.existsById(vote.spaceId)) {
             try {
-                voteService.verifyAndSave(vote)
+                voteService.findVote(vote) ?: voteService.verifyAndSave(vote)
             } catch (e: Exception) {
                 voteService.findVote(vote)?.let {
                     log.warn("Vote already exists ${it.toVO()}")
