@@ -15,11 +15,13 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import javax.persistence.EntityManager
 
 @Service
 class TransactionService(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val entityManager: EntityManager
 ) {
 
     // TODO add blockchain config option - if adding smart contracts allowed
@@ -118,9 +120,11 @@ class TransactionService(
         }
 
         return try {
-            transactionRepository.save(tx)
+            val savedTx = transactionRepository.save(tx)
+            entityManager.flush()
+            savedTx
         } catch (e: Exception) {
-            when (e) {
+            when (e.cause) {
                 is DataIntegrityViolationException,
                 is ConstraintViolationException -> {
                     transactionRepository.getByHash(tx.hash)

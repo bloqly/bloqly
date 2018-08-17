@@ -14,6 +14,9 @@ import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.util.concurrent.Callable
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 /**
  * Processes the most important events
@@ -36,6 +39,8 @@ class EventProcessorService(
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
+
+    private val blockExecutor = Executors.newSingleThreadExecutor()
 
     private val timeout = 1000L
 
@@ -78,7 +83,7 @@ class EventProcessorService(
      */
     fun onVote(vote: Vote) {
         spaceService.findById(vote.spaceId)?.let {
-            voteService.validateAndSaveIfNotExists(vote)
+            voteService.verifyAndSaveIfNotExists(vote)
         }
     }
 
@@ -94,7 +99,14 @@ class EventProcessorService(
             .mapNotNull { space ->
                 accountService.getActiveProducerBySpace(space, round)
                     ?.let { producer ->
-                        createNextBlock(space, producer, round)
+                        blockExecutor.submit(Callable {
+                            try {
+                                createNextBlock(space, producer, round)
+                            } catch (e: Exception) {
+                                log.error(e.message, e)
+                                throw e
+                            }
+                        }).get(timeout, TimeUnit.MILLISECONDS)
                     }
             }
     }
@@ -126,7 +138,18 @@ class EventProcessorService(
                 isActiveValidator && isAcceptable
             }
             .forEach { blockData ->
-                blockProcessor.processReceivedBlock(blockData)
+                try {
+                    blockExecutor.submit {
+                        try {
+                            blockProcessor.processReceivedBlock(blockData)
+                        } catch (e: Exception) {
+                            log.error(e.message, e)
+                            throw e
+                        }
+                    }.get(timeout, TimeUnit.MILLISECONDS)
+                } catch (e: Exception) {
+                    log.error("Could not process block ${blockData.block.hash}", e)
+                }
             }
     }
 }

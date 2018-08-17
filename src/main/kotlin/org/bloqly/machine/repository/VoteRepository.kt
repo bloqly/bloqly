@@ -14,5 +14,5 @@ interface VoteRepository : CrudRepository<Vote, Long> {
 
     fun findBySpaceIdAndValidatorAndHeight(spaceId: String, validator: Account, height: Long): Vote?
 
-    fun existsByValidatorAndSpaceIdAndHeight(validator: Account, spaceId: String, height: Long): Boolean
+    fun getBySpaceIdAndValidatorAndHeight(spaceId: String, validator: Account, height: Long): Vote
 }

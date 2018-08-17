@@ -75,7 +75,7 @@ class BlockProcessor(
         val votes = blockData.votes.map { voteVO ->
             val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
             val vote = voteVO.toModel(validator)
-            voteService.validateAndSaveIfNotExists(vote)
+            voteService.verifyAndSaveIfNotExists(vote)
         }
 
         val transactions = blockData.transactions.map {

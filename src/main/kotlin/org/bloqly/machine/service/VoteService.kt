@@ -8,14 +8,18 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
+import org.hibernate.exception.ConstraintViolationException
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
+import javax.persistence.EntityManager
 
 @Service
 class VoteService(
     private val voteRepository: VoteRepository,
-    private val blockRepository: BlockRepository
+    private val blockRepository: BlockRepository,
+    private val entityManager: EntityManager
 ) {
 
     @Transactional
@@ -56,15 +60,23 @@ class VoteService(
     }
 
     @Transactional
-    fun validateAndSaveIfNotExists(vote: Vote): Vote {
-
-        voteRepository.findBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)?.let {
-            return it
-        }
+    fun verifyAndSaveIfNotExists(vote: Vote): Vote {
 
         requireVoteValid(vote)
 
-        return voteRepository.save(vote)
+        return try {
+            val savedVote = voteRepository.save(vote)
+            entityManager.flush()
+            savedVote
+        } catch (e: Exception) {
+            when (e.cause) {
+                is DataIntegrityViolationException,
+                is ConstraintViolationException -> {
+                    voteRepository.getBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)
+                }
+                else -> throw e
+            }
+        }
     }
 
     fun requireVoteValid(vote: Vote) {
