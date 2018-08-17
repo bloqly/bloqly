@@ -92,7 +92,7 @@ class BlockService(
         val libHash = if (height > 0) {
             calculateLIBForBlock(newBlock).hash
         } else {
-            ""
+            blockHash
         }
 
         return newBlock.copy(libHash = libHash)
@@ -259,13 +259,7 @@ class BlockService(
     fun findByHash(hash: String): Block? = blockRepository.findByHash(hash)
 
     @Transactional(readOnly = true)
-    fun getByHash(hash: String): Block {
-        return if (hash.isNotBlank()) {
-            blockRepository.getByHash(hash)
-        } else {
-            blockRepository.getFirst()
-        }
-    }
+    fun getByHash(hash: String): Block = blockRepository.getByHash(hash)
 
     @Transactional(readOnly = true)
     fun existsBySpace(space: Space): Boolean = blockRepository.existsBySpaceId(space.id)
