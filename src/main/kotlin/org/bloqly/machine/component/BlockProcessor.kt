@@ -278,8 +278,6 @@ class BlockProcessor(
 
                     val properties = ObjectUtils.readProperties(txOutput.output)
 
-                    properties.forEach { log.info("Applying property $it") }
-
                     propertyService.updateProperties(properties)
 
                     finalizedTransactionRepository.save(
@@ -319,6 +317,12 @@ class BlockProcessor(
     ): List<TransactionResult> {
         val transactions = getPendingTransactionsBySpace(spaceId)
 
+        val hashes = transactions.map { it.hash }
+
+        if (hashes.size > hashes.distinct().size) {
+            throw IllegalStateException("Transactions are not unique")
+        }
+
         return transactions
             .map { tx ->
 
@@ -355,7 +359,6 @@ class BlockProcessor(
         }
 
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
-        val minTimestamp = lastBlock.timestamp - MAX_TRANSACTION_AGE
 
         val libHash = if (lastBlock.height > 0) {
             lastBlock.libHash
@@ -377,6 +380,8 @@ class BlockProcessor(
         }
 
         val pendingTransactions = transactionRepository.getPendingTransactionsBySpace(spaceId)
+
+        val minTimestamp = lastBlock.timestamp - MAX_TRANSACTION_AGE
 
         return pendingTransactions.subtract(txsAfterLIB).filter { tx ->
             // TODO try to optimize it to avoid repeated calls to dbs
