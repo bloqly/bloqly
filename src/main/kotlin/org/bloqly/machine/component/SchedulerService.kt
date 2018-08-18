@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component
 
 @Component
 @Profile("scheduler")
+
+// TODO change to cron expressions
+
 class SchedulerService(
     private val nodeQueryService: NodeQueryService,
     private val eventSenderService: EventSenderService,

@@ -109,7 +109,7 @@ dependencies {
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
 
-    compile group: 'com.google.guava', name: 'guava', version: '19.0'
+    compile group: 'com.google.guava', name: 'guava', version: '26.0-jre'
 
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 

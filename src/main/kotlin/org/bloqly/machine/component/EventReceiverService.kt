@@ -10,17 +10,27 @@ import org.bloqly.machine.vo.VoteVO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
+/**
+ * The main purpose of this class is to do basic preparations for requests handling
+ * such as converting to model etc
+ */
 @Service
 class EventReceiverService(
     private val eventProcessorService: EventProcessorService,
     private val accountService: AccountService,
     private val transactionService: TransactionService,
-    private val blockService: BlockService
+    private val blockService: BlockService,
+    private val objectFilterService: ObjectFilterService
 ) {
     private val log = LoggerFactory.getLogger(EventReceiverService::class.simpleName)
 
     fun receiveTransactions(transactionVOs: List<TransactionVO>) {
-        transactionVOs.forEach { eventProcessorService.onTransaction(it.toModel()) }
+        transactionVOs.forEach {
+            if (!objectFilterService.mightContain(it.hash)) {
+                eventProcessorService.onTransaction(it.toModel())
+                objectFilterService.add(it.hash)
+            }
+        }
     }
 
     fun receiveTransactionRequest(transactionRequest: TransactionRequest): TransactionVO {
@@ -46,6 +56,8 @@ class EventReceiverService(
     }
 
     fun receiveProposals(proposals: List<BlockData>) {
-        eventProcessorService.onProposals(proposals)
+        eventProcessorService.onProposals(proposals.filter {
+            !objectFilterService.mightContain(it.block.hash)
+        })
     }
 }

@@ -35,7 +35,8 @@ class EventProcessorService(
     private val blockProcessor: BlockProcessor,
     private val transactionProcessor: TransactionProcessor,
     private val passphraseService: PassphraseService,
-    private val blockService: BlockService
+    private val blockService: BlockService,
+    private val objectFilterService: ObjectFilterService
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
@@ -82,8 +83,6 @@ class EventProcessorService(
                         )
                     }
             }
-
-        // TODO send all known votes for blocks with height > H
     }
 
     /**
@@ -156,6 +155,7 @@ class EventProcessorService(
                     blockExecutor.submit {
                         try {
                             blockProcessor.processReceivedBlock(blockData)
+                            objectFilterService.add(blockData.block.hash)
                         } catch (e: Exception) {
                             log.error(e.message, e)
                             throw e
