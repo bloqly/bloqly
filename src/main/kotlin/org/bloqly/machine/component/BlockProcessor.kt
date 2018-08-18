@@ -198,11 +198,19 @@ class BlockProcessor(
 
     @Transactional(isolation = SERIALIZABLE)
     fun createNextBlock(spaceId: String, producer: Account, passphrase: String, round: Long): BlockData {
+        val lastBlock = blockService.getLastBlockForSpace(spaceId)
+
+        return createNextBlock(lastBlock, producer, passphrase, round)
+    }
+
+    @Transactional(isolation = SERIALIZABLE)
+    fun createNextBlock(lastBlock: Block, producer: Account, passphrase: String, round: Long): BlockData {
+
+        val spaceId = lastBlock.spaceId
 
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)
             ?.let { return BlockData(it) }
 
-        val lastBlock = blockService.getLastBlockForSpace(spaceId)
         val newHeight = lastBlock.height + 1
 
         val currentLIB = blockService.getByHash(lastBlock.libHash)

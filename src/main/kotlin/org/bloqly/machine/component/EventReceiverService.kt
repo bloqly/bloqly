@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 /**
  * The main purpose of this class is to do basic preparations for requests handling
  * such as converting to model etc
+ * TODO it should be reviewed as there is seem to be clash of functionality with EventProcessorService
  */
 @Service
 class EventReceiverService(

@@ -12,7 +12,7 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
 
     @Query(
         """
-        select t.* from block_transactions bt
+        select distinct t.* from block_transactions bt
         inner join transaction t on t.id = bt.transaction_id
         where bt.block_id in ?1
         """, nativeQuery = true

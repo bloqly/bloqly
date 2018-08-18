@@ -53,6 +53,51 @@ class BlockProcessorTest : BaseTest() {
     }
 
     @Test
+    fun testGetPendingTransactionsReturnsNotIncludedInBlock() {
+
+        testService.createTransaction()
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+
+        testService.createTransaction()
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+
+        val tx3 = testService.createTransaction()
+
+        val txs = blockProcessor.getPendingTransactions()
+
+        assertEquals(1, txs.size)
+        assertEquals(tx3, txs.first())
+    }
+
+    @Test
+    fun testGetPendingTransactionsReturnsTxAfterLIB() {
+        val tx = testService.createTransaction()
+
+        val txs = blockProcessor.getPendingTransactions()
+
+        assertEquals(1, txs.size)
+        assertEquals(tx, txs.first())
+    }
+
+    @Test
+    fun testGetPendingTransactionsReturnsTxOnlyCurrentBranch() {
+
+        val tx = testService.createTransaction()
+
+        val blockBranch1 = blockProcessor.createNextBlock(firstBlock, validator(1), passphrase(1), 2)
+        assertNotNull(blockBranch1.transactions.find { it.hash == tx.hash })
+
+        val blockBranch2 = blockProcessor.createNextBlock(firstBlock, validator(1), passphrase(1), 2)
+        assertNotNull(blockBranch2.transactions.find { it.hash == tx.hash })
+
+        val txs1 = blockProcessor.getPendingTransactionsByLastBlock(blockBranch1.block.toModel())
+        assertEquals(1, txs1.size)
+
+        val txs2 = blockProcessor.getPendingTransactionsByLastBlock(blockBranch2.block.toModel())
+        assertEquals(1, txs2.size)
+    }
+
+    @Test
     fun testGetBlockRange() {
         populateBlocks(cleanup = false)
 
@@ -189,7 +234,7 @@ class BlockProcessorTest : BaseTest() {
     private fun populateBlocks(cleanup: Boolean = true) {
         txs[0] = testService.createTransaction()
         blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1))
-        assertEquals(firstBlock.hash,  blocks[0].block.libHash)
+        assertEquals(firstBlock.hash, blocks[0].block.libHash)
         assertEquals(firstBlock.hash, txs[0]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("1")
