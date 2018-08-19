@@ -12,5 +12,5 @@ interface VoteRepository : CrudRepository<Vote, Long> {
     @Query("select * from vote where space_id = ?1 order by height desc limit 1", nativeQuery = true)
     fun findLastForSpace(spaceId: String): Vote
 
-    fun findBySpaceIdAndValidatorAndHeight(spaceId: String, validator: Account, height: Long): Vote?
+    fun findByValidatorAndBlockHash(validator: Account, blockHash: String): Vote?
 }

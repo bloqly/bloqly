@@ -4,9 +4,11 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
+import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.decode16
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -16,17 +18,16 @@ import java.time.Instant
 @Service
 class VoteService(
     private val voteRepository: VoteRepository,
-    private val blockRepository: BlockRepository
+    private val blockRepository: BlockRepository,
+    private val accountRepository: AccountRepository
 ) {
 
     @Transactional
-    fun findVote(space: Space, validator: Account, passphrase: String): Vote? {
+    fun findOrCreateVote(space: Space, validator: Account, passphrase: String): Vote? {
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
-        val newHeight = lastBlock.height + 1
-
-        return voteRepository.findBySpaceIdAndValidatorAndHeight(space.id, validator, newHeight)
+        return voteRepository.findByValidatorAndBlockHash(validator, lastBlock.hash)
             ?: createVote(validator, passphrase, lastBlock)
     }
 
@@ -65,8 +66,16 @@ class VoteService(
     }
 
     @Transactional
-    fun findVote(vote: Vote): Vote? =
-        voteRepository.findBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)
+    fun findVote(publicKey: String, blockHash: String): Vote? {
+
+        val accountId = EncodingUtils.hashAndEncode16(publicKey.decode16())
+
+        val validator = accountRepository.findByAccountId(accountId)
+
+        return validator?.let {
+            voteRepository.findByValidatorAndBlockHash(validator, blockHash)
+        }
+    }
 
     fun requireVoteValid(vote: Vote) {
 

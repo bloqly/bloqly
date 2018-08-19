@@ -38,10 +38,10 @@ class EventReceiverService(
     }
 
     fun receiveTransactions(transactionVOs: List<TransactionVO>) {
-        transactionVOs.forEach {
-            if (!objectFilterService.mightContain(it.hash)) {
-                eventProcessorService.onTransaction(it.toModel())
-                objectFilterService.add(it.hash)
+        transactionVOs.forEach { tx ->
+            if (!objectFilterService.mightContain(tx.hash)) {
+                eventProcessorService.onTransaction(tx.toModel())
+                objectFilterService.add(tx.hash)
             }
         }
     }
@@ -49,12 +49,13 @@ class EventReceiverService(
     fun receiveVotes(voteVOs: List<VoteVO>) {
         voteVOs.forEach { vote ->
             try {
-                val validator = accountService.ensureExistsAndGetByPublicKey(vote.publicKey)
-                eventProcessorService.onVote(vote.toModel(validator))
+                if (!objectFilterService.mightContain(vote.getUID())) {
+                    val validator = accountService.ensureExistsAndGetByPublicKey(vote.publicKey)
+                    eventProcessorService.onVote(vote.toModel(validator))
+                    objectFilterService.add(vote.getUID())
+                }
             } catch (e: Exception) {
-                val errorMessage = "Could not process vote $vote"
-                log.warn(errorMessage)
-                log.error(errorMessage, e)
+                log.error(e.message, e)
             }
         }
     }
@@ -79,6 +80,10 @@ class EventReceiverService(
                 isActiveValidator && isAcceptable
             }
             .forEach { blockData ->
+
+                receiveTransactions(blockData.transactions)
+                receiveVotes(blockData.votes)
+
                 objectFilterService.add(blockData.block.hash)
                 eventProcessorService.onProposal(blockData)
             }

@@ -19,7 +19,6 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
@@ -52,7 +51,6 @@ class BlockProcessor(
     private val propertyService: PropertyService,
     private val contractService: ContractService,
     private val transactionOutputRepository: TransactionOutputRepository,
-    private val accountService: AccountService,
     private val accountRepository: AccountRepository,
     private val spaceRepository: SpaceRepository,
     private val transactionRepository: TransactionRepository,
@@ -74,22 +72,12 @@ class BlockProcessor(
 
         val currentLIB = blockService.calculateLIBForBlock(lastBlock)
 
-        val votes = blockData.votes.map { voteVO ->
-            val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
-            val vote = voteVO.toModel(validator)
-            try {
-                voteService.findVote(vote) ?: voteService.verifyAndSave(vote)
-            } catch (e: Exception) {
-                voteService.findVote(vote) ?: throw e
-            }
+        val votes = blockData.votes.map { vote ->
+            voteService.findVote(vote.publicKey, vote.blockHash)!!
         }
 
-        val transactions = blockData.transactions.map {
-            try {
-                transactionService.verifyAndSaveIfNotExists(it.toModel())
-            } catch (e: Exception) {
-                transactionService.findByHash(it.hash) ?: throw e
-            }
+        val transactions = blockData.transactions.map { tx ->
+            transactionService.findByHash(tx.hash)!!
         }
 
         val propertyContext = PropertyContext(propertyService, contractService)

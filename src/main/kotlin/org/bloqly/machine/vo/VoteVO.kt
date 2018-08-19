@@ -15,6 +15,8 @@ data class VoteVO(
     val signature: String
 ) {
 
+    fun getUID(): String = "$publicKey:$blockHash:$spaceId:$height:$timestamp"
+
     fun toModel(validator: Account): Vote {
         return Vote(
             validator = validator,

@@ -52,13 +52,13 @@ class VoteServiceTest : BaseTest() {
 
         publicKey = validator.publicKey.decode16()
 
-        vote = voteService.findVote(space, validator, passphrase(validator.accountId))!!
+        vote = voteService.findOrCreateVote(space, validator, passphrase(validator.accountId))!!
     }
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val v1 = voteService.findVote(space, validator, passphrase(validator.accountId))
-        val v2 = voteService.findVote(space, validator, passphrase(validator.accountId))
+        val v1 = voteService.findOrCreateVote(space, validator, passphrase(validator.accountId))
+        val v2 = voteService.findOrCreateVote(space, validator, passphrase(validator.accountId))
 
         assertEquals(v1, v2)
     }

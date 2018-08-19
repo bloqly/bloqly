@@ -147,10 +147,9 @@ class EventControllerTest : BaseControllerTest() {
         restTemplate.postForObject(url, entity, String::class.java)
 
         Assert.assertNotNull(
-            voteRepository.findBySpaceIdAndValidatorAndHeight(
-                DEFAULT_SPACE,
+            voteRepository.findByValidatorAndBlockHash(
                 vote.validator,
-                vote.height
+                vote.blockHash
             )
         )
     }

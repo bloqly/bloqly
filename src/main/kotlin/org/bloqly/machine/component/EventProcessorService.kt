@@ -76,7 +76,7 @@ class EventProcessorService(
                 accountService.getValidatorsForSpace(space)
                     .filter { passphraseService.hasPassphrase(it.accountId) }
                     .mapNotNull { validator ->
-                        voteService.findVote(
+                        voteService.findOrCreateVote(
                             space,
                             validator,
                             passphraseService.getPassphrase(validator.accountId)
@@ -91,11 +91,11 @@ class EventProcessorService(
     fun onVote(vote: Vote) {
         if (spaceService.existsById(vote.spaceId)) {
             try {
-                voteService.findVote(vote) ?: voteService.verifyAndSave(vote)
+                voteService.findVote(vote.validator.publicKey, vote.blockHash)
+                    ?: voteService.verifyAndSave(vote)
             } catch (e: Exception) {
-                voteService.findVote(vote)?.let {
-                    log.warn("Vote already exists ${it.toVO()}")
-                }
+                val errorMessage = "Could not process vote $vote"
+                log.error(errorMessage, e)
             }
         }
     }

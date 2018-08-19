@@ -111,10 +111,6 @@ dependencies {
 
     compile group: 'com.google.guava', name: 'guava', version: '26.0-jre'
 
-    compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
-
-    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
-
     compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jackson_version
