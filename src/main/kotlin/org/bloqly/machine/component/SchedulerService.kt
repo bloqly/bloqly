@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 @Component
 @Profile("scheduler")
 
-// TODO change to cron expressions
+// TODO change to cron expressions?
 
 class SchedulerService(
     private val nodeQueryService: NodeQueryService,
@@ -28,7 +28,7 @@ class SchedulerService(
         nodeQueryService.queryForNodes()
     }
 
-    @Scheduled(initialDelay = 1000, fixedDelay = 4000)
+    @Scheduled(initialDelay = 500, fixedDelay = 1000)
     fun sendTransactions() {
 
         val transactions = blockProcessor.getPendingTransactions()
@@ -41,7 +41,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(initialDelay = 500, fixedDelay = 4000)
+    @Scheduled(initialDelay = 1000, fixedDelay = 1000)
     fun sendVotes() {
         val votes = eventProcessorService.onGetVotes()
 
@@ -53,7 +53,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(initialDelay = 2000, fixedDelay = 4000)
+    @Scheduled(initialDelay = 1500, fixedDelay = 1000)
     fun sendProposals() {
 
         val proposals = eventProcessorService.onProduceBlock()

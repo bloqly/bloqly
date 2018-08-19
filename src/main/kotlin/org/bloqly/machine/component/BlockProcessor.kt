@@ -397,8 +397,8 @@ class BlockProcessor(
 
         return pendingTransactions.subtract(txsAfterLIB).filter { tx ->
             // TODO try to optimize it to avoid repeated calls to dbs
-            val referencedBlock = blockService.getByHash(tx.referencedBlockHash)
-            tx.timestamp > minTimestamp && referencedBlock.height > minHeight
+            val referencedBlock = blockService.findByHash(tx.referencedBlockHash)
+            tx.timestamp > minTimestamp && referencedBlock != null && referencedBlock.height > minHeight
         }
     }
 }

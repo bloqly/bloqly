@@ -5,8 +5,10 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.test.BaseControllerTest
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
+import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.BlockRequest
+import org.bloqly.machine.vo.BlockVO
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
@@ -18,13 +20,20 @@ import org.springframework.test.context.junit4.SpringRunner
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
 class BlockControllerTest : BaseControllerTest() {
 
-    @Test
-    fun testReceiveTransactions() {
+    private lateinit var blocks: List<BlockData>
 
-        blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(0), passphrase(0), 1)
-        blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(1), passphrase(1), 2)
-        blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(2), passphrase(2), 3)
-        blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(3), passphrase(3), 4)
+    override fun setup() {
+        super.setup()
+        blocks = arrayListOf(
+            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(0), passphrase(0), 1),
+            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(1), passphrase(1), 2),
+            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(2), passphrase(2), 3),
+            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(3), passphrase(3), 4)
+        )
+    }
+
+    @Test
+    fun testRequestDeltas() {
 
         val deltaPayload = ObjectUtils.writeValueAsString(
             BlockRequest(
@@ -41,5 +50,37 @@ class BlockControllerTest : BaseControllerTest() {
         val blockList = restTemplate.postForObject(url, entity, BlockDataList::class.java)
 
         assertEquals(2, blockList.blocks.size)
+    }
+
+    @Test
+    fun testGetLast() {
+
+        val lastPayload = ObjectUtils.writeValueAsString(
+            BlockRequest(spaceId = "main")
+        )
+
+        val entity = HttpEntity(lastPayload, headers)
+
+        val url = APIUtils.getDataPath(node, "blocks/last")
+
+        val block = restTemplate.postForObject(url, entity, BlockVO::class.java)
+
+        assertEquals(blocks[3].block.hash, block.hash)
+    }
+
+    @Test
+    fun testGetLIB() {
+
+        val libPayload = ObjectUtils.writeValueAsString(
+            BlockRequest(spaceId = "main")
+        )
+
+        val entity = HttpEntity(libPayload, headers)
+
+        val url = APIUtils.getDataPath(node, "blocks/lib")
+
+        val block = restTemplate.postForObject(url, entity, BlockVO::class.java)
+
+        assertEquals(blocks[3].block.libHash, block.hash)
     }
 }
