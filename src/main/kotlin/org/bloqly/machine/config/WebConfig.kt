@@ -9,7 +9,10 @@ import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+
+
 
 // TODO sort out string from console "Using generated security password: a0d9f4aa-277d-4f0f-8d84-ce21686b0803"
 @Configuration
@@ -26,5 +29,11 @@ class WebConfig : WebMvcConfigurer {
         val mapper = ObjectMapper()
         mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
         return MappingJackson2HttpMessageConverter(mapper)
+    }
+
+    override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
+        registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/")
+
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/")
     }
 }
