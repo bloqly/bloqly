@@ -25,10 +25,10 @@ class BlockControllerTest : BaseControllerTest() {
     override fun setup() {
         super.setup()
         blocks = arrayListOf(
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(0), passphrase(0), 1),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(1), passphrase(1), 2),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(2), passphrase(2), 3),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validator(3), passphrase(3), 4)
+            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(1), 1),
+            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(2), 2),
+            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(3), 3),
+            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(4), 4)
         )
     }
 

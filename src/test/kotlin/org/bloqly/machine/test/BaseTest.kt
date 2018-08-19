@@ -16,7 +16,9 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
+import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
+import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
@@ -26,6 +28,12 @@ import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 
 open class BaseTest {
+
+    @Autowired
+    protected lateinit var accountService: AccountService
+
+    @Autowired
+    protected lateinit var spaceService: SpaceService
 
     @Autowired
     protected lateinit var objectFilterService: ObjectFilterService
@@ -67,8 +75,8 @@ open class BaseTest {
 
     @Before
     open fun setup() {
-        TimeUtils.setTestTime(0)
         testService.cleanup()
+        TimeUtils.setTestTime(0)
         testService.createBlockchain()
 
         propertyId = PropertyId(DEFAULT_SPACE, DEFAULT_SELF, testService.getUser().accountId, "balance")
@@ -79,6 +87,11 @@ open class BaseTest {
     fun passphrase(account: Account): String = passphraseService.getPassphrase(account.accountId)
 
     fun validator(n: Int) = testService.getValidator(n)
+
+    fun validatorForRound(round: Long): Account {
+        val space = spaceService.getById(DEFAULT_SPACE)
+        return accountService.getProducerBySpace(space, round)
+    }
 
     fun passphrase(n: Int) = passphrase(validator(n))
 

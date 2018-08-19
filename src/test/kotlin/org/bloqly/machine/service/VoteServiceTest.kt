@@ -27,9 +27,6 @@ class VoteServiceTest : BaseTest() {
     @Autowired
     private lateinit var voteService: VoteService
 
-    @Autowired
-    private lateinit var accountService: AccountService
-
     private lateinit var vote: Vote
 
     private lateinit var publicKey: ByteArray

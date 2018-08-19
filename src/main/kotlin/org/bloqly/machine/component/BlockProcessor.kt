@@ -53,7 +53,8 @@ class BlockProcessor(
     private val accountRepository: AccountRepository,
     private val spaceRepository: SpaceRepository,
     private val transactionRepository: TransactionRepository,
-    private val finalizedTransactionRepository: FinalizedTransactionRepository
+    private val finalizedTransactionRepository: FinalizedTransactionRepository,
+    private val passphraseService: PassphraseService
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
@@ -186,14 +187,23 @@ class BlockProcessor(
     }
 
     @Transactional
-    fun createNextBlock(spaceId: String, producer: Account, passphrase: String, round: Long): BlockData {
+    fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
+
+        val passphrase = passphraseService.getPassphrase(producer.accountId)
 
         return createNextBlock(lastBlock, producer, passphrase, round)
     }
 
     @Transactional
-    fun createNextBlock(lastBlock: Block, producer: Account, passphrase: String, round: Long): BlockData {
+    fun createNextBlock(lastBlock: Block, producer: Account, round: Long): BlockData {
+
+        val passphrase = passphraseService.getPassphrase(producer.accountId)
+
+        return createNextBlock(lastBlock, producer, passphrase, round)
+    }
+
+    private fun createNextBlock(lastBlock: Block, producer: Account, passphrase: String, round: Long): BlockData {
 
         log.info("Creating next block on top of ${lastBlock.header()}")
 

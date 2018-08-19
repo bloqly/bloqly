@@ -6,9 +6,9 @@ import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.TimeUtils.setTestTime
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.BlockData
@@ -28,9 +28,6 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class BlockProcessorTest : BaseTest() {
-
-    @Autowired
-    private lateinit var accountService: AccountService
 
     @Autowired
     private lateinit var transactionOutputRepository: TransactionOutputRepository
@@ -58,10 +55,10 @@ class BlockProcessorTest : BaseTest() {
     fun testGetPendingTransactionsReturnsNotIncludedInBlock() {
 
         testService.createTransaction()
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         testService.createTransaction()
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
 
         val tx3 = testService.createTransaction()
 
@@ -74,12 +71,12 @@ class BlockProcessorTest : BaseTest() {
     @Test
     fun testDoesntMoveLIBTwice() {
 
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3)
 
         testService.createTransaction()
-        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4)
+        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4)
 
         assertFalse(blockService.isAcceptable(blockData.block.toModel()))
 
@@ -108,10 +105,10 @@ class BlockProcessorTest : BaseTest() {
 
         val tx = testService.createTransaction()
 
-        val blockBranch1 = blockProcessor.createNextBlock(firstBlock, validator(1), passphrase(1), 2)
+        val blockBranch1 = blockProcessor.createNextBlock(firstBlock, validatorForRound(2), 2)
         assertNotNull(blockBranch1.transactions.find { it.hash == tx.hash })
 
-        val blockBranch2 = blockProcessor.createNextBlock(firstBlock, validator(1), passphrase(1), 2)
+        val blockBranch2 = blockProcessor.createNextBlock(firstBlock, validatorForRound(2), 2)
         assertNotNull(blockBranch2.transactions.find { it.hash == tx.hash })
 
         val txs1 = blockProcessor.getPendingTransactionsByLastBlock(blockBranch1.block.toModel())
@@ -138,7 +135,7 @@ class BlockProcessorTest : BaseTest() {
 
     @Test
     fun testVerifyBlock() {
-        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
         val producer = accountRepository.findByAccountId(blockData.block.producerId)!!
 
         val block = blockRepository.findByHash(blockData.block.hash)!!
@@ -171,7 +168,8 @@ class BlockProcessorTest : BaseTest() {
 
         voteRepository.saveAll(votes)
 
-        blockProcessor.processReceivedBlock(blocks[0])
+        TimeUtils.setTestRound(blocks[0].block.round)
+        eventReceiverService.onBlocks(listOf(blocks[0]))
     }
 
     @Test
@@ -184,7 +182,7 @@ class BlockProcessorTest : BaseTest() {
             testService.createTransaction()
         }
 
-        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(4), passphrase(4), 9)
+        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(9), 9)
 
         assertEquals(txCount, blockData.transactions.size)
     }
@@ -192,13 +190,16 @@ class BlockProcessorTest : BaseTest() {
     @Test
     fun testRejectsBlockWithTheSameHash() {
         populateBlocks()
-        blockProcessor.processReceivedBlock(blocks[0])
-        try {
-            blockProcessor.processReceivedBlock(blocks[0])
-            fail()
-        } catch (e: Exception) {
 
-        }
+        val blockData = blocks[0]
+
+        assertTrue(blockService.isAcceptable(blockData.block.toModel()))
+
+        TimeUtils.setTestRound(blockData.block.round)
+
+        eventReceiverService.onBlocks(listOf(blockData))
+
+        assertFalse(blockService.isAcceptable(blockData.block.toModel()))
     }
 
     @Test
@@ -207,7 +208,7 @@ class BlockProcessorTest : BaseTest() {
         testService.createTransaction()
         testService.createInvalidTransaction()
 
-        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         assertEquals(1, block.transactions.size)
     }
@@ -218,7 +219,9 @@ class BlockProcessorTest : BaseTest() {
 
         assertNull(propertyService.findById(propertyId))
 
-        blockProcessor.processReceivedBlock(blocks[0])
+        TimeUtils.setTestRound(blocks[0].block.round)
+        eventReceiverService.onBlocks(listOf(blocks[0]))
+
         assertNull(propertyService.findById(propertyId))
         val block0 = blockService.loadBlockByHash(blocks[0].block.hash)
         assertEquals(1, block0.transactions.size)
@@ -226,7 +229,9 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("1")
         assertNoPropertyValue()
 
-        blockProcessor.processReceivedBlock(blocks[1])
+        TimeUtils.setTestRound(blocks[1].block.round)
+        eventReceiverService.onBlocks(listOf(blocks[1]))
+
         assertNull(propertyService.findById(propertyId))
         val block1 = blockService.loadBlockByHash(blocks[1].block.hash)
         assertEquals(1, block1.transactions.size)
@@ -234,7 +239,9 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("2")
         assertNoPropertyValue()
 
-        blockProcessor.processReceivedBlock(blocks[2])
+        TimeUtils.setTestRound(blocks[2].block.round)
+        eventReceiverService.onBlocks(listOf(blocks[2]))
+
         assertNull(propertyService.findById(propertyId))
         val block2 = blockService.loadBlockByHash(blocks[2].block.hash)
         assertEquals(1, block2.transactions.size)
@@ -242,14 +249,18 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValueCandidate("3")
         assertNoPropertyValue()
 
-        blockProcessor.processReceivedBlock(blocks[3])
+        TimeUtils.setTestRound(blocks[3].block.round)
+        eventReceiverService.onBlocks(listOf(blocks[3]))
+
         val block3 = blockService.loadBlockByHash(blocks[3].block.hash)
         assertEquals(1, block3.transactions.size)
 
         assertPropertyValueCandidate("4")
         assertPropertyValue("1")
 
-        blockProcessor.processReceivedBlock(blocks[4])
+        TimeUtils.setTestRound(blocks[4].block.round)
+        eventReceiverService.onBlocks(listOf(blocks[4]))
+
         val block4 = blockService.loadBlockByHash(blocks[4].block.hash)
         assertEquals(1, block4.transactions.size)
 
@@ -258,8 +269,12 @@ class BlockProcessorTest : BaseTest() {
     }
 
     private fun populateBlocks(cleanup: Boolean = true) {
+
+        val space = spaceService.getById(DEFAULT_SPACE)
+
         txs[0] = testService.createTransaction()
-        blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1))
+        blocks.add(0, blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1))
+        assertEquals(blocks[0].block.producerId, accountService.getProducerBySpace(space, 1).accountId)
         assertEquals(firstBlock.hash, blocks[0].block.libHash)
         assertEquals(firstBlock.hash, txs[0]!!.referencedBlockHash)
 
@@ -267,7 +282,7 @@ class BlockProcessorTest : BaseTest() {
         assertNoPropertyValue()
 
         txs[1] = testService.createTransaction()
-        blocks.add(1, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2))
+        blocks.add(1, blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2))
 
         assertEquals(txs[1]!!.hash, blocks[1].transactions.first().hash)
         assertEquals(1, blocks[1].transactions.size)
@@ -279,7 +294,7 @@ class BlockProcessorTest : BaseTest() {
         assertNoPropertyValue()
 
         txs[2] = testService.createTransaction()
-        blocks.add(2, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3))
+        blocks.add(2, blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3))
 
         assertEquals(txs[2]!!.hash, blocks[2].transactions.first().hash)
         assertEquals(1, blocks[2].transactions.size)
@@ -291,7 +306,7 @@ class BlockProcessorTest : BaseTest() {
         assertNoPropertyValue()
 
         txs[3] = testService.createTransaction() // lib is first block yet
-        blocks.add(3, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4))
+        blocks.add(3, blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4))
 
         assertEquals(txs[3]!!.hash, blocks[3].transactions.first().hash)
         assertEquals(1, blocks[3].transactions.size)
@@ -305,7 +320,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValue("1")
 
         txs[4] = testService.createTransaction()
-        blocks.add(4, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5))
+        blocks.add(4, blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(5), 5))
 
         assertEquals(txs[4]!!.hash, blocks[4].transactions.first().hash)
         assertEquals(1, blocks[4].transactions.size)
@@ -317,7 +332,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValue("2")
 
         txs[5] = testService.createTransaction()
-        blocks.add(5, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6))
+        blocks.add(5, blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6))
 
         assertEquals(txs[5]!!.hash, blocks[5].transactions.first().hash)
         assertEquals(1, blocks[5].transactions.size)
@@ -329,7 +344,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValue("3")
 
         txs[6] = testService.createTransaction()
-        blocks.add(6, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7))
+        blocks.add(6, blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(7), 7))
 
         assertEquals(txs[6]!!.hash, blocks[6].transactions.first().hash)
         assertEquals(1, blocks[6].transactions.size)
@@ -341,7 +356,7 @@ class BlockProcessorTest : BaseTest() {
         assertPropertyValue("4")
 
         txs[7] = testService.createTransaction()
-        blocks.add(7, blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 8))
+        blocks.add(7, blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(8), 8))
 
         assertEquals(txs[7]!!.hash, blocks[7].transactions.first().hash)
         assertEquals(1, blocks[7].transactions.size)

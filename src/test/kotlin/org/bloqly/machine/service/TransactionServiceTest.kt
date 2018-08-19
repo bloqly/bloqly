@@ -25,9 +25,6 @@ import java.time.Instant
 class TransactionServiceTest : BaseTest() {
 
     @Autowired
-    private lateinit var accountService: AccountService
-
-    @Autowired
     private lateinit var blockchainService: BlockchainService
 
     private lateinit var transaction: Transaction
@@ -89,13 +86,13 @@ class TransactionServiceTest : BaseTest() {
     fun testIsActualTransactions() {
 
         val blocks = listOf(
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 5).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 6).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 7).block
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(5), 5).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6).block,
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(7), 7).block
         )
 
         assertEquals(blocks[3].hash, blocks[6].libHash)

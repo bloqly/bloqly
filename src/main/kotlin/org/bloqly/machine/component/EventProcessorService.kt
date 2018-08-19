@@ -112,8 +112,7 @@ class EventProcessorService(
                     ?.let { producer ->
                         blockExecutor.submit(Callable {
                             try {
-                                val passphrase = passphraseService.getPassphrase(producer.accountId)
-                                val blockData = blockProcessor.createNextBlock(space.id, producer, passphrase, round)
+                                val blockData = blockProcessor.createNextBlock(space.id, producer, round)
                                 objectFilterService.add(blockData.block.hash)
                                 blockData
                             } catch (e: Exception) {

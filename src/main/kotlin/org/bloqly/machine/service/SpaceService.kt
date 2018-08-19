@@ -17,6 +17,10 @@ class SpaceService(private val spaceRepository: SpaceRepository) {
         spaceRepository.findById(spaceId).orElse(null)
 
     @Transactional(readOnly = true)
+    fun getById(spaceId: String): Space =
+        spaceRepository.findById(spaceId).orElseThrow()
+
+    @Transactional(readOnly = true)
     fun existsById(spaceId: String): Boolean =
         spaceRepository.existsById(spaceId)
 

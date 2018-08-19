@@ -24,7 +24,7 @@ class PropertyControllerTest : BaseControllerTest() {
     fun testGetLastProperty() {
         testService.createTransaction()
 
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         val url = APIUtils.getDataPath(node, "properties/search")
 
@@ -48,7 +48,7 @@ class PropertyControllerTest : BaseControllerTest() {
     fun testGetFinalizedProperty() {
         testService.createTransaction()
 
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         val url = APIUtils.getDataPath(node, "properties/search")
 

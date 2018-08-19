@@ -18,4 +18,8 @@ object TimeUtils {
     fun reset() {
         TEST_TIME = null
     }
+
+    fun setTestRound(round: Long) {
+        setTestTime(round * ROUND + 1)
+    }
 }
