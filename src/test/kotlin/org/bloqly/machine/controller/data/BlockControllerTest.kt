@@ -1,6 +1,5 @@
 package org.bloqly.machine.controller.data
 
-import junit.framework.Assert.assertEquals
 import org.bloqly.machine.Application
 import org.bloqly.machine.test.BaseControllerTest
 import org.bloqly.machine.util.APIUtils
@@ -9,6 +8,7 @@ import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.BlockRequest
 import org.bloqly.machine.vo.BlockVO
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest

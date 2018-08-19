@@ -53,9 +53,6 @@ class EventSenderServiceTest : BaseTest() {
     private lateinit var eventSenderService: EventSenderService
 
     @Autowired
-    private lateinit var eventReceiverService: EventReceiverService
-
-    @Autowired
     private lateinit var nodeRepository: NodeRepository
 
     @Autowired

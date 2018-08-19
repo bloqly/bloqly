@@ -9,6 +9,7 @@ import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.TimeUtils.setTestTime
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
@@ -148,10 +149,12 @@ class BlockProcessorTest : BaseTest() {
     @Test
     fun testBlockProcessed() {
         populateBlocks()
+        setTestTime(Application.ROUND + 1L)
 
         assertNull(propertyService.findById(propertyId))
 
-        blockProcessor.processReceivedBlock(blocks[0])
+        onBlock(blocks[0])
+
         assertNotNull(blockRepository.findByHash(blocks[0].block.hash))
 
         assertNull(propertyService.findById(propertyId))

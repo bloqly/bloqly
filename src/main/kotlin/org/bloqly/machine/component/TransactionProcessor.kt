@@ -112,7 +112,7 @@ class TransactionProcessor(
     fun isTransactionAcceptable(tx: Transaction): Boolean {
         // TODO add log warnings
         // TODO use block timestamp?
-        return tx.timestamp < TimeUtils.getCurrentTime() &&
+        return tx.timestamp <= TimeUtils.getCurrentTime() &&
             blockService.existsByHash(tx.referencedBlockHash) &&
             blockService.isActualTransaction(tx)
     }

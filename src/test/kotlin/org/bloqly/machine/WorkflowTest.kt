@@ -1,13 +1,11 @@
 package org.bloqly.machine
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.TimeUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -22,9 +20,6 @@ class WorkflowTest : BaseTest() {
 
     @Autowired
     private lateinit var deltaService: DeltaService
-
-    @Autowired
-    private lateinit var eventReceiverService: EventReceiverService
 
     @Autowired
     private lateinit var blockRepository: BlockRepository
@@ -58,12 +53,11 @@ class WorkflowTest : BaseTest() {
     @Test
     fun testSingleRound() {
 
-        // 1. Start first round
-        TimeUtils.setTestTime(0)
-
         val transaction = testService.createTransaction()
 
         sendTransactions(listOf(transaction))
+        val pendingTxs = blockProcessor.getPendingTransactions()
+        assertEquals(1, pendingTxs.size)
 
         sendVotes()
         assertEquals(4, voteRepository.findAll().toList().size)
@@ -116,7 +110,7 @@ class WorkflowTest : BaseTest() {
         // need to do it otherwise the same votes won't be processed
         objectFilterService.clear()
 
-        eventReceiverService.receiveProposals(blocks)
+        eventReceiverService.onBlocks(blocks)
         assertEquals(1, blockData.transactions.size)
         // votes are re-imported
         assertEquals(4, voteRepository.count())

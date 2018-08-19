@@ -4,6 +4,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.EventProcessorService
+import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.component.ObjectFilterService
 import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.math.BInteger
@@ -19,6 +20,7 @@ import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
+import org.bloqly.machine.vo.BlockData
 import org.junit.Assert
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,6 +47,9 @@ open class BaseTest {
 
     @Autowired
     protected lateinit var eventProcessorService: EventProcessorService
+
+    @Autowired
+    protected lateinit var eventReceiverService: EventReceiverService
 
     @Autowired
     protected lateinit var blockService: BlockService
@@ -99,4 +104,6 @@ open class BaseTest {
         val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
         return blockService.getByHash(lastBlock.libHash)
     }
+
+    fun onBlock(blockData: BlockData) = eventReceiverService.onBlocks(listOf(blockData))
 }

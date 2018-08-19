@@ -25,7 +25,8 @@ class ResetService(
     private val nodeRepository: NodeRepository,
     private val voteRepository: VoteRepository,
     private val transactionOutputRepository: TransactionOutputRepository,
-    private val finalizedTransactionRepository: FinalizedTransactionRepository
+    private val finalizedTransactionRepository: FinalizedTransactionRepository,
+    private val objectFilterService: ObjectFilterService
 ) {
 
     @Transactional
@@ -41,5 +42,6 @@ class ResetService(
         transactionOutputRepository.deleteAll()
         accountRepository.deleteAll()
         TimeUtils.reset()
+        objectFilterService.clear()
     }
 }

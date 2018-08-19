@@ -5,16 +5,12 @@ import org.bloqly.machine.test.BaseTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 open class EventReceiverServiceTest : BaseTest() {
-
-    @Autowired
-    private lateinit var eventReceiverService: EventReceiverService
 
     @Test
     fun testAccountPublicKeyPopulatedWhenReceiveVotes() {

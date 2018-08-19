@@ -25,14 +25,13 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Isolation.SERIALIZABLE
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 
 private data class TransactionResult(
     val transaction: Transaction,
@@ -186,14 +185,14 @@ class BlockProcessor(
         }
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun createNextBlock(spaceId: String, producer: Account, passphrase: String, round: Long): BlockData {
         val lastBlock = blockService.getLastBlockForSpace(spaceId)
 
         return createNextBlock(lastBlock, producer, passphrase, round)
     }
 
-    @Transactional(isolation = SERIALIZABLE)
+    @Transactional
     fun createNextBlock(lastBlock: Block, producer: Account, passphrase: String, round: Long): BlockData {
 
         log.info("Creating next block on top of ${lastBlock.header()}")
@@ -227,7 +226,7 @@ class BlockProcessor(
             height = newHeight,
             weight = weight,
             diff = diff,
-            timestamp = Instant.now().toEpochMilli(),
+            timestamp = TimeUtils.getCurrentTime(),
             parentHash = lastBlock.hash,
             producerId = producer.accountId,
             passphrase = passphrase,
@@ -386,7 +385,7 @@ class BlockProcessor(
         return pendingTransactions.subtract(txsAfterLIB).filter { tx ->
             // TODO try to optimize it to avoid repeated calls to dbs
             val referencedBlock = blockService.findByHash(tx.referencedBlockHash)
-            tx.timestamp > minTimestamp && referencedBlock != null && referencedBlock.height > minHeight
+            tx.timestamp >= minTimestamp && referencedBlock != null && referencedBlock.height > minHeight
         }
     }
 }

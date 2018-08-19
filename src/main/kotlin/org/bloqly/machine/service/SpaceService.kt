@@ -19,4 +19,8 @@ class SpaceService(private val spaceRepository: SpaceRepository) {
     @Transactional(readOnly = true)
     fun existsById(spaceId: String): Boolean =
         spaceRepository.existsById(spaceId)
+
+    @Transactional(readOnly = true)
+    fun getSpaceIds(): List<String> =
+        spaceRepository.findAll().map { it.id }
 }

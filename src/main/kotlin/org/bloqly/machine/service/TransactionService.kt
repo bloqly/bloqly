@@ -8,12 +8,12 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ParameterUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.TransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
 
 @Service
 class TransactionService(
@@ -66,11 +66,11 @@ class TransactionService(
         destinationId: String,
         self: String,
         key: String? = null,
-        // TODO do we ned byte-array here?
+        // TODO do we need byte-array here?
         value: ByteArray,
         transactionType: TransactionType,
         referencedBlockHash: String,
-        timestamp: Long = Instant.now().toEpochMilli(),
+        timestamp: Long = TimeUtils.getCurrentTime(),
         nonce: String = CryptoUtils.newNonce()
     ): Transaction {
 

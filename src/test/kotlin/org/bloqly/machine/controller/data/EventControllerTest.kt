@@ -2,7 +2,6 @@ package org.bloqly.machine.controller.data
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.test.BaseControllerTest
 import org.bloqly.machine.util.APIUtils
@@ -32,9 +31,6 @@ class EventControllerTest : BaseControllerTest() {
 
     @Autowired
     private lateinit var blockRepository: BlockRepository
-
-    @Autowired
-    private lateinit var eventReceiverService: EventReceiverService
 
     @Before
     override fun setup() {

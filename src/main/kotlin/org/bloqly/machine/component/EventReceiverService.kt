@@ -60,11 +60,11 @@ class EventReceiverService(
         }
     }
 
-    fun receiveProposals(proposals: List<BlockData>) {
+    fun onBlocks(proposals: List<BlockData>) {
 
         val round = TimeUtils.getCurrentRound()
 
-        val spaceIds = spaceService.findAll().map { it.id }
+        val spaceIds = spaceService.getSpaceIds()
 
         proposals
             .filter { it.block.round == round }
@@ -73,12 +73,9 @@ class EventReceiverService(
             .filter {
                 val space = spaceService.findById(it.block.spaceId)!!
                 val activeValidator = accountService.getProducerBySpace(space, round)
-
-                val isActiveValidator = activeValidator.accountId == it.block.producerId
-                val isAcceptable = blockService.isAcceptable(it.block.toModel())
-
-                isActiveValidator && isAcceptable
+                activeValidator.accountId == it.block.producerId
             }
+            .filter { blockService.isAcceptable(it.block.toModel()) }
             .forEach { blockData ->
 
                 receiveTransactions(blockData.transactions)

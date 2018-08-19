@@ -1,7 +1,5 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.AccountService
@@ -114,7 +112,8 @@ class EventProcessorService(
                     ?.let { producer ->
                         blockExecutor.submit(Callable {
                             try {
-                                val blockData = createNextBlock(space, producer, round)
+                                val passphrase = passphraseService.getPassphrase(producer.accountId)
+                                val blockData = blockProcessor.createNextBlock(space.id, producer, passphrase, round)
                                 objectFilterService.add(blockData.block.hash)
                                 blockData
                             } catch (e: Exception) {
@@ -124,12 +123,6 @@ class EventProcessorService(
                         }).get(timeout, TimeUnit.MILLISECONDS)
                     }
             }
-    }
-
-    private fun createNextBlock(space: Space, producer: Account, round: Long): BlockData {
-        val passphrase = passphraseService.getPassphrase(producer.accountId)
-
-        return blockProcessor.createNextBlock(space.id, producer, passphrase, round)
     }
 
     /**

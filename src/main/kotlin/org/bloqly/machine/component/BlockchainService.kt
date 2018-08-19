@@ -14,11 +14,11 @@ import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
-import java.time.Instant
 
 @Service
 class BlockchainService(
@@ -57,7 +57,7 @@ class BlockchainService(
 
         spaceRepository.save(Space(id = spaceId, creatorId = rootId))
 
-        val timestamp = Instant.now().toEpochMilli()
+        val timestamp = TimeUtils.getCurrentTime()
 
         val validatorTxHash = ByteArray(0)
         val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
