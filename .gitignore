@@ -12,7 +12,6 @@ release/
 docs/vendor/
 docs/.bundle
 docs/.saas-cache
-test/
 logs/
 
 LOG_PATH*

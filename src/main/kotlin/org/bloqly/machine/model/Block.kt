@@ -147,4 +147,18 @@ data class Block(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
+
+    fun header(): String {
+        return "Block(" +
+            "spaceId='$spaceId', " +
+            "height=$height, " +
+            "weight=$weight, " +
+            "diff=$diff, " +
+            "round=$round, " +
+            "timestamp=$timestamp, " +
+            "parentHash='$parentHash', " +
+            "producerId='$producerId', " +
+            "hash='$hash', " +
+            "libHash='$libHash')"
+    }
 }

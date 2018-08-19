@@ -208,6 +208,8 @@ class BlockProcessor(
     @Transactional(isolation = SERIALIZABLE)
     fun createNextBlock(lastBlock: Block, producer: Account, passphrase: String, round: Long): BlockData {
 
+        log.info("Creating next block on top of ${lastBlock.header()}")
+
         val spaceId = lastBlock.spaceId
 
         // TODO add height to equation?
@@ -265,6 +267,8 @@ class BlockProcessor(
      * In some situations LIB.height + 1 = NEW_LIB.height
      */
     private fun moveLIBIfNeeded(currentLIB: Block, lastBlock: Block) {
+
+        log.info("Check if LIB has changed, currentLIB: ${currentLIB.header()}, last block: ${lastBlock.header()}")
 
         val newLIB = blockService.getByHash(lastBlock.libHash)
 
