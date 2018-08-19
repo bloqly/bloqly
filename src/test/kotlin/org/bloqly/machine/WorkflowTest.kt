@@ -111,10 +111,14 @@ class WorkflowTest : BaseTest() {
         testService.cleanupBlockTransactions()
         finalizedTransactionRepository.deleteAll()
         transactionRepository.deleteAll()
+
         voteRepository.deleteAll()
+        // need to do it otherwise the same votes won't be processed
+        objectFilterService.clear()
 
         eventReceiverService.receiveProposals(blocks)
         assertEquals(1, blockData.transactions.size)
+        // votes are re-imported
         assertEquals(4, voteRepository.count())
     }
 }

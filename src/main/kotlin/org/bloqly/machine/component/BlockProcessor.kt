@@ -64,6 +64,8 @@ class BlockProcessor(
     @Transactional
     fun processReceivedBlock(blockData: BlockData) {
 
+        log.info("Processing received block: ${blockData.block}")
+
         val receivedBlock = blockData.block.toModel()
 
         requireValid(receivedBlock)
@@ -208,6 +210,7 @@ class BlockProcessor(
 
         val spaceId = lastBlock.spaceId
 
+        // TODO add height to equation?
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)
             ?.let { return BlockData(it) }
 

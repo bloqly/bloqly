@@ -12,6 +12,7 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.BlockData
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -67,6 +68,28 @@ class BlockProcessorTest : BaseTest() {
 
         assertEquals(1, txs.size)
         assertEquals(tx3, txs.first())
+    }
+
+    @Test
+    fun testDoesntMoveLIBTwice() {
+
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(0), passphrase(0), 1)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(1), passphrase(1), 2)
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validator(2), passphrase(2), 3)
+
+        testService.createTransaction()
+        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validator(3), passphrase(3), 4)
+
+        assertFalse(blockService.isAcceptable(blockData.block.toModel()))
+
+        try {
+            blockProcessor.processReceivedBlock(blockData)
+            fail()
+        } catch (e: Exception) {
+
+        }
+
+        eventProcessorService.onProposal(blockData)
     }
 
     @Test

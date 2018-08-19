@@ -114,7 +114,9 @@ class EventProcessorService(
                     ?.let { producer ->
                         blockExecutor.submit(Callable {
                             try {
-                                createNextBlock(space, producer, round)
+                                val blockData = createNextBlock(space, producer, round)
+                                objectFilterService.add(blockData.block.hash)
+                                blockData
                             } catch (e: Exception) {
                                 log.error(e.message, e)
                                 throw e
@@ -133,37 +135,18 @@ class EventProcessorService(
     /**
      * Receive block
      */
-    fun onProposals(proposals: List<BlockData>) {
-
-        val round = TimeUtils.getCurrentRound()
-
-        val spaceIds = spaceService.findAll().map { it.id }
-
-        proposals
-            .filter { it.block.round == round }
-            .filter { it.block.spaceId in spaceIds }
-            .filter {
-                val space = spaceService.findById(it.block.spaceId)!!
-                val activeValidator = accountService.getProducerBySpace(space, round)
-                val isActiveValidator = activeValidator.accountId == it.block.producerId
-                val isAcceptable = blockService.isAcceptable(it.block.toModel())
-
-                isActiveValidator && isAcceptable
-            }
-            .forEach { blockData ->
+    fun onProposal(blockData: BlockData) {
+        try {
+            blockExecutor.submit {
                 try {
-                    blockExecutor.submit {
-                        try {
-                            blockProcessor.processReceivedBlock(blockData)
-                            objectFilterService.add(blockData.block.hash)
-                        } catch (e: Exception) {
-                            log.error(e.message, e)
-                            throw e
-                        }
-                    }.get(timeout, TimeUnit.MILLISECONDS)
+                    blockProcessor.processReceivedBlock(blockData)
                 } catch (e: Exception) {
-                    log.error("Could not process block ${blockData.block.hash}", e)
+                    log.error(e.message, e)
+                    throw e
                 }
-            }
+            }.get(timeout, TimeUnit.MILLISECONDS)
+        } catch (e: Exception) {
+            log.error("Could not process block ${blockData.block.hash}", e)
+        }
     }
 }

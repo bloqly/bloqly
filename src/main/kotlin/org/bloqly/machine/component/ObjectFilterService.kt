@@ -30,4 +30,8 @@ class ObjectFilterService {
     }
 
     fun mightContain(key: String): Boolean = filter.get().mightContain(key)
+
+    fun clear() {
+        filter.set(createFilter())
+    }
 }

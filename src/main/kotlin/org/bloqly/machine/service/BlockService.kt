@@ -155,7 +155,7 @@ class BlockService(
      *      new block introduces new validator into the chain of confirmations.
      */
     @Transactional(readOnly = true)
-    fun calculateLIBForBlock(lastBlock: Block, newBlockValidatorId: String? = null): Block {
+    fun calculateLIBForBlock(lastBlock: Block): Block {
 
         // TODO calculate quorum taking into account the current block producer
         // also, being a block producer, don't create a vote as it is unnecessary -
@@ -170,8 +170,6 @@ class BlockService(
         }
 
         val validatorIds = mutableSetOf<String>()
-
-        newBlockValidatorId?.let { validatorIds.add(it) }
 
         while (validatorIds.size < quorum && block.height > 0) {
 

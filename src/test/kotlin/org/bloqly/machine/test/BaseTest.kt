@@ -4,6 +4,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.EventProcessorService
+import org.bloqly.machine.component.ObjectFilterService
 import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.math.BInteger
 import org.bloqly.machine.model.Account
@@ -23,6 +24,9 @@ import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 
 open class BaseTest {
+
+    @Autowired
+    protected lateinit var objectFilterService: ObjectFilterService
 
     @Autowired
     protected lateinit var accountRepository: AccountRepository

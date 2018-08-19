@@ -2,7 +2,9 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
+import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.TransactionRequest
 import org.bloqly.machine.vo.TransactionVO
@@ -21,18 +23,10 @@ class EventReceiverService(
     private val accountService: AccountService,
     private val transactionService: TransactionService,
     private val blockService: BlockService,
-    private val objectFilterService: ObjectFilterService
+    private val objectFilterService: ObjectFilterService,
+    private val spaceService: SpaceService
 ) {
     private val log = LoggerFactory.getLogger(EventReceiverService::class.simpleName)
-
-    fun receiveTransactions(transactionVOs: List<TransactionVO>) {
-        transactionVOs.forEach {
-            if (!objectFilterService.mightContain(it.hash)) {
-                eventProcessorService.onTransaction(it.toModel())
-                objectFilterService.add(it.hash)
-            }
-        }
-    }
 
     fun receiveTransactionRequest(transactionRequest: TransactionRequest): TransactionVO {
 
@@ -41,6 +35,15 @@ class EventReceiverService(
         val tx = transactionService.createTransaction(transactionRequest, lastBlock.libHash)
 
         return tx.toVO()
+    }
+
+    fun receiveTransactions(transactionVOs: List<TransactionVO>) {
+        transactionVOs.forEach {
+            if (!objectFilterService.mightContain(it.hash)) {
+                eventProcessorService.onTransaction(it.toModel())
+                objectFilterService.add(it.hash)
+            }
+        }
     }
 
     fun receiveVotes(voteVOs: List<VoteVO>) {
@@ -57,8 +60,27 @@ class EventReceiverService(
     }
 
     fun receiveProposals(proposals: List<BlockData>) {
-        eventProcessorService.onProposals(proposals.filter {
-            !objectFilterService.mightContain(it.block.hash)
-        })
+
+        val round = TimeUtils.getCurrentRound()
+
+        val spaceIds = spaceService.findAll().map { it.id }
+
+        proposals
+            .filter { it.block.round == round }
+            .filter { it.block.spaceId in spaceIds }
+            .filter { !objectFilterService.mightContain(it.block.hash) }
+            .filter {
+                val space = spaceService.findById(it.block.spaceId)!!
+                val activeValidator = accountService.getProducerBySpace(space, round)
+
+                val isActiveValidator = activeValidator.accountId == it.block.producerId
+                val isAcceptable = blockService.isAcceptable(it.block.toModel())
+
+                isActiveValidator && isAcceptable
+            }
+            .forEach { blockData ->
+                objectFilterService.add(blockData.block.hash)
+                eventProcessorService.onProposal(blockData)
+            }
     }
 }
