@@ -41,7 +41,7 @@ class EventProcessorService(
 
     private val blockExecutor = Executors.newSingleThreadExecutor()
 
-    private val timeout = 1000L
+    private val timeout = 1000000L
 
     /**
      * Collecting transactions

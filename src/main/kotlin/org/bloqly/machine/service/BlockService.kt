@@ -149,33 +149,39 @@ class BlockService(
         return true
     }
 
-    /**
-     * @param newBlockValidatorId - when creating a new block, we need to include LIB value into it.
-     *      this LIB value can differ so that a new block's LIB is the the previous LIB + 1 because
-     *      new block introduces new validator into the chain of confirmations.
-     */
     @Transactional(readOnly = true)
-    fun calculateLIBForBlock(lastBlock: Block): Block {
+    fun calculateLIBForBlock(targetBlock: Block): Block {
+
+        if (targetBlock.height == 0L) {
+            return targetBlock
+        }
 
         // TODO calculate quorum taking into account the current block producer
         // also, being a block producer, don't create a vote as it is unnecessary -
         // you already vote with your block
         // introduce method "isQuorum(block: Block): Boolean"
-        val quorum = propertyRepository.getQuorumBySpaceId(lastBlock.spaceId)
+        val quorum = propertyRepository.getQuorumBySpaceId(targetBlock.spaceId)
 
-        var block = lastBlock
-
-        if (isHyperFinalizer(block, quorum)) {
-            return blockRepository.findByHash(block.parentHash)!!
+        if (isHyperFinalizer(targetBlock, quorum)) {
+            return blockRepository.findByHash(targetBlock.parentHash)!!
         }
 
+        val parentBlock = blockRepository.getByHash(targetBlock.parentHash)
+
+        val currentLIB = blockRepository.getByHash(parentBlock.libHash)
+
+        val blocks = blockRepository.findBlocksByHeightRange(currentLIB.height, targetBlock.height)
+            .associateBy { it.hash }
+
         val validatorIds = mutableSetOf<String>()
+
+        var block = targetBlock
 
         while (validatorIds.size < quorum && block.height > 0) {
 
             validatorIds.add(block.producerId)
 
-            block = blockRepository.findByHash(block.parentHash)!!
+            block = blocks[block.parentHash]!!
         }
 
         return block

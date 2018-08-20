@@ -54,4 +54,7 @@ interface BlockRepository : CrudRepository<Block, Long> {
 
     @Query("from Block where height = 0")
     fun getFirst(): Block
+
+    @Query("from Block where height >= ?1 and height <= ?2")
+    fun findBlocksByHeightRange(from: Long, to: Long): List<Block>
 }
