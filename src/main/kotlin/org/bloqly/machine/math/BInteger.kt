@@ -44,6 +44,12 @@ class BInteger {
     }
 
     @Suppress("unused")
+    fun add(another: BInteger): BInteger {
+
+        return BInteger(value.add(another.value))
+    }
+
+    @Suppress("unused")
     fun subtract(another: BInteger): BInteger {
 
         val result = value.subtract(another.value)

@@ -181,6 +181,7 @@ class BlockService(
 
             validatorIds.add(block.producerId)
 
+            // TODO sometimes NPE, sort out why
             block = blocks[block.parentHash]!!
         }
 

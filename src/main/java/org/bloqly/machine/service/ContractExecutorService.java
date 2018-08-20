@@ -61,21 +61,25 @@ public class ContractExecutorService {
         return (Invocable) engine;
     }
 
-    private ScriptEngine getEngine(String body) throws Exception {
+    private ScriptEngine getEngine(String body) {
 
         var key = Hex.toHexString(CryptoUtils.INSTANCE.hash(body));
 
-        if (!engines.containsKey(key)) {
-            System.setProperty("nashorn.args", "--language=es6");
+        engines.computeIfAbsent(key, (keyToCompute) -> {
+            try {
+                System.setProperty("nashorn.args", "--language=es6");
 
-            var engine = new ScriptEngineManager().getEngineByName("nashorn");
+                var engine = new ScriptEngineManager().getEngineByName("nashorn");
 
-            CompiledScript compiled = ((Compilable) engine).compile(body);
+                CompiledScript compiled = ((Compilable) engine).compile(body);
 
-            compiled.eval();
+                compiled.eval();
 
-            engines.put(key, compiled.getEngine());
-        }
+                return compiled.getEngine();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         return engines.get(key);
     }

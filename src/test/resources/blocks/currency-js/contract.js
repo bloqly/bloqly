@@ -11,7 +11,7 @@ function main(context, orig, dest, amount) {
     let destBalance = getProperty(dest, 'balance', zero);
 
     let newOrigBalance = origBalance.subtract(amount);
-    let newDestBalance = destBalance.add(amount, maxSupply);
+    let newDestBalance = destBalance.add(amount);
 
     return [
         { target: orig, balance: newOrigBalance },

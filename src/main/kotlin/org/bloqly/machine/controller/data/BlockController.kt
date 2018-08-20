@@ -6,6 +6,7 @@ import org.bloqly.machine.vo.BlockDataList
 import org.bloqly.machine.vo.BlockRequest
 import org.bloqly.machine.vo.BlockVO
 import org.springframework.context.annotation.Profile
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -35,7 +36,7 @@ class BlockController(
         return blockService.getBlockDataList(blockRequest)
     }
 
-    @PostMapping("{blockHash}")
+    @GetMapping("{blockHash}")
     fun getBlock(@PathVariable("blockHash") blockHash: String): BlockVO {
         val block = blockService.findByHash(blockHash) ?: throw NotFoundException()
         return block.toVO()
