@@ -19,7 +19,7 @@ class EventController(
 
     @PostMapping("/blocks")
     fun onReceiveBlocks(@RequestBody blockDataList: BlockDataList) {
-        //eventReceiverService.onBlocks(blockDataList.blocks)
+        eventReceiverService.onBlocks(blockDataList.blocks)
     }
 
     @PostMapping("/transactions")
