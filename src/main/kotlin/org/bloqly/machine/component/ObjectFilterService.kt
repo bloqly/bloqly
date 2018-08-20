@@ -31,6 +31,7 @@ class ObjectFilterService {
 
     fun mightContain(key: String): Boolean = filter.get().mightContain(key)
 
+    // TODO make it work in 2 steps, so that there is no spike in load
     fun clear() {
         filter.set(createFilter())
     }

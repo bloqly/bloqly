@@ -135,6 +135,7 @@ class EventControllerTest : BaseControllerTest() {
         val vote = votes.first()
 
         voteRepository.deleteById(vote.id!!)
+        objectFilterService.clear()
 
         Assert.assertFalse(voteRepository.existsById(vote.id!!))
 

@@ -58,12 +58,12 @@ class BlockServiceTest : BaseTest() {
         assertEquals(block3.hash, block6.libHash)
 
         // same proposer, nothing changed
-        val block7 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(7), 7).block
+        val block7 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(10), 10).block
         assertEquals(block3.hash, getLIB().hash)
         assertEquals(block3.hash, block7.libHash)
 
         // change validator, continue changing LIB
-        val block8 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(8), 8).block
+        val block8 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(11), 11).block
         assertEquals(block4.hash, getLIB().hash)
         assertEquals(block4.hash, block8.libHash)
     }
