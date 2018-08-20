@@ -67,15 +67,25 @@ class EventReceiverService(
         val spaceIds = spaceService.getSpaceIds()
 
         proposals
-            .filter { it.block.round == round }
-            .filter { it.block.spaceId in spaceIds }
-            .filter { !objectFilterService.mightContain(it.block.hash) }
-            .filter {
-                val space = spaceService.findById(it.block.spaceId)!!
-                val activeValidator = accountService.getProducerBySpace(space, round)
-                activeValidator.accountId == it.block.producerId
+            .sortedBy { it.block.height }
+            .filter { blockData ->
+
+                val block = blockData.block
+
+                val isNotProcessed = !objectFilterService.mightContain(block.hash)
+
+                val isValidSpaceIds = block.spaceId in spaceIds
+
+                val isValidRound = block.round <= round
+
+                val space = spaceService.findById(block.spaceId)!!
+                val activeValidator = accountService.getProducerBySpace(space, block.round)
+                val isProducerValid = activeValidator.accountId == block.producerId
+
+                val isAcceptable = blockService.isAcceptable(block.toModel())
+
+                isProducerValid && isAcceptable && isNotProcessed && isValidSpaceIds && isValidRound
             }
-            .filter { blockService.isAcceptable(it.block.toModel()) }
             .forEach { blockData ->
 
                 receiveTransactions(blockData.transactions)

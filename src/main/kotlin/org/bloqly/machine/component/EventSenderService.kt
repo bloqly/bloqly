@@ -14,7 +14,7 @@ class EventSenderService(
     private val nodeService: NodeService,
     private val nodeQueryService: NodeQueryService,
     private val executorService: ExecutorService,
-    private val blockProcessor: BlockProcessor
+    private val eventReceiverService: EventReceiverService
 ) {
 
     private val log = LoggerFactory.getLogger(EventSenderService::class.simpleName)
@@ -75,11 +75,9 @@ class EventSenderService(
                 try {
                     log.info("Request deltas from node $node")
 
-                    val remoteDeltas = nodeQueryService.requestDelta(node, delta)
-                        ?.sortedBy { it.block.height }
-
-                    remoteDeltas
-                        ?.forEach { blockProcessor.processReceivedBlock(it) }
+                    nodeQueryService.requestDelta(node, delta)?.let {
+                        eventReceiverService.onBlocks(it)
+                    }
                 } catch (e: Exception) {
                     val errorMessage = "Could not request deltas from $node: ${e.message}"
                     log.warn(errorMessage)

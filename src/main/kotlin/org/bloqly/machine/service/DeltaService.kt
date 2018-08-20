@@ -23,9 +23,11 @@ class DeltaService(
 
                 val lastBlock = blockRepository.getLastBlock(space.id)
 
+                val lib = blockRepository.getByHash(lastBlock.libHash)
+
                 BlockRequest(
                     spaceId = space.id,
-                    startHeight = lastBlock.height,
+                    startHeight = lib.height + 1,
                     endHeight = vote.height
                 )
             }
