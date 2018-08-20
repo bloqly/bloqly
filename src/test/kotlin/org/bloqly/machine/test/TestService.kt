@@ -56,8 +56,8 @@ class TestService(
         accounts = ObjectUtils.readValue(accountsString, Accounts::class.java).accounts
     }
 
-    fun cleanup() {
-        resetService.reset()
+    fun cleanup(deleteAccounts: Boolean = true) {
+        resetService.reset(deleteAccounts = deleteAccounts)
     }
 
     fun getRoot(): Account = accounts.first()

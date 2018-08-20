@@ -2,8 +2,6 @@ package org.bloqly.machine
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.service.DeltaService
 import org.bloqly.machine.test.BaseTest
 import org.junit.Assert.assertEquals
@@ -20,12 +18,6 @@ class WorkflowTest : BaseTest() {
 
     @Autowired
     private lateinit var deltaService: DeltaService
-
-    @Autowired
-    private lateinit var blockRepository: BlockRepository
-
-    @Autowired
-    private lateinit var finalizedTransactionRepository: FinalizedTransactionRepository
 
     @Test
     fun testNoDelta() {

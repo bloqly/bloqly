@@ -43,9 +43,6 @@ class EventProcessorServiceTest : BaseTest() {
     @Autowired
     private lateinit var spaceRepository: SpaceRepository
 
-    @Autowired
-    private lateinit var blockchainService: BlockchainService
-
     private lateinit var root: Account
 
     private lateinit var user: Account

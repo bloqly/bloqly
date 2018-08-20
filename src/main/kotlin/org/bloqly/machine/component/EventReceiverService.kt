@@ -82,17 +82,20 @@ class EventReceiverService(
                 val activeValidator = accountService.getProducerBySpace(space, block.round)
                 val isProducerValid = activeValidator.accountId == block.producerId
 
-                val isAcceptable = blockService.isAcceptable(block.toModel())
-
-                isProducerValid && isAcceptable && isNotProcessed && isValidSpaceIds && isValidRound
+                isProducerValid && isNotProcessed && isValidSpaceIds && isValidRound
             }
             .forEach { blockData ->
 
-                receiveTransactions(blockData.transactions)
-                receiveVotes(blockData.votes)
+                log.info("Start processing block ${blockData.block.hash}")
 
-                objectFilterService.add(blockData.block.hash)
-                eventProcessorService.onProposal(blockData)
+                if (blockService.isAcceptable(blockData.block.toModel())) {
+                    receiveTransactions(blockData.transactions)
+                    receiveVotes(blockData.votes)
+
+                    objectFilterService.add(blockData.block.hash)
+                    eventProcessorService.onProposal(blockData)
+                }
+
             }
     }
 }

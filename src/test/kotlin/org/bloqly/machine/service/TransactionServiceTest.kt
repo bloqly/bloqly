@@ -2,7 +2,6 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -15,7 +14,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 import java.time.Instant
@@ -23,9 +21,6 @@ import java.time.Instant
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class TransactionServiceTest : BaseTest() {
-
-    @Autowired
-    private lateinit var blockchainService: BlockchainService
 
     private lateinit var transaction: Transaction
 

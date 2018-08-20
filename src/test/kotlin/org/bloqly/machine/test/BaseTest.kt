@@ -3,8 +3,10 @@ package org.bloqly.machine.test
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.BlockProcessor
+import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.EventReceiverService
+import org.bloqly.machine.component.GenesisService
 import org.bloqly.machine.component.ObjectFilterService
 import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.math.BInteger
@@ -13,6 +15,8 @@ import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.AccountRepository
+import org.bloqly.machine.repository.BlockRepository
+import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
@@ -28,6 +32,12 @@ import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 
 open class BaseTest {
+
+    @Autowired
+    protected lateinit var blockchainService: BlockchainService
+
+    @Autowired
+    protected lateinit var genesisService: GenesisService
 
     @Autowired
     protected lateinit var accountService: AccountService
@@ -66,7 +76,13 @@ open class BaseTest {
     protected lateinit var blockProcessor: BlockProcessor
 
     @Autowired
+    protected lateinit var finalizedTransactionRepository: FinalizedTransactionRepository
+
+    @Autowired
     protected lateinit var transactionRepository: TransactionRepository
+
+    @Autowired
+    protected lateinit var blockRepository: BlockRepository
 
     @Autowired
     protected lateinit var transactionService: TransactionService

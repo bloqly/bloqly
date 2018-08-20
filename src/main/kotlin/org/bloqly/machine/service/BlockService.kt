@@ -117,7 +117,7 @@ class BlockService(
 
         // TODO do something about it? Introduce block memory storage?
         if (!blockRepository.existsByHash(block.parentHash)) {
-            log.warn("No parent found with hash ${block.parentHash}.")
+            log.warn("No parent found with hash ${block.parentHash} for block ${block.hash}.")
             return false
         }
 

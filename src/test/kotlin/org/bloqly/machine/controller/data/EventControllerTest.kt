@@ -2,7 +2,6 @@ package org.bloqly.machine.controller.data
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.test.BaseControllerTest
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
@@ -17,7 +16,6 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.http.HttpEntity
@@ -28,9 +26,6 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
 class EventControllerTest : BaseControllerTest() {
-
-    @Autowired
-    private lateinit var blockRepository: BlockRepository
 
     @Before
     override fun setup() {

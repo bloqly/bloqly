@@ -4,7 +4,6 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
@@ -31,12 +30,6 @@ class BlockProcessorTest : BaseTest() {
 
     @Autowired
     private lateinit var transactionOutputRepository: TransactionOutputRepository
-
-    @Autowired
-    private lateinit var genesisService: GenesisService
-
-    @Autowired
-    private lateinit var blockRepository: BlockRepository
 
     private val blocks = mutableListOf<BlockData>()
 

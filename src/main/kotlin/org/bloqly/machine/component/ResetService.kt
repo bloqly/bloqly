@@ -30,7 +30,7 @@ class ResetService(
 ) {
 
     @Transactional
-    fun reset() {
+    fun reset(deleteAccounts: Boolean = true) {
         finalizedTransactionRepository.deleteAll()
         contractRepository.deleteAll()
         propertyRepository.deleteAll()
@@ -40,7 +40,9 @@ class ResetService(
         nodeRepository.deleteAll()
         voteRepository.deleteAll()
         transactionOutputRepository.deleteAll()
-        accountRepository.deleteAll()
+        if (deleteAccounts) {
+            accountRepository.deleteAll()
+        }
         TimeUtils.reset()
         objectFilterService.clear()
     }
