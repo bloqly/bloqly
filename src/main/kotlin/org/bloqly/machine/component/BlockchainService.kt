@@ -7,10 +7,10 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.repository.PropertyService
-import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
@@ -26,7 +26,7 @@ class BlockchainService(
     private val contractExecutorService: ContractExecutorService,
     private val propertyService: PropertyService,
     private val contractService: ContractService,
-    private val spaceRepository: SpaceRepository,
+    private val spaceService: SpaceService,
     private val transactionService: TransactionService,
     private val blockRepository: BlockRepository,
     private val transactionProcessor: TransactionProcessor,
@@ -55,7 +55,7 @@ class BlockchainService(
 
         propertyService.updateProperties(spaceId, Application.DEFAULT_SELF, initProperties)
 
-        spaceRepository.save(Space(id = spaceId, creatorId = rootId))
+        spaceService.save(Space(id = spaceId, creatorId = rootId))
 
         val timestamp = TimeUtils.getCurrentTime()
 

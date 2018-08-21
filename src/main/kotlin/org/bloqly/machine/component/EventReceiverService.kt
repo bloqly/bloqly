@@ -75,6 +75,7 @@ class EventReceiverService(
         val spaceIds = spaceService.getSpaceIds()
 
         proposals
+            .filter { spaceService.existsById(it.block.spaceId) }
             .sortedBy { it.block.height }
             .filter { blockData ->
 
@@ -86,7 +87,7 @@ class EventReceiverService(
 
                 val isValidRound = block.round <= round
 
-                val space = spaceService.findById(block.spaceId)!!
+                val space = spaceService.getById(block.spaceId)
                 val activeValidator = accountService.getProducerBySpace(space, block.round)
                 val isProducerValid = activeValidator.accountId == block.producerId
 

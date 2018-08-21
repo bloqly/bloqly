@@ -51,10 +51,4 @@ interface BlockRepository : CrudRepository<Block, Long> {
     fun existsBySpaceIdAndProducerIdAndHeight(spaceId: String, producerId: String, height: Long): Boolean
 
     fun existsBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Boolean
-
-    @Query("from Block where height = 0")
-    fun getFirst(): Block
-
-    @Query("from Block where height >= ?1 and height <= ?2")
-    fun findBlocksByHeightRange(from: Long, to: Long): List<Block>
 }

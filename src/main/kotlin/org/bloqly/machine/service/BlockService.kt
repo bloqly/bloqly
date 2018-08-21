@@ -166,12 +166,7 @@ class BlockService(
             return blockRepository.findByHash(targetBlock.parentHash)!!
         }
 
-        val parentBlock = blockRepository.getByHash(targetBlock.parentHash)
-
-        val currentLIB = blockRepository.getByHash(parentBlock.libHash)
-
-        val blocks = blockRepository.findBlocksByHeightRange(currentLIB.height, targetBlock.height)
-            .associateBy { it.hash }
+        log.info("Calculating LIB for block ${targetBlock.header()}")
 
         val validatorIds = mutableSetOf<String>()
 
@@ -181,8 +176,8 @@ class BlockService(
 
             validatorIds.add(block.producerId)
 
-            // TODO sometimes NPE, sort out why
-            block = blocks[block.parentHash]!!
+            log.info("Getting parent for block ${block.header()}")
+            block = blockRepository.getByHash(block.parentHash)
         }
 
         return block
