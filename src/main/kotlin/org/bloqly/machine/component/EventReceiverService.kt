@@ -4,6 +4,7 @@ import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
+import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
 import org.bloqly.machine.vo.TransactionRequest
@@ -23,6 +24,7 @@ class EventReceiverService(
     private val accountService: AccountService,
     private val transactionService: TransactionService,
     private val blockService: BlockService,
+    private val voteService: VoteService,
     private val objectFilterService: ObjectFilterService,
     private val spaceService: SpaceService
 ) {
@@ -47,12 +49,18 @@ class EventReceiverService(
     }
 
     fun receiveVotes(voteVOs: List<VoteVO>) {
-        voteVOs.forEach { vote ->
+        voteVOs.forEach { voteVO ->
             try {
-                if (!objectFilterService.mightContain(vote.getUID())) {
-                    val validator = accountService.ensureExistsAndGetByPublicKey(vote.publicKey)
-                    eventProcessorService.onVote(vote.toModel(validator))
-                    objectFilterService.add(vote.getUID())
+                if (!objectFilterService.mightContain(voteVO.getUID())) {
+                    val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
+
+                    val vote = voteVO.toModel(validator)
+
+                    if (voteService.isAcceptable(vote)) {
+                        eventProcessorService.onVote(vote)
+                    }
+
+                    objectFilterService.add(voteVO.getUID())
                 }
             } catch (e: Exception) {
                 log.error(e.message, e)

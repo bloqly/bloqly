@@ -87,14 +87,10 @@ class EventProcessorService(
      * Receive new vote
      */
     fun onVote(vote: Vote) {
-        if (spaceService.existsById(vote.spaceId)) {
-            try {
-                voteService.findVote(vote.validator.publicKey, vote.blockHash)
-                    ?: voteService.verifyAndSave(vote)
-            } catch (e: Exception) {
-                val errorMessage = "Could not process vote $vote"
-                log.error(errorMessage, e)
-            }
+        try {
+            voteService.verifyAndSave(vote)
+        } catch (e: Exception) {
+            log.error("Could not process vote $vote", e)
         }
     }
 

@@ -14,6 +14,36 @@ import org.springframework.test.context.junit4.SpringRunner
 open class EventReceiverServiceTest : BaseTest() {
 
     @Test
+    fun testDoNotAcceptSameHeightFromDifferentValidators() {
+
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+
+        val block1 = blockProcessor.createNextBlock(lastBlock, validatorForRound(1), 1).block
+        val block2 = blockProcessor.createNextBlock(lastBlock, validatorForRound(2), 2).block
+
+        val validators = accountService.getValidatorsForSpaceId(DEFAULT_SPACE)
+
+        val v1 = voteService.newVote(validators[0], passphrase(validators[0]), block1.toModel())
+        val v2 = voteService.newVote(validators[0], passphrase(validators[0]), block2.toModel())
+
+        assertEquals(v1.height, v2.height)
+
+        eventReceiverService.receiveVotes(listOf(v1.toVO()))
+
+        assertEquals(1, voteRepository.count())
+
+        assertEquals(v1.validator.accountId, voteRepository.findAll().first().validator.accountId)
+
+        objectFilterService.clear()
+
+        eventReceiverService.receiveVotes(listOf(v2.toVO()))
+
+        assertEquals(1, voteRepository.count())
+
+        assertEquals(v1.validator.accountId, voteRepository.findAll().first().validator.accountId)
+    }
+
+    @Test
     fun testAccountPublicKeyPopulatedWhenReceiveVotes() {
 
         val votes = eventProcessorService.onGetVotes()

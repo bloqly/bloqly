@@ -17,16 +17,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class VoteServiceTest : BaseTest() {
-
-    @Autowired
-    private lateinit var voteService: VoteService
 
     private lateinit var vote: Vote
 
@@ -50,7 +46,7 @@ class VoteServiceTest : BaseTest() {
 
         publicKey = validator.publicKey.decode16()
 
-        vote = voteService.findOrCreateVote(space, validator, passphrase(validator.accountId))!!
+        vote = voteService.findOrCreateVote(space, validator, passphrase(validator))!!
     }
 
     @Test
@@ -66,8 +62,8 @@ class VoteServiceTest : BaseTest() {
 
     @Test
     fun testNoDoubleVoteCreated() {
-        val v1 = voteService.findOrCreateVote(space, validator, passphrase(validator.accountId))
-        val v2 = voteService.findOrCreateVote(space, validator, passphrase(validator.accountId))
+        val v1 = voteService.findOrCreateVote(space, validator, passphrase(validator))
+        val v2 = voteService.findOrCreateVote(space, validator, passphrase(validator))
 
         assertEquals(v1, v2)
     }

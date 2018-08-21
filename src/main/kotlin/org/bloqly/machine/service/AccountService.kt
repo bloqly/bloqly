@@ -9,6 +9,7 @@ import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
@@ -23,7 +24,8 @@ import java.math.BigInteger
 class AccountService(
     private val accountRepository: AccountRepository,
     private val propertyRepository: PropertyRepository,
-    private val passphraseService: PassphraseService
+    private val passphraseService: PassphraseService,
+    private val spaceRepository: SpaceRepository
 ) {
 
     @Transactional(readOnly = true)
@@ -60,6 +62,13 @@ class AccountService(
         account.privateKeyEncoded = CryptoUtils.encrypt(privateKey, passphrase)
 
         return account
+    }
+
+    @Transactional(readOnly = true)
+    fun getValidatorsForSpaceId(spaceId: String): List<Account> {
+        val space = spaceRepository.findById(spaceId).orElseThrow()
+
+        return getValidatorsForSpace(space)
     }
 
     @Transactional(readOnly = true)

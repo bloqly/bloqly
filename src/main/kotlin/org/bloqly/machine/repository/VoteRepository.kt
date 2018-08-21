@@ -13,4 +13,8 @@ interface VoteRepository : CrudRepository<Vote, Long> {
     fun findLastForSpace(spaceId: String): Vote
 
     fun findByValidatorAndBlockHash(validator: Account, blockHash: String): Vote?
+
+    fun existsBySpaceIdAndValidatorAndHeight(spaceId: String, validator: Account, height: Long): Boolean
+
+    fun existsByValidatorAndBlockHash(validator: Account, blockHash: String): Boolean
 }

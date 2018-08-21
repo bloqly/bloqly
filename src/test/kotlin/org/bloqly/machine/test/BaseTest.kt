@@ -24,6 +24,7 @@ import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
+import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.BlockData
@@ -64,6 +65,9 @@ open class BaseTest {
     protected lateinit var voteRepository: VoteRepository
 
     @Autowired
+    protected lateinit var voteService: VoteService
+
+    @Autowired
     protected lateinit var eventProcessorService: EventProcessorService
 
     @Autowired
@@ -102,14 +106,10 @@ open class BaseTest {
 
     fun passphrase(account: Account): String = passphraseService.getPassphrase(account.accountId)
 
-    fun validator(n: Int) = testService.getValidator(n)
-
     fun validatorForRound(round: Long): Account {
         val space = spaceService.getById(DEFAULT_SPACE)
         return accountService.getProducerBySpace(space, round)
     }
-
-    fun passphrase(n: Int) = passphrase(validator(n))
 
     protected fun assertPropertyValueCandidate(value: String) {
 
