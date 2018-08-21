@@ -13,7 +13,6 @@ import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
@@ -50,27 +49,6 @@ class EventControllerTest : BaseControllerTest() {
     }
 
     @Test
-    @Ignore
-    // TODO fix
-    fun testReceiveBlocks() {
-        val entity = getHttpEntity()
-
-        assertEquals(2, blockRepository.count())
-        val block = blockRepository.getLastBlock(DEFAULT_SPACE)
-        assertEquals(1, block.height)
-        blockRepository.deleteById(block.id!!)
-        assertEquals(1, blockRepository.count())
-
-        val url = APIUtils.getEventPath(node, "blocks")
-
-        restTemplate.postForObject(url, entity, String::class.java)
-
-        assertEquals(2, blockRepository.count())
-        val inserted = blockRepository.getLastBlock(DEFAULT_SPACE)
-        assertEquals(block, inserted)
-    }
-
-    @Test
     fun testReceiveBlocksTwice() {
         val blocks = eventProcessorService.onProduceBlock()
 
@@ -93,8 +71,6 @@ class EventControllerTest : BaseControllerTest() {
     }
 
     @Test
-    @Ignore
-    // TODO fix
     fun testReceiveBlocksWrongRound() {
 
         val entity = getHttpEntity()

@@ -33,7 +33,7 @@ class VoteService(
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
-        return voteRepository.findByValidatorAndBlockHash(validator, lastBlock.hash)
+        return voteRepository.findBySpaceIdAndValidatorAndHeight(space.id, validator, lastBlock.height + 1)
             ?: createVote(validator, passphrase, lastBlock)
     }
 
