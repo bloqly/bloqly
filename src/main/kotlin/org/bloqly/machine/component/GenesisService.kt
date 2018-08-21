@@ -9,10 +9,10 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.repository.PropertyService
-import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.decode16
@@ -26,7 +26,7 @@ import java.time.Instant
 class GenesisService(
     private val blockRepository: BlockRepository,
     private val transactionRepository: TransactionRepository,
-    private val spaceRepository: SpaceRepository,
+    private val spaceService: SpaceService,
     private val propertyService: PropertyService,
     private val contractService: ContractService,
     private val transactionProcessor: TransactionProcessor,
@@ -64,7 +64,7 @@ class GenesisService(
 
         val block = genesis.block.toModel()
 
-        spaceRepository.save(
+        spaceService.save(
             Space(
                 id = block.spaceId,
                 creatorId = genesis.block.producerId

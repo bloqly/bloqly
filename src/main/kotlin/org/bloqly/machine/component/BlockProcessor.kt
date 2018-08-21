@@ -15,12 +15,12 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.repository.PropertyService
-import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
@@ -51,7 +51,7 @@ class BlockProcessor(
     private val contractService: ContractService,
     private val transactionOutputRepository: TransactionOutputRepository,
     private val accountRepository: AccountRepository,
-    private val spaceRepository: SpaceRepository,
+    private val spaceService: SpaceService,
     private val transactionRepository: TransactionRepository,
     private val finalizedTransactionRepository: FinalizedTransactionRepository,
     private val passphraseService: PassphraseService
@@ -359,11 +359,10 @@ class BlockProcessor(
 
     @Transactional(readOnly = true)
     fun getPendingTransactions(depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH): List<Transaction> =
-        spaceRepository.findAll()
-            .flatMap {
-                val lastBlock = blockRepository.getLastBlock(it.id)
-                getPendingTransactionsByLastBlock(lastBlock, depth)
-            }
+        spaceService.findAll().flatMap {
+            val lastBlock = blockRepository.getLastBlock(it.id)
+            getPendingTransactionsByLastBlock(lastBlock, depth)
+        }
 
     @Transactional(readOnly = true)
     fun getPendingTransactionsByLastBlock(

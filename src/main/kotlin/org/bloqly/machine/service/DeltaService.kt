@@ -1,7 +1,6 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.vo.BlockRequest
 import org.springframework.stereotype.Service
@@ -10,23 +9,24 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class DeltaService(
     private val voteRepository: VoteRepository,
-    private val spaceRepository: SpaceRepository,
+    private val spaceService: SpaceService,
     private val blockRepository: BlockRepository
 ) {
 
     @Transactional(readOnly = true)
     fun getDeltas(): List<BlockRequest> {
-        return spaceRepository.findAll()
+        return spaceService.findAll()
             .filter { blockRepository.existsBySpaceId(it.id) }
             .map { space ->
-                val vote = voteRepository.findLastForSpace(space.id)
-
-                val lastBlock = blockRepository.getLastBlock(space.id)
+                voteRepository.findLastForSpace(space.id)
+            }
+            .map { vote ->
+                val lastBlock = blockRepository.getLastBlock(vote.spaceId)
 
                 val lib = blockRepository.getByHash(lastBlock.libHash)
 
                 BlockRequest(
-                    spaceId = space.id,
+                    spaceId = vote.spaceId,
                     startHeight = lib.height + 1,
                     endHeight = vote.height
                 )
