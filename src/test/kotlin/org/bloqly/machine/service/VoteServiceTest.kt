@@ -1,6 +1,7 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
@@ -50,6 +51,17 @@ class VoteServiceTest : BaseTest() {
         publicKey = validator.publicKey.decode16()
 
         vote = voteService.findOrCreateVote(space, validator, passphrase(validator.accountId))!!
+    }
+
+    @Test
+    fun testFindVote() {
+        val block = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+
+        val vote = voteService.createVote(validators.last(), passphrase(validators.last().accountId), block)
+
+        val saved = voteService.findVote(validators.last().publicKey, block.hash)
+
+        assertEquals(vote, saved)
     }
 
     @Test

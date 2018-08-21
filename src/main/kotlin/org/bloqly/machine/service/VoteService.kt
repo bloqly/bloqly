@@ -9,6 +9,7 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -31,20 +32,19 @@ class VoteService(
             ?: createVote(validator, passphrase, lastBlock)
     }
 
-    private fun createVote(
+    @Transactional
+    internal fun createVote(
         validator: Account,
         passphrase: String,
         block: Block
     ): Vote {
-
-        val timestamp = Instant.now().toEpochMilli()
 
         val vote = Vote(
             validator = validator,
             blockHash = block.hash,
             height = block.height + 1,
             spaceId = block.spaceId,
-            timestamp = timestamp
+            timestamp = TimeUtils.getCurrentTime()
         )
 
         val signature = CryptoUtils.sign(
