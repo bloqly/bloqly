@@ -113,6 +113,7 @@ class EventProcessorService(
                                 val blockData = blockProcessor.createNextBlock(space.id, producer, round)
                                 val t2 = System.currentTimeMillis()
 
+                                /// TODO remove
                                 log.info("TIME SPENT : " + (t2 - t1))
 
                                 objectFilterService.add(blockData.block.hash)

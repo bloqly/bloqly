@@ -110,10 +110,22 @@ class TransactionProcessor(
 
     @Transactional
     fun isTransactionAcceptable(tx: Transaction): Boolean {
-        // TODO add log warnings
-        // TODO use block timestamp?
-        return tx.timestamp <= TimeUtils.getCurrentTime() &&
-            blockService.existsByHash(tx.referencedBlockHash) &&
-            blockService.isActualTransaction(tx)
+
+        if (tx.timestamp > TimeUtils.getCurrentTime()) {
+            log.warn("Transaction is too old ${tx.toVO()}")
+            return false
+        }
+
+        if (!blockService.existsByHash(tx.referencedBlockHash)) {
+            log.warn("Not found referencedBlockHash for transaction ${tx.toVO()}")
+            return false
+        }
+
+        if (!blockService.isActualTransaction(tx)) {
+            log.warn("Transaction is not actual ${tx.toVO()}")
+            return false
+        }
+
+        return true
     }
 }

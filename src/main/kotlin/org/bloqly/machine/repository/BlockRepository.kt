@@ -1,6 +1,8 @@
 package org.bloqly.machine.repository
 
 import org.bloqly.machine.model.Block
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 
@@ -38,9 +40,14 @@ interface BlockRepository : CrudRepository<Block, Long> {
 
     fun existsByHash(referencedBlockHash: String): Boolean
 
+    @Cacheable("block")
     fun findByHash(hash: String): Block?
 
+    @Cacheable("block")
     fun getByHash(hash: String): Block
+
+    @CachePut(cacheNames = ["block"], key = "#block.hash")
+    override fun <S : Block?> save(block: S): S
 
     fun existsByLibHash(hash: String): Boolean
 

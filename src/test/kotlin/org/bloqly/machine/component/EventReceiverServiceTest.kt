@@ -4,6 +4,8 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.test.BaseTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
@@ -12,6 +14,25 @@ import org.springframework.test.context.junit4.SpringRunner
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 open class EventReceiverServiceTest : BaseTest() {
+
+    @Test
+    fun testReceiveNewTransactionsWithNewBlock() {
+
+        val tx = testService.createTransaction()
+        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
+
+        val genesis = genesisService.exportFirst(DEFAULT_SPACE)
+
+        testService.cleanup(deleteAccounts = false)
+
+        assertFalse(transactionService.existsByHash(tx.hash))
+
+        genesisService.importFirst(genesis)
+
+        eventReceiverService.onBlocks(listOf(block))
+
+        assertTrue(transactionService.existsByHash(tx.hash))
+    }
 
     @Test
     fun testDoNotAcceptSameHeightFromDifferentValidators() {
