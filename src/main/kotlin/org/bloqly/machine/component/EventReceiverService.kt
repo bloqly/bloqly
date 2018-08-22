@@ -88,8 +88,13 @@ class EventReceiverService(
                 val isValidRound = block.round <= round
 
                 val space = spaceService.getById(block.spaceId)
-                val activeValidator = accountService.getProducerBySpace(space, block.round)
-                val isProducerValid = activeValidator.accountId == block.producerId
+
+                val isProducerValid = if (block.round == round) {
+                    val activeValidator = accountService.getProducerBySpace(space, round)
+                    activeValidator.accountId == block.producerId
+                } else {
+                    isValidRound
+                }
 
                 isProducerValid && isNotProcessed && isValidSpaceIds && isValidRound
             }

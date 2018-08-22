@@ -108,10 +108,7 @@ class EventProcessorService(
                     ?.let { producer ->
                         blockExecutor.submit(Callable {
                             try {
-                                val blockData = blockProcessor.createNextBlock(space.id, producer, round)
-
-                                objectFilterService.add(blockData.block.hash)
-                                blockData
+                                blockProcessor.createNextBlock(space.id, producer, round)
                             } catch (e: Exception) {
                                 log.error(e.message, e)
                                 throw e
@@ -119,6 +116,7 @@ class EventProcessorService(
                         }).get(timeout, TimeUnit.MILLISECONDS)
                     }
             }
+            .onEach { objectFilterService.add(it.block.hash) }
             .filter { it.block.round == round }
     }
 
