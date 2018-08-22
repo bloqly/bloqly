@@ -101,9 +101,9 @@ class BlockProcessor(
 
         evaluateBlock(block, propertyContext)
 
-        log.info("Saving block with hash ${block.hash}")
+        log.debug("Saving block with hash ${block.hash}")
         val savedNewBlock = saveBlock(block)
-        log.info("Saved block with hash ${block.hash}")
+        log.debug("Saved block with hash ${block.hash}")
 
         moveLIBIfNeeded(currentLIB, savedNewBlock)
     }

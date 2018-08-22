@@ -1,6 +1,7 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.PropertyContext
 import org.bloqly.machine.component.TransactionProcessor
@@ -18,6 +19,7 @@ import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.ParameterUtils.writeString
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,6 +44,40 @@ class TransactionProcessorTest : BaseTest() {
     private val callee = "callee id"
 
     private val self = "test.js.self"
+
+    @Test
+    @Ignore
+    fun testProcessTransactionPerformance() {
+
+        val originId = testService.getRoot().accountId
+
+        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+
+        val invokeContractTx = transactionService.createTransaction(
+            space = DEFAULT_SPACE,
+            originId = originId,
+            passphrase = passphrase(originId),
+            destinationId = callee,
+            self = DEFAULT_SELF,
+            value = writeLong("1"),
+            transactionType = TransactionType.CALL,
+            referencedBlockHash = lastBlock.hash
+        )
+
+        val propertyContext = PropertyContext(propertyService, contractService)
+
+        val timeStart = System.currentTimeMillis()
+
+        repeat(500) {
+            val result = transactionProcessor.processTransaction(invokeContractTx, propertyContext)
+
+            assertTrue(result.isOK())
+        }
+
+        val timeEnd = System.currentTimeMillis()
+
+        System.out.println("TIME: " + (timeEnd - timeStart))
+    }
 
     @Test
     fun testRunContractArgument() {

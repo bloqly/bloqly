@@ -41,8 +41,7 @@ class EventProcessorService(
 
     private val blockExecutor = Executors.newSingleThreadExecutor()
 
-    // TODO return value back
-    private val timeout = 10000L
+    private val timeout = 1000L
 
     /**
      * Collecting transactions
@@ -109,12 +108,7 @@ class EventProcessorService(
                     ?.let { producer ->
                         blockExecutor.submit(Callable {
                             try {
-                                val t1 = System.currentTimeMillis()
                                 val blockData = blockProcessor.createNextBlock(space.id, producer, round)
-                                val t2 = System.currentTimeMillis()
-
-                                /// TODO remove
-                                log.info("TIME SPENT : " + (t2 - t1))
 
                                 objectFilterService.add(blockData.block.hash)
                                 blockData
