@@ -119,6 +119,7 @@ class EventProcessorService(
                         }).get(timeout, TimeUnit.MILLISECONDS)
                     }
             }
+            .filter { it.block.round == round }
     }
 
     /**
