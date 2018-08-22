@@ -232,26 +232,17 @@ class BlockService(
         return block
     }
 
-    /**
-     * Asserts that referencedBlock is LIB and LIB(lastBlock).height - referencedBlock.height >= depth
-     */
     @Transactional(readOnly = true)
     fun isActualTransaction(tx: Transaction, depth: Int = MAX_REFERENCED_BLOCK_DEPTH): Boolean {
 
         return blockRepository.findByHash(tx.referencedBlockHash)
             ?.let { referencedBlock ->
-                // is not LIB
-                if (!blockRepository.existsByLibHash(referencedBlock.hash)) {
-                    return false
-                }
 
                 val lastBlock = blockRepository.getLastBlock(tx.spaceId)
 
-                val lib = blockRepository.getByHash(lastBlock.libHash)
+                val actualDepth = lastBlock.height - referencedBlock.height
 
-                val actualDepth = lib.height - referencedBlock.height
-
-                actualDepth in 0..depth
+                actualDepth <= depth
             } ?: false
     }
 

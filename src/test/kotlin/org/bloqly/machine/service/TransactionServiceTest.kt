@@ -83,32 +83,15 @@ class TransactionServiceTest : BaseTest() {
         val blocks = listOf(
             blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1).block,
             blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(5), 5).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(7), 7).block
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3).block
         )
 
-        assertEquals(blocks[3].hash, blocks[6].libHash)
+        val tx = createTransaction(blocks[0].hash)
 
-        val tx0 = createTransaction(blocks[3].hash)
-        assertTrue(blockService.isActualTransaction(tx0, 0))
+        assertFalse(blockService.isActualTransaction(tx, 0))
+        assertFalse(blockService.isActualTransaction(tx, 1))
+        assertTrue(blockService.isActualTransaction(tx, 2))
 
-        val tx1 = createTransaction(blocks[2].hash)
-        assertTrue(blockService.isActualTransaction(tx1, 1))
-        assertFalse(blockService.isActualTransaction(tx1, 0))
-
-        val tx2 = createTransaction(blocks[1].hash)
-        assertTrue(blockService.isActualTransaction(tx2, 2))
-        assertFalse(blockService.isActualTransaction(tx2, 1))
-        assertFalse(blockService.isActualTransaction(tx2, 0))
-
-        val tx3 = createTransaction(blocks[0].hash)
-        assertTrue(blockService.isActualTransaction(tx3, 3))
-        assertFalse(blockService.isActualTransaction(tx3, 2))
-        assertFalse(blockService.isActualTransaction(tx3, 1))
-        assertFalse(blockService.isActualTransaction(tx3, 0))
     }
 
     @Test

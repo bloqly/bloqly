@@ -91,7 +91,7 @@ class EventProcessorService(
         try {
             voteService.verifyAndSave(vote)
         } catch (e: Exception) {
-            log.error("Could not process vote $vote", e)
+            log.error("Could not process vote ${vote.toVO()}", e)
         }
     }
 
