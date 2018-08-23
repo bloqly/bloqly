@@ -108,11 +108,6 @@ class VoteService(
     @Transactional
     fun isAcceptable(vote: Vote): Boolean {
 
-        if (!spaceRepository.existsById(vote.spaceId)) {
-            log.warn("Can't process vote, space doesn't exist ${vote.toVO()}")
-            return false
-        }
-
         if (voteRepository.existsBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)) {
             log.warn("Vote with validator and height already exists ${vote.toVO()}")
             return false

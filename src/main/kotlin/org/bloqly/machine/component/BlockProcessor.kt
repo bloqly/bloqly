@@ -234,18 +234,18 @@ class BlockProcessor(
         val t1 = System.currentTimeMillis()
         evaluateBlocks(currentLIB, lastBlock, propertyContext)
         val t2 = System.currentTimeMillis()
-        log.info("TIME SPENT EVALUATE: " + (t2 - t1))
+        log.trace("TIME SPENT EVALUATE: " + (t2 - t1))
 
         val txResults = getTransactionResultsForNextBlock(lastBlock, propertyContext)
         val t3 = System.currentTimeMillis()
-        log.info("TIME SPENT EVALUATE: " + (t3 - t2))
+        log.trace("TIME SPENT EVALUATE: " + (t3 - t2))
 
         val transactions = txResults.map { it.transaction }
 
         val votes = getVotesForBlock(lastBlock.hash)
         val prevVotes = getVotesForBlock(lastBlock.parentHash)
         val t4 = System.currentTimeMillis()
-        log.info("TIME SPENT LOAD VOTES AND TRANSACTIONS: " + (t4 - t3))
+        log.trace("TIME SPENT LOAD VOTES AND TRANSACTIONS: " + (t4 - t3))
 
         val diff = votes.minus(prevVotes).size
         val weight = lastBlock.weight + votes.size
@@ -266,19 +266,19 @@ class BlockProcessor(
             votes = votes
         )
         val t5 = System.currentTimeMillis()
-        log.info("TIME SPENT CREATE NEW: " + (t5 - t4))
+        log.trace("TIME SPENT CREATE NEW: " + (t5 - t4))
 
         saveTxOutputs(txResults, newBlock)
 
         val t6 = System.currentTimeMillis()
-        log.info("TIME SPENT saveTxOutputs: " + (t6 - t5))
+        log.trace("TIME SPENT saveTxOutputs: " + (t6 - t5))
 
         val blockData = BlockData(saveBlock(newBlock))
 
         moveLIBIfNeeded(currentLIB, newBlock)
 
         val t7 = System.currentTimeMillis()
-        log.info("TIME SPENT moveLIBIfNeeded: " + (t7 - t6))
+        log.trace("TIME SPENT moveLIBIfNeeded: " + (t7 - t6))
 
         return blockData
     }

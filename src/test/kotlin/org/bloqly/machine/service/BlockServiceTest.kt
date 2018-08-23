@@ -8,6 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,6 +24,42 @@ class BlockServiceTest : BaseTest() {
         assertEquals(0, lastBlock.height)
 
         assertEquals(lastBlock, getLIB())
+    }
+
+    @Test
+    fun testFirstBlockIsAfterLIB() {
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
+
+        assertEquals(0, lastBlock.height)
+        assertTrue(blockService.isAfterLIB(lastBlock))
+    }
+
+    @Test
+    fun testNextBlockIsAfterLIB() {
+        val blockData = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
+
+        assertTrue(blockService.isAfterLIB(blockData.block.toModel()))
+    }
+
+    @Test
+    fun testNotAfterLIB() {
+        val blocks = listOf(
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1),
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3),
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4),
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(5), 5),
+            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6)
+        )
+
+        val lib = blockService.getByHash(blocks.last().block.libHash)
+        assertEquals(blocks[1].block.hash, lib.hash)
+
+        try {
+            blockProcessor.createNextBlock(blocks[0].block.toModel(), validatorForRound(2), 2)
+            fail()
+        } catch (e: Exception) {
+
+        }
     }
 
     @Test

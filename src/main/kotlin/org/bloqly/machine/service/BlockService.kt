@@ -110,7 +110,8 @@ class BlockService(
     fun existsByHash(hash: String): Boolean =
         blockRepository.existsByHash(hash)
 
-    private fun isAfterLIB(target: Block): Boolean {
+    @Transactional(readOnly = true)
+    fun isAfterLIB(target: Block): Boolean {
 
         val lastBlock = blockRepository.getLastBlock(target.spaceId)
 
@@ -119,7 +120,7 @@ class BlockService(
         var block = target
 
         while (block.hash != lib.hash && block.height > 0 && block.height >= lib.height) {
-            block = blockRepository.getByHash(block.parentHash)
+            block = blockRepository.findByHash(block.parentHash) ?: return false
         }
 
         return block.hash == lib.hash

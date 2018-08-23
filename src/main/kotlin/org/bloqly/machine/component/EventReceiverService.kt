@@ -49,23 +49,25 @@ class EventReceiverService(
     }
 
     fun receiveVotes(voteVOs: List<VoteVO>) {
-        voteVOs.forEach { voteVO ->
-            try {
-                if (!objectFilterService.mightContain(voteVO.getUID())) {
-                    val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
+        voteVOs
+            .filter { spaceService.existsById(it.spaceId) }
+            .forEach { voteVO ->
+                try {
+                    if (!objectFilterService.mightContain(voteVO.getUID())) {
+                        val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
 
-                    val vote = voteVO.toModel(validator)
+                        val vote = voteVO.toModel(validator)
 
-                    if (voteService.isAcceptable(vote)) {
-                        eventProcessorService.onVote(vote)
+                        if (voteService.isAcceptable(vote)) {
+                            eventProcessorService.onVote(vote)
+                        }
+
+                        objectFilterService.add(voteVO.getUID())
                     }
-
-                    objectFilterService.add(voteVO.getUID())
+                } catch (e: Exception) {
+                    log.error(e.message, e)
                 }
-            } catch (e: Exception) {
-                log.error(e.message, e)
             }
-        }
     }
 
     fun onBlocks(proposals: List<BlockData>) {
