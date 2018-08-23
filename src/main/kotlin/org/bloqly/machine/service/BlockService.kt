@@ -116,19 +116,22 @@ class BlockService(
 
         val lib = blockRepository.getByHash(lastBlock.libHash)
 
-        val hashes = mutableSetOf<String>()
-
         var block = target
 
-        while (block.hash != lib.hash) {
-
+        while (block.hash != lib.hash && block.height > 0 && block.height >= lib.height) {
+            block = blockRepository.getByHash(block.parentHash)
         }
 
-        return true
+        return block.hash == lib.hash
     }
 
     @Transactional(readOnly = true)
     fun isAcceptable(block: Block): Boolean {
+
+        if (!isAfterLIB(block)) {
+            log.warn("Proposed block is from different branch: ${block.hash}")
+            return false
+        }
 
         if (blockRepository.existsByHash(block.hash)) {
             log.warn("Block hash already exists: ${block.hash}")
