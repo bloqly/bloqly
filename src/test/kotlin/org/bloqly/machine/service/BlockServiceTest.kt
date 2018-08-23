@@ -19,7 +19,7 @@ class BlockServiceTest : BaseTest() {
 
     @Test
     fun testFirstBlockIsFinal() {
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
         assertEquals(0, lastBlock.height)
 
         assertEquals(lastBlock, getLIB())
@@ -27,7 +27,7 @@ class BlockServiceTest : BaseTest() {
 
     @Test
     fun testVerticalFinality() {
-        val block0 = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val block0 = blockService.getLastBlockBySpace(DEFAULT_SPACE)
         assertEquals(0, block0.height)
 
         assertEquals(block0.hash, getLIB().hash)

@@ -41,7 +41,7 @@ class TransactionControllerTest : BaseControllerTest() {
 
         val entity = HttpEntity(transactionRequestPayload, headers)
 
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         assertEquals(0, blockProcessor.getPendingTransactionsByLastBlock(lastBlock).size)
 

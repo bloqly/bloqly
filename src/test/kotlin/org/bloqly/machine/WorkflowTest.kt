@@ -60,7 +60,7 @@ class WorkflowTest : BaseTest() {
     }
 
     private fun getHeight(): Long {
-        return blockService.getLastBlockForSpace(DEFAULT_SPACE).height
+        return blockService.getLastBlockBySpace(DEFAULT_SPACE).height
     }
 
     private fun sendTransactions(transactions: List<Transaction>) {

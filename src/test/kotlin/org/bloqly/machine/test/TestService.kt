@@ -91,7 +91,7 @@ class TestService(
 
     fun createTransaction(): Transaction {
 
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         val lib = blockService.getByHash(lastBlock.libHash)
 
@@ -114,7 +114,7 @@ class TestService(
 
     fun createInvalidTransaction(): Transaction {
 
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         val lib = blockService.getByHash(lastBlock.libHash)
 

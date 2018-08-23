@@ -51,7 +51,7 @@ class VoteServiceTest : BaseTest() {
 
     @Test
     fun testFindVote() {
-        val block = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val block = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         val vote = voteService.createVote(validators.last(), passphrase(validators.last().accountId), block)
 

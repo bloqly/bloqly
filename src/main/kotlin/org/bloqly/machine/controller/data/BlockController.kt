@@ -22,12 +22,12 @@ class BlockController(
 
     @PostMapping("last")
     fun getLastBlock(@RequestBody blockRequest: BlockRequest): BlockVO {
-        return blockService.getLastBlockForSpace(blockRequest.spaceId).toVO()
+        return blockService.getLastBlockBySpace(blockRequest.spaceId).toVO()
     }
 
     @PostMapping("lib")
     fun getLIB(@RequestBody blockRequest: BlockRequest): BlockVO {
-        val lastBlock = blockService.getLastBlockForSpace(blockRequest.spaceId)
+        val lastBlock = blockService.getLastBlockBySpace(blockRequest.spaceId)
         return blockService.getByHash(lastBlock.libHash).toVO()
     }
 

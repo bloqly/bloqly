@@ -51,7 +51,7 @@ class TransactionProcessorTest : BaseTest() {
 
         val originId = testService.getRoot().accountId
 
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         val invokeContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
@@ -87,7 +87,7 @@ class TransactionProcessorTest : BaseTest() {
         val propertyId1 = PropertyId(DEFAULT_SPACE, self, creator, "value1")
         val propertyId2 = PropertyId(DEFAULT_SPACE, self, self, "value3")
 
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         val contractBody = FileUtils.getResourceAsString("/scripts/test.js")
 

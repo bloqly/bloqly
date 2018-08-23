@@ -37,7 +37,7 @@ open class EventReceiverServiceTest : BaseTest() {
     @Test
     fun testDoNotAcceptSameHeightFromDifferentValidators() {
 
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         val block1 = blockProcessor.createNextBlock(lastBlock, validatorForRound(1), 1).block
         val block2 = blockProcessor.createNextBlock(lastBlock, validatorForRound(2), 2).block
@@ -108,7 +108,7 @@ open class EventReceiverServiceTest : BaseTest() {
 
         eventReceiverService.onBlocks(blockChain1)
 
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         assertEquals(blockChain1.last().block.hash, lastBlock.hash)
     }

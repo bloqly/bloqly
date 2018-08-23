@@ -130,7 +130,7 @@ open class BaseTest {
     }
 
     fun getLIB(): Block {
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
         return blockService.getByHash(lastBlock.libHash)
     }
 

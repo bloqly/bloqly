@@ -66,7 +66,7 @@ class TransactionServiceTest : BaseTest() {
 
     @Test
     fun testGetPendingTransaction() {
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         val txs = blockProcessor.getPendingTransactionsByLastBlock(lastBlock)
         assertEquals(1, txs.size)

@@ -41,7 +41,7 @@ class BlockProcessorTest : BaseTest() {
     override fun setup() {
         super.setup()
 
-        firstBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        firstBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
     }
 
     @Test

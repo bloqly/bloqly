@@ -32,7 +32,7 @@ class EventReceiverService(
 
     fun receiveTransactionRequest(transactionRequest: TransactionRequest): TransactionVO {
 
-        val lastBlock = blockService.getLastBlockForSpace(transactionRequest.space)
+        val lastBlock = blockService.getLastBlockBySpace(transactionRequest.space)
 
         val tx = transactionService.createTransaction(transactionRequest, lastBlock.libHash)
 
@@ -89,12 +89,11 @@ class EventReceiverService(
 
                 val space = spaceService.getById(block.spaceId)
 
-                val isProducerValid = if (block.round == round) {
-                    val activeValidator = accountService.getProducerBySpace(space, round)
-                    activeValidator.accountId == block.producerId
-                } else {
-                    isValidRound
-                }
+                val activeValidator = accountService.getProducerBySpace(space, blockData.block.round)
+
+                val isProducerValid = activeValidator.accountId == block.producerId
+
+                // TODO add TPOS check for better chain
 
                 isProducerValid && isNotProcessed && isValidSpaceIds && isValidRound
             }

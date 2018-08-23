@@ -99,23 +99,42 @@ class BlockService(
     }
 
     @Transactional(readOnly = true)
-    fun getLastBlockForSpace(spaceId: String): Block =
+    fun getLastBlockBySpace(spaceId: String): Block =
         blockRepository.getLastBlock(spaceId)
+
+    @Transactional(readOnly = true)
+    fun getLastBlockDataBySpace(space: Space): BlockData =
+        BlockData(blockRepository.getLastBlock(space.id))
 
     @Transactional(readOnly = true)
     fun existsByHash(hash: String): Boolean =
         blockRepository.existsByHash(hash)
 
+    private fun isAfterLIB(target: Block): Boolean {
+
+        val lastBlock = blockRepository.getLastBlock(target.spaceId)
+
+        val lib = blockRepository.getByHash(lastBlock.libHash)
+
+        val hashes = mutableSetOf<String>()
+
+        var block = target
+
+        while (block.hash != lib.hash) {
+
+        }
+
+        return true
+    }
+
     @Transactional(readOnly = true)
     fun isAcceptable(block: Block): Boolean {
 
-        // TODO do something about it?
         if (blockRepository.existsByHash(block.hash)) {
             log.warn("Block hash already exists: ${block.hash}")
             return false
         }
 
-        // TODO do something about it? Introduce block memory storage?
         if (!blockRepository.existsByHash(block.parentHash)) {
             log.warn("No parent found with hash ${block.parentHash} for block ${block.hash}.")
             return false

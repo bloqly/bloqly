@@ -1,5 +1,7 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.AccountService
@@ -103,22 +105,23 @@ class EventProcessorService(
 
         return spaceService.findAll()
             .filter { blockService.existsBySpace(it) }
-            .mapNotNull { space ->
+            .map { space ->
                 accountService.getActiveProducerBySpace(space, round)
-                    ?.let { producer ->
-                        blockExecutor.submit(Callable {
-                            try {
-                                blockProcessor.createNextBlock(space.id, producer, round)
-                            } catch (e: Exception) {
-                                log.error(e.message, e)
-                                throw e
-                            }
-                        }).get(timeout, TimeUnit.MILLISECONDS)
-                    }
+                    ?.let { producer -> createNextBlock(space, producer, round) }
+                    ?: blockService.getLastBlockDataBySpace(space)
             }
-            .onEach { objectFilterService.add(it.block.hash) }
-            .filter { it.block.round == round }
+            .onEach { blockData -> objectFilterService.add(blockData.block.hash) }
     }
+
+    private fun createNextBlock(space: Space, producer: Account, round: Long): BlockData =
+        blockExecutor.submit(Callable {
+            try {
+                blockProcessor.createNextBlock(space.id, producer, round)
+            } catch (e: Exception) {
+                log.error(e.message, e)
+                throw e
+            }
+        }).get(timeout, TimeUnit.MILLISECONDS)
 
     /**
      * Receive block

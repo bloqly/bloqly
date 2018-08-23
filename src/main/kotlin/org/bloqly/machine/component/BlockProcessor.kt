@@ -68,7 +68,7 @@ class BlockProcessor(
 
         requireValid(receivedBlock)
 
-        val lastBlock = blockService.getLastBlockForSpace(receivedBlock.spaceId)
+        val lastBlock = blockService.getLastBlockBySpace(receivedBlock.spaceId)
 
         val currentLIB = blockService.calculateLIBForBlock(lastBlock)
 
@@ -134,7 +134,7 @@ class BlockProcessor(
         target: String,
         key: String
     ): ByteArray? {
-        val lastBlock = blockService.getLastBlockForSpace(spaceId)
+        val lastBlock = blockService.getLastBlockBySpace(spaceId)
         val lib = blockService.getByHash(lastBlock.libHash)
 
         val propertyContext = PropertyContext(propertyService, contractService)
@@ -200,7 +200,7 @@ class BlockProcessor(
 
     @Transactional
     fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
-        val lastBlock = blockService.getLastBlockForSpace(spaceId)
+        val lastBlock = blockService.getLastBlockBySpace(spaceId)
 
         val passphrase = passphraseService.getPassphrase(producer.accountId)
 

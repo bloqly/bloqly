@@ -116,7 +116,7 @@ class EventProcessorServiceTest : BaseTest() {
         assertArrayEquals(writeLong("999996"), rootBalanceBefore.value)
         assertFalse(userBalanceBefore.isPresent)
 
-        val lastBlock = blockService.getLastBlockForSpace(DEFAULT_SPACE)
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
         val tx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
