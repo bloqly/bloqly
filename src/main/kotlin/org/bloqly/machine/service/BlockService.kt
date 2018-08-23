@@ -173,6 +173,9 @@ class BlockService(
     }
 
     @Transactional(readOnly = true)
+    fun calculateLIBForBlock(blockHash: String): Block = calculateLIBForBlock(getByHash(blockHash))
+
+    @Transactional(readOnly = true)
     fun calculateLIBForBlock(targetBlock: Block): Block {
 
         if (targetBlock.height == 0L) {
@@ -193,9 +196,17 @@ class BlockService(
 
         val validatorIds = mutableSetOf<String>()
 
+        val parentBlock = getByHash(targetBlock.parentHash)
+
+        val parentLIB = if (parentBlock.height > 0) {
+            getByHash(parentBlock.libHash)
+        } else {
+            parentBlock
+        }
+
         var block = targetBlock
 
-        while (validatorIds.size < quorum && block.height > 0) {
+        while (validatorIds.size < quorum && block.height > 0 && block.hash != parentLIB.hash) {
 
             validatorIds.add(block.producerId)
 

@@ -84,6 +84,49 @@ class BlockProcessorTest : BaseTest() {
     }
 
     @Test
+    fun testLIBIsNotMovingBack() {
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1) // normally finalized
+
+        eventProcessorService.onGetVotes()
+        val blockData2 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2) // hyper-finalized
+
+        eventProcessorService.onGetVotes()
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3) // same validator
+
+        val blockData4 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(7), 7) // same validator
+
+        val lib = blockService.getByHash(blockData4.block.libHash)
+
+        assertEquals(blockData2.block.hash, lib.hash)
+
+        val lastBlock = blockService.getByHash(blockData4.block.hash)
+
+        val calculatedLIB = blockService.calculateLIBForBlock(lastBlock.hash)
+
+        assertEquals(blockData2.block.libHash, calculatedLIB.libHash)
+    }
+
+    @Test
+    fun testLIBNoVotes() {
+
+        val firstBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
+
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
+
+        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
+
+        val blockData3 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3)
+
+        assertEquals(firstBlock.hash, blockData3.block.libHash)
+
+        val lastBlock = blockService.getByHash(blockData3.block.hash)
+
+        val calculatedLIB = blockService.calculateLIBForBlock(lastBlock.hash)
+
+        assertEquals(firstBlock.hash, calculatedLIB.libHash)
+    }
+
+    @Test
     fun testGetPendingTransactionsReturnsTxAfterLIB() {
         val tx = testService.createTransaction()
 

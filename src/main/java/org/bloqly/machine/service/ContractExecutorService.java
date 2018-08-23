@@ -4,9 +4,7 @@ import com.google.common.collect.Lists;
 import org.bloqly.machine.component.PropertyContext;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.*;
-import org.bloqly.machine.util.CryptoUtils;
 import org.bloqly.machine.util.ParameterUtils;
-import org.bouncycastle.util.encoders.Hex;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -24,8 +21,6 @@ import static org.bloqly.machine.model.InvocationResultType.SUCCESS;
 
 @Service
 public class ContractExecutorService {
-
-    private Map<String, ScriptEngine> engines = new ConcurrentHashMap<>();
 
     private GetPropertyFunction getPropertyFunction(PropertyContext propertyContext, InvocationContext invocationContext) {
 
@@ -46,7 +41,7 @@ public class ContractExecutorService {
         };
     }
 
-    private Invocable getEngine(PropertyContext propertyContext, InvocationContext invocationContext) throws Exception {
+    private Invocable getEngine(PropertyContext propertyContext, InvocationContext invocationContext) {
 
         var contract = propertyContext.getContract(invocationContext.getSelf());
 
@@ -63,25 +58,19 @@ public class ContractExecutorService {
 
     private ScriptEngine getEngine(String body) {
 
-        var key = Hex.toHexString(CryptoUtils.INSTANCE.hash(body));
+        try {
+            System.setProperty("nashorn.args", "--language=es6");
 
-        engines.computeIfAbsent(key, (keyToCompute) -> {
-            try {
-                System.setProperty("nashorn.args", "--language=es6");
+            var engine = new ScriptEngineManager().getEngineByName("nashorn");
 
-                var engine = new ScriptEngineManager().getEngineByName("nashorn");
+            CompiledScript compiled = ((Compilable) engine).compile(body);
 
-                CompiledScript compiled = ((Compilable) engine).compile(body);
+            compiled.eval();
 
-                compiled.eval();
-
-                return compiled.getEngine();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        return engines.get(key);
+            return compiled.getEngine();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private PropertyResult getEntry(Map<String, Object> item) {
