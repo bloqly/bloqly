@@ -107,9 +107,10 @@ class EventReceiverService(
                     receiveTransactions(blockData.transactions)
                     receiveVotes(blockData.votes)
 
-                    objectFilterService.add(blockData.block.hash)
                     eventProcessorService.onProposal(blockData)
                 }
+
+                objectFilterService.add(blockData.block.hash)
 
             }
     }

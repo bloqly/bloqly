@@ -90,7 +90,14 @@ class TransactionProcessor(
                 }
 
                 CALL -> {
-                    processCall(tx, propertyContext)
+
+                    val t1 = System.currentTimeMillis()
+                    val res = processCall(tx, propertyContext)
+                    val t2 = System.currentTimeMillis()
+
+                    log.info("PROCESSED CALL IN " + (t2 - t1))
+
+                    res
                 }
 
                 else -> {

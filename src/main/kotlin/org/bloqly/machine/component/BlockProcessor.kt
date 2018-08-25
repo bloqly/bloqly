@@ -359,7 +359,11 @@ class BlockProcessor(
 
                 val localPropertyContext = propertyContext.getLocalCopy()
 
+                val t1 = System.currentTimeMillis()
                 val result = transactionProcessor.processTransaction(tx, localPropertyContext)
+                val t2 = System.currentTimeMillis()
+
+                log.info("Processed transaction in " + (t2 - t1))
 
                 if (result.isOK()) {
                     propertyContext.merge(localPropertyContext)
