@@ -129,11 +129,6 @@ class BlockService(
     @Transactional(readOnly = true)
     fun isAcceptable(block: Block): Boolean {
 
-        if (!isAfterLIB(block)) {
-            log.warn("Proposed block is from different branch: ${block.hash}")
-            return false
-        }
-
         if (blockRepository.existsByHash(block.hash)) {
             log.warn("Block hash already exists: ${block.hash}")
             return false
@@ -149,16 +144,6 @@ class BlockService(
             return false
         }
 
-        if (blockRepository.existsByHashAndLibHash(block.hash, block.libHash)) {
-            log.warn("Unique constraint violated (hash, block_hash) : (${block.hash}, ${block.libHash})")
-            return false
-        }
-
-        if (blockRepository.existsByHashAndParentHash(block.hash, block.parentHash)) {
-            log.warn("Unique constraint violated (hash, parent_hash) : (${block.hash}, ${block.parentHash})")
-            return false
-        }
-
         if (blockRepository.existsBySpaceIdAndProducerIdAndHeight(block.spaceId, block.producerId, block.height)) {
             log.warn("Unique constraint violated (space_id, producer_id, height) : (${block.spaceId}, ${block.producerId}, ${block.height})")
             return false
@@ -166,6 +151,25 @@ class BlockService(
 
         if (blockRepository.existsBySpaceIdAndProducerIdAndRound(block.spaceId, block.producerId, block.round)) {
             log.warn("Unique constraint violated (space_id, producer_id, round) : (${block.spaceId}, ${block.producerId}, ${block.round})")
+            return false
+        }
+
+        val lastBlock = getLastBlockBySpace(block.spaceId)
+
+        val lib = getByHash(lastBlock.libHash)
+
+        val proposedLIB = getByHash(block.libHash)
+
+        if (proposedLIB.height < lib.height) {
+            log.warn(
+                "Proposed lib ${block.libHash} has lower height ${proposedLIB.height} " +
+                    "then the existing ${lib.hash} ${lib.height}"
+            )
+            return false
+        }
+
+        if (!isAfterLIB(block)) {
+            log.warn("Proposed block is from different branch: ${block.hash}")
             return false
         }
 
@@ -189,7 +193,8 @@ class BlockService(
         val quorum = propertyRepository.getQuorumBySpaceId(targetBlock.spaceId)
 
         if (isHyperFinalizer(targetBlock, quorum)) {
-            return blockRepository.findByHash(targetBlock.parentHash)!!
+            val parent = blockRepository.getByHash(targetBlock.parentHash)
+            return blockRepository.getByHash(parent.parentHash)
         }
 
         log.info("Calculating LIB for block ${targetBlock.header()}")

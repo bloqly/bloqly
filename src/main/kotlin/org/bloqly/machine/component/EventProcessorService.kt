@@ -1,7 +1,5 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.AccountService
@@ -41,9 +39,9 @@ class EventProcessorService(
 
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
-    private val blockExecutor = Executors.newSingleThreadExecutor()
+    private val executor = Executors.newSingleThreadExecutor()
 
-    private val timeout = 1000L
+    private val timeout = 100000L
 
     /**
      * Collecting transactions
@@ -57,7 +55,9 @@ class EventProcessorService(
         }
 
         try {
-            transactionService.verifyAndSaveIfNotExists(tx)
+            submitTask {
+                transactionService.verifyAndSaveIfNotExists(tx)
+            }
         } catch (e: Exception) {
             transactionService.findByHash(tx.hash)?.let {
                 log.warn("Transaction already exists ${tx.hash}")
@@ -76,11 +76,13 @@ class EventProcessorService(
                 accountService.getValidatorsForSpace(space)
                     .filter { passphraseService.hasPassphrase(it.accountId) }
                     .mapNotNull { validator ->
-                        voteService.findOrCreateVote(
-                            space,
-                            validator,
-                            passphraseService.getPassphrase(validator.accountId)
-                        )
+                        submitTask {
+                            voteService.findOrCreateVote(
+                                space,
+                                validator,
+                                passphraseService.getPassphrase(validator.accountId)
+                            )
+                        }
                     }
             }
     }
@@ -90,7 +92,7 @@ class EventProcessorService(
      */
     fun onVote(vote: Vote) {
         try {
-            voteService.verifyAndSave(vote)
+            submitTask { voteService.verifyAndSave(vote) }
         } catch (e: Exception) {
             log.error("Could not process vote ${vote.toVO()}", e)
         }
@@ -105,39 +107,42 @@ class EventProcessorService(
 
         return spaceService.findAll()
             .filter { blockService.existsBySpace(it) }
-            .map { space ->
-                accountService.getActiveProducerBySpace(space, round)
-                    ?.let { producer -> createNextBlock(space, producer, round) }
-                    ?: blockService.getLastBlockDataBySpace(space)
+            .mapNotNull { space ->
+                try {
+                    accountService.getActiveProducerBySpace(space, round)
+                        ?.let { producer ->
+                            submitTask { blockProcessor.createNextBlock(space.id, producer, round) }
+                        }
+                        ?: blockService.getLastBlockDataBySpace(space)
+                } catch (e: Exception) {
+                    log.error("Could not produce block for round $round", e)
+                    null
+                }
             }
             .onEach { blockData -> objectFilterService.add(blockData.block.hash) }
     }
-
-    private fun createNextBlock(space: Space, producer: Account, round: Long): BlockData =
-        blockExecutor.submit(Callable {
-            try {
-                blockProcessor.createNextBlock(space.id, producer, round)
-            } catch (e: Exception) {
-                log.error(e.message, e)
-                throw e
-            }
-        }).get(timeout, TimeUnit.MILLISECONDS)
 
     /**
      * Receive block
      */
     fun onProposal(blockData: BlockData) {
         try {
-            blockExecutor.submit {
-                try {
-                    blockProcessor.processReceivedBlock(blockData)
-                } catch (e: Exception) {
-                    log.error(e.message, e)
-                    throw e
-                }
-            }.get(timeout, TimeUnit.MILLISECONDS)
+            submitTask {
+                blockProcessor.processReceivedBlock(blockData)
+            }
         } catch (e: Exception) {
             log.error("Could not process block ${blockData.block.hash}", e)
         }
+    }
+
+    private fun <T> submitTask(task: () -> T): T {
+        return executor.submit(Callable<T> {
+            try {
+                task()
+            } catch (e: Exception) {
+                log.error(e.message, e)
+                throw e
+            }
+        }).get(timeout, TimeUnit.MILLISECONDS)
     }
 }

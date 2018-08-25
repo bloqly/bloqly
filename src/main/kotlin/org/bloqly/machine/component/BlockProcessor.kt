@@ -221,11 +221,11 @@ class BlockProcessor(
 
         val spaceId = lastBlock.spaceId
 
+        val newHeight = lastBlock.height + 1
+
         // TODO add height to equation?
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)
             ?.let { return BlockData(it) }
-
-        val newHeight = lastBlock.height + 1
 
         val currentLIB = blockService.getByHash(lastBlock.libHash)
 
@@ -378,9 +378,8 @@ class BlockProcessor(
             .filter { it.invocationResult.isOK() }
     }
 
-    private fun getVotesForBlock(blockHash: String): List<Vote> {
-        return voteRepository.findByBlockHash(blockHash)
-    }
+    private fun getVotesForBlock(blockHash: String): List<Vote> =
+        voteRepository.findByBlockHash(blockHash)
 
     @Transactional(readOnly = true)
     fun getPendingTransactions(depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH): List<Transaction> =

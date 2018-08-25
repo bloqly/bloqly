@@ -85,7 +85,7 @@ class BlockProcessorTest : BaseTest() {
 
     @Test
     fun testLIBIsNotMovingBack() {
-        blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1) // normally finalized
+        val blockData1 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1) // normally finalized
 
         eventProcessorService.onGetVotes()
         val blockData2 = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2) // hyper-finalized
@@ -97,7 +97,7 @@ class BlockProcessorTest : BaseTest() {
 
         val lib = blockService.getByHash(blockData4.block.libHash)
 
-        assertEquals(blockData2.block.hash, lib.hash)
+        assertEquals(blockData1.block.hash, lib.hash)
 
         val lastBlock = blockService.getByHash(blockData4.block.hash)
 

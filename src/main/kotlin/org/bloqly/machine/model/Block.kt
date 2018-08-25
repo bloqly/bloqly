@@ -19,12 +19,8 @@ import javax.persistence.UniqueConstraint
     name = "block",
     uniqueConstraints = [
         UniqueConstraint(
-            columnNames = ["hash", "libHash"],
-            name = "block_uq_hash_lib_hash"
-        ),
-        UniqueConstraint(
-            columnNames = ["hash", "parentHash"],
-            name = "block_uq_hash_parent_hash"
+            columnNames = ["hash"],
+            name = "block_uq_hash"
         ),
         UniqueConstraint(
             columnNames = ["spaceId", "producerId", "height"],
@@ -33,10 +29,6 @@ import javax.persistence.UniqueConstraint
         UniqueConstraint(
             columnNames = ["spaceId", "producerId", "round"],
             name = "block_uq_producer_round"
-        ),
-        UniqueConstraint(
-            columnNames = ["hash"],
-            name = "block_uq_hash"
         )
     ],
     indexes = [

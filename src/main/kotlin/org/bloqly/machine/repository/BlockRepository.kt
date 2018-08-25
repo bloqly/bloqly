@@ -36,8 +36,6 @@ interface BlockRepository : CrudRepository<Block, Long> {
     )
     fun getBlocksDelta(spaceId: String, startHeight: Long, endHeight: Long): List<Block>
 
-    fun findBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Block?
-
     fun existsByHash(referencedBlockHash: String): Boolean
 
     @Cacheable("block")
@@ -49,8 +47,6 @@ interface BlockRepository : CrudRepository<Block, Long> {
     @CachePut(cacheNames = ["block"], key = "#block.hash")
     override fun <S : Block?> save(block: S): S
 
-    fun existsByLibHash(hash: String): Boolean
-
     fun existsByHashAndLibHash(hash: String, libHash: String): Boolean
 
     fun existsByHashAndParentHash(hash: String, parentHash: String): Boolean
@@ -58,4 +54,6 @@ interface BlockRepository : CrudRepository<Block, Long> {
     fun existsBySpaceIdAndProducerIdAndHeight(spaceId: String, producerId: String, height: Long): Boolean
 
     fun existsBySpaceIdAndProducerIdAndRound(spaceId: String, producerId: String, round: Long): Boolean
+
+    fun findBySpaceIdAndProducerIdAndRound(spaceId: String, accountId: String, round: Long): Block?
 }
