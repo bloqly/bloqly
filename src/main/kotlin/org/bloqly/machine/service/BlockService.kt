@@ -103,10 +103,6 @@ class BlockService(
         blockRepository.getLastBlock(spaceId)
 
     @Transactional(readOnly = true)
-    fun getLastBlockDataBySpace(space: Space): BlockData =
-        BlockData(blockRepository.getLastBlock(space.id))
-
-    @Transactional(readOnly = true)
     fun existsByHash(hash: String): Boolean =
         blockRepository.existsByHash(hash)
 

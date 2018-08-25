@@ -102,6 +102,8 @@ class EventProcessorService(
 
     /**
      * Produce next block
+     *
+     * Create next block or return the one created by current active producer in current round
      */
     fun onProduceBlock(): List<BlockData> {
 
@@ -115,7 +117,6 @@ class EventProcessorService(
                         ?.let { producer ->
                             submitTask { blockProcessor.createNextBlock(space.id, producer, round) }
                         }
-                        ?: blockService.getLastBlockDataBySpace(space)
                 } catch (e: Exception) {
                     log.error("Could not produce block for round $round", e)
                     null

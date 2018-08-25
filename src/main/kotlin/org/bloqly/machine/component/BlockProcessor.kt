@@ -221,11 +221,12 @@ class BlockProcessor(
 
         val spaceId = lastBlock.spaceId
 
-        val newHeight = lastBlock.height + 1
-
-        // TODO add height to equation?
+        // did I already create block in this round?
+        // if yes - return it
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)
             ?.let { return BlockData(it) }
+
+        val newHeight = lastBlock.height + 1
 
         val currentLIB = blockService.getByHash(lastBlock.libHash)
 
