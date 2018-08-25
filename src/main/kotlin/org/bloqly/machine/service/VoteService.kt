@@ -6,7 +6,6 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
-import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
@@ -22,7 +21,6 @@ import java.time.Instant
 class VoteService(
     private val voteRepository: VoteRepository,
     private val blockRepository: BlockRepository,
-    private val spaceRepository: SpaceRepository,
     private val accountRepository: AccountRepository
 ) {
 
@@ -33,7 +31,7 @@ class VoteService(
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
-        return voteRepository.findBySpaceIdAndValidatorAndHeight(space.id, validator, lastBlock.height + 1)
+        return voteRepository.findBySpaceIdAndValidatorAndHeight(space.id, validator, lastBlock.height)
             ?: createVote(validator, passphrase, lastBlock)
     }
 
@@ -56,7 +54,7 @@ class VoteService(
         val vote = Vote(
             validator = validator,
             blockHash = block.hash,
-            height = block.height + 1,
+            height = block.height,
             spaceId = block.spaceId,
             timestamp = TimeUtils.getCurrentTime()
         )

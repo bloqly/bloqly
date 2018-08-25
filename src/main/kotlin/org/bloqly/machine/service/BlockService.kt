@@ -160,7 +160,7 @@ class BlockService(
 
         val proposedLIB = getByHash(block.libHash)
 
-        if (proposedLIB.height < lib.height) {
+        if (block.height >= lastBlock.height && proposedLIB.height < lib.height) {
             log.warn(
                 "Proposed lib ${block.libHash} has lower height ${proposedLIB.height} " +
                     "then the existing ${lib.hash} ${lib.height}"

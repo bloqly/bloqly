@@ -37,6 +37,7 @@ data class Vote(
     @Column(nullable = false)
     val blockHash: String,
 
+    // height of the block this vote refers to
     @Column(nullable = false)
     val height: Long,
 

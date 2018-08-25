@@ -67,6 +67,8 @@ class EventProcessorService(
 
     /**
      * Create votes
+     *
+     * Validator can create single vote per height
      */
     fun onGetVotes(): List<Vote> {
 
@@ -75,12 +77,12 @@ class EventProcessorService(
             .flatMap { space ->
                 accountService.getValidatorsForSpace(space)
                     .filter { passphraseService.hasPassphrase(it.accountId) }
-                    .mapNotNull { validator ->
+                    .mapNotNull { producer ->
                         submitTask {
                             voteService.findOrCreateVote(
                                 space,
-                                validator,
-                                passphraseService.getPassphrase(validator.accountId)
+                                producer,
+                                passphraseService.getPassphrase(producer.accountId)
                             )
                         }
                     }
