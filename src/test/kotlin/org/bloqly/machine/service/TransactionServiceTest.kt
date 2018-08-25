@@ -81,9 +81,9 @@ class TransactionServiceTest : BaseTest() {
     fun testIsActualTransactions() {
 
         val blocks = listOf(
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2).block,
-            blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3).block
+            createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1).block,
+            createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2).block,
+            createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3).block
         )
 
         val tx = createTransaction(blocks[0].hash)

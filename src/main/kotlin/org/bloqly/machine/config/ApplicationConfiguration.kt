@@ -6,6 +6,7 @@ import org.springframework.boot.web.embedded.undertow.UndertowBuilderCustomizer
 import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver
 import org.springframework.web.client.RestTemplate
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -34,5 +35,10 @@ class ApplicationConfiguration(
         })
 
         return factory
+    }
+
+    @Bean
+    fun loadTimeWeaver(): InstrumentationLoadTimeWeaver {
+        return InstrumentationLoadTimeWeaver()
     }
 }

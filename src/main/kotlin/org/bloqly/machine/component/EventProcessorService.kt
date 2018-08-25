@@ -1,5 +1,7 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.AccountService
@@ -115,7 +117,7 @@ class EventProcessorService(
                 try {
                     accountService.getActiveProducerBySpace(space, round)
                         ?.let { producer ->
-                            submitTask { blockProcessor.createNextBlock(space.id, producer, round) }
+                            submitTask { createNextBlock(space.id, producer, round) }
                         }
                 } catch (e: Exception) {
                     log.error("Could not produce block for round $round", e)
@@ -123,6 +125,25 @@ class EventProcessorService(
                 }
             }
             .onEach { blockData -> objectFilterService.add(blockData.block.hash) }
+    }
+
+    fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
+        val lastBlock = blockService.getLastBlockBySpace(spaceId)
+
+        return createNextBlock(lastBlock, producer, round)
+    }
+
+    fun createNextBlock(lastBlock: Block, producer: Account, round: Long): BlockData {
+
+        val passphrase = passphraseService.getPassphrase(producer.accountId)
+
+        val t1 = System.currentTimeMillis()
+        val transactions = blockProcessor.getPendingTransactionsByLastBlock(lastBlock)
+        val t2 = System.currentTimeMillis()
+
+        log.info("TIME SPENT GET PENDING TRANSACTIONS " + (t2 - t1))
+
+        return blockProcessor.createNextBlock(lastBlock.hash, transactions, producer, passphrase, round)
     }
 
     /**

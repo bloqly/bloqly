@@ -19,7 +19,7 @@ open class EventReceiverServiceTest : BaseTest() {
     fun testReceiveNewTransactionsWithNewBlock() {
 
         val tx = testService.createTransaction()
-        val block = blockProcessor.createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
+        val block = createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         val genesis = genesisService.exportFirst(DEFAULT_SPACE)
 
@@ -39,8 +39,8 @@ open class EventReceiverServiceTest : BaseTest() {
 
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
-        val block1 = blockProcessor.createNextBlock(lastBlock, validatorForRound(1), 1).block
-        val block2 = blockProcessor.createNextBlock(lastBlock, validatorForRound(2), 2).block
+        val block1 = createNextBlock(lastBlock, validatorForRound(1), 1).block
+        val block2 = createNextBlock(lastBlock, validatorForRound(2), 2).block
 
         val validators = accountService.getValidatorsForSpaceId(DEFAULT_SPACE)
 
@@ -83,12 +83,12 @@ open class EventReceiverServiceTest : BaseTest() {
     fun testChainsJoinAfterSplit() {
 
         val blockChain1 = arrayListOf(
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(1), 1),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(2), 2),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(5), 5),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(6), 6),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(9), 9),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(10), 10)
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(1), 1),
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(2), 2),
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(5), 5),
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(6), 6),
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(9), 9),
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(10), 10)
         )
 
         val genesis = genesisService.exportFirst(DEFAULT_SPACE)
@@ -98,10 +98,10 @@ open class EventReceiverServiceTest : BaseTest() {
         genesisService.importFirst(genesis)
 
         val blockChain2 = arrayListOf(
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(3), 3),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(4), 4),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(7), 7),
-            blockProcessor.createNextBlock(Application.DEFAULT_SPACE, validatorForRound(8), 8)
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(3), 3),
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(4), 4),
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(7), 7),
+            createNextBlock(Application.DEFAULT_SPACE, validatorForRound(8), 8)
         )
 
         assertEquals(blockChain1[0].block.parentHash, blockChain2[0].block.parentHash)

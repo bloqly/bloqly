@@ -53,8 +53,7 @@ class BlockProcessor(
     private val accountRepository: AccountRepository,
     private val spaceService: SpaceService,
     private val transactionRepository: TransactionRepository,
-    private val finalizedTransactionRepository: FinalizedTransactionRepository,
-    private val passphraseService: PassphraseService
+    private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
@@ -116,7 +115,8 @@ class BlockProcessor(
         return blockRepository.save(block)
     }
 
-    private fun evaluateBlocks(currentLIB: Block, toBlock: Block, propertyContext: PropertyContext) {
+    @Transactional
+    fun evaluateBlocks(currentLIB: Block, toBlock: Block, propertyContext: PropertyContext) {
 
         if (currentLIB == toBlock) {
             return
@@ -199,23 +199,15 @@ class BlockProcessor(
     }
 
     @Transactional
-    fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData {
-        val lastBlock = blockService.getLastBlockBySpace(spaceId)
+    fun createNextBlock(
+        lastBlockHash: String,
+        transactions: List<Transaction>,
+        producer: Account,
+        passphrase: String,
+        round: Long
+    ): BlockData {
 
-        val passphrase = passphraseService.getPassphrase(producer.accountId)
-
-        return createNextBlock(lastBlock, producer, passphrase, round)
-    }
-
-    @Transactional
-    fun createNextBlock(lastBlock: Block, producer: Account, round: Long): BlockData {
-
-        val passphrase = passphraseService.getPassphrase(producer.accountId)
-
-        return createNextBlock(lastBlock, producer, passphrase, round)
-    }
-
-    private fun createNextBlock(lastBlock: Block, producer: Account, passphrase: String, round: Long): BlockData {
+        val lastBlock = blockRepository.getByHash(lastBlockHash)
 
         log.info("Creating next block on top of ${lastBlock.header()}")
 
@@ -237,11 +229,11 @@ class BlockProcessor(
         val t2 = System.currentTimeMillis()
         log.info("TIME SPENT EVALUATE: " + (t2 - t1))
 
-        val txResults = getTransactionResultsForNextBlock(lastBlock, propertyContext)
+        val txResults = getTransactionResultsForNextBlock(transactions, propertyContext)
         val t3 = System.currentTimeMillis()
-        log.info("TIME SPENT EVALUATE: " + (t3 - t2))
+        log.info("TIME SPENT GET TX FOR NEXT BLOCK: " + (t3 - t2))
 
-        val transactions = txResults.map { it.transaction }
+        val selectedTransactions = txResults.map { it.transaction }
 
         val votes = getVotesForBlock(lastBlock.hash)
         val prevVotes = getVotesForBlock(lastBlock.parentHash)
@@ -260,10 +252,10 @@ class BlockProcessor(
             parentHash = lastBlock.hash,
             producerId = producer.accountId,
             passphrase = passphrase,
-            txHash = CryptoUtils.hashTransactions(transactions),
+            txHash = CryptoUtils.hashTransactions(selectedTransactions),
             validatorTxHash = CryptoUtils.hashVotes(votes),
             round = round,
-            transactions = transactions,
+            transactions = selectedTransactions,
             votes = votes
         )
         val t5 = System.currentTimeMillis()
@@ -352,10 +344,9 @@ class BlockProcessor(
     }
 
     private fun getTransactionResultsForNextBlock(
-        lastBlock: Block,
+        transactions: List<Transaction>,
         propertyContext: PropertyContext
     ): List<TransactionResult> {
-        val transactions = getPendingTransactionsByLastBlock(lastBlock)
 
         val hashes = transactions.map { it.hash }
 
@@ -363,7 +354,7 @@ class BlockProcessor(
             throw IllegalStateException("Transactions are not unique")
         }
 
-        return transactions
+        val txs = transactions
             .map { tx ->
 
                 val localPropertyContext = propertyContext.getLocalCopy()
@@ -377,6 +368,12 @@ class BlockProcessor(
                 TransactionResult(tx, result)
             }
             .filter { it.invocationResult.isOK() }
+
+        val t3 = System.currentTimeMillis()
+
+        log.info("TIME SPENT PROCESSING TXS " + (t3 - t3))
+
+        return txs
     }
 
     private fun getVotesForBlock(blockHash: String): List<Vote> =

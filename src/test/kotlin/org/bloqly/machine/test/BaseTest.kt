@@ -135,4 +135,10 @@ open class BaseTest {
     }
 
     fun onBlock(blockData: BlockData) = eventReceiverService.onBlocks(listOf(blockData))
+
+    fun createNextBlock(spaceId: String, producer: Account, round: Long): BlockData =
+        eventProcessorService.createNextBlock(spaceId, producer, round)
+
+    fun createNextBlock(lastBlock: Block, producer: Account, round: Long): BlockData =
+        eventProcessorService.createNextBlock(lastBlock, producer, round)
 }

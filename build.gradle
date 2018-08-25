@@ -124,7 +124,7 @@ dependencies {
     compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: kotlin_version
 
     compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: kotlin_version
-    
+
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
