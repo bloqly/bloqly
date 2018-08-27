@@ -328,18 +328,16 @@ class BlockProcessor(
     }
 
     private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block) {
-        txResults.forEach { txResult ->
-
-            val output = ObjectUtils.writeValueAsString(
-                Properties(txResult.invocationResult.output)
+        val txOutputs = txResults.map {
+            TransactionOutput(
+                TransactionOutputId(block.hash, it.transaction.hash),
+                ObjectUtils.writeValueAsString(
+                    Properties(it.invocationResult.output)
+                )
             )
-
-            val txOutput = TransactionOutput(
-                TransactionOutputId(block.hash, txResult.transaction.hash),
-                output
-            )
-            transactionOutputRepository.save(txOutput)
         }
+
+        transactionOutputRepository.saveAll(txOutputs)
     }
 
     private fun getTransactionResultsForNextBlock(
@@ -358,11 +356,7 @@ class BlockProcessor(
 
                 val localPropertyContext = propertyContext.getLocalCopy()
 
-                val t1 = System.currentTimeMillis()
                 val result = transactionProcessor.processTransaction(tx, localPropertyContext)
-                val t2 = System.currentTimeMillis()
-
-                log.info("Processed transaction in " + (t2 - t1))
 
                 if (result.isOK()) {
                     propertyContext.merge(localPropertyContext)
