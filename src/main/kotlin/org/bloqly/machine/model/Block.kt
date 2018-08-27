@@ -85,7 +85,7 @@ data class Block(
     val validatorTxHash: String,
 
     @Column(nullable = false)
-    val signature: String,
+    val signature: String = "",
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -104,7 +104,7 @@ data class Block(
     val votes: List<Vote> = listOf(),
 
     @Column(nullable = false)
-    val hash: String,
+    var hash: String = "",
 
     @Column(nullable = false)
     val libHeight: Long = 0

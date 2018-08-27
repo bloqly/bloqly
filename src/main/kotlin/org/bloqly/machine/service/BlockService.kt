@@ -53,9 +53,31 @@ class BlockService(
         val proposer = accountRepository.findByAccountId(producerId)
             ?: throw IllegalArgumentException("Could not find producer: $producerId")
 
+        val newBlock = Block(
+            spaceId = spaceId,
+            height = height,
+            weight = weight,
+            diff = diff,
+            round = round,
+            timestamp = timestamp,
+            parentHash = parentHash,
+            producerId = producerId,
+            txHash = txHash?.encode16(),
+            validatorTxHash = validatorTxHash.encode16(),
+            transactions = transactions,
+            votes = votes
+        )
+
+        val libHeight = if (height > 0) {
+            calculateLIBForBlock(newBlock).height
+        } else {
+            0
+        }
+
         val dataToSign = Bytes.concat(
             spaceId.toByteArray(),
             EncodingUtils.longToBytes(height),
+            EncodingUtils.longToBytes(libHeight),
             EncodingUtils.longToBytes(weight),
             EncodingUtils.intToBytes(diff),
             EncodingUtils.longToBytes(round),
@@ -72,30 +94,11 @@ class BlockService(
         )
         val blockHash = CryptoUtils.hash(signature).encode16()
 
-        val newBlock = Block(
-            spaceId = spaceId,
-            height = height,
-            weight = weight,
-            diff = diff,
-            round = round,
-            timestamp = timestamp,
-            parentHash = parentHash,
-            producerId = producerId,
-            txHash = txHash?.encode16(),
-            validatorTxHash = validatorTxHash.encode16(),
-            signature = signature.encode16(),
-            transactions = transactions,
-            votes = votes,
-            hash = blockHash
+        return newBlock.copy(
+            hash = blockHash,
+            libHeight = libHeight,
+            signature = signature.encode16()
         )
-
-        val libHeight = if (height > 0) {
-            calculateLIBForBlock(newBlock).height
-        } else {
-            0
-        }
-
-        return newBlock.copy(libHeight = libHeight)
     }
 
     @Transactional(readOnly = true)
