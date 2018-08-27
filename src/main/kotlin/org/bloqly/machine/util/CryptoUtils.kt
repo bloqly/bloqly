@@ -124,8 +124,7 @@ object CryptoUtils {
                 tx.value.decode16(),
                 tx.referencedBlockHash.decode16(),
                 tx.transactionType.name.toByteArray(),
-                EncodingUtils.longToBytes(tx.timestamp),
-                tx.nonce.decode16()
+                EncodingUtils.longToBytes(tx.timestamp)
             )
         )
     }

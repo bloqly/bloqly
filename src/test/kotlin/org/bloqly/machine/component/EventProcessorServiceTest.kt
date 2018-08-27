@@ -89,6 +89,7 @@ class EventProcessorServiceTest : BaseTest() {
 
     @Test
     fun testInitTwiceWithDifferentSpaceOK() {
+        TimeUtils.testTick()
         blockchainService.createBlockchain(
             "space1", TEST_BLOCK_BASE_DIR, passphrase(root.accountId)
         )
@@ -117,6 +118,8 @@ class EventProcessorServiceTest : BaseTest() {
         assertFalse(userBalanceBefore.isPresent)
 
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
+
+        TimeUtils.testTick()
 
         val tx = transactionService.createTransaction(
             space = DEFAULT_SPACE,

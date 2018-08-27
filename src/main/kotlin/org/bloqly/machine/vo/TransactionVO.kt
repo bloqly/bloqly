@@ -19,8 +19,7 @@ data class TransactionVO(
     val timestamp: Long,
     val signature: String,
     val publicKey: String,
-    val hash: String,
-    val nonce: String
+    val hash: String
 ) {
 
     fun toModel(): Transaction {
@@ -42,8 +41,7 @@ data class TransactionVO(
             timestamp = timestamp,
             signature = signature,
             publicKey = publicKey,
-            hash = hash,
-            nonce = nonce
+            hash = hash
         )
     }
 }

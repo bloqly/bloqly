@@ -21,6 +21,7 @@ import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.VoteVO
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -99,6 +100,9 @@ class TestService(
 
         val root = accountRepository.findByAccountId(getRoot().accountId)!!
         val user = accountRepository.findByAccountId(getUser().accountId)!!
+
+        val time = TimeUtils.getCurrentTime()
+        TimeUtils.setTestTime(time + 1)
 
         return transactionService.createTransaction(
             space = DEFAULT_SPACE,

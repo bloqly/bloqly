@@ -70,12 +70,11 @@ class TransactionService(
         value: ByteArray,
         transactionType: TransactionType,
         referencedBlockHash: String,
-        timestamp: Long = TimeUtils.getCurrentTime(),
-        nonce: String = CryptoUtils.newNonce()
+        timestamp: Long = TimeUtils.getCurrentTime()
     ): Transaction {
 
-        require(!transactionRepository.existsByNonce(nonce)) {
-            "Transaction with nonce $nonce already exists"
+        require(!transactionRepository.existsByOriginAndTimestamp(originId, timestamp)) {
+            "Transaction already exists origin: $originId, timestamp: $timestamp"
         }
 
         val origin = accountRepository.findByAccountId(originId)!!
@@ -90,8 +89,7 @@ class TransactionService(
             transactionType = transactionType,
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
-            publicKey = origin.publicKey,
-            nonce = nonce
+            publicKey = origin.publicKey
         )
 
         val signature = CryptoUtils.sign(

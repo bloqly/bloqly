@@ -17,6 +17,7 @@ import org.bloqly.machine.util.ParameterUtils.writeBoolean
 import org.bloqly.machine.util.ParameterUtils.writeInteger
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.ParameterUtils.writeString
+import org.bloqly.machine.util.TimeUtils
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Ignore
@@ -116,6 +117,7 @@ class TransactionProcessorTest : BaseTest() {
 
         val params = ParameterUtils.writeParams(arrayOf("test", 22, true, BInteger(123)))
 
+        TimeUtils.testTick()
         val invokeContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,

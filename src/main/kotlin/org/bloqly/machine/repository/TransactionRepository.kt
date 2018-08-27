@@ -8,8 +8,6 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
 
     fun existsByHash(hash: String): Boolean
 
-    fun existsByNonce(nonce: String): Boolean
-
     @Query(
         """
         select distinct t.* from block_transactions bt
@@ -35,4 +33,6 @@ interface TransactionRepository : CrudRepository<Transaction, String> {
     fun getByHash(hash: String): Transaction
 
     fun findByHash(hash: String): Transaction?
+
+    fun existsByOriginAndTimestamp(origin: String, timestamp: Long): Boolean
 }

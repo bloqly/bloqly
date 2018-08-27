@@ -4,6 +4,7 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.test.BaseControllerTest
 import org.bloqly.machine.util.APIUtils
+import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.TransactionVO
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -45,6 +46,7 @@ class TransactionControllerTest : BaseControllerTest() {
 
         assertEquals(0, blockProcessor.getPendingTransactionsByLastBlock(lastBlock).size)
 
+        TimeUtils.testTick()
         val tx = restTemplate.postForObject(url, entity, TransactionVO::class.java)
 
         val pendingTransactions = blockProcessor.getPendingTransactionsByLastBlock(lastBlock)

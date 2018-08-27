@@ -22,4 +22,11 @@ object TimeUtils {
     fun setTestRound(round: Long) {
         setTestTime(round * ROUND + 1)
     }
+
+    fun testTick() {
+        val time = TEST_TIME
+        if(time != null) {
+            TEST_TIME = time + 1
+        }
+    }
 }

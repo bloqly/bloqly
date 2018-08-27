@@ -18,8 +18,8 @@ import javax.persistence.UniqueConstraint
             name = "transaction_uq_hash"
         ),
         UniqueConstraint(
-            columnNames = ["nonce"],
-            name = "transaction_uq_nonce"
+            columnNames = ["origin", "timestamp"],
+            name = "transaction_uq_origin_timestamp"
         )
     ]
 )
@@ -63,10 +63,7 @@ data class Transaction(
     val publicKey: String,
 
     @Column(nullable = false)
-    val hash: String = "",
-
-    @Column(nullable = false)
-    val nonce: String
+    val hash: String = ""
 ) {
 
     fun toVO(): TransactionVO {
@@ -82,8 +79,7 @@ data class Transaction(
             timestamp = timestamp,
             signature = signature,
             publicKey = publicKey,
-            hash = hash,
-            nonce = nonce
+            hash = hash
         )
     }
 
