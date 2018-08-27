@@ -85,25 +85,23 @@ class BlockProcessorTest : BaseTest() {
 
     @Test
     fun testLIBIsNotMovingBack() {
-        val blockData1 = createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1) // normally finalized
+        val blockData1 = createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         eventProcessorService.onGetVotes()
-        val blockData2 = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2) // hyper-finalized
+        val blockData2 = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2) // hyper-finalizer
 
         eventProcessorService.onGetVotes()
         createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3) // same validator
 
         val blockData4 = createNextBlock(DEFAULT_SPACE, validatorForRound(7), 7) // same validator
 
-        val lib = blockService.getByHash(blockData4.block.libHash)
-
-        assertEquals(blockData1.block.hash, lib.hash)
+        assertEquals(blockData1.block.height, blockData4.block.libHeight)
 
         val lastBlock = blockService.getByHash(blockData4.block.hash)
 
         val calculatedLIB = blockService.calculateLIBForBlock(lastBlock.hash)
 
-        assertEquals(blockData2.block.libHash, calculatedLIB.libHash)
+        assertEquals(blockData2.block.libHeight, calculatedLIB.libHeight)
     }
 
     @Test
@@ -117,13 +115,13 @@ class BlockProcessorTest : BaseTest() {
 
         val blockData3 = createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3)
 
-        assertEquals(firstBlock.hash, blockData3.block.libHash)
+        assertEquals(firstBlock.height, blockData3.block.libHeight)
 
         val lastBlock = blockService.getByHash(blockData3.block.hash)
 
         val calculatedLIB = blockService.calculateLIBForBlock(lastBlock.hash)
 
-        assertEquals(firstBlock.hash, calculatedLIB.libHash)
+        assertEquals(firstBlock.height, calculatedLIB.libHeight)
     }
 
     @Test
@@ -158,12 +156,11 @@ class BlockProcessorTest : BaseTest() {
     fun testGetBlockRange() {
         populateBlocks(cleanup = false)
 
-        val blocksRange = blockProcessor.getBlocksRange(
-            blocks.first().block.toModel(),
+        val blocksRange = blockProcessor.getBlocksFromLIB(
             blocks.last().block.toModel()
         )
 
-        val blockHashes = blocks.drop(1).map { it.block.hash }
+        val blockHashes = blocks.drop(5).map { it.block.hash }
         val rangeBlockHashes = blocksRange.map { it.hash }
 
         assertEquals(blockHashes, rangeBlockHashes)
@@ -311,7 +308,7 @@ class BlockProcessorTest : BaseTest() {
         txs[0] = testService.createTransaction()
         blocks.add(0, createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1))
         assertEquals(blocks[0].block.producerId, accountService.getProducerBySpace(space, 1).accountId)
-        assertEquals(firstBlock.hash, blocks[0].block.libHash)
+        assertEquals(firstBlock.height, blocks[0].block.libHeight)
         assertEquals(firstBlock.hash, txs[0]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("1")
@@ -323,7 +320,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[1]!!.hash, blocks[1].transactions.first().hash)
         assertEquals(1, blocks[1].transactions.size)
 
-        assertEquals(firstBlock.hash, blocks[1].block.libHash)
+        assertEquals(firstBlock.height, blocks[1].block.libHeight)
         assertEquals(firstBlock.hash, txs[1]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("2")
@@ -335,7 +332,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[2]!!.hash, blocks[2].transactions.first().hash)
         assertEquals(1, blocks[2].transactions.size)
 
-        assertEquals(firstBlock.hash, blocks[2].block.libHash)
+        assertEquals(firstBlock.height, blocks[2].block.libHeight)
         assertEquals(firstBlock.hash, txs[2]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("3")
@@ -349,7 +346,7 @@ class BlockProcessorTest : BaseTest() {
 
         // lib changed, for the first time
         // all transactions from block[0] must be applied
-        assertEquals(blocks[0].block.hash, blocks[3].block.libHash)
+        assertEquals(blocks[0].block.height, blocks[3].block.libHeight)
         assertEquals(firstBlock.hash, txs[3]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("4")
@@ -361,7 +358,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[4]!!.hash, blocks[4].transactions.first().hash)
         assertEquals(1, blocks[4].transactions.size)
 
-        assertEquals(blocks[1].block.hash, blocks[4].block.libHash)
+        assertEquals(blocks[1].block.height, blocks[4].block.libHeight)
         assertEquals(blocks[0].block.hash, txs[4]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("5")
@@ -373,7 +370,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[5]!!.hash, blocks[5].transactions.first().hash)
         assertEquals(1, blocks[5].transactions.size)
 
-        assertEquals(blocks[2].block.hash, blocks[5].block.libHash)
+        assertEquals(blocks[2].block.height, blocks[5].block.libHeight)
         assertEquals(blocks[1].block.hash, txs[5]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("6")
@@ -385,7 +382,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[6]!!.hash, blocks[6].transactions.first().hash)
         assertEquals(1, blocks[6].transactions.size)
 
-        assertEquals(blocks[3].block.hash, blocks[6].block.libHash)
+        assertEquals(blocks[3].block.height, blocks[6].block.libHeight)
         assertEquals(blocks[2].block.hash, txs[6]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("7")
@@ -397,7 +394,7 @@ class BlockProcessorTest : BaseTest() {
         assertEquals(txs[7]!!.hash, blocks[7].transactions.first().hash)
         assertEquals(1, blocks[7].transactions.size)
 
-        assertEquals(blocks[4].block.hash, blocks[7].block.libHash)
+        assertEquals(blocks[4].block.height, blocks[7].block.libHeight)
         assertEquals(blocks[3].block.hash, txs[7]!!.referencedBlockHash)
 
         assertPropertyValueCandidate("8")

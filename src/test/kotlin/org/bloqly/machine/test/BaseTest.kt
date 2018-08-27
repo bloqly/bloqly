@@ -131,7 +131,7 @@ open class BaseTest {
 
     fun getLIB(): Block {
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
-        return blockService.getByHash(lastBlock.libHash)
+        return blockService.getLIBForBlock(lastBlock)
     }
 
     fun onBlock(blockData: BlockData) = eventReceiverService.onBlocks(listOf(blockData))

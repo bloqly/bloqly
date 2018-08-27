@@ -33,7 +33,7 @@ import javax.persistence.UniqueConstraint
     ],
     indexes = [
         Index(
-            columnList = "height DESC, diff DESC, weight DESC, round, hash",
+            columnList = "height DESC, libHeight DESC, diff DESC, weight DESC, round, hash",
             name = "block_last_block_idx"
         ),
         Index(
@@ -103,7 +103,7 @@ data class Block(
     val hash: String,
 
     @Column(nullable = false)
-    val libHash: String = ""
+    val libHeight: Long = 0
 ) {
 
     fun toVO(): BlockVO {
@@ -121,7 +121,7 @@ data class Block(
             validatorTxHash = validatorTxHash,
             signature = signature,
             hash = hash,
-            libHash = libHash
+            libHeight = libHeight
         )
     }
 
@@ -151,6 +151,6 @@ data class Block(
             "parentHash='$parentHash', " +
             "producerId='$producerId', " +
             "hash='$hash', " +
-            "libHash='$libHash')"
+            "libHeight='$libHeight')"
     }
 }

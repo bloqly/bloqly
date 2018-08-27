@@ -89,13 +89,13 @@ class BlockService(
             hash = blockHash
         )
 
-        val libHash = if (height > 0) {
-            calculateLIBForBlock(newBlock).hash
+        val libHeight = if (height > 0) {
+            calculateLIBForBlock(newBlock).height
         } else {
-            blockHash
+            0
         }
 
-        return newBlock.copy(libHash = libHash)
+        return newBlock.copy(libHeight = libHeight)
     }
 
     @Transactional(readOnly = true)
@@ -107,19 +107,26 @@ class BlockService(
         blockRepository.existsByHash(hash)
 
     @Transactional(readOnly = true)
-    fun isAfterLIB(target: Block): Boolean {
+    fun isAfterLIB(block: Block): Boolean {
 
-        val lastBlock = blockRepository.getLastBlock(target.spaceId)
-
-        val lib = blockRepository.getByHash(lastBlock.libHash)
-
-        var block = target
-
-        while (block.hash != lib.hash && block.height > 0 && block.height >= lib.height) {
-            block = blockRepository.findByHash(block.parentHash) ?: return false
+        if (block.height == 0L) {
+            return true
         }
 
-        return block.hash == lib.hash
+        val lastBlock = blockRepository.getLastBlock(block.spaceId)
+
+        var currentBlock = block
+
+        while (currentBlock.height > lastBlock.libHeight) {
+
+            if (currentBlock.hash == block.hash) {
+                return true
+            }
+
+            currentBlock = findByHash(currentBlock.parentHash) ?: return false
+        }
+
+        return false
     }
 
     @Transactional(readOnly = true)
@@ -135,11 +142,6 @@ class BlockService(
             return false
         }
 
-        if (!blockRepository.existsByHash(block.libHash)) {
-            log.warn("No LIB found by hash ${block.libHash}.")
-            return false
-        }
-
         if (blockRepository.existsBySpaceIdAndProducerIdAndHeight(block.spaceId, block.producerId, block.height)) {
             log.warn("Unique constraint violated (space_id, producer_id, height) : (${block.spaceId}, ${block.producerId}, ${block.height})")
             return false
@@ -147,20 +149,6 @@ class BlockService(
 
         if (blockRepository.existsBySpaceIdAndProducerIdAndRound(block.spaceId, block.producerId, block.round)) {
             log.warn("Unique constraint violated (space_id, producer_id, round) : (${block.spaceId}, ${block.producerId}, ${block.round})")
-            return false
-        }
-
-        val lastBlock = getLastBlockBySpace(block.spaceId)
-
-        val lib = getByHash(lastBlock.libHash)
-
-        val proposedLIB = getByHash(block.libHash)
-
-        if (block.height >= lastBlock.height && proposedLIB.height < lib.height) {
-            log.warn(
-                "Proposed lib ${block.libHash} has lower height ${proposedLIB.height} " +
-                    "then the existing ${lib.hash} ${lib.height}"
-            )
             return false
         }
 
@@ -176,46 +164,39 @@ class BlockService(
     fun calculateLIBForBlock(blockHash: String): Block = calculateLIBForBlock(getByHash(blockHash))
 
     @Transactional(readOnly = true)
-    fun calculateLIBForBlock(targetBlock: Block): Block {
+    fun calculateLIBForBlock(block: Block): Block {
 
-        if (targetBlock.height == 0L) {
-            return targetBlock
+        if (block.height == 0L) {
+            return block
         }
 
         // TODO calculate quorum taking into account the current block producer
         // also, being a block producer, don't create a vote as it is unnecessary -
         // you already vote with your block
         // introduce method "isQuorum(block: Block): Boolean"
-        val quorum = propertyRepository.getQuorumBySpaceId(targetBlock.spaceId)
+        val quorum = propertyRepository.getQuorumBySpaceId(block.spaceId)
 
-        if (isHyperFinalizer(targetBlock, quorum)) {
-            val parent = blockRepository.getByHash(targetBlock.parentHash)
+        if (isHyperFinalizer(block, quorum)) {
+            val parent = blockRepository.getByHash(block.parentHash)
             return blockRepository.getByHash(parent.parentHash)
         }
 
-        log.info("Calculating LIB for block ${targetBlock.header()}")
+        log.info("Calculating LIB for block ${block.header()}")
 
         val validatorIds = mutableSetOf<String>()
 
-        val parentBlock = getByHash(targetBlock.parentHash)
+        val parentBlock = getByHash(block.parentHash)
 
-        val parentLIB = if (parentBlock.height > 0) {
-            getByHash(parentBlock.libHash)
-        } else {
-            parentBlock
+        var currentBlock = block
+
+        while (validatorIds.size < quorum && currentBlock.height > 0 && currentBlock.height > parentBlock.libHeight) {
+
+            validatorIds.add(currentBlock.producerId)
+
+            currentBlock = blockRepository.getByHash(currentBlock.parentHash)
         }
 
-        var block = targetBlock
-
-        while (validatorIds.size < quorum && block.height > 0 && block.hash != parentLIB.hash) {
-
-            validatorIds.add(block.producerId)
-
-            log.info("Getting parent for block ${block.header()}")
-            block = blockRepository.getByHash(block.parentHash)
-        }
-
-        return block
+        return currentBlock
     }
 
     @Transactional(readOnly = true)
@@ -289,4 +270,19 @@ class BlockService(
 
     @Transactional(readOnly = true)
     fun existsBySpace(space: Space): Boolean = blockRepository.existsBySpaceId(space.id)
+
+    @Transactional(readOnly = true)
+    fun getLIBForBlock(block: Block): Block {
+        if (block.height == 0L) {
+            return block
+        }
+
+        var currentBlock = block
+
+        while (currentBlock.height > block.libHeight) {
+            currentBlock = blockRepository.getByHash((currentBlock.parentHash))
+        }
+
+        return currentBlock
+    }
 }

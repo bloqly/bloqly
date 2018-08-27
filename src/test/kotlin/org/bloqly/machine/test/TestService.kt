@@ -93,7 +93,7 @@ class TestService(
 
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
-        val lib = blockService.getByHash(lastBlock.libHash)
+        val lib = blockService.getLIBForBlock(lastBlock)
 
         val libHash = lib.hash
 
@@ -116,7 +116,7 @@ class TestService(
 
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
-        val lib = blockService.getByHash(lastBlock.libHash)
+        val lib = blockService.getLIBForBlock(lastBlock)
 
         val root = accountRepository.findByAccountId(getRoot().accountId)!!
         val user = accountRepository.findByAccountId(getUser().accountId)!!

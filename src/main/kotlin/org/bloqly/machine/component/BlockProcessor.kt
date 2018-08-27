@@ -67,10 +67,6 @@ class BlockProcessor(
 
         requireValid(receivedBlock)
 
-        val lastBlock = blockService.getLastBlockBySpace(receivedBlock.spaceId)
-
-        val currentLIB = blockService.calculateLIBForBlock(lastBlock)
-
         val votes = blockData.votes.map { vote ->
             try {
                 voteService.findVote(vote.publicKey, vote.blockHash)!!
@@ -91,7 +87,7 @@ class BlockProcessor(
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        evaluateBlocks(currentLIB, receivedBlock, propertyContext)
+        evaluateFromLIB(receivedBlock, propertyContext)
 
         val block = receivedBlock.copy(
             transactions = transactions,
@@ -104,7 +100,7 @@ class BlockProcessor(
         val savedNewBlock = saveBlock(block)
         log.debug("Saved block with hash ${block.hash}")
 
-        moveLIBIfNeeded(currentLIB, savedNewBlock)
+        moveLIBIfNeeded(savedNewBlock)
     }
 
     private fun saveBlock(block: Block): Block {
@@ -116,13 +112,8 @@ class BlockProcessor(
     }
 
     @Transactional
-    fun evaluateBlocks(currentLIB: Block, toBlock: Block, propertyContext: PropertyContext) {
-
-        if (currentLIB == toBlock) {
-            return
-        }
-
-        getBlocksRange(currentLIB, toBlock).forEach { block ->
+    fun evaluateFromLIB(toBlock: Block, propertyContext: PropertyContext) {
+        getBlocksFromLIB(toBlock).forEach { block ->
             evaluateBlock(block, propertyContext)
         }
     }
@@ -135,11 +126,10 @@ class BlockProcessor(
         key: String
     ): ByteArray? {
         val lastBlock = blockService.getLastBlockBySpace(spaceId)
-        val lib = blockService.getByHash(lastBlock.libHash)
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        evaluateBlocks(lib, lastBlock, propertyContext)
+        evaluateFromLIB(lastBlock, propertyContext)
 
         return propertyContext.getPropertyValue(spaceId, self, target, key)
     }
@@ -148,13 +138,13 @@ class BlockProcessor(
      * Returns blocks range (afterBlock, toBlock]
      */
     @Transactional(readOnly = true)
-    internal fun getBlocksRange(afterBlock: Block, toBlock: Block): List<Block> {
+    internal fun getBlocksFromLIB(block: Block): List<Block> {
 
-        var currentBlock = toBlock
+        var currentBlock = block
 
         val blocks = mutableListOf<Block>()
 
-        while (currentBlock.height > afterBlock.height) {
+        while (currentBlock.height > block.libHeight) {
             blocks.add(currentBlock)
 
             currentBlock = blockRepository.findByHash(currentBlock.parentHash)!!
@@ -220,12 +210,10 @@ class BlockProcessor(
 
         val newHeight = lastBlock.height + 1
 
-        val currentLIB = blockService.getByHash(lastBlock.libHash)
-
         val propertyContext = PropertyContext(propertyService, contractService)
 
         val t1 = System.currentTimeMillis()
-        evaluateBlocks(currentLIB, lastBlock, propertyContext)
+        evaluateFromLIB(lastBlock, propertyContext)
         val t2 = System.currentTimeMillis()
         log.info("TIME SPENT EVALUATE: " + (t2 - t1))
 
@@ -261,6 +249,7 @@ class BlockProcessor(
         val t5 = System.currentTimeMillis()
         log.info("TIME SPENT CREATE NEW: " + (t5 - t4))
 
+        // todo add tx output hash to block and signature
         saveTxOutputs(txResults, newBlock)
 
         val t6 = System.currentTimeMillis()
@@ -268,7 +257,7 @@ class BlockProcessor(
 
         val blockData = BlockData(saveBlock(newBlock))
 
-        moveLIBIfNeeded(currentLIB, newBlock)
+        moveLIBIfNeeded(newBlock)
 
         val t7 = System.currentTimeMillis()
         log.info("TIME SPENT moveLIBIfNeeded: " + (t7 - t6))
@@ -283,49 +272,48 @@ class BlockProcessor(
      * Iterate and apply all transactions from the block next to the previous LIB including NEW_LIB
      * In some situations LIB.height + 1 = NEW_LIB.height
      */
-    private fun moveLIBIfNeeded(currentLIB: Block, lastBlock: Block) {
+    private fun moveLIBIfNeeded(lastBlock: Block) {
 
-        log.info("Check if LIB has changed, currentLIB: ${currentLIB.header()}, last block: ${lastBlock.header()}")
+        log.info("Check if LIB has changed, last block: ${lastBlock.header()}")
 
-        val newLIB = blockService.getByHash(lastBlock.libHash)
+        val parentBlock = blockService.getByHash(lastBlock.parentHash)
 
-        if (newLIB == currentLIB || newLIB.height <= currentLIB.height) {
+        if (parentBlock.libHeight == lastBlock.libHeight) {
             return
         }
 
-        log.info(
-            """
-                Moving LIB from height ${currentLIB.height} to ${newLIB.height}.
-                currentLIB.hash = ${currentLIB.hash}, newLIB.hash = ${newLIB.hash}.""".trimIndent()
-        )
+        log.info("Moving LIB from height ${parentBlock.libHeight} to ${lastBlock.libHeight}.")
 
-        getBlocksRange(currentLIB, newLIB).forEach { block ->
-            block.transactions.forEach { tx ->
+        getBlocksFromLIB(parentBlock)
+            // TODO add this restriction to getBlocksFromLIB to get better performance
+            .filter { it.height <= lastBlock.libHeight }
+            .forEach { block ->
+                block.transactions.forEach { tx ->
 
-                try {
+                    try {
 
-                    val txOutput = transactionOutputRepository
-                        .findById(TransactionOutputId(block.hash, tx.hash))
-                        .orElseThrow()
+                        val txOutput = transactionOutputRepository
+                            .findById(TransactionOutputId(block.hash, tx.hash))
+                            .orElseThrow()
 
-                    val properties = ObjectUtils.readProperties(txOutput.output)
+                        val properties = ObjectUtils.readProperties(txOutput.output)
 
-                    propertyService.updateProperties(properties)
+                        propertyService.updateProperties(properties)
 
-                    finalizedTransactionRepository.save(
-                        FinalizedTransaction(
-                            transaction = tx,
-                            block = block
+                        finalizedTransactionRepository.save(
+                            FinalizedTransaction(
+                                transaction = tx,
+                                block = block
+                            )
                         )
-                    )
-                } catch (e: Exception) {
-                    val errorMessage =
-                        "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
-                    log.warn(errorMessage, e)
-                    throw RuntimeException(errorMessage, e)
+                    } catch (e: Exception) {
+                        val errorMessage =
+                            "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
+                        log.warn(errorMessage, e)
+                        throw RuntimeException(errorMessage, e)
+                    }
                 }
             }
-        }
     }
 
     private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block) {
@@ -396,17 +384,10 @@ class BlockProcessor(
         depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH
     ): List<Transaction> {
 
-        val libHash = if (lastBlock.height > 0) {
-            lastBlock.libHash
-        } else {
-            lastBlock.hash
-        }
-
-        val lib = blockService.getByHash(libHash)
-        val minHeight = lib.height - depth
+        val minHeight = lastBlock.libHeight - depth
 
         // Not finalized blocks, current branch
-        val blocksAfterLIB = getBlocksRange(lib, lastBlock).mapNotNull { it.id }
+        val blocksAfterLIB = getBlocksFromLIB(lastBlock).mapNotNull { it.id }
 
         // Not finalized tx ids, current branch
         val txsAfterLIB = if (blocksAfterLIB.isNotEmpty()) {

@@ -15,7 +15,7 @@ interface BlockRepository : CrudRepository<Block, Long> {
         select * from block
         where
         space_id = ?1
-        order by height desc, diff desc, weight desc, round, hash
+        order by height desc, lib_height desc, diff desc, weight desc, round, hash
         limit 1
         """, nativeQuery = true
     )
@@ -46,10 +46,6 @@ interface BlockRepository : CrudRepository<Block, Long> {
 
     @CachePut(cacheNames = ["block"], key = "#block.hash")
     override fun <S : Block?> save(block: S): S
-
-    fun existsByHashAndLibHash(hash: String, libHash: String): Boolean
-
-    fun existsByHashAndParentHash(hash: String, parentHash: String): Boolean
 
     fun existsBySpaceIdAndProducerIdAndHeight(spaceId: String, producerId: String, height: Long): Boolean
 

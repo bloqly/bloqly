@@ -81,6 +81,6 @@ class BlockControllerTest : BaseControllerTest() {
 
         val block = restTemplate.postForObject(url, entity, BlockVO::class.java)
 
-        assertEquals(blocks[3].block.libHash, block.hash)
+        assertEquals(blocks[3].block.libHeight, block.height)
     }
 }

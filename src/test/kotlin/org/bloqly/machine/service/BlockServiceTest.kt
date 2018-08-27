@@ -51,8 +51,7 @@ class BlockServiceTest : BaseTest() {
             createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6)
         )
 
-        val lib = blockService.getByHash(blocks.last().block.libHash)
-        assertEquals(blocks[1].block.hash, lib.hash)
+        assertEquals(blocks[1].block.height, blocks.last().block.libHeight)
 
         try {
             createNextBlock(blocks[0].block.toModel(), validatorForRound(2), 2)
@@ -71,38 +70,38 @@ class BlockServiceTest : BaseTest() {
 
         val block1 = createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1).block
         assertEquals(block0.hash, getLIB().hash)
-        assertEquals(block0.hash, block1.libHash)
+        assertEquals(block0.height, block1.libHeight)
 
         val block2 = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2).block
         assertEquals(block0.hash, getLIB().hash)
-        assertEquals(block0.hash, block2.libHash)
+        assertEquals(block0.height, block2.libHeight)
 
         val block3 = createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3).block
         assertEquals(block0.hash, getLIB().hash)
-        assertEquals(block0.hash, block3.libHash)
+        assertEquals(block0.height, block3.libHeight)
 
         val block4 = createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4).block
         // now 3 out of 4 validators have built on block1, it is final now
         assertEquals(block1.hash, getLIB().hash)
-        assertEquals(block1.hash, block4.libHash)
+        assertEquals(block1.height, block4.libHeight)
 
         val block5 = createNextBlock(DEFAULT_SPACE, validatorForRound(5), 5).block
         assertEquals(block2.hash, getLIB().hash)
-        assertEquals(block2.hash, block5.libHash)
+        assertEquals(block2.height, block5.libHeight)
 
         val block6 = createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6).block
         assertEquals(block3.hash, getLIB().hash)
-        assertEquals(block3.hash, block6.libHash)
+        assertEquals(block3.height, block6.libHeight)
 
         // same proposer, nothing changed
         val block7 = createNextBlock(DEFAULT_SPACE, validatorForRound(10), 10).block
         assertEquals(block3.hash, getLIB().hash)
-        assertEquals(block3.hash, block7.libHash)
+        assertEquals(block3.height, block7.libHeight)
 
         // change validator, continue changing LIB
         val block8 = createNextBlock(DEFAULT_SPACE, validatorForRound(11), 11).block
         assertEquals(block4.hash, getLIB().hash)
-        assertEquals(block4.hash, block8.libHash)
+        assertEquals(block4.height, block8.libHeight)
     }
 
     @Test

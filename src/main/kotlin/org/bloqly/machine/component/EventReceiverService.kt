@@ -34,7 +34,9 @@ class EventReceiverService(
 
         val lastBlock = blockService.getLastBlockBySpace(transactionRequest.space)
 
-        val tx = transactionService.createTransaction(transactionRequest, lastBlock.libHash)
+        val lib = blockService.getLIBForBlock(lastBlock)
+
+        val tx = transactionService.createTransaction(transactionRequest, lib.hash)
 
         return tx.toVO()
     }

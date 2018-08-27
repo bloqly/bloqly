@@ -28,7 +28,7 @@ class BlockController(
     @PostMapping("lib")
     fun getLIB(@RequestBody blockRequest: BlockRequest): BlockVO {
         val lastBlock = blockService.getLastBlockBySpace(blockRequest.spaceId)
-        return blockService.getByHash(lastBlock.libHash).toVO()
+        return blockService.getLIBForBlock(lastBlock).toVO()
     }
 
     @PostMapping("search")

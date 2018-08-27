@@ -23,11 +23,9 @@ class DeltaService(
             .map { vote ->
                 val lastBlock = blockRepository.getLastBlock(vote.spaceId)
 
-                val lib = blockRepository.getByHash(lastBlock.libHash)
-
                 BlockRequest(
                     spaceId = vote.spaceId,
-                    startHeight = lib.height + 1,
+                    startHeight = lastBlock.libHeight + 1,
                     endHeight = vote.height
                 )
             }
