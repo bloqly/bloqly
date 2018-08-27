@@ -82,6 +82,7 @@ open class EventReceiverServiceTest : BaseTest() {
     @Test
     fun testChainsJoinAfterSplit() {
 
+        // chain created by the first and second validators
         val blockChain1 = arrayListOf(
             createNextBlock(Application.DEFAULT_SPACE, validatorForRound(1), 1),
             createNextBlock(Application.DEFAULT_SPACE, validatorForRound(2), 2),
@@ -97,6 +98,7 @@ open class EventReceiverServiceTest : BaseTest() {
 
         genesisService.importFirst(genesis)
 
+        // chain created by the third and fourth validators
         val blockChain2 = arrayListOf(
             createNextBlock(Application.DEFAULT_SPACE, validatorForRound(3), 3),
             createNextBlock(Application.DEFAULT_SPACE, validatorForRound(4), 4),

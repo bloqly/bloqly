@@ -28,6 +28,14 @@ class AccountService(
     private val spaceRepository: SpaceRepository
 ) {
 
+    fun isProducerValidForRound(spaceId: String, producerId: String, round: Long): Boolean {
+        val space = spaceRepository.findById(spaceId).orElseThrow()
+
+        val activeValidator = getProducerBySpace(space, round)
+
+        return activeValidator.accountId == producerId
+    }
+
     @Transactional(readOnly = true)
     fun getProducerBySpace(space: Space, round: Long): Account {
 

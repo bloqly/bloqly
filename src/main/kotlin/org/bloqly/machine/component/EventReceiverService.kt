@@ -91,11 +91,11 @@ class EventReceiverService(
 
                 val isValidRound = block.round <= round
 
-                val space = spaceService.getById(block.spaceId)
-
-                val activeValidator = accountService.getProducerBySpace(space, blockData.block.round)
-
-                val isProducerValid = activeValidator.accountId == block.producerId
+                val isProducerValid = accountService.isProducerValidForRound(
+                    block.spaceId,
+                    block.producerId,
+                    block.round
+                )
 
                 // TODO add TPOS check for better chain
 

@@ -39,6 +39,10 @@ import javax.persistence.UniqueConstraint
         Index(
             columnList = "spaceId",
             name = "block_space_idx"
+        ),
+        Index(
+            columnList = "parentHash",
+            name = "block_parent_hash_idx"
         )
     ]
 )

@@ -18,6 +18,7 @@ import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
+import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.SpaceService
@@ -53,7 +54,8 @@ class BlockProcessor(
     private val accountRepository: AccountRepository,
     private val spaceService: SpaceService,
     private val transactionRepository: TransactionRepository,
-    private val finalizedTransactionRepository: FinalizedTransactionRepository
+    private val finalizedTransactionRepository: FinalizedTransactionRepository,
+    private val accountService: AccountService
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockProcessor::class.simpleName)
@@ -105,8 +107,17 @@ class BlockProcessor(
 
     private fun saveBlock(block: Block): Block {
         require(blockService.isAcceptable(block)) {
-            // TODO improve block logging, add producer etc
             "Block is not acceptable: ${block.hash}"
+        }
+
+        require(
+            accountService.isProducerValidForRound(
+                block.spaceId,
+                block.producerId,
+                block.round
+            )
+        ) {
+            "Producer is invalid in block ${block.height}"
         }
         return blockRepository.save(block)
     }
