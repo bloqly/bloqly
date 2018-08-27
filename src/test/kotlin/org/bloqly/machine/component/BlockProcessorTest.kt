@@ -145,10 +145,10 @@ class BlockProcessorTest : BaseTest() {
         val blockBranch2 = createNextBlock(firstBlock, validatorForRound(2), 2)
         assertNotNull(blockBranch2.transactions.find { it.hash == tx.hash })
 
-        val txs1 = blockProcessor.getPendingTransactionsByLastBlock(blockBranch1.block.toModel())
+        val txs1 = blockProcessor.getPendingTransactions(blockBranch1.block.toModel())
         assertEquals(1, txs1.size)
 
-        val txs2 = blockProcessor.getPendingTransactionsByLastBlock(blockBranch2.block.toModel())
+        val txs2 = blockProcessor.getPendingTransactions(blockBranch2.block.toModel())
         assertEquals(1, txs2.size)
     }
 

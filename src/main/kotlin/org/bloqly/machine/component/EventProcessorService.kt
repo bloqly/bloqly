@@ -43,7 +43,7 @@ class EventProcessorService(
 
     private val executor = Executors.newSingleThreadExecutor()
 
-    private val timeout = 100000L
+    private val timeout = 1000L
 
     /**
      * Collecting transactions
@@ -137,13 +137,11 @@ class EventProcessorService(
 
         val passphrase = passphraseService.getPassphrase(producer.accountId)
 
-        val t1 = System.currentTimeMillis()
-        val transactions = blockProcessor.getPendingTransactionsByLastBlock(lastBlock)
-        val t2 = System.currentTimeMillis()
+        val pendingTransactions = blockProcessor.getPendingTransactions(lastBlock)
 
-        log.info("TIME SPENT GET PENDING TRANSACTIONS " + (t2 - t1))
-
-        return blockProcessor.createNextBlock(lastBlock.hash, transactions, producer, passphrase, round)
+        return blockProcessor.createNextBlock(
+            lastBlock.hash, pendingTransactions, producer, passphrase, round
+        )
     }
 
     /**

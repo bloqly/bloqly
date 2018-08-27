@@ -68,13 +68,13 @@ class TransactionServiceTest : BaseTest() {
     fun testGetPendingTransaction() {
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
-        val txs = blockProcessor.getPendingTransactionsByLastBlock(lastBlock)
+        val txs = blockProcessor.getPendingTransactions(lastBlock)
         assertEquals(1, txs.size)
         assertEquals(transaction.hash, txs.first().hash)
 
         testService.createTransaction()
 
-        assertEquals(2, blockProcessor.getPendingTransactionsByLastBlock(lastBlock).size)
+        assertEquals(2, blockProcessor.getPendingTransactions(lastBlock).size)
     }
 
     @Test

@@ -386,11 +386,11 @@ class BlockProcessor(
     fun getPendingTransactions(depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH): List<Transaction> =
         spaceService.findAll().flatMap {
             val lastBlock = blockRepository.getLastBlock(it.id)
-            getPendingTransactionsByLastBlock(lastBlock, depth)
+            getPendingTransactions(lastBlock, depth)
         }
 
     @Transactional(readOnly = true)
-    fun getPendingTransactionsByLastBlock(
+    fun getPendingTransactions(
         lastBlock: Block,
         depth: Int = Application.MAX_REFERENCED_BLOCK_DEPTH
     ): List<Transaction> {

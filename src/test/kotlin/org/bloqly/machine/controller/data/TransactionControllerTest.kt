@@ -44,12 +44,12 @@ class TransactionControllerTest : BaseControllerTest() {
 
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
-        assertEquals(0, blockProcessor.getPendingTransactionsByLastBlock(lastBlock).size)
+        assertEquals(0, blockProcessor.getPendingTransactions(lastBlock).size)
 
         TimeUtils.testTick()
         val tx = restTemplate.postForObject(url, entity, TransactionVO::class.java)
 
-        val pendingTransactions = blockProcessor.getPendingTransactionsByLastBlock(lastBlock)
+        val pendingTransactions = blockProcessor.getPendingTransactions(lastBlock)
 
         assertEquals(1, pendingTransactions.size)
         assertEquals(pendingTransactions.first().toVO(), tx)

@@ -160,6 +160,13 @@ class BlockService(
             return false
         }
 
+        val lib = calculateLIBForBlock(block)
+
+        if (lib.height != block.libHeight) {
+            log.warn("Wrong LIB. Expected ${lib.height}, proposed block: ${block.header()}")
+            return false
+        }
+
         return true
     }
 
