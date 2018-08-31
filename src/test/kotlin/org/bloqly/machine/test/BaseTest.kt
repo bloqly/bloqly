@@ -31,8 +31,11 @@ import org.bloqly.machine.vo.BlockData
 import org.junit.Assert
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
+import java.math.BigInteger
 
 open class BaseTest {
+
+    protected val maxSupply = BigInteger("1000000000").add(BigInteger.TEN.pow(8))
 
     @Autowired
     protected lateinit var blockchainService: BlockchainService

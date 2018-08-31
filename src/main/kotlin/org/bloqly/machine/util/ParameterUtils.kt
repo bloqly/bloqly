@@ -40,10 +40,8 @@ object ParameterUtils {
         return result.toTypedArray()
     }
 
-    fun readValue(bytes: ByteArray): Any {
-
-        return readValue(ByteArrayInputStream(bytes))
-    }
+    fun readValue(bytes: ByteArray): Any =
+        readValue(ByteArrayInputStream(bytes))
 
     private fun readValue(bis: ByteArrayInputStream): Any {
 

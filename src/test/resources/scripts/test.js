@@ -9,7 +9,7 @@ function main(context, orig, dest, arg1, arg2, arg3, arg4) {
         { target: dest, value2: arg2 },
 
         { target: context.self, value3: arg3 },
-        { target: context.self, value4: arg4.add(new BigInteger("1"), maxSupply) }
+        { target: context.self, value4: arg4.safeAdd(new BigInteger("1"), maxSupply) }
     ];
 }
 

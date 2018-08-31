@@ -5,7 +5,7 @@ function init() {
             root: '58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607'
         }, {
             target: '58BF325AF01CCC78265EB715C1EB10EEA455905D4B50C2AC6541950D97DF8607',
-            balance: new BigInteger('999996')
+            balance: maxValue.safeSubtract(4)
         }, {
             target: '10CA5388D7637B9A280D6E5BC3DBA5C71D55F6C155C9B9B2F35BCB149386EDFF',
             balance: new BigInteger('1')

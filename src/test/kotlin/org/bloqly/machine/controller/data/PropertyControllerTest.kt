@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.junit4.SpringRunner
+import java.math.BigInteger
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class], webEnvironment = RANDOM_PORT)
@@ -40,7 +41,7 @@ class PropertyControllerTest : BaseControllerTest() {
 
         val rootValue = restTemplate.postForObject(url, rootEntity, PropertyValue::class.java)
 
-        assertEquals("999995", rootValue.value)
+        assertEquals(maxSupply.minus(BigInteger("5")).toString(), rootValue.value)
         assertEquals(ValueType.BIGINT, rootValue.type)
     }
 
@@ -63,7 +64,7 @@ class PropertyControllerTest : BaseControllerTest() {
 
         val rootValue = restTemplate.postForObject(url, rootEntity, PropertyValue::class.java)
 
-        assertEquals("999996", rootValue.value)
+        assertEquals(maxSupply.minus(BigInteger("4")).toString(), rootValue.value)
         assertEquals(ValueType.BIGINT, rootValue.type)
     }
 

@@ -1,64 +1,144 @@
 package org.bloqly.machine.math
 
-import org.bloqly.machine.exception.BloqlyArithmeticException
 import java.math.BigInteger
-import java.math.BigInteger.TEN
 import java.util.Objects
 
+@Suppress("unused")
 class BInteger {
+
+    private val maxValue = BigInteger.valueOf(Long.MAX_VALUE)
+
+    private val minValue = BigInteger.valueOf(Long.MIN_VALUE)
 
     val value: BigInteger
 
-    @Suppress("unused")
     constructor(valueStr: String) {
+        val result = BigInteger(valueStr.replace("_", ""))
 
-        this.value = BigInteger(valueStr)
+        ensureRange(result)
 
-        assertValueInRange(this.value)
+        this.value = result
     }
 
     constructor(longValue: Long) {
-
         this.value = BigInteger.valueOf(longValue)
-
-        assertValueInRange(this.value)
     }
 
     constructor(value: BigInteger) {
-
+        ensureRange(value)
         this.value = value
-
-        assertValueInRange(this.value)
     }
 
-    @Suppress("unused")
-    fun add(another: BInteger, max: BInteger): BInteger {
+    fun pow(exponent: Int): BInteger {
+
+        require(exponent >= 0) {
+            "Negative value: $exponent"
+        }
+
+        val result = value.pow(exponent)
+
+        ensureRange(result)
+
+        return BInteger(result)
+    }
+
+    fun safeAdd(another: BInteger, max: BInteger): BInteger {
+
+        require(another.value.signum() >= 0) {
+            "Negative value: ${another.value}"
+        }
 
         val result = value.add(another.value)
 
-        if (result > max.value) {
-            throw BloqlyArithmeticException("The resulting value is too big $result > ${max.value}")
+        ensureRange(result)
+
+        require(result <= max.value) {
+            "The resulting value is too big $result > ${max.value}"
         }
 
         return BInteger(result)
     }
 
-    @Suppress("unused")
-    fun add(another: BInteger): BInteger {
+    fun safeAdd(another: Long, max: BInteger): BInteger =
+        safeAdd(BInteger(another), max)
 
-        return BInteger(value.add(another.value))
+    fun add(another: BInteger): BInteger {
+        val result = value.add(another.value)
+
+        ensureRange(result)
+
+        return BInteger(result)
     }
 
-    @Suppress("unused")
-    fun subtract(another: BInteger): BInteger {
+    fun add(another: Long): BInteger =
+        add(BInteger(another))
+
+    fun safeSubtract(another: BInteger): BInteger {
+
+        require(another.value.signum() >= 0) {
+            "Negative value: ${another.value}"
+        }
 
         val result = value.subtract(another.value)
 
-        if (result.signum() < 0) {
-            throw BloqlyArithmeticException("Negative value: $result")
+        require(result.signum() >= 0) {
+            "Negative value: $result"
         }
 
+        ensureRange(result)
+
         return BInteger(result)
+    }
+
+    fun safeSubtract(another: Long): BInteger =
+        safeSubtract(BInteger(another))
+
+    fun subtract(another: BInteger): BInteger {
+        val result = value.subtract(another.value)
+
+        ensureRange(result)
+
+        return BInteger(result)
+    }
+
+    fun subtract(another: Long): BInteger =
+        subtract(BInteger(another))
+
+    fun multiply(another: BInteger): BInteger {
+        val result = value.multiply(another.value)
+
+        ensureRange(result)
+
+        return BInteger(value)
+    }
+
+    fun safeMultiply(another: BInteger, max: BInteger): BInteger {
+
+        require(another.value.signum() >= 0) {
+            "Negative value: ${another.value}"
+        }
+
+        val result = value.multiply(another.value)
+
+        require(result <= max.value) {
+            "The resulting value is too big $result > ${max.value}"
+        }
+
+        ensureRange(result)
+
+        return BInteger(value)
+    }
+
+    fun divide(another: BInteger): BInteger {
+        val result = value.divide(another.value)
+
+        return BInteger(result)
+    }
+
+    private fun ensureRange(result: BigInteger) {
+        require(result <= maxValue && result >= minValue) {
+            "Result is out of range: $result"
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -75,15 +155,5 @@ class BInteger {
 
     override fun toString(): String {
         return value.toString()
-    }
-
-    companion object {
-
-        private val MAX_VALUE = TEN.pow(11).multiply(TEN.pow(8))
-
-        private fun assertValueInRange(value: BigInteger) {
-
-            require(value <= MAX_VALUE)
-        }
     }
 }

@@ -26,6 +26,7 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
+import java.math.BigInteger
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
@@ -98,9 +99,11 @@ class EventProcessorServiceTest : BaseTest() {
     @Test
     fun testInitDefaultContract() {
 
+        val balance = writeLong(maxSupply.minus(BigInteger("4")))
+
         assertTrue(
             Sets.newHashSet(propertyRepository.findAll()).contains(
-                Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.accountId, "balance"), writeLong("999996"))
+                Property(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, root.accountId, "balance"), balance)
             )
         )
     }
@@ -114,7 +117,7 @@ class EventProcessorServiceTest : BaseTest() {
         val rootBalanceBefore = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceBefore = propertyRepository.findById(userBalanceId)
 
-        assertArrayEquals(writeLong("999996"), rootBalanceBefore.value)
+        assertArrayEquals(writeLong(maxSupply.minus(BigInteger("4")).toString()), rootBalanceBefore.value)
         assertFalse(userBalanceBefore.isPresent)
 
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
@@ -141,7 +144,7 @@ class EventProcessorServiceTest : BaseTest() {
         val rootBalanceAfter = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceAfter = propertyRepository.findById(userBalanceId).orElseThrow()
 
-        assertArrayEquals(writeLong("999995"), rootBalanceAfter.value)
+        assertArrayEquals(writeLong(maxSupply.minus(BigInteger("5")).toString()), rootBalanceAfter.value)
         assertArrayEquals(writeLong("1"), userBalanceAfter.value)
     }
 
