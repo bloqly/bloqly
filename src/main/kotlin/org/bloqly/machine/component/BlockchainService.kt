@@ -38,16 +38,14 @@ class BlockchainService(
 
         blockService.ensureSpaceEmpty(spaceId)
 
-        val contractBody = File(baseDir).list()
-            .filter {
-                it.endsWith(".js")
-            }
-            .map { fileName ->
-                val source = File("$baseDir/$fileName").readText()
-                val extension = fileName.substringAfterLast(".")
-                val header = FileUtils.getResourceAsString("/headers/header.$extension")
-                header + source
-            }.reduce { str, acc -> str + "\n" + acc }
+        val header = FileUtils.getResourceAsString("/headers/header.js")
+
+        val source = File(baseDir).list()
+            .filter { it.endsWith(".js") }
+            .map { fileName -> File("$baseDir/$fileName").readText() }
+            .reduce { str, acc -> str + "\n" + acc }
+
+        val contractBody = header + "\n" + source
 
         val initProperties = contractExecutorService.invokeFunction("init", contractBody)
 

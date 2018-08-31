@@ -1,6 +1,6 @@
-var BigInteger = Java.type("org.bloqly.machine.math.BInteger");
+var Long = Java.type("org.bloqly.machine.math.BInteger");
 
-const maxSupply = new BigInteger('1000000');
+const maxSupply = new Long('1000000');
 
 function main(context, orig, dest, arg1, arg2, arg3, arg4) {
 
@@ -9,7 +9,7 @@ function main(context, orig, dest, arg1, arg2, arg3, arg4) {
         { target: dest, value2: arg2 },
 
         { target: context.self, value3: arg3 },
-        { target: context.self, value4: arg4.safeAdd(new BigInteger("1"), maxSupply) }
+        { target: context.self, value4: arg4.safeAdd(new Long("1"), maxSupply) }
     ];
 }
 

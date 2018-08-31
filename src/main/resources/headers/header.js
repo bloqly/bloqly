@@ -1,3 +1,5 @@
 'use strict';
 
-var BigInteger = Java.type('org.bloqly.machine.math.BInteger');
+var Long = Java.type('org.bloqly.machine.math.BInteger');
+
+const ZERO = new Long('0');
