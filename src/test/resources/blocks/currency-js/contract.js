@@ -2,8 +2,6 @@
 const fractions = new Long('10').pow(8);
 const maxSupply = new Long('1_000_000_000').add(fractions);
 
-const validatorAmount = new Long('1');
-
 function main(context, orig, dest, amount) {
 
     let origBalance = getProperty(orig, 'balance', ZERO);
@@ -18,9 +16,15 @@ function main(context, orig, dest, amount) {
     ];
 }
 
-function set(context, orig, key, value) {
+function set(context, orig, dest, key, value) {
 
-    return [
-        { target: context.self, key: value }
-    ];
+    if (key == 'balance' || key == 'power') {
+        throw 'Illegal property access attempt: ' + key;
+    }
+
+    if (orig !=  dest) {
+        throw 'Origin and destination don\'t match: ' + orig + ', ' + dest
+    }
+
+    return [ { target: dest, key: value } ];
 }
