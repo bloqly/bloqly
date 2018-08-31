@@ -10,10 +10,15 @@ class ContractService(
     private val contractRepository: ContractRepository
 ) {
     @Transactional(readOnly = true)
-    fun findById(self: String): Contract? = contractRepository.findById(self).orElse(null)
+    fun findById(self: String): Contract? =
+        contractRepository.findById(self).orElse(null)
 
     @Transactional
     fun saveAll(contracts: List<Contract>) {
         contractRepository.saveAll(contracts)
     }
+
+    @Transactional
+    fun findAll(): List<Contract> =
+        contractRepository.findAll().toList()
 }

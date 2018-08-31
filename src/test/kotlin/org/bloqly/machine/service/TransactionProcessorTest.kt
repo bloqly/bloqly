@@ -118,6 +118,7 @@ class TransactionProcessorTest : BaseTest() {
         val params = ParameterUtils.writeParams(arrayOf("test", 22, true, BInteger(123)))
 
         TimeUtils.testTick()
+
         val invokeContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,

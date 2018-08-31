@@ -7,10 +7,12 @@ import org.bloqly.machine.model.*;
 import org.bloqly.machine.util.CryptoUtils;
 import org.bloqly.machine.util.ParameterUtils;
 import org.bouncycastle.util.encoders.Hex;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.script.*;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +27,20 @@ import static org.bloqly.machine.model.InvocationResultType.SUCCESS;
 @Service
 public class ContractExecutorService {
 
+    @Autowired
+    private ContractService contractService;
+
     private Map<String, ScriptEngine> engines = new ConcurrentHashMap<>();
+
+    @PostConstruct
+    @Transactional
+    public void init() {
+        contractService.findAll().forEach(this::initContract);
+    }
+
+    private void initContract(Contract contract) {
+        getEngine(contract.getBody());
+    }
 
     private GetPropertyFunction getPropertyFunction(PropertyContext propertyContext, InvocationContext invocationContext) {
 
@@ -46,7 +61,7 @@ public class ContractExecutorService {
         };
     }
 
-    private Invocable getEngine(PropertyContext propertyContext, InvocationContext invocationContext) throws Exception {
+    private Invocable getEngine(PropertyContext propertyContext, InvocationContext invocationContext) {
 
         var contract = propertyContext.getContract(invocationContext.getSelf());
 
@@ -113,9 +128,7 @@ public class ContractExecutorService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public InvocationResult invokeContract(PropertyContext propertyContext, InvocationContext invocationContext, byte[] arg) {
-        var properties = invokeFunction(propertyContext, invocationContext, arg);
-
-        return new InvocationResult(SUCCESS, properties);
+        return new InvocationResult(SUCCESS, invokeFunction(propertyContext, invocationContext, arg));
     }
 
     @SuppressWarnings("unchecked")
