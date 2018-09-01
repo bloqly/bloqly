@@ -16,7 +16,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,12 +72,7 @@ class BlockProcessorTest : BaseTest() {
 
         assertFalse(blockService.isAcceptable(blockData.block.toModel()))
 
-        try {
-            blockProcessor.processReceivedBlock(blockData)
-            fail()
-        } catch (e: Exception) {
-
-        }
+        blockProcessor.processReceivedBlock(blockData)
 
         eventProcessorService.onProposal(blockData)
     }

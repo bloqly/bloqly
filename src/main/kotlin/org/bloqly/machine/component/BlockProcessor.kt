@@ -98,17 +98,12 @@ class BlockProcessor(
 
         evaluateBlock(block, propertyContext)
 
-        log.debug("Saving block with hash ${block.hash}")
-        val savedNewBlock = saveBlock(block)
-        log.debug("Saved block with hash ${block.hash}")
-
-        moveLIBIfNeeded(savedNewBlock)
+        if (blockService.isAcceptable(block)) {
+            moveLIBIfNeeded(saveBlock(block))
+        }
     }
 
     private fun saveBlock(block: Block): Block {
-        require(blockService.isAcceptable(block)) {
-            "Block is not acceptable: ${block.hash}"
-        }
 
         require(
             accountService.isProducerValidForRound(
@@ -256,6 +251,10 @@ class BlockProcessor(
         // todo add tx output hash to block and signature
         saveTxOutputs(txResults, newBlock)
 
+        require(blockService.isAcceptable(newBlock)) {
+            "Block is not acceptable ${newBlock.header()}"
+        }
+
         val blockData = BlockData(saveBlock(newBlock))
 
         moveLIBIfNeeded(newBlock)
@@ -343,7 +342,9 @@ class BlockProcessor(
 
         run txs@{
             transactions.forEach { tx ->
-                if (TimeUtils.getCurrentTime() - timeStart > Application.TX_TIMEOUT) {
+                val timeSpent = TimeUtils.getCurrentTime() - timeStart
+                if (timeSpent - timeStart > Application.TX_TIMEOUT) {
+                    log.warn("Finishing processing transactions as time spent is already over the limit: $timeSpent")
                     return@txs
                 } else {
                     val localPropertyContext = propertyContext.getLocalCopy()
