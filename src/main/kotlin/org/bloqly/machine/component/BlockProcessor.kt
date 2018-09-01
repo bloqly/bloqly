@@ -2,12 +2,10 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
-import org.bloqly.machine.Application.Companion.TX_TIMEOUT
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.FinalizedTransaction
 import org.bloqly.machine.model.InvocationResult
-import org.bloqly.machine.model.InvocationResultType
 import org.bloqly.machine.model.Properties
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
@@ -341,10 +339,12 @@ class BlockProcessor(
             throw IllegalStateException("Transactions are not unique")
         }
 
-        val txs = transactions
-            .map { tx ->
-                if (TimeUtils.getCurrentTime() - timeStart > TX_TIMEOUT) {
-                    TransactionResult(tx, InvocationResult(InvocationResultType.ERROR))
+        val txResults = mutableListOf<TransactionResult>()
+
+        run txs@{
+            transactions.forEach { tx ->
+                if (TimeUtils.getCurrentTime() - timeStart > Application.TX_TIMEOUT) {
+                    return@txs
                 } else {
                     val localPropertyContext = propertyContext.getLocalCopy()
 
@@ -352,19 +352,13 @@ class BlockProcessor(
 
                     if (result.isOK()) {
                         propertyContext.merge(localPropertyContext)
+                        txResults.add(TransactionResult(tx, result))
                     }
-
-                    TransactionResult(tx, result)
                 }
-
             }
-            .filter { it.invocationResult.isOK() }
+        }
 
-        val t3 = System.currentTimeMillis()
-
-        log.info("TIME SPENT PROCESSING TXS " + (t3 - t3))
-
-        return txs
+        return txResults.toMutableList()
     }
 
     private fun getVotesForBlock(blockHash: String): List<Vote> =
