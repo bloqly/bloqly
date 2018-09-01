@@ -2,10 +2,12 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
+import org.bloqly.machine.Application.Companion.TX_TIMEOUT
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.FinalizedTransaction
 import org.bloqly.machine.model.InvocationResult
+import org.bloqly.machine.model.InvocationResultType
 import org.bloqly.machine.model.Properties
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
@@ -208,6 +210,8 @@ class BlockProcessor(
         round: Long
     ): BlockData {
 
+        val timeStart = TimeUtils.getCurrentTime()
+
         val lastBlock = blockRepository.getByHash(lastBlockHash)
 
         log.info("Creating next block on top of ${lastBlock.header()}")
@@ -223,21 +227,14 @@ class BlockProcessor(
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        val t1 = System.currentTimeMillis()
         evaluateFromLIB(lastBlock, propertyContext)
-        val t2 = System.currentTimeMillis()
-        log.info("TIME SPENT EVALUATE: " + (t2 - t1))
 
-        val txResults = getTransactionResultsForNextBlock(transactions, propertyContext)
-        val t3 = System.currentTimeMillis()
-        log.info("TIME SPENT GET TX FOR NEXT BLOCK: " + (t3 - t2))
+        val txResults = getTransactionResultsForNextBlock(transactions, propertyContext, timeStart)
 
         val selectedTransactions = txResults.map { it.transaction }
 
         val votes = getVotesForBlock(lastBlock.hash)
         val prevVotes = getVotesForBlock(lastBlock.parentHash)
-        val t4 = System.currentTimeMillis()
-        log.info("TIME SPENT LOAD VOTES AND TRANSACTIONS: " + (t4 - t3))
 
         val diff = votes.minus(prevVotes).size
         val weight = lastBlock.weight + votes.size
@@ -257,21 +254,13 @@ class BlockProcessor(
             transactions = selectedTransactions,
             votes = votes
         )
-        val t5 = System.currentTimeMillis()
-        log.info("TIME SPENT CREATE NEW: " + (t5 - t4))
 
         // todo add tx output hash to block and signature
         saveTxOutputs(txResults, newBlock)
 
-        val t6 = System.currentTimeMillis()
-        log.info("TIME SPENT saveTxOutputs: " + (t6 - t5))
-
         val blockData = BlockData(saveBlock(newBlock))
 
         moveLIBIfNeeded(newBlock)
-
-        val t7 = System.currentTimeMillis()
-        log.info("TIME SPENT moveLIBIfNeeded: " + (t7 - t6))
 
         return blockData
     }
@@ -342,7 +331,8 @@ class BlockProcessor(
 
     private fun getTransactionResultsForNextBlock(
         transactions: List<Transaction>,
-        propertyContext: PropertyContext
+        propertyContext: PropertyContext,
+        timeStart: Long
     ): List<TransactionResult> {
 
         val hashes = transactions.map { it.hash }
@@ -353,16 +343,20 @@ class BlockProcessor(
 
         val txs = transactions
             .map { tx ->
+                if (TimeUtils.getCurrentTime() - timeStart > TX_TIMEOUT) {
+                    TransactionResult(tx, InvocationResult(InvocationResultType.ERROR))
+                } else {
+                    val localPropertyContext = propertyContext.getLocalCopy()
 
-                val localPropertyContext = propertyContext.getLocalCopy()
+                    val result = transactionProcessor.processTransaction(tx, localPropertyContext)
 
-                val result = transactionProcessor.processTransaction(tx, localPropertyContext)
+                    if (result.isOK()) {
+                        propertyContext.merge(localPropertyContext)
+                    }
 
-                if (result.isOK()) {
-                    propertyContext.merge(localPropertyContext)
+                    TransactionResult(tx, result)
                 }
 
-                TransactionResult(tx, result)
             }
             .filter { it.invocationResult.isOK() }
 

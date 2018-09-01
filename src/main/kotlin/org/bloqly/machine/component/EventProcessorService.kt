@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.Application.Companion.BLOCK_TIMEOUT
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
@@ -42,8 +43,6 @@ class EventProcessorService(
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
     private val executor = Executors.newSingleThreadExecutor()
-
-    private val timeout = 2000L
 
     /**
      * Collecting transactions
@@ -165,6 +164,6 @@ class EventProcessorService(
                 log.error(e.message, e)
                 throw e
             }
-        }).get(timeout, TimeUnit.MILLISECONDS)
+        }).get(BLOCK_TIMEOUT, TimeUnit.MILLISECONDS)
     }
 }

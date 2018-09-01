@@ -6,7 +6,6 @@ import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.InvocationResultType.ERROR
-import org.bloqly.machine.model.InvocationResultType.SUCCESS
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
@@ -18,9 +17,7 @@ import org.bloqly.machine.util.decode16
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.Callable
 import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 @Component
 class TransactionProcessor(
@@ -30,8 +27,6 @@ class TransactionProcessor(
     private val log = LoggerFactory.getLogger(TransactionProcessor::class.simpleName)
 
     private val transactionExecutor = Executors.newSingleThreadExecutor()
-
-    private val maxTransactionProcessingTimeMS = 150L
 
     private fun processCreateContract(
         tx: Transaction,
@@ -86,29 +81,26 @@ class TransactionProcessor(
     ): InvocationResult {
 
         try {
+            // TODO check results are unique
+            val result = when (tx.transactionType) {
 
-            return transactionExecutor.submit(Callable<InvocationResult> {
-                // TODO check results are unique
-                val result = when (tx.transactionType) {
-
-                    CREATE -> {
-                        processCreateContract(tx, propertyContext)
-                    }
-
-                    CALL -> {
-                        processCall(tx, propertyContext)
-                    }
-
-                    else -> {
-                        // do nothing
-                        InvocationResult(SUCCESS)
-                    }
+                CREATE -> {
+                    processCreateContract(tx, propertyContext)
                 }
 
-                propertyContext.updatePropertyValues(result.output)
+                CALL -> {
+                    processCall(tx, propertyContext)
+                }
 
-                result
-            }).get(maxTransactionProcessingTimeMS, TimeUnit.MILLISECONDS)
+                else -> {
+                    // do nothing
+                    InvocationResult(ERROR)
+                }
+            }
+
+            propertyContext.updatePropertyValues(result.output)
+
+            return result
         } catch (e: Exception) {
             log.error(e.message, e)
             return InvocationResult(ERROR)
