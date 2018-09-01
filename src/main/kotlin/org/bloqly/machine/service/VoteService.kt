@@ -4,11 +4,9 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.slf4j.LoggerFactory
@@ -20,8 +18,7 @@ import java.time.Instant
 @Service
 class VoteService(
     private val voteRepository: VoteRepository,
-    private val blockRepository: BlockRepository,
-    private val accountRepository: AccountRepository
+    private val blockRepository: BlockRepository
 ) {
 
     private val log = LoggerFactory.getLogger(VoteService::class.simpleName)
@@ -31,7 +28,7 @@ class VoteService(
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
-        return voteRepository.findBySpaceIdAndValidatorAndHeight(space.id, validator, lastBlock.height)
+        return voteRepository.findBySpaceIdAndPublicKeyAndHeight(space.id, validator.publicKey, lastBlock.height)
             ?: createVote(validator, passphrase, lastBlock)
     }
 
@@ -52,7 +49,7 @@ class VoteService(
         block: Block
     ): Vote {
         val vote = Vote(
-            validator = validator,
+            publicKey = validator.publicKey,
             blockHash = block.hash,
             height = block.height,
             spaceId = block.spaceId,
@@ -76,22 +73,12 @@ class VoteService(
     }
 
     @Transactional
-    fun findVote(publicKey: String, blockHash: String): Vote? {
-
-        val accountId = EncodingUtils.hashAndEncode16(publicKey.decode16())
-
-        val validator = accountRepository.findByAccountId(accountId)
-
-        return validator?.let {
-            voteRepository.findByValidatorAndBlockHash(validator, blockHash)
-        }
-    }
+    fun findVote(publicKey: String, blockHash: String): Vote? =
+        voteRepository.findByPublicKeyAndBlockHash(publicKey, blockHash)
 
     fun requireVoteValid(vote: Vote) {
 
-        val validator = vote.validator
-
-        require(CryptoUtils.verifyVote(vote, validator.publicKey.decode16())) {
+        require(CryptoUtils.verifyVote(vote, vote.publicKey.decode16())) {
             "Could not verify vote."
         }
 
@@ -106,12 +93,12 @@ class VoteService(
     @Transactional
     fun isAcceptable(vote: Vote): Boolean {
 
-        if (voteRepository.existsBySpaceIdAndValidatorAndHeight(vote.spaceId, vote.validator, vote.height)) {
+        if (voteRepository.existsBySpaceIdAndPublicKeyAndHeight(vote.spaceId, vote.publicKey, vote.height)) {
             log.warn("Vote with validator and height already exists ${vote.toVO()}")
             return false
         }
 
-        if (voteRepository.existsByValidatorAndBlockHash(vote.validator, vote.blockHash)) {
+        if (voteRepository.existsByPublicKeyAndBlockHash(vote.publicKey, vote.blockHash)) {
             log.warn("Validator has already voted for this block ${vote.toVO()}")
         }
 

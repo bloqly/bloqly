@@ -1,7 +1,6 @@
 package org.bloqly.machine.vo
 
 import org.bloqly.machine.annotation.ValueObject
-import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.decode16
 
@@ -17,9 +16,9 @@ data class VoteVO(
 
     fun getUID(): String = "$publicKey:$blockHash:$spaceId:$height:$timestamp"
 
-    fun toModel(validator: Account): Vote {
+    fun toModel(): Vote {
         return Vote(
-            validator = validator,
+            publicKey = publicKey,
             blockHash = blockHash,
             height = height,
             spaceId = spaceId,

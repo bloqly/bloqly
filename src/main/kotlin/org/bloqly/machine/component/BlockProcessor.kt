@@ -98,12 +98,14 @@ class BlockProcessor(
 
         evaluateBlock(block, propertyContext)
 
-        if (blockService.isAcceptable(block)) {
-            moveLIBIfNeeded(saveBlock(block))
-        }
+        moveLIBIfNeeded(saveBlock(block))
     }
 
     private fun saveBlock(block: Block): Block {
+
+        require(blockService.isAcceptable(block)) {
+            "Block is not acceptable ${block.header()}"
+        }
 
         require(
             accountService.isProducerValidForRound(
@@ -250,10 +252,6 @@ class BlockProcessor(
 
         // todo add tx output hash to block and signature
         saveTxOutputs(txResults, newBlock)
-
-        require(blockService.isAcceptable(newBlock)) {
-            "Block is not acceptable ${newBlock.header()}"
-        }
 
         val blockData = BlockData(saveBlock(newBlock))
 

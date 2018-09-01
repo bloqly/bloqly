@@ -56,9 +56,8 @@ class EventReceiverService(
             .forEach { voteVO ->
                 try {
                     if (!objectFilterService.mightContain(voteVO.getUID())) {
-                        val validator = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
 
-                        val vote = voteVO.toModel(validator)
+                        val vote = voteVO.toModel()
 
                         if (voteService.isAcceptable(vote)) {
                             eventProcessorService.onVote(vote)
@@ -105,7 +104,7 @@ class EventReceiverService(
 
                 log.info("Start processing block ${blockData.block.hash}")
 
-                if (blockService.isAcceptable(blockData.block.toModel())) {
+                if (blockService.isAcceptable(blockData.toModel())) {
                     receiveTransactions(blockData.transactions)
                     receiveVotes(blockData.votes)
 

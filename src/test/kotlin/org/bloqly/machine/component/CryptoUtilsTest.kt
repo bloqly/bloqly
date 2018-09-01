@@ -1,7 +1,6 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
@@ -68,10 +67,7 @@ class CryptoUtilsTest {
         val pub = CryptoUtils.getPublicFor(priv)
 
         val vote = Vote(
-            validator = Account(
-                accountId = EncodingUtils.hashAndEncode16(pub),
-                publicKey = pub.encode16()
-            ),
+            publicKey = pub.encode16(),
             blockHash = "",
             height = 11,
             timestamp = 1,

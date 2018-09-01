@@ -53,7 +53,7 @@ open class EventReceiverServiceTest : BaseTest() {
 
         assertEquals(1, voteRepository.count())
 
-        assertEquals(v1.validator.accountId, voteRepository.findAll().first().validator.accountId)
+        assertEquals(v1.publicKey, voteRepository.findAll().first().publicKey)
 
         objectFilterService.clear()
 
@@ -61,22 +61,7 @@ open class EventReceiverServiceTest : BaseTest() {
 
         assertEquals(1, voteRepository.count())
 
-        assertEquals(v1.validator.accountId, voteRepository.findAll().first().validator.accountId)
-    }
-
-    @Test
-    fun testAccountPublicKeyPopulatedWhenReceiveVotes() {
-
-        val votes = eventProcessorService.onGetVotes()
-
-        val votesVOs = votes.map { it.toVO() }
-
-        voteRepository.deleteAll()
-        accountRepository.deleteAll()
-
-        eventReceiverService.receiveVotes(votesVOs)
-
-        assertEquals(4, accountRepository.count())
+        assertEquals(v1.publicKey, voteRepository.findAll().first().publicKey)
     }
 
     @Test

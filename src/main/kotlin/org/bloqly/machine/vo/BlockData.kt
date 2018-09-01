@@ -16,4 +16,14 @@ data class BlockData(
     constructor(
         block: Block
     ) : this(block.toVO(), block.transactions.map { it.toVO() }, block.votes.map { it.toVO() })
+
+    fun toModel(): Block {
+        val block = block.toModel()
+
+        val txs = transactions.map { it.toModel() }
+
+        val votes = votes.map { it.toModel() }
+
+        return block.copy(votes = votes, transactions = txs)
+    }
 }

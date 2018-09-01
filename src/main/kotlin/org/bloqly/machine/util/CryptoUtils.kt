@@ -98,7 +98,7 @@ object CryptoUtils {
         val bos = ByteArrayOutputStream()
 
         votes
-            .sortedBy { it.validator.accountId }
+            .sortedBy { it.publicKey }
             .forEach { bos.write(hash(it)) }
 
         return hash(bos.toByteArray())
@@ -150,7 +150,7 @@ object CryptoUtils {
     fun hash(vote: Vote): ByteArray {
         return hash(
             Bytes.concat(
-                vote.validator.accountId.decode16(),
+                vote.publicKey.decode16(),
                 vote.blockHash.decode16(),
                 EncodingUtils.longToBytes(vote.height),
                 vote.spaceId.toByteArray(),

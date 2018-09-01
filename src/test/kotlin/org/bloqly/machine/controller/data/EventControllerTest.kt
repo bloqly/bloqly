@@ -115,8 +115,8 @@ class EventControllerTest : BaseControllerTest() {
         restTemplate.postForObject(url, entity, String::class.java)
 
         Assert.assertNotNull(
-            voteRepository.findByValidatorAndBlockHash(
-                vote.validator,
+            voteRepository.findByPublicKeyAndBlockHash(
+                vote.publicKey,
                 vote.blockHash
             )
         )

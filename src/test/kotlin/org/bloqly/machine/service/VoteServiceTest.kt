@@ -73,7 +73,7 @@ class VoteServiceTest : BaseTest() {
 
         val savedVote = voteRepository.findAll().first()
 
-        val validator = validators.find { it.accountId == savedVote.validator.accountId }
+        val validator = validators.find { it.publicKey == savedVote.publicKey }
 
         assertNotNull(validator)
     }
@@ -81,9 +81,9 @@ class VoteServiceTest : BaseTest() {
     @Test
     fun testVerifyVote() {
 
-        val converted = vote.toVO().toModel(validator)
+        val converted = vote.toVO().toModel()
 
-        assertEquals(vote.validator, converted.validator)
+        assertEquals(vote.publicKey, converted.publicKey)
         assertEquals(vote.blockHash, converted.blockHash)
         assertEquals(vote.height, converted.height)
         assertEquals(vote.timestamp, converted.timestamp)
@@ -111,11 +111,8 @@ class VoteServiceTest : BaseTest() {
     }
 
     @Test
-    fun testVerifyVoteValidatorWrongFails() {
-
-        val wrongValidator = validator.copy(accountId = FAKE_DATA)
-
-        assertFalse(verifyVote(vote.copy(validator = wrongValidator), publicKey))
+    fun testVerifyVotePublicKeyWrongFails() {
+        assertFalse(verifyVote(vote.copy(publicKey = FAKE_DATA), publicKey))
     }
 
     @Test

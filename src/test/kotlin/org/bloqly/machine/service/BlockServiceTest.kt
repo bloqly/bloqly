@@ -38,7 +38,7 @@ class BlockServiceTest : BaseTest() {
     fun testNextBlockIsAfterLIB() {
         val blockData = createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
-        assertTrue(blockService.isAfterLIB(blockData.block.toModel()))
+        assertTrue(blockService.isAfterLIB(blockData.toModel()))
     }
 
     @Test
@@ -54,7 +54,7 @@ class BlockServiceTest : BaseTest() {
         assertEquals(blocks[1].block.height, blocks.last().block.libHeight)
 
         try {
-            createNextBlock(blocks[0].block.toModel(), validatorForRound(2), 2)
+            createNextBlock(blocks[0].toModel(), validatorForRound(2), 2)
             fail()
         } catch (e: Exception) {
 
@@ -118,7 +118,7 @@ class BlockServiceTest : BaseTest() {
     @Test
     fun testHyperFinalizationNoPrevQuorum() {
         val votes1 = eventProcessorService.onGetVotes()
-        voteRepository.deleteAll(votes1.sortedBy { it.validator.accountId }.takeLast(2))
+        voteRepository.deleteAll(votes1.sortedBy { it.publicKey }.takeLast(2))
 
         createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
@@ -134,7 +134,7 @@ class BlockServiceTest : BaseTest() {
         createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         val votes2 = eventProcessorService.onGetVotes()
-        voteRepository.deleteAll(votes2.sortedBy { it.validator.accountId }.takeLast(2))
+        voteRepository.deleteAll(votes2.sortedBy { it.publicKey }.takeLast(2))
 
         val block = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
 
@@ -170,12 +170,12 @@ class BlockServiceTest : BaseTest() {
     @Test
     fun testHyperFinalizationNotSameValidatorsQuorum() {
         val votes1 = eventProcessorService.onGetVotes()
-        val first = votes1.sortedBy { it.validator.accountId }.first()
+        val first = votes1.sortedBy { it.publicKey }.first()
         voteRepository.delete(first)
         createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         val votes2 = eventProcessorService.onGetVotes()
-        val last = votes2.sortedBy { it.validator.accountId }.last()
+        val last = votes2.sortedBy { it.publicKey }.last()
         voteRepository.delete(last)
         val block = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
 

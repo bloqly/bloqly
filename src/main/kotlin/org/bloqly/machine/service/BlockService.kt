@@ -219,8 +219,8 @@ class BlockService(
         // TODO bug, returns not unique results
         val prevBlock = blockRepository.findByHash(currBlock.parentHash)!!
 
-        val prevBlockValidators = prevBlock.votes.map { it.validator.accountId }.toSet()
-        val currBlockValidators = currBlock.votes.map { it.validator.accountId }.toSet()
+        val prevBlockValidators = prevBlock.votes.map { it.publicKey }.toSet()
+        val currBlockValidators = currBlock.votes.map { it.publicKey }.toSet()
 
         return currBlockValidators.intersect(prevBlockValidators).size >= quorum
     }

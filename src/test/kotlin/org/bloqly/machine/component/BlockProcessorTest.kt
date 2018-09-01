@@ -16,6 +16,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -70,9 +71,14 @@ class BlockProcessorTest : BaseTest() {
         testService.createTransaction()
         val blockData = eventProcessorService.createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4)
 
-        assertFalse(blockService.isAcceptable(blockData.block.toModel()))
+        assertFalse(blockService.isAcceptable(blockData.toModel()))
 
-        blockProcessor.processReceivedBlock(blockData)
+        try {
+            blockProcessor.processReceivedBlock(blockData)
+            fail()
+        } catch (e: Exception) {
+
+        }
 
         eventProcessorService.onProposal(blockData)
     }
@@ -139,10 +145,10 @@ class BlockProcessorTest : BaseTest() {
         val blockBranch2 = createNextBlock(firstBlock, validatorForRound(2), 2)
         assertNotNull(blockBranch2.transactions.find { it.hash == tx.hash })
 
-        val txs1 = blockProcessor.getPendingTransactions(blockBranch1.block.toModel())
+        val txs1 = blockProcessor.getPendingTransactions(blockBranch1.toModel())
         assertEquals(1, txs1.size)
 
-        val txs2 = blockProcessor.getPendingTransactions(blockBranch2.block.toModel())
+        val txs2 = blockProcessor.getPendingTransactions(blockBranch2.toModel())
         assertEquals(1, txs2.size)
     }
 
@@ -188,10 +194,7 @@ class BlockProcessorTest : BaseTest() {
     fun testProcessNewBlockWithOldVotes() {
         populateBlocks()
 
-        val votes = blocks[0].votes.map { voteVO ->
-            val account = accountService.ensureExistsAndGetByPublicKey(voteVO.publicKey)
-            voteVO.toModel(account)
-        }
+        val votes = blocks[0].votes.map { it.toModel() }
 
         voteRepository.saveAll(votes)
 
@@ -220,13 +223,13 @@ class BlockProcessorTest : BaseTest() {
 
         val blockData = blocks[0]
 
-        assertTrue(blockService.isAcceptable(blockData.block.toModel()))
+        assertTrue(blockService.isAcceptable(blockData.toModel()))
 
         TimeUtils.setTestRound(blockData.block.round)
 
         eventReceiverService.onBlocks(listOf(blockData))
 
-        assertFalse(blockService.isAcceptable(blockData.block.toModel()))
+        assertFalse(blockService.isAcceptable(blockData.toModel()))
     }
 
     @Test
