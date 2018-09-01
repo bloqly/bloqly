@@ -75,19 +75,21 @@ class EventProcessorService(
 
         return spaceService.findAll()
             .filter { blockService.existsBySpace(it) }
-            .flatMap { space ->
-                accountService.getValidatorsForSpace(space)
-                    .filter { passphraseService.hasPassphrase(it.accountId) }
-                    .mapNotNull { producer ->
-                        submitTask {
-                            voteService.findOrCreateVote(
-                                space,
-                                producer,
-                                passphraseService.getPassphrase(producer.accountId)
-                            )
+            .mapNotNull { space ->
+                accountService.findValidatorsForSpace(space)?.let { validators ->
+                    validators.filter { passphraseService.hasPassphrase(it.accountId) }
+                        .mapNotNull { producer ->
+                            submitTask {
+                                voteService.findOrCreateVote(
+                                    space,
+                                    producer,
+                                    passphraseService.getPassphrase(producer.accountId)
+                                )
+                            }
                         }
-                    }
+                }
             }
+            .flatMap { it }
     }
 
     /**

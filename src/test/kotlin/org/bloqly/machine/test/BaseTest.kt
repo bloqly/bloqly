@@ -111,7 +111,7 @@ open class BaseTest {
 
     fun validatorForRound(round: Long): Account {
         val space = spaceService.getById(DEFAULT_SPACE)
-        return accountService.getProducerBySpace(space, round)
+        return accountService.getProducerBySpace(space, round)!!
     }
 
     protected fun assertPropertyValueCandidate(value: String) {

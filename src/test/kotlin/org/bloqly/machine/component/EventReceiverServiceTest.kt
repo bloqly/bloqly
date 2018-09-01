@@ -42,7 +42,7 @@ open class EventReceiverServiceTest : BaseTest() {
         val block1 = createNextBlock(lastBlock, validatorForRound(1), 1).block
         val block2 = createNextBlock(lastBlock, validatorForRound(2), 2).block
 
-        val validators = accountService.getValidatorsForSpaceId(DEFAULT_SPACE)
+        val validators = accountService.findValidatorsForSpaceId(DEFAULT_SPACE)!!
 
         val v1 = voteService.newVote(validators[0], passphrase(validators[0]), block1.toModel())
         val v2 = voteService.newVote(validators[0], passphrase(validators[0]), block2.toModel())

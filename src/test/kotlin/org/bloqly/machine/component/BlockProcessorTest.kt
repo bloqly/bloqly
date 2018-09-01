@@ -304,7 +304,7 @@ class BlockProcessorTest : BaseTest() {
 
         txs[0] = testService.createTransaction()
         blocks.add(0, createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1))
-        assertEquals(blocks[0].block.producerId, accountService.getProducerBySpace(space, 1).accountId)
+        assertEquals(blocks[0].block.producerId, accountService.getProducerBySpace(space, 1)!!.accountId)
         assertEquals(firstBlock.height, blocks[0].block.libHeight)
         assertEquals(firstBlock.hash, txs[0]!!.referencedBlockHash)
 

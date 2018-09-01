@@ -33,22 +33,25 @@ class AccountService(
 
         val activeValidator = getProducerBySpace(space, round)
 
-        return activeValidator.accountId == producerId
+        return activeValidator != null && activeValidator.accountId == producerId
     }
 
     @Transactional(readOnly = true)
-    fun getProducerBySpace(space: Space, round: Long): Account {
+    fun getProducerBySpace(space: Space, round: Long): Account? {
 
-        val validators = getValidatorsForSpace(space)
+        val validators = findValidatorsForSpace(space)
 
-        val validatorIndex = round % validators.size
+        return validators?.let {
+            val validatorIndex = round % validators.size
 
-        return validators[validatorIndex.toInt()]
+            validators[validatorIndex.toInt()]
+        }
     }
 
     @Transactional(readOnly = true)
     fun getActiveProducerBySpace(space: Space, round: Long): Account? {
-        return getProducerBySpace(space, round).takeIf { passphraseService.hasPassphrase(it.accountId) }
+        return getProducerBySpace(space, round)
+            .takeIf { it != null && passphraseService.hasPassphrase(it.accountId) }
     }
 
     @Transactional
@@ -73,14 +76,14 @@ class AccountService(
     }
 
     @Transactional(readOnly = true)
-    fun getValidatorsForSpaceId(spaceId: String): List<Account> {
+    fun findValidatorsForSpaceId(spaceId: String): List<Account>? {
         val space = spaceRepository.findById(spaceId).orElseThrow()
 
-        return getValidatorsForSpace(space)
+        return findValidatorsForSpace(space)
     }
 
     @Transactional(readOnly = true)
-    fun getValidatorsForSpace(space: Space): List<Account> {
+    fun findValidatorsForSpace(space: Space): List<Account>? {
         val powerProperties = propertyRepository.findBySpaceAndKey(space.id, POWER_KEY)
         val validatorsCount = propertyRepository.getValidatorsCountSpaceId(space.id)
 
@@ -88,11 +91,9 @@ class AccountService(
 
         val validators = accountRepository.findAllByAccountIds(accountIds)
 
-        return if (validators.size == validatorsCount) {
-            validators.sortedBy { it.accountId }
-        } else {
-            listOf()
-        }
+        return validators
+            .takeIf { validators.size == validatorsCount }
+            ?.sortedBy { it.accountId }
     }
 
     @Transactional(readOnly = true)
@@ -109,6 +110,13 @@ class AccountService(
             .map { ParameterUtils.readValue(it.value) as BInteger }
             .map { it.value }
             .orElseThrow()
+    }
+
+    @Transactional
+    fun importAccountId(accountId: String) {
+        if (!accountRepository.existsByAccountId(accountId)) {
+            accountRepository.save(Account(accountId = accountId))
+        }
     }
 
     @Transactional

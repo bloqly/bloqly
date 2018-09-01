@@ -41,10 +41,7 @@ class SchedulerService(
 
     @Scheduled(initialDelay = 1000, fixedDelay = 1000)
     fun sendVotes() {
-        val votes = eventProcessorService.onGetVotes()
-
-        if (votes.isNotEmpty()) {
-
+        eventProcessorService.onGetVotes().takeIf { it.isNotEmpty() }?.let { votes ->
             log.info("Votes to send: ${votes.size}.")
 
             eventSenderService.sendVotes(votes)

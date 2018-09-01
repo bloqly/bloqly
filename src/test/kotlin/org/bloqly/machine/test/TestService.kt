@@ -2,12 +2,12 @@ package org.bloqly.machine.test
 
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.component.EventProcessorService
 import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.component.ResetService
 import org.bloqly.machine.model.Account
+import org.bloqly.machine.model.Accounts
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -147,7 +147,7 @@ class TestService(
     }
 
     fun testValidatorsInitialized() {
-        val validators = accountService.getValidatorsForSpace(getDefaultSpace())
+        val validators = accountService.findValidatorsForSpace(getDefaultSpace())!!
 
         assertEquals(4, validators.size)
 
@@ -189,7 +189,4 @@ class TestService(
     fun cleanupBlockTransactions() {
         entityManager.createNativeQuery("delete from block_transactions").executeUpdate()
     }
-
-    @ValueObject
-    private data class Accounts(val accounts: List<Account>)
 }

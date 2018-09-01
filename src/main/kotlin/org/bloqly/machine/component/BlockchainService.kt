@@ -33,11 +33,7 @@ class BlockchainService(
     private val finalizedTransactionRepository: FinalizedTransactionRepository
 ) {
 
-    @Transactional
-    fun createBlockchain(spaceId: String, baseDir: String, passphrase: String) {
-
-        blockService.ensureSpaceEmpty(spaceId)
-
+    private fun getContractBody(baseDir: String): String {
         val header = FileUtils.getResourceAsString("/headers/header.js")
 
         val source = File(baseDir).list()
@@ -45,7 +41,15 @@ class BlockchainService(
             .map { fileName -> File("$baseDir/$fileName").readText() }
             .reduce { str, acc -> str + "\n" + acc }
 
-        val contractBody = header + "\n" + source
+        return header + "\n" + source
+    }
+
+    @Transactional
+    fun createBlockchain(spaceId: String, baseDir: String, passphrase: String) {
+
+        blockService.ensureSpaceEmpty(spaceId)
+
+        val contractBody = getContractBody(baseDir)
 
         val initProperties = contractExecutorService.invokeFunction("init", contractBody)
 

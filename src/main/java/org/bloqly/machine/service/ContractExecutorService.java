@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.bloqly.machine.Application.POWER_KEY;
 import static org.bloqly.machine.model.InvocationResultType.SUCCESS;
 
 @Service
@@ -29,6 +30,9 @@ public class ContractExecutorService {
 
     @Autowired
     private ContractService contractService;
+
+    @Autowired
+    private AccountService accountService;
 
     private Map<String, ScriptEngine> engines = new ConcurrentHashMap<>();
 
@@ -166,9 +170,16 @@ public class ContractExecutorService {
 
             var results = (Map<String, Object>) engine.invokeFunction(name);
 
-            return results.values().stream()
+            var properties = results.values().stream()
                     .map(item -> getEntry((Map<String, Object>) item))
                     .collect(toList());
+
+            properties
+                    .stream()
+                    .filter(property -> property.getTarget().equals(POWER_KEY))
+                    .forEach(property -> accountService.importAccountId(property.getTarget()));
+
+            return properties;
 
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -28,8 +28,8 @@ data class Account(
     @Column(nullable = false)
     val accountId: String,
 
-    @Column(nullable = false)
-    var publicKey: String,
+    @Column
+    var publicKey: String? = null,
 
     @Column
     var privateKeyEncoded: ByteArray? = null

@@ -9,7 +9,7 @@ interface VoteRepository : CrudRepository<Vote, Long> {
     fun findByBlockHash(blockId: String): List<Vote>
 
     @Query("select * from vote where space_id = ?1 order by height desc limit 1", nativeQuery = true)
-    fun findLastForSpace(spaceId: String): Vote
+    fun findLastForSpace(spaceId: String): Vote?
 
     fun findByPublicKeyAndBlockHash(publicKey: String, blockHash: String): Vote?
 

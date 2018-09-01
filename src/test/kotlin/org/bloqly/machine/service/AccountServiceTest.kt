@@ -69,7 +69,7 @@ class AccountServiceTest : BaseTest() {
             val account = accountService.newAccount(passphrase)
 
             println("id: ${account.id}")
-            println("pub: ${account.publicKey.toLowerCase()}")
+            println("pub: ${account.publicKey!!.toLowerCase()}")
             println("priv: ${account.privateKey}")
             println("pass: $passphrase")
         }
@@ -93,7 +93,7 @@ class AccountServiceTest : BaseTest() {
         val passphrase = "passphrase"
         val account = accountService.newAccount(passphrase)
 
-        val publicKey = account.publicKey
+        val publicKey = account.publicKey!!
 
         accountRepository.save(account)
 

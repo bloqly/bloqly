@@ -40,7 +40,7 @@ class VoteServiceTest : BaseTest() {
 
         space = testService.getDefaultSpace()
 
-        validators = accountService.getValidatorsForSpace(space)
+        validators = accountService.findValidatorsForSpace(space)!!
 
         validator = validators.first()
 
@@ -55,7 +55,7 @@ class VoteServiceTest : BaseTest() {
 
         val vote = voteService.createVote(validators.last(), passphrase(validators.last().accountId), block)
 
-        val saved = voteService.findVote(validators.last().publicKey, block.hash)
+        val saved = voteService.findVote(validators.last().publicKey!!, block.hash)
 
         assertEquals(vote, saved)
     }

@@ -28,7 +28,7 @@ class VoteService(
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
-        return voteRepository.findBySpaceIdAndPublicKeyAndHeight(space.id, validator.publicKey, lastBlock.height)
+        return voteRepository.findBySpaceIdAndPublicKeyAndHeight(space.id, validator.publicKey!!, lastBlock.height)
             ?: createVote(validator, passphrase, lastBlock)
     }
 
@@ -49,7 +49,7 @@ class VoteService(
         block: Block
     ): Vote {
         val vote = Vote(
-            publicKey = validator.publicKey,
+            publicKey = validator.publicKey!!,
             blockHash = block.hash,
             height = block.height,
             spaceId = block.spaceId,

@@ -17,7 +17,7 @@ class DeltaService(
     fun getDeltas(): List<BlockRequest> {
         return spaceService.findAll()
             .filter { blockRepository.existsBySpaceId(it.id) }
-            .map { space ->
+            .mapNotNull { space ->
                 voteRepository.findLastForSpace(space.id)
             }
             .map { vote ->
