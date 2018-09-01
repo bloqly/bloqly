@@ -31,4 +31,18 @@ class PropertyRepositoryCustomImpl(
 
         return ParameterUtils.readValue(quorumProperty.value) as Int
     }
+
+    override fun getValidatorsCountSpaceId(spaceId: String): Int {
+
+        val validatorsCount = entityManager.find(
+            Property::class.java, PropertyId(
+                spaceId = spaceId,
+                self = Application.DEFAULT_SELF,
+                target = Application.DEFAULT_SELF,
+                key = Application.VALIDATORS_KEY
+            )
+        )
+
+        return ParameterUtils.readValue(validatorsCount.value) as Int
+    }
 }

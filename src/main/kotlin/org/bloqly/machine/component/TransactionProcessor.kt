@@ -1,7 +1,7 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.Application.Companion.DEFAULT_KEY
-import org.bloqly.machine.Application.Companion.INIT_KEY
+import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION
+import org.bloqly.machine.Application.Companion.INIT_FUNCTION
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
@@ -37,7 +37,7 @@ class TransactionProcessor(
             space = tx.spaceId,
             owner = tx.origin,
             self = tx.self,
-            key = INIT_KEY,
+            key = INIT_FUNCTION,
             caller = tx.origin,
             callee = tx.destination
         )
@@ -66,7 +66,7 @@ class TransactionProcessor(
         val invocationContext = InvocationContext(
             space = tx.spaceId,
             self = tx.self,
-            key = tx.key ?: DEFAULT_KEY,
+            key = tx.key ?: DEFAULT_FUNCTION,
             caller = tx.origin,
             callee = tx.destination
         )

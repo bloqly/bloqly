@@ -35,15 +35,21 @@ class Application {
         }
 
         const val REQUEST_THREADS = 5
+
         const val POWER_KEY = "power"
+        const val QUORUM_KEY = "quorum"
+        const val VALIDATORS_KEY = "validators"
+
+        const val DEFAULT_FUNCTION = "main"
+        const val INIT_FUNCTION = "init"
+
         const val DEFAULT_SPACE = "main"
         const val DEFAULT_SELF = "self"
-        const val QUORUM_KEY = "quorum"
-        const val DEFAULT_KEY = "main"
-        const val INIT_KEY = "init"
+
         const val MAX_DELTA_SIZE = 1000
         const val MAX_REFERENCED_BLOCK_DEPTH = 720
         const val MAX_TRANSACTION_AGE = 3600 * 1000
+
         const val ROUND = 5000
         const val BLOCK_TIMEOUT = ROUND / 3L
         const val TX_TIMEOUT = BLOCK_TIMEOUT * 2 / 3L

@@ -81,13 +81,18 @@ class AccountService(
 
     @Transactional(readOnly = true)
     fun getValidatorsForSpace(space: Space): List<Account> {
-
         val powerProperties = propertyRepository.findBySpaceAndKey(space.id, POWER_KEY)
+        val validatorsCount = propertyRepository.getValidatorsCountSpaceId(space.id)
+
         val accountIds = powerProperties.map { it.id.target }
 
-        return accountRepository
-            .findAllByAccountIds(accountIds)
-            .sortedBy { it.accountId }
+        val validators = accountRepository.findAllByAccountIds(accountIds)
+
+        return if (validators.size == validatorsCount) {
+            validators.sortedBy { it.accountId }
+        } else {
+            listOf()
+        }
     }
 
     @Transactional(readOnly = true)

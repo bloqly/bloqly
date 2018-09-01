@@ -1,6 +1,6 @@
 package org.bloqly.machine.vo
 
-import org.bloqly.machine.Application.Companion.DEFAULT_KEY
+import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.annotation.ValueObject
@@ -14,7 +14,7 @@ data class TransactionRequest(
     val destination: String,
     var transactionType: String = TransactionType.CALL.name,
     var self: String = DEFAULT_SELF,
-    var key: String = DEFAULT_KEY,
+    var key: String = DEFAULT_FUNCTION,
     val args: List<Arg>
 )
 
