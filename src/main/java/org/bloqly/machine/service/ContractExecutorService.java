@@ -176,7 +176,7 @@ public class ContractExecutorService {
 
             properties
                     .stream()
-                    .filter(property -> property.getTarget().equals(POWER_KEY))
+                    .filter(property -> property.getKey().equals(POWER_KEY))
                     .forEach(property -> accountService.importAccountId(property.getTarget()));
 
             return properties;

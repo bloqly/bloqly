@@ -45,5 +45,7 @@ class GenesisServiceTest : BaseTest() {
         testService.testPropertiesAreCreated()
         testService.testSpaceCreated()
         testService.testValidatorsPowerValues()
+
+        assertEquals(4, accountRepository.count())
     }
 }

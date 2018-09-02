@@ -113,20 +113,20 @@ class GenesisService(
             "Genesis block can contain only 1 transaction."
         }
 
-        validateGenesisTransaction(transactions.first(), block, now)
+        val transaction = transactions.first()
+
+        validateGenesisTransaction(transaction, block, now)
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        transactions.forEach { tx ->
-            val result = transactionProcessor.processTransaction(tx, propertyContext)
-            require(result.isOK()) {
-                "Could not process transaction ${tx.toVO()}"
-            }
+        val result = transactionProcessor.processTransaction(transaction, propertyContext)
+        require(result.isOK()) {
+            "Could not process transaction ${transaction.toVO()}"
         }
 
         propertyContext.commit()
 
-        transactionRepository.saveAll(transactions).forEach { tx ->
+        transactionRepository.save(transaction).let { tx ->
             finalizedTransactionRepository.save(
                 FinalizedTransaction(
                     transaction = tx,

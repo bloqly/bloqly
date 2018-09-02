@@ -1,3 +1,4 @@
+
 const fractions = new Long('10').pow(8);
 const maxSupply = new Long('1_000_000_000').add(fractions);
 
