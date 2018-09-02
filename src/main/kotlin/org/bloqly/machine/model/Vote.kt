@@ -1,7 +1,7 @@
 package org.bloqly.machine.model
 
 import org.bloqly.machine.util.encode16
-import org.bloqly.machine.vo.VoteVO
+import org.bloqly.machine.vo.vote.VoteVO
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue

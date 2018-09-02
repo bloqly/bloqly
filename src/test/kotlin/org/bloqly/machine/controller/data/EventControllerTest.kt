@@ -6,9 +6,9 @@ import org.bloqly.machine.test.BaseControllerTest
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.vo.BlockDataList
-import org.bloqly.machine.vo.TransactionList
-import org.bloqly.machine.vo.VoteList
+import org.bloqly.machine.vo.block.BlockDataList
+import org.bloqly.machine.vo.transaction.TransactionList
+import org.bloqly.machine.vo.vote.VoteList
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

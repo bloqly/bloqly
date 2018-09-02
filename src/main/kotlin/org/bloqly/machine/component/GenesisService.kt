@@ -17,7 +17,7 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
-import org.bloqly.machine.vo.Genesis
+import org.bloqly.machine.vo.genesis.Genesis
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant

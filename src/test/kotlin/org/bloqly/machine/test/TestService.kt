@@ -22,7 +22,7 @@ import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.vo.VoteVO
+import org.bloqly.machine.vo.vote.VoteVO
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.springframework.stereotype.Component

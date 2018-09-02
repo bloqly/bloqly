@@ -1,4 +1,4 @@
-package org.bloqly.machine.vo
+package org.bloqly.machine.vo.transaction
 
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Transaction

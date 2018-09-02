@@ -3,8 +3,8 @@ package org.bloqly.machine.component
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
-import org.bloqly.machine.vo.BlockData
-import org.bloqly.machine.vo.BlockRequest
+import org.bloqly.machine.vo.block.BlockData
+import org.bloqly.machine.vo.block.BlockRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.ExecutorService

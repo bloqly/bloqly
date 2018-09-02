@@ -8,10 +8,10 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.NodeRepository
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.APIUtils
-import org.bloqly.machine.vo.BlockData
-import org.bloqly.machine.vo.BlockDataList
-import org.bloqly.machine.vo.TransactionList
-import org.bloqly.machine.vo.VoteList
+import org.bloqly.machine.vo.block.BlockData
+import org.bloqly.machine.vo.block.BlockDataList
+import org.bloqly.machine.vo.transaction.TransactionList
+import org.bloqly.machine.vo.vote.VoteList
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

@@ -5,7 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.test.BaseControllerTest
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.vo.TransactionVO
+import org.bloqly.machine.vo.transaction.TransactionVO
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith

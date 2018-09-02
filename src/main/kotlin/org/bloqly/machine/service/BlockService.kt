@@ -14,9 +14,9 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.encode16
-import org.bloqly.machine.vo.BlockData
-import org.bloqly.machine.vo.BlockDataList
-import org.bloqly.machine.vo.BlockRequest
+import org.bloqly.machine.vo.block.BlockData
+import org.bloqly.machine.vo.block.BlockDataList
+import org.bloqly.machine.vo.block.BlockRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

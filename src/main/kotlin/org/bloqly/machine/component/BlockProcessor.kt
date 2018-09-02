@@ -28,7 +28,7 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
-import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.block.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

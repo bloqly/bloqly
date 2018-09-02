@@ -55,7 +55,7 @@ class VoteServiceTest : BaseTest() {
 
         val vote = voteService.createVote(validators.last(), passphrase(validators.last().accountId), block)
 
-        val saved = voteService.findVote(validators.last().publicKey!!, block.hash)
+        val saved = voteService.findVote(validators.last().publicKey, block.hash)
 
         assertEquals(vote, saved)
     }

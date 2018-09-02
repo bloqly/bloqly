@@ -1,4 +1,4 @@
-package org.bloqly.machine.vo
+package org.bloqly.machine.vo.transaction
 
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF

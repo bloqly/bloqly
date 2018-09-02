@@ -6,10 +6,10 @@ import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.vo.BlockData
-import org.bloqly.machine.vo.TransactionRequest
-import org.bloqly.machine.vo.TransactionVO
-import org.bloqly.machine.vo.VoteVO
+import org.bloqly.machine.vo.block.BlockData
+import org.bloqly.machine.vo.transaction.TransactionRequest
+import org.bloqly.machine.vo.transaction.TransactionVO
+import org.bloqly.machine.vo.vote.VoteVO
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

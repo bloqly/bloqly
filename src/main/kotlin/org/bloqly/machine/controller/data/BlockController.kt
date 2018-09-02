@@ -2,9 +2,9 @@ package org.bloqly.machine.controller.data
 
 import org.bloqly.machine.controller.exception.NotFoundException
 import org.bloqly.machine.service.BlockService
-import org.bloqly.machine.vo.BlockDataList
-import org.bloqly.machine.vo.BlockRequest
-import org.bloqly.machine.vo.BlockVO
+import org.bloqly.machine.vo.block.BlockDataList
+import org.bloqly.machine.vo.block.BlockRequest
+import org.bloqly.machine.vo.block.BlockVO
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

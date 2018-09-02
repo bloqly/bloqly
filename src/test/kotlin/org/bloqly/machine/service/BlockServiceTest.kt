@@ -3,7 +3,7 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.block.BlockData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals

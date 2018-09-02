@@ -2,9 +2,9 @@ package org.bloqly.machine.controller.data
 
 import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.EventReceiverService
-import org.bloqly.machine.vo.TransactionList
-import org.bloqly.machine.vo.TransactionRequest
-import org.bloqly.machine.vo.TransactionVO
+import org.bloqly.machine.vo.transaction.TransactionList
+import org.bloqly.machine.vo.transaction.TransactionRequest
+import org.bloqly.machine.vo.transaction.TransactionVO
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

@@ -11,7 +11,7 @@ import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.block.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -77,7 +77,9 @@ class EventProcessorService(
             .filter { blockService.existsBySpace(it) }
             .mapNotNull { space ->
                 accountService.findValidatorsForSpace(space)?.let { validators ->
-                    validators.filter { passphraseService.hasPassphrase(it.accountId) }
+                    validators
+                        .filter { passphraseService.hasPassphrase(it.accountId) }
+                        .filter { it.privateKeyEncoded != null }
                         .mapNotNull { producer ->
                             submitTask {
                                 voteService.findOrCreateVote(

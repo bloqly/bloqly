@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.vo.NodeVO
+import org.bloqly.machine.vo.node.NodeVO
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity
 

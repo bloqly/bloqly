@@ -113,32 +113,37 @@ class AccountService(
     }
 
     @Transactional
-    fun importAccountId(accountId: String) {
+    fun importAccountPublicKey(publicKey: String) {
+
+        val accountId = EncodingUtils.hashAndEncode16(publicKey.decode16())
+
         if (!accountRepository.existsByAccountId(accountId)) {
-            accountRepository.save(Account(accountId = accountId))
+            accountRepository.save(
+                Account(
+                    accountId = accountId,
+                    publicKey = publicKey
+                )
+            )
         }
     }
 
     @Transactional
-    fun importAccount(privateKeyBytes: ByteArray?, passphrase: String): Account {
+    fun importAccount(privateKeyBytes: ByteArray?, passphrase: String) {
 
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
         val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)
 
         require(!accountRepository.existsByAccountId(accountId)) {
-            "Could not import account: $accountId, account already exists."
+            "Account $accountId already exists"
         }
 
-        val publicKey = publicKeyBytes.encode16()
-
-        val account = Account(
-            accountId = accountId,
-            publicKey = publicKey
+        accountRepository.save(
+            Account(
+                accountId = accountId,
+                publicKey = publicKeyBytes.encode16(),
+                privateKeyEncoded = CryptoUtils.encrypt(privateKeyBytes, passphrase)
+            )
         )
-
-        account.privateKeyEncoded = CryptoUtils.encrypt(privateKeyBytes, passphrase)
-
-        return accountRepository.save(account)
     }
 
     @Transactional

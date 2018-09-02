@@ -10,7 +10,7 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
-import org.bloqly.machine.vo.TransactionRequest
+import org.bloqly.machine.vo.transaction.TransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -89,7 +89,7 @@ class TransactionService(
             transactionType = transactionType,
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
-            publicKey = origin.publicKey!!
+            publicKey = origin.publicKey
         )
 
         val signature = CryptoUtils.sign(

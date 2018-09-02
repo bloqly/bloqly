@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.vo.TransactionVO
+import org.bloqly.machine.vo.transaction.TransactionVO
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue

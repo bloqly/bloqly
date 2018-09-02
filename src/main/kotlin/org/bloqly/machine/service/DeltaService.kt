@@ -2,7 +2,7 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
-import org.bloqly.machine.vo.BlockRequest
+import org.bloqly.machine.vo.block.BlockRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

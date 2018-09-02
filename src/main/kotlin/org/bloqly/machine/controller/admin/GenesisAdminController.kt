@@ -1,7 +1,7 @@
 package org.bloqly.machine.controller.admin
 
 import org.bloqly.machine.component.GenesisService
-import org.bloqly.machine.vo.GenesisEncoded
+import org.bloqly.machine.vo.genesis.GenesisEncoded
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus

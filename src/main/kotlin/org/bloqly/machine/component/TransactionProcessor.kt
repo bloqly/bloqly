@@ -2,7 +2,6 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION
 import org.bloqly.machine.Application.Companion.INIT_FUNCTION
-import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
@@ -10,7 +9,6 @@ import org.bloqly.machine.model.InvocationResultType.ERROR
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
-import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.util.CryptoUtils
@@ -23,8 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class TransactionProcessor(
     private val contractExecutorService: ContractExecutorService,
-    private val blockService: BlockService,
-    private val accountService: AccountService
+    private val blockService: BlockService
 ) {
     private val log = LoggerFactory.getLogger(TransactionProcessor::class.simpleName)
 
@@ -51,17 +48,7 @@ class TransactionProcessor(
             )
         )
 
-        val invocationResult = contractExecutorService.invokeContract(propertyContext, invocationContext, byteArrayOf())
-
-        if (invocationResult.isOK()) {
-            invocationResult.output.forEach {
-                if (it.id.key == POWER_KEY) {
-                    accountService.importAccountId(it.id.target)
-                }
-            }
-        }
-
-        return invocationResult
+        return contractExecutorService.invokeContract(propertyContext, invocationContext, byteArrayOf())
     }
 
     private fun processCall(

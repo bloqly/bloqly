@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.vo.BlockVO
+import org.bloqly.machine.vo.block.BlockVO
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType

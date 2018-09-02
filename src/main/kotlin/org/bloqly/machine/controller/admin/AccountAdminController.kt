@@ -2,10 +2,11 @@ package org.bloqly.machine.controller.admin
 
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.util.decode16
-import org.bloqly.machine.vo.AccountImportRequest
+import org.bloqly.machine.vo.account.AccountImportRequest
+import org.bloqly.machine.vo.account.PublicKeysImportRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Profile
-import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.CREATED
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -34,6 +35,20 @@ class AccountAdminController(
             accountImportRequest.password
         )
 
-        return ResponseEntity(HttpStatus.CREATED)
+        return ResponseEntity(CREATED)
+    }
+
+    @PostMapping("/publicKeys")
+    fun importPublicKeys(
+        @RequestBody publicKeysImportRequest: PublicKeysImportRequest,
+        request: HttpServletRequest
+    ): ResponseEntity<Void> {
+
+        require(request.localPort == adminPort)
+
+        publicKeysImportRequest.publicKeys
+            .forEach { accountService.importAccountPublicKey(it) }
+
+        return ResponseEntity(CREATED)
     }
 }

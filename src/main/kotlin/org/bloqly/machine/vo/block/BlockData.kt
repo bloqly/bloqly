@@ -1,7 +1,9 @@
-package org.bloqly.machine.vo
+package org.bloqly.machine.vo.block
 
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.vo.transaction.TransactionVO
+import org.bloqly.machine.vo.vote.VoteVO
 
 @ValueObject
 data class BlockData(

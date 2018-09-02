@@ -27,7 +27,7 @@ import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.block.BlockData
 import org.junit.Assert
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired

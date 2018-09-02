@@ -10,7 +10,7 @@ import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.TimeUtils.setTestTime
 import org.bloqly.machine.util.decode16
-import org.bloqly.machine.vo.BlockData
+import org.bloqly.machine.vo.block.BlockData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull

@@ -4,7 +4,7 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.decode16
-import org.bloqly.machine.vo.Genesis
+import org.bloqly.machine.vo.genesis.Genesis
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,7 +45,5 @@ class GenesisServiceTest : BaseTest() {
         testService.testPropertiesAreCreated()
         testService.testSpaceCreated()
         testService.testValidatorsPowerValues()
-
-        assertEquals(4, accountRepository.count())
     }
 }
