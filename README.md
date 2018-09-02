@@ -38,13 +38,16 @@ First, small contract code sample:
  * @return {Object}  Array of properties to set after function execution
  */
 
+const fractions = new Long('10').pow(8);
+const maxSupply = new Long('1_000_000_000').add(fractions);
+
 function main(context, orig, dest, amount) {
 
-    let origBalance = getProperty(orig, 'balance', zero);
-    let destBalance = getProperty(dest, 'balance', zero);
+    let origBalance = getProperty(orig, 'balance', ZERO);
+    let destBalance = getProperty(dest, 'balance', ZERO);
 
-    let newOrigBalance = origBalance.subtract(amount);
-    let newDestBalance = destBalance.add(amount);
+    let newOrigBalance = origBalance.safeSubtract(amount);
+    let newDestBalance = destBalance.safeAdd(amount, maxSupply);
 
     return [
         { target: orig, balance: newOrigBalance },
