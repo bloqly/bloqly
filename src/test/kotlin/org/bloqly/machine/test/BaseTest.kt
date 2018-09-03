@@ -9,7 +9,7 @@ import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.component.GenesisService
 import org.bloqly.machine.component.ObjectFilterService
 import org.bloqly.machine.component.PassphraseService
-import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.lang.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Property

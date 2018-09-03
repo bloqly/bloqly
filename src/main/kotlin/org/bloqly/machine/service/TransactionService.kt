@@ -1,6 +1,6 @@
 package org.bloqly.machine.service
 
-import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.lang.BInteger
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.ValueType

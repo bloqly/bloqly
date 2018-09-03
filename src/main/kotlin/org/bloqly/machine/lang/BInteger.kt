@@ -1,4 +1,4 @@
-package org.bloqly.machine.math
+package org.bloqly.machine.lang
 
 import java.math.BigInteger
 import java.util.Objects

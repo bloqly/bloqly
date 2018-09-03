@@ -4,7 +4,7 @@ import com.google.common.primitives.UnsignedBytes
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.ArrayUtils
 import org.apache.commons.lang3.Validate
-import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.lang.BInteger
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger

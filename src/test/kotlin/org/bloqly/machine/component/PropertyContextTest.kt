@@ -3,7 +3,7 @@ package org.bloqly.machine.component
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.lang.BInteger
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.PropertyService

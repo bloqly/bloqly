@@ -1,6 +1,6 @@
 package org.bloqly.machine.util
 
-import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.lang.BInteger
 import org.junit.Assert.assertTrue
 import org.junit.Test
 

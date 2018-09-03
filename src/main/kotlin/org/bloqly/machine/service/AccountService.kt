@@ -4,7 +4,7 @@ import org.bitcoinj.core.ECKey
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.component.PassphraseService
-import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.lang.BInteger
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space

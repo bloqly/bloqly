@@ -1,7 +1,7 @@
 package org.bloqly.machine.model
 
 import org.bloqly.machine.annotation.ValueObject
-import org.bloqly.machine.math.BInteger
+import org.bloqly.machine.lang.BInteger
 import org.bloqly.machine.util.ParameterUtils
 
 @ValueObject

@@ -189,6 +189,20 @@ object CryptoUtils {
         return BloqlySchnorr.verify(message, Signature.fromByteArray(signature), publicKey)
     }
 
+    fun verifySchnorrHex(message: String, signature: String, publicKey: String): Boolean =
+        verify(
+            message.decode16(),
+            signature.decode16(),
+            publicKey.decode16()
+        )
+
+    fun verifyHex(message: String, signature: String, publicKey: String): Boolean =
+        ECKey.verify(
+            message.decode16(),
+            signature.decode16(),
+            publicKey.decode16()
+        )
+
     fun verifyBlock(block: Block, publicKey: ByteArray): Boolean {
         return verify(
             hash(block),
