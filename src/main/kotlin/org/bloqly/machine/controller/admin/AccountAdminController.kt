@@ -1,6 +1,8 @@
 package org.bloqly.machine.controller.admin
 
 import io.swagger.annotations.Api
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import io.swagger.annotations.Authorization
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.util.decode16
@@ -33,15 +35,28 @@ class AccountAdminController(
     @Value("\${admin.port}") private val adminPort: Int
 ) {
 
+    @ApiOperation(
+        value = "Returns list of current validators",
+        response = AccountVO::class,
+        responseContainer = "List",
+        nickname = "getValidators"
+    )
     @GetMapping("/validators")
-    fun getMapping(@RequestParam("space") spaceId: String): List<AccountVO> {
+    fun getValidators(
+        @ApiParam(value = "Space id, default value is 'main'", example = "main")
+        @RequestParam("space") spaceId: String
+    ): List<AccountVO> {
         return accountService.findValidatorsForSpaceId(spaceId)
             ?.let { validators -> validators.map { it.toVO() } }
             ?: listOf()
     }
 
+    @ApiOperation(
+        value = "Imports account",
+        nickname = "importAccount"
+    )
     @PostMapping
-    fun import(
+    fun importAccount(
         @RequestBody accountImportRequest: AccountImportRequest,
         request: HttpServletRequest
     ): ResponseEntity<Void> {
@@ -56,6 +71,10 @@ class AccountAdminController(
         return ResponseEntity(CREATED)
     }
 
+    @ApiOperation(
+        value = "Imports account public keys",
+        nickname = "importPublicKeys"
+    )
     @PostMapping("/publicKeys")
     fun importPublicKeys(
         @RequestBody publicKeysImportRequest: PublicKeysImportRequest,
