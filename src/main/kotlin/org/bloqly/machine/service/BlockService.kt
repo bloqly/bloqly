@@ -282,6 +282,13 @@ class BlockService(
     fun existsBySpace(space: Space): Boolean = blockRepository.existsBySpaceId(space.id)
 
     @Transactional(readOnly = true)
+    fun existsBySpaceId(spaceId: String): Boolean {
+        return spaceRepository.findById(spaceId).map { space ->
+            blockRepository.existsBySpaceId(space.id)
+        }.orElse(false)
+    }
+
+    @Transactional(readOnly = true)
     fun getLIBForBlock(block: Block): Block {
         if (block.height == 0L) {
             return block

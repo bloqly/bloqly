@@ -1,11 +1,13 @@
 package org.bloqly.machine.controller.data
 
-import org.bloqly.machine.controller.exception.NotFoundException
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.vo.block.BlockDataList
 import org.bloqly.machine.vo.block.BlockRequest
 import org.bloqly.machine.vo.block.BlockVO
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.HttpStatus.OK
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,24 +23,33 @@ class BlockController(
 ) {
 
     @PostMapping("last")
-    fun getLastBlock(@RequestBody blockRequest: BlockRequest): BlockVO {
-        return blockService.getLastBlockBySpace(blockRequest.spaceId).toVO()
+    fun getLastBlock(@RequestBody blockRequest: BlockRequest): ResponseEntity<BlockVO> {
+        return if (blockService.existsBySpaceId(blockRequest.spaceId)) {
+            ResponseEntity(blockService.getLastBlockBySpace(blockRequest.spaceId).toVO(), OK)
+        } else {
+            ResponseEntity(NOT_FOUND)
+        }
     }
 
     @PostMapping("lib")
-    fun getLIB(@RequestBody blockRequest: BlockRequest): BlockVO {
-        val lastBlock = blockService.getLastBlockBySpace(blockRequest.spaceId)
-        return blockService.getLIBForBlock(lastBlock).toVO()
+    fun getLIB(@RequestBody blockRequest: BlockRequest): ResponseEntity<BlockVO> {
+        return if (blockService.existsBySpaceId(blockRequest.spaceId)) {
+            val lastBlock = blockService.getLastBlockBySpace(blockRequest.spaceId)
+            ResponseEntity(blockService.getLIBForBlock(lastBlock).toVO(), OK)
+        } else {
+            ResponseEntity(NOT_FOUND)
+        }
     }
 
     @PostMapping("search")
-    fun getDelta(@RequestBody blockRequest: BlockRequest): BlockDataList {
-        return blockService.getBlockDataList(blockRequest)
+    fun getDelta(@RequestBody blockRequest: BlockRequest): ResponseEntity<BlockDataList> {
+        return ResponseEntity(blockService.getBlockDataList(blockRequest), OK)
     }
 
     @GetMapping("{blockHash}")
-    fun getBlock(@PathVariable("blockHash") blockHash: String): BlockVO {
-        val block = blockService.findByHash(blockHash) ?: throw NotFoundException()
-        return block.toVO()
+    fun getBlock(@PathVariable("blockHash") blockHash: String): ResponseEntity<BlockVO> {
+        return blockService.findByHash(blockHash)
+            ?.let { ResponseEntity(it.toVO(), OK) }
+            ?: ResponseEntity(NOT_FOUND)
     }
 }
