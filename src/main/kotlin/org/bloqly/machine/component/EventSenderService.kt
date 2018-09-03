@@ -4,7 +4,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.vo.block.BlockData
-import org.bloqly.machine.vo.block.BlockRequest
+import org.bloqly.machine.vo.block.BlockRangeRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.concurrent.ExecutorService
@@ -66,7 +66,7 @@ class EventSenderService(
         }
     }
 
-    fun requestDeltas(blockRequests: List<BlockRequest>) {
+    fun requestDeltas(blockRequests: List<BlockRangeRequest>) {
         val nodes = nodeService.getNodesToQuery()
         val node = nodes.shuffled().first()
 

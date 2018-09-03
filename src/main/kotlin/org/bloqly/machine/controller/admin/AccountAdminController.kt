@@ -1,5 +1,7 @@
 package org.bloqly.machine.controller.admin
 
+import io.swagger.annotations.Api
+import io.swagger.annotations.Authorization
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.account.AccountImportRequest
@@ -17,6 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import javax.servlet.http.HttpServletRequest
 
+@Api(
+    value = "/api/v1/admin/accounts",
+    authorizations = [
+        Authorization(value = "Basic", scopes = [])
+    ]
+)
 @Profile("server")
 @RestController
 @RequestMapping("/api/v1/admin/accounts")

@@ -16,7 +16,7 @@ import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.block.BlockData
 import org.bloqly.machine.vo.block.BlockDataList
-import org.bloqly.machine.vo.block.BlockRequest
+import org.bloqly.machine.vo.block.BlockRangeRequest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -226,12 +226,12 @@ class BlockService(
     }
 
     @Transactional(readOnly = true)
-    fun getBlockDataList(blockRequest: BlockRequest): BlockDataList {
+    fun getBlockDataList(blockRangeRequest: BlockRangeRequest): BlockDataList {
 
-        val startHeight = blockRequest.startHeight
-        val endHeight = min(blockRequest.endHeight, startHeight + MAX_DELTA_SIZE)
+        val startHeight = blockRangeRequest.startHeight
+        val endHeight = min(blockRangeRequest.endHeight, startHeight + MAX_DELTA_SIZE)
 
-        val blocks = blockRepository.getBlocksDelta(blockRequest.spaceId, startHeight, endHeight)
+        val blocks = blockRepository.getBlocksDelta(blockRangeRequest.spaceId, startHeight, endHeight)
 
         return BlockDataList(blocks.map { BlockData(it) })
     }

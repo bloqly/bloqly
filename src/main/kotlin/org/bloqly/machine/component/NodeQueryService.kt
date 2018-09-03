@@ -7,7 +7,7 @@ import org.bloqly.machine.service.NodeService
 import org.bloqly.machine.util.APIUtils
 import org.bloqly.machine.vo.block.BlockData
 import org.bloqly.machine.vo.block.BlockDataList
-import org.bloqly.machine.vo.block.BlockRequest
+import org.bloqly.machine.vo.block.BlockRangeRequest
 import org.bloqly.machine.vo.node.NodeList
 import org.bloqly.machine.vo.transaction.TransactionList
 import org.bloqly.machine.vo.vote.VoteList
@@ -88,14 +88,14 @@ class NodeQueryService(
     }
 
     // TODO create test for deltas API
-    fun requestDelta(node: Node, blockRequest: BlockRequest): List<BlockData>? {
+    fun requestDelta(node: Node, blockRangeRequest: BlockRangeRequest): List<BlockData>? {
         val path = APIUtils.getDataPath(node, "blocks/search")
 
         var result: List<BlockData>? = null
 
         try {
 
-            val blockDataList = restTemplate.postForObject(path, blockRequest, BlockDataList::class.java)
+            val blockDataList = restTemplate.postForObject(path, blockRangeRequest, BlockDataList::class.java)
 
             result = blockDataList?.blocks
         } catch (e: Exception) {
