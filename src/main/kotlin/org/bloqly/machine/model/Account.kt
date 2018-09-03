@@ -2,6 +2,7 @@ package org.bloqly.machine.model
 
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
+import org.bloqly.machine.vo.account.AccountVO
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -57,4 +58,10 @@ data class Account(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
+
+    fun toVO(): AccountVO =
+        AccountVO(
+            accountId = accountId,
+            publicKey = publicKey
+        )
 }

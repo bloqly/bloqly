@@ -3,12 +3,11 @@ package org.bloqly.machine.component
 import org.bloqly.machine.service.DeltaService
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
 @Profile("scheduler")
-
-// TODO change to cron expressions?
 
 class SchedulerService(
     private val nodeQueryService: NodeQueryService,
@@ -20,12 +19,12 @@ class SchedulerService(
 
     private val log = LoggerFactory.getLogger(SchedulerService::class.simpleName)
 
-    //@Scheduled(fixedDelay = 30000)
+    @Scheduled(fixedDelay = 30000)
     fun queryForNodes() {
         nodeQueryService.queryForNodes()
     }
 
-    //@Scheduled(initialDelay = 500, fixedDelay = 1000)
+    @Scheduled(initialDelay = 500, fixedDelay = 1000)
     fun sendTransactions() {
 
         val transactions = blockProcessor.getPendingTransactions()
@@ -38,7 +37,7 @@ class SchedulerService(
         }
     }
 
-    //@Scheduled(initialDelay = 1000, fixedDelay = 1000)
+    @Scheduled(initialDelay = 1000, fixedDelay = 1000)
     fun sendVotes() {
         eventProcessorService.onGetVotes().takeIf { it.isNotEmpty() }?.let { votes ->
             log.info("Votes to send: ${votes.size}.")
@@ -47,7 +46,7 @@ class SchedulerService(
         }
     }
 
-    //@Scheduled(initialDelay = 1500, fixedDelay = 1000)
+    @Scheduled(initialDelay = 1500, fixedDelay = 1000)
     fun sendProposals() {
 
         val proposals = eventProcessorService.onProduceBlock()
@@ -60,7 +59,7 @@ class SchedulerService(
         }
     }
 
-    //@Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 5000)
     fun checkDeltas() {
         val deltas = deltaService.getDeltas()
 
