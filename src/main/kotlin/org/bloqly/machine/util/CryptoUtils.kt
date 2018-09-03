@@ -1,6 +1,7 @@
 package org.bloqly.machine.util
 
 import com.google.common.primitives.Bytes
+import org.bitcoinj.core.ECKey
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
@@ -16,8 +17,6 @@ import javax.crypto.spec.SecretKeySpec
 object CryptoUtils {
 
     private val log = LoggerFactory.getLogger(CryptoUtils::class.simpleName)
-
-    const val RANDOM = "SHA1PRNG"
 
     private const val SHA_256 = "SHA-256"
     private const val AES = "AES"
@@ -66,13 +65,11 @@ object CryptoUtils {
         return cipher.doFinal(encryptedBytes)
     }
 
-    fun newPrivateKey(): ByteArray = BloqlySchnorr.newPrivateKey()
-
     fun getPublicFor(privateKeyBytes: ByteArray?): ByteArray {
 
         val privateKey = BigIntegers.fromUnsignedByteArray(privateKeyBytes)
 
-        return BloqlySchnorr.getPublicFromPrivate(privateKey)
+        return ECKey.publicKeyFromPrivate(privateKey, true)
     }
 
     fun hash(input: ByteArray): ByteArray {

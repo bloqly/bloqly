@@ -1,5 +1,6 @@
 package org.bloqly.machine.service
 
+import org.bitcoinj.core.ECKey
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.component.PassphraseService
@@ -62,7 +63,9 @@ class AccountService(
 
     fun newAccount(passphrase: String): Account {
 
-        val privateKey = CryptoUtils.newPrivateKey()
+        val key = ECKey()
+
+        val privateKey = key.privKeyBytes
         val publicKey = CryptoUtils.getPublicFor(privateKey)
 
         val account = Account(

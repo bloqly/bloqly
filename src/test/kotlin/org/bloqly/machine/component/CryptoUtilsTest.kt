@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bitcoinj.core.ECKey
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.CryptoUtils
@@ -27,15 +28,18 @@ class CryptoUtilsTest {
     fun testNewAccount() {
 
         for (i in 0..5) {
-            val privateKey = CryptoUtils.newPrivateKey()
-            val publicKey = CryptoUtils.getPublicFor(privateKey)
+
+            val key = ECKey()
+
+            val privateKey = key.privateKeyAsHex
+            val publicKey = key.pubKey
             val id = EncodingUtils.hashAndEncode16(publicKey)
 
             println(
                 """
                 id: $id
                 publicKey: ${publicKey.encode16()}
-                privateKey: ${privateKey.encode16()}
+                privateKey: $privateKey
             """.trimIndent()
             )
         }
@@ -44,9 +48,11 @@ class CryptoUtilsTest {
     @Test
     fun testCrypto() {
 
-        val priv = CryptoUtils.newPrivateKey()
+        val key = ECKey()
 
-        val pub = CryptoUtils.getPublicFor(priv)
+        val priv = key.privKeyBytes
+
+        val pub = key.pubKey
 
         val message = CryptoUtils.hash("test".toByteArray())
 
@@ -62,9 +68,10 @@ class CryptoUtilsTest {
     @Test
     fun testVerifyVote() {
 
-        val priv = CryptoUtils.newPrivateKey()
+        val key = ECKey()
 
-        val pub = CryptoUtils.getPublicFor(priv)
+        val priv = key.privKeyBytes
+        val pub = key.pubKey
 
         val vote = Vote(
             publicKey = pub.encode16(),

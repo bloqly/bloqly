@@ -4,52 +4,17 @@ import com.google.common.primitives.Bytes
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.math.ec.ECCurve
 import org.bouncycastle.math.ec.ECPoint
-import org.bouncycastle.math.ec.WNafUtil
 import org.bouncycastle.util.BigIntegers.asUnsignedByteArray
 import org.bouncycastle.util.BigIntegers.fromUnsignedByteArray
 import java.math.BigInteger
 import java.math.BigInteger.ONE
 import java.math.BigInteger.TWO
-import java.security.SecureRandom
 
-// TODO read about the "Related Key Attack"
 object BloqlySchnorr {
-    private const val BASE_16 = 16
 
     private const val CURVE_NAME = "secp256k1"
 
-    private var secureRandom = SecureRandom.getInstance(CryptoUtils.RANDOM)
-
     private val CURVE_PARAMS = SECNamedCurves.getByName(CURVE_NAME)
-
-    fun newPrivateKey(): ByteArray {
-
-        val n = CURVE_PARAMS.n
-        val nBitLength = n.bitLength()
-        val minWeight = nBitLength.ushr(2)
-
-        var d: BigInteger
-        while (true) {
-            d = BigInteger(nBitLength, secureRandom)
-
-            if (d < TWO || d >= n) {
-                continue
-            }
-
-            // TODO sort out WTF it means
-            if (WNafUtil.getNafWeight(d) < minWeight) {
-                continue
-            }
-
-            break
-        }
-
-        val dBytes = asUnsignedByteArray(d).pad()
-
-        require(32 == dBytes.size)
-
-        return dBytes
-    }
 
     private fun getP(): BigInteger {
         return (CURVE_PARAMS.curve as ECCurve.Fp).q
@@ -101,14 +66,6 @@ object BloqlySchnorr {
             r.xCoord.toBigInteger(),
             k.add(e.multiply(d)).mod(CURVE_PARAMS.n)
         )
-    }
-
-    fun getPublicFromPrivate(d: BigInteger): ByteArray {
-        val pBytes = CURVE_PARAMS.g.multiply(d).encodePoint()
-
-        require(33 == pBytes.size)
-
-        return pBytes
     }
 
     fun verify(message: ByteArray, signature: Signature, p: ByteArray): Boolean {

@@ -1,6 +1,8 @@
 package org.bloqly.machine.util
 
+import org.bitcoinj.core.ECKey
 import org.bouncycastle.util.BigIntegers.fromUnsignedByteArray
+import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -9,8 +11,26 @@ import org.junit.Test
 class BloqlySchnorrTest {
 
     @Test
+    fun testCompatibility() {
+
+        val keyPair = ECKey()
+
+        val ecPrivateKey = keyPair.privateKeyAsHex!!
+
+        val ecPublicKey = keyPair.publicKeyAsHex!!.toUpperCase()
+
+        val publicKeyBytes = CryptoUtils.getPublicFor(ecPrivateKey.decode16())
+
+        val publicKey = publicKeyBytes.encode16()
+
+        assertEquals(ecPublicKey, publicKey)
+    }
+
+    @Test
     fun testPrivateKeySize() {
-        val d = BloqlySchnorr.newPrivateKey()
+        val key = ECKey()
+
+        val d = key.privKeyBytes
 
         assertEquals(32, d.size)
     }
@@ -18,15 +38,19 @@ class BloqlySchnorrTest {
     @Test
     fun testSignAndVerify() {
 
-        for (i in 0..50) {
+        for (i in 0..20) {
 
-            val d = BloqlySchnorr.newPrivateKey()
+            val key = ECKey()
+
+            val d = key.privKeyBytes
 
             val dBytes = fromUnsignedByteArray(d)
 
-            val p = BloqlySchnorr.getPublicFromPrivate(dBytes)
+            val p = CryptoUtils.getPublicFor(d)
+            val ecP = ECKey.publicKeyFromPrivate(dBytes, true)
 
             assertEquals(33, p.size)
+            assertArrayEquals(ecP, p)
 
             val message = "243F6A8885A308D313198A2E03707344A4093822299F31D0082EFA98EC4E6C89".decode16()
 
