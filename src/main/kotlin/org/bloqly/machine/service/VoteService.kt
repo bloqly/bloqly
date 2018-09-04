@@ -28,8 +28,13 @@ class VoteService(
 
         val lastBlock = blockRepository.getLastBlock(space.id)
 
-        return voteRepository.findBySpaceIdAndPublicKeyAndHeight(space.id, validator.publicKey, lastBlock.height)
-            ?: createVote(validator, passphrase, lastBlock)
+        // Did I vote for the height of the last block?
+        return if (voteRepository.existsByHeight(space.id, validator.publicKey, lastBlock.height)) {
+            // if so, I just will send my best vote
+            voteRepository.getBestVote(space.id, validator.publicKey)
+        } else {
+            createVote(validator, passphrase, lastBlock)
+        }
     }
 
     @Transactional
