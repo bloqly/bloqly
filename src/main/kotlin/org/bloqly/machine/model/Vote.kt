@@ -14,14 +14,14 @@ import javax.persistence.UniqueConstraint
 @Table(
     name = "vote",
     uniqueConstraints = [
-        (UniqueConstraint(
+        UniqueConstraint(
             columnNames = ["spaceId", "publicKey", "height"],
             name = "vote_uq_space_validator_height"
-        )),
-        (UniqueConstraint(
+        ),
+        UniqueConstraint(
             columnNames = ["publicKey", "blockHash"],
             name = "vote_uq_validator_block_hash"
-        ))
+        )
     ]
 )
 data class Vote(

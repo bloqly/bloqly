@@ -29,5 +29,5 @@ interface VoteRepository : CrudRepository<Vote, Long> {
         order by height desc limit 1
         """, nativeQuery = true
     )
-    fun getBestVote(spaceId: String, publicKey: String): Vote
+    fun findBestVote(spaceId: String, publicKey: String): Vote?
 }

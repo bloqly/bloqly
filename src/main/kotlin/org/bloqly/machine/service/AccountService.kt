@@ -13,7 +13,7 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.hashAndEncode16
+import org.bloqly.machine.util.EncodingUtils.publicKeyToAddress
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
@@ -69,7 +69,7 @@ class AccountService(
         val publicKey = CryptoUtils.getPublicFor(privateKey)
 
         val account = Account(
-            accountId = hashAndEncode16(publicKey),
+            accountId = publicKeyToAddress(publicKey),
             publicKey = publicKey.encode16()
         )
 
@@ -118,7 +118,7 @@ class AccountService(
     @Transactional
     fun importAccountPublicKey(publicKey: String) {
 
-        val accountId = EncodingUtils.hashAndEncode16(publicKey.decode16())
+        val accountId = EncodingUtils.publicKeyToAddress(publicKey.decode16())
 
         if (!accountRepository.existsByAccountId(accountId)) {
             accountRepository.save(
@@ -134,7 +134,7 @@ class AccountService(
     fun importAccount(privateKeyBytes: ByteArray?, passphrase: String) {
 
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
-        val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)
+        val accountId = EncodingUtils.publicKeyToAddress(publicKeyBytes)
 
         require(!accountRepository.existsByAccountId(accountId)) {
             "Account $accountId already exists"
@@ -153,7 +153,7 @@ class AccountService(
     fun ensureExistsAndGetByPublicKey(publicKey: String): Account {
         val publicKeyBytes = publicKey.decode16()
 
-        val accountId = EncodingUtils.hashAndEncode16(publicKeyBytes)
+        val accountId = EncodingUtils.publicKeyToAddress(publicKeyBytes)
 
         return accountRepository.findByAccountId(accountId)
             ?: accountRepository.save(

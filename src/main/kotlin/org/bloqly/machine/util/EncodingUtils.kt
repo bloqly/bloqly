@@ -30,8 +30,11 @@ object EncodingUtils {
 
     fun intToBytes(value: Int): ByteArray = ByteBuffer.allocate(INT_BYTES).putInt(value).array()
 
-    fun hashAndEncode16(input: ByteArray): String {
+    fun publicKeyToAddress(input: ByteArray): String {
         val hash = CryptoUtils.hash(input)
         return hash.encode16()
     }
+
+    fun publicKeyToAddress(input: String): String =
+        publicKeyToAddress(input.decode16())
 }

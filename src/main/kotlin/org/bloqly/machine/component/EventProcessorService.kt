@@ -1,6 +1,5 @@
 package org.bloqly.machine.component
 
-import org.bloqly.machine.Application.Companion.BLOCK_TIMEOUT
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
@@ -168,6 +167,6 @@ class EventProcessorService(
                 log.error(e.message, e)
                 throw e
             }
-        }).get(BLOCK_TIMEOUT, TimeUnit.MILLISECONDS)
+        }).get(1000000L, TimeUnit.MILLISECONDS)
     }
 }

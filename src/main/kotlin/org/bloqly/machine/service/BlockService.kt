@@ -180,28 +180,31 @@ class BlockService(
             return block
         }
 
-        // TODO calculate quorum taking into account the current block producer
-        // also, being a block producer, don't create a vote as it is unnecessary -
-        // you already vote with your block
-        // introduce method "isQuorum(block: Block): Boolean"
         val quorum = propertyRepository.getQuorumBySpaceId(block.spaceId)
-
-        if (isHyperFinalizer(block, quorum)) {
-            val parent = blockRepository.getByHash(block.parentHash)
-            return blockRepository.getByHash(parent.parentHash)
-        }
 
         log.info("Calculating LIB for block ${block.header()}")
 
-        val validatorIds = mutableSetOf<String>()
+        val validatorVotesCount = mutableMapOf<String, Int>()
 
         val parentBlock = getByHash(block.parentHash)
 
         var currentBlock = block
 
-        while (validatorIds.size < quorum && currentBlock.height > 0 && currentBlock.height > parentBlock.libHeight) {
+        while (currentBlock.height > 0 && currentBlock.height > parentBlock.libHeight) {
 
-            validatorIds.add(currentBlock.producerId)
+            validatorVotesCount.compute(currentBlock.producerId) { _, count ->
+                calculateVotesCount(count)
+            }
+
+            if (getCommitsCount(validatorVotesCount) >= quorum) {
+                break
+            }
+
+            currentBlock.votes.forEach { vote ->
+                validatorVotesCount.compute(EncodingUtils.publicKeyToAddress(vote.publicKey)) { _, count ->
+                    calculateVotesCount(count)
+                }
+            }
 
             currentBlock = blockRepository.getByHash(currentBlock.parentHash)
         }
@@ -209,20 +212,19 @@ class BlockService(
         return currentBlock
     }
 
-    @Transactional(readOnly = true)
-    fun isHyperFinalizer(currBlock: Block, quorum: Int): Boolean {
-
-        if (currBlock.height < 2) {
-            return false
+    private fun calculateVotesCount(count: Int?): Int =
+        if (count == null) {
+            1
+        } else {
+            count + 1
         }
 
-        // TODO bug, returns not unique results
-        val prevBlock = blockRepository.findByHash(currBlock.parentHash)!!
+    private fun getCommitsCount(validatorVotesCount: Map<String, Int>): Int =
+        validatorVotesCount.filter { it.value > 1 }.size
 
-        val prevBlockValidators = prevBlock.votes.map { it.publicKey }.toSet()
-        val currBlockValidators = currBlock.votes.map { it.publicKey }.toSet()
-
-        return currBlockValidators.intersect(prevBlockValidators).size >= quorum
+    @Transactional(readOnly = true)
+    fun isHyperFinalizer(currBlock: Block, quorum: Int): Boolean {
+        return false
     }
 
     @Transactional(readOnly = true)

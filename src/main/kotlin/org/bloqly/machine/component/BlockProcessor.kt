@@ -229,6 +229,8 @@ class BlockProcessor(
         val selectedTransactions = txResults.map { it.transaction }
 
         val votes = getVotesForBlock(lastBlock.hash)
+            // don't include own vote in block I produce - my block is my vote
+            .filter { it.publicKey != producer.publicKey }
         val prevVotes = getVotesForBlock(lastBlock.parentHash)
 
         val diff = votes.minus(prevVotes).size

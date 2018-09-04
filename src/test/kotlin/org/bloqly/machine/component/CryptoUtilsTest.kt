@@ -33,7 +33,7 @@ class CryptoUtilsTest {
 
             val privateKey = key.privateKeyAsHex
             val publicKey = key.pubKey
-            val id = EncodingUtils.hashAndEncode16(publicKey)
+            val id = EncodingUtils.publicKeyToAddress(publicKey)
 
             println(
                 """

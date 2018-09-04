@@ -10,6 +10,8 @@ interface AccountRepository : CrudRepository<Account, String> {
 
     fun findByAccountId(originId: String): Account?
 
+    fun getByAccountId(originId: String): Account
+
     @Query("from Account where accountId in ?1")
     fun findAllByAccountIds(accountIds: List<String>): List<Account>
 }
