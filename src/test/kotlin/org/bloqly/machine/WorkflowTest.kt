@@ -105,6 +105,6 @@ class WorkflowTest : BaseTest() {
         eventReceiverService.onBlocks(blocks)
         assertEquals(1, blockData.transactions.size)
         // votes are re-imported
-        assertEquals(4, voteRepository.count())
+        assertEquals(3, voteRepository.count())
     }
 }
