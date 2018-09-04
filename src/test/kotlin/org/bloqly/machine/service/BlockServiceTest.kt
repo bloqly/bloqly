@@ -3,10 +3,7 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.vo.block.BlockData
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
@@ -48,10 +45,13 @@ class BlockServiceTest : BaseTest() {
             createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3),
             createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4),
             createNextBlock(DEFAULT_SPACE, validatorForRound(5), 5),
-            createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6)
+            createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6),
+            createNextBlock(DEFAULT_SPACE, validatorForRound(7), 7),
+            createNextBlock(DEFAULT_SPACE, validatorForRound(8), 8),
+            createNextBlock(DEFAULT_SPACE, validatorForRound(9), 9)
         )
 
-        assertEquals(blocks[1].block.height, blocks.last().block.libHeight)
+        assertEquals(2, blocks.last().block.libHeight)
 
         try {
             createNextBlock(blocks[0].toModel(), validatorForRound(2), 2)
@@ -81,108 +81,75 @@ class BlockServiceTest : BaseTest() {
         assertEquals(block0.height, block3.libHeight)
 
         val block4 = createNextBlock(DEFAULT_SPACE, validatorForRound(4), 4).block
-        // now 3 out of 4 validators have built on block1, it is final now
-        assertEquals(block1.hash, getLIB().hash)
-        assertEquals(block1.height, block4.libHeight)
+        assertEquals(block0.hash, getLIB().hash)
+        assertEquals(block0.height, block4.libHeight)
 
         val block5 = createNextBlock(DEFAULT_SPACE, validatorForRound(5), 5).block
-        assertEquals(block2.hash, getLIB().hash)
-        assertEquals(block2.height, block5.libHeight)
+        assertEquals(block0.hash, getLIB().hash)
+        assertEquals(block0.height, block5.libHeight)
 
         val block6 = createNextBlock(DEFAULT_SPACE, validatorForRound(6), 6).block
-        assertEquals(block3.hash, getLIB().hash)
-        assertEquals(block3.height, block6.libHeight)
+        assertEquals(block0.hash, getLIB().hash)
+        assertEquals(block0.height, block6.libHeight)
 
         // same proposer, nothing changed
         val block7 = createNextBlock(DEFAULT_SPACE, validatorForRound(10), 10).block
-        assertEquals(block3.hash, getLIB().hash)
-        assertEquals(block3.height, block7.libHeight)
+        assertEquals(block0.hash, getLIB().hash)
+        assertEquals(block0.height, block7.libHeight)
 
         // change validator, continue changing LIB
         val block8 = createNextBlock(DEFAULT_SPACE, validatorForRound(11), 11).block
-        assertEquals(block4.hash, getLIB().hash)
-        assertEquals(block4.height, block8.libHeight)
+        assertEquals(block1.hash, getLIB().hash)
+        assertEquals(block1.height, block8.libHeight)
     }
 
     @Test
     fun testHyperFinalization() {
-        eventProcessorService.onGetVotes()
         createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
         eventProcessorService.onGetVotes()
-        val block = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
+        createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
 
-        assertTrue(isHyperFinalizer(block))
+        eventProcessorService.onGetVotes()
+        val block = createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3)
+
+        assertEquals(1, block.block.libHeight)
     }
 
     @Test
     fun testHyperFinalizationNoPrevQuorum() {
-        val votes1 = eventProcessorService.onGetVotes()
-        voteRepository.deleteAll(votes1.sortedBy { it.publicKey }.takeLast(2))
 
         createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
-        eventProcessorService.onGetVotes()
-        val block = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
+        val votes1 = eventProcessorService.onGetVotes().filter { it.height == 1L }
+        assertEquals(3, votes1.size)
+        voteRepository.delete(votes1.first())
+        val blockData1 = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
+        assertEquals(1, blockData1.votes.size)
 
-        assertFalse(isHyperFinalizer(block))
+        val votes2 = eventProcessorService.onGetVotes().filter { it.height == 2L }
+        assertEquals(3, votes2.size)
+        val blockData2 = createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3)
+        assertEquals(2, blockData2.votes.size)
+
+        assertEquals(0, blockData2.block.libHeight)
     }
 
     @Test
     fun testHyperFinalizationNoCurrQuorum() {
-        eventProcessorService.onGetVotes()
         createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
-        val votes2 = eventProcessorService.onGetVotes()
-        voteRepository.deleteAll(votes2.sortedBy { it.publicKey }.takeLast(2))
+        val votes1 = eventProcessorService.onGetVotes().filter { it.height == 1L }
+        assertEquals(3, votes1.size)
+        val blockData1 = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
+        assertEquals(2, blockData1.votes.size)
 
-        val block = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
+        val votes2 = eventProcessorService.onGetVotes().filter { it.height == 2L }
+        assertEquals(3, votes2.size)
+        voteRepository.delete(votes2.first())
+        val blockData2 = createNextBlock(DEFAULT_SPACE, validatorForRound(3), 3)
+        assertEquals(1, blockData2.votes.size)
 
-        assertFalse(isHyperFinalizer(block))
+        assertEquals(0, blockData2.block.libHeight)
     }
-
-    @Test
-    fun testHyperFinalizationExactPrevQuorum() {
-        val votes1 = eventProcessorService.onGetVotes()
-        voteRepository.deleteAll(votes1.take(1))
-
-        createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
-
-        eventProcessorService.onGetVotes()
-        val block = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
-
-        assertTrue(isHyperFinalizer(block))
-    }
-
-    @Test
-    fun testHyperFinalizationExactCurrQuorum() {
-        eventProcessorService.onGetVotes()
-        createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
-
-        val votes2 = eventProcessorService.onGetVotes()
-        voteRepository.deleteAll(votes2.take(1))
-
-        val block = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
-
-        assertTrue(isHyperFinalizer(block))
-    }
-
-    @Test
-    fun testHyperFinalizationNotSameValidatorsQuorum() {
-        val votes1 = eventProcessorService.onGetVotes()
-        val first = votes1.sortedBy { it.publicKey }.first()
-        voteRepository.delete(first)
-        createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
-
-        val votes2 = eventProcessorService.onGetVotes()
-        val last = votes2.sortedBy { it.publicKey }.last()
-        voteRepository.delete(last)
-        val block = createNextBlock(DEFAULT_SPACE, validatorForRound(2), 2)
-
-        assertNotEquals(first, last)
-        assertFalse(isHyperFinalizer(block))
-    }
-
-    private fun isHyperFinalizer(blockData: BlockData): Boolean =
-        blockService.isHyperFinalizer(blockService.loadBlockByHash(blockData.block.hash), 3)
 }

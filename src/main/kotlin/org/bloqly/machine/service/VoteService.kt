@@ -35,7 +35,6 @@ class VoteService(
                 lastBlock.height
             ) // did I vote for this height
             || lastBlock.producerId == validator.accountId  // don't vote for the own block
-
         ) {
             // if so, I just will send my best vote
             voteRepository.findBestVote(space.id, validator.publicKey)

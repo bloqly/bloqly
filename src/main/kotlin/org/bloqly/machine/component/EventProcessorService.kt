@@ -2,6 +2,7 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
+import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.service.AccountService
@@ -76,22 +77,21 @@ class EventProcessorService(
             .filter { blockService.existsBySpace(it) }
             .mapNotNull { space ->
                 accountService.findValidatorsForSpace(space)?.let { validators ->
-                    validators
-                        .filter { passphraseService.hasPassphrase(it.accountId) }
-                        .filter { it.privateKeyEncoded != null }
-                        .mapNotNull { producer ->
-                            submitTask {
-                                voteService.findOrCreateVote(
-                                    space,
-                                    producer,
-                                    passphraseService.getPassphrase(producer.accountId)
-                                )
-                            }
-                        }
+                    getVotes(space, validators)
                 }
             }
             .flatMap { it }
     }
+
+    private fun getVotes(space: Space, validators: List<Account>): List<Vote> =
+        validators
+            .filter { passphraseService.hasPassphrase(it.accountId) }
+            .filter { it.privateKeyEncoded != null }
+            .mapNotNull { producer ->
+                submitTask {
+                    voteService.findOrCreateVote(space, producer, passphraseService.getPassphrase(producer.accountId))
+                }
+            }
 
     /**
      * Receive new vote
