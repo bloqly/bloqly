@@ -5,6 +5,7 @@ import org.bitcoinj.core.ECKey
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
+import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.util.BigIntegers
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
@@ -23,6 +24,9 @@ object CryptoUtils {
     private const val AES_PADDING = "AES/CBC/PKCS5Padding"
     private const val AES_IV_SIZE = 16
     private const val AES_INPUT_SIZE = 32
+
+    internal const val CURVE_NAME = "secp256k1"
+    internal val CURVE_PARAMS = SECNamedCurves.getByName(CURVE_NAME)
 
     fun encrypt(input: ByteArray?, passphrase: String): ByteArray {
         require(input != null)

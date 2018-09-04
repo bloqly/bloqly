@@ -1,7 +1,7 @@
 package org.bloqly.machine.util
 
 import com.google.common.primitives.Bytes
-import org.bouncycastle.asn1.sec.SECNamedCurves
+import org.bloqly.machine.util.CryptoUtils.CURVE_PARAMS
 import org.bouncycastle.math.ec.ECCurve
 import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.util.BigIntegers.asUnsignedByteArray
@@ -11,10 +11,6 @@ import java.math.BigInteger.ONE
 import java.math.BigInteger.TWO
 
 object BloqlySchnorr {
-
-    private const val CURVE_NAME = "secp256k1"
-
-    private val CURVE_PARAMS = SECNamedCurves.getByName(CURVE_NAME)
 
     private fun getP(): BigInteger {
         return (CURVE_PARAMS.curve as ECCurve.Fp).q
