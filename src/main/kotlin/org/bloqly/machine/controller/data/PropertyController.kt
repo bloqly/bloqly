@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiOperation
 import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.controller.exception.NotFoundException
 import org.bloqly.machine.model.PropertyValue
-import org.bloqly.machine.repository.PropertyService
+import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.vo.property.PropertyRequest
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PostMapping

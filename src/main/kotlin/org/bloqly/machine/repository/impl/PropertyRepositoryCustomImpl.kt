@@ -11,7 +11,7 @@ import javax.persistence.EntityManager
 
 @Repository
 class PropertyRepositoryCustomImpl(
-    private var entityManager: EntityManager
+    val entityManager: EntityManager
 ) : PropertyRepositoryCustom {
 
     override fun getQuorumBySpace(space: Space): Int {

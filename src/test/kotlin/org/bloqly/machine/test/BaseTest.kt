@@ -17,19 +17,20 @@ import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
+import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.block.BlockData
-import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
@@ -125,16 +126,16 @@ open class BaseTest {
             DEFAULT_SPACE, DEFAULT_SELF, propertyId.target, propertyId.key
         )!!
 
-        Assert.assertEquals(BInteger(value), ParameterUtils.readValue(lastValue))
+        assertEquals(BInteger(value), ParameterUtils.readValue(lastValue))
     }
 
     protected fun assertPropertyValue(value: String) {
         val property: Property = propertyService.findById(propertyId)!!
-        Assert.assertEquals(BInteger(value), ParameterUtils.readValue(property.value))
+        assertEquals(BInteger(value), ParameterUtils.readValue(property.value))
     }
 
     protected fun assertNoPropertyValue() {
-        Assert.assertNull(propertyService.findById(propertyId))
+        assertNull(propertyService.findById(propertyId))
     }
 
     fun getLIB(): Block {

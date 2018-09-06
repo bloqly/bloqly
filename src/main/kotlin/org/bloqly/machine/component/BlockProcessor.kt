@@ -13,13 +13,13 @@ import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
-import org.bloqly.machine.repository.PropertyService
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
@@ -88,7 +88,7 @@ class BlockProcessor(
 
         // on this step we have already checked that provided lib is correct
         // see isAcceptable()
-        moveLIBIfNeeded(block)
+        applyLIB(block)
 
         val propertyContext = PropertyContext(propertyService, contractService)
 
@@ -121,8 +121,7 @@ class BlockProcessor(
         return blockRepository.save(block)
     }
 
-    @Transactional
-    fun evaluateFromLIB(toBlock: Block, propertyContext: PropertyContext) {
+    private fun evaluateFromLIB(toBlock: Block, propertyContext: PropertyContext) {
         getBlocksFromLIB(toBlock).forEach { block ->
             evaluateBlock(block, propertyContext)
         }
@@ -269,7 +268,7 @@ class BlockProcessor(
             txOutputs = txOutputs
         )
 
-        moveLIBIfNeeded(newBlock)
+        applyLIB(newBlock)
 
         return BlockData(
             block = saveBlock(newBlock),
@@ -282,7 +281,7 @@ class BlockProcessor(
      * Iterate and apply all transactions from the block next to the previous LIB including NEW_LIB
      * In some situations LIB.height + 1 = NEW_LIB.height
      */
-    private fun moveLIBIfNeeded(lastBlock: Block) {
+    private fun applyLIB(lastBlock: Block) {
 
         log.info("Check if LIB has changed, last block: ${lastBlock.header()}")
 
@@ -294,35 +293,35 @@ class BlockProcessor(
 
         log.info("Moving LIB from height ${parentBlock.libHeight} to ${lastBlock.libHeight}.")
 
-        getBlocksFromLIB(parentBlock)
-            // TODO add this restriction to getBlocksFromLIB to get better performance
+        val blocksToApply = getBlocksFromLIB(parentBlock)
             .filter { it.height <= lastBlock.libHeight }
-            .forEach { block ->
-                block.transactions.forEach { tx ->
 
-                    try {
+        blocksToApply.forEach { block ->
+            block.transactions.forEach { tx ->
 
-                        val txOutput = transactionOutputRepository
-                            .getByBlockHashAndTransactionHash(block.hash, tx.hash)
+                try {
 
-                        val properties = ObjectUtils.readProperties(txOutput.output)
+                    val txOutput = transactionOutputRepository
+                        .getByBlockHashAndTransactionHash(block.hash, tx.hash)
 
-                        propertyService.updateProperties(properties)
+                    val properties = ObjectUtils.readProperties(txOutput.output)
 
-                        finalizedTransactionRepository.save(
-                            FinalizedTransaction(
-                                transaction = tx,
-                                block = block
-                            )
+                    propertyService.updateProperties(properties)
+
+                    finalizedTransactionRepository.save(
+                        FinalizedTransaction(
+                            transaction = tx,
+                            block = block
                         )
-                    } catch (e: Exception) {
-                        val errorMessage =
-                            "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
-                        log.warn(errorMessage, e)
-                        throw RuntimeException(errorMessage, e)
-                    }
+                    )
+                } catch (e: Exception) {
+                    val errorMessage =
+                        "Could not process transaction output tx: ${tx.hash}, block: ${block.hash}"
+                    log.warn(errorMessage, e)
+                    throw RuntimeException(errorMessage, e)
                 }
             }
+        }
     }
 
     private fun saveTxOutputs(txOutputs: Map<String, String>, block: Block): List<TransactionOutput> =

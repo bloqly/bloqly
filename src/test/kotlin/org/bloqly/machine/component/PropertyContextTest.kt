@@ -6,7 +6,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.lang.BInteger
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
-import org.bloqly.machine.repository.PropertyService
+import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.util.ParameterUtils
 import org.junit.Assert.assertEquals

@@ -1,13 +1,16 @@
-package org.bloqly.machine.repository
+package org.bloqly.machine.service
 
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.PropertyResult
+import org.bloqly.machine.repository.PropertyRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class PropertyService(private val propertyRepository: PropertyRepository) {
+class PropertyService(
+    private val propertyRepository: PropertyRepository
+) {
 
     @Transactional
     fun updateProperties(properties: List<Property>) {

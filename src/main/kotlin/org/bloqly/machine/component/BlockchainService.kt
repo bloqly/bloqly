@@ -6,7 +6,7 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
-import org.bloqly.machine.repository.PropertyService
+import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.service.ContractService
