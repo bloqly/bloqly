@@ -18,6 +18,7 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
 import org.bloqly.machine.repository.PropertyService
+import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.service.AccountService
@@ -87,6 +88,9 @@ open class BaseTest {
 
     @Autowired
     protected lateinit var transactionRepository: TransactionRepository
+
+    @Autowired
+    protected lateinit var transactionOutputRepository: TransactionOutputRepository
 
     @Autowired
     protected lateinit var blockRepository: BlockRepository

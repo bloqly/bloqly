@@ -11,6 +11,7 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
+import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.encode16
@@ -28,7 +29,8 @@ class BlockService(
     private val accountRepository: AccountRepository,
     private val blockRepository: BlockRepository,
     private val spaceRepository: SpaceRepository,
-    private val propertyRepository: PropertyRepository
+    private val propertyRepository: PropertyRepository,
+    private val transactionOutputRepository: TransactionOutputRepository
 ) {
 
     private val log: Logger = LoggerFactory.getLogger(BlockService::class.simpleName)
@@ -223,11 +225,6 @@ class BlockService(
         validatorVotesCount.filter { it.value > 1 }.size
 
     @Transactional(readOnly = true)
-    fun isHyperFinalizer(currBlock: Block, quorum: Int): Boolean {
-        return false
-    }
-
-    @Transactional(readOnly = true)
     fun getBlockDataList(blockRangeRequest: BlockRangeRequest): BlockDataList {
 
         val startHeight = blockRangeRequest.startHeight
@@ -235,7 +232,12 @@ class BlockService(
 
         val blocks = blockRepository.getBlocksDelta(blockRangeRequest.spaceId, startHeight, endHeight)
 
-        return BlockDataList(blocks.map { BlockData(it) })
+        return BlockDataList(blocks.map { block ->
+            BlockData(
+                block = block,
+                transactionOutputs = transactionOutputRepository.findByBlockHash(block.hash)
+            )
+        })
     }
 
     @Transactional(readOnly = true)
@@ -248,16 +250,6 @@ class BlockService(
         require(!spaceRepository.existsById(space)) {
             "Space '$space' already exists"
         }
-    }
-
-    @Transactional(readOnly = true)
-    fun loadBlockByHash(hash: String): Block {
-        val block = blockRepository.findByHash(hash)!!
-
-        block.transactions.size
-        block.votes.size
-
-        return block
     }
 
     @Transactional(readOnly = true)

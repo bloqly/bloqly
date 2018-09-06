@@ -5,11 +5,13 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.ValueType
 import org.bloqly.machine.repository.AccountRepository
+import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
+import org.bloqly.machine.vo.transaction.TransactionOutputVO
 import org.bloqly.machine.vo.transaction.TransactionRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -18,7 +20,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TransactionService(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val transactionOutputRepository: TransactionOutputRepository
 ) {
 
     // TODO add blockchain config option - if adding smart contracts allowed
@@ -130,4 +133,9 @@ class TransactionService(
     @Transactional
     fun existsByHash(hash: String): Boolean =
         transactionRepository.existsByHash(hash)
+
+    @Transactional
+    fun saveTransactionOutputs(transactionOutputs: List<TransactionOutputVO>) {
+        transactionOutputRepository.saveAll(transactionOutputs.map { it.toModel() })
+    }
 }

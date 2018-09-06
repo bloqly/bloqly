@@ -97,6 +97,7 @@ class WorkflowTest : BaseTest() {
         testService.cleanupBlockTransactions()
         finalizedTransactionRepository.deleteAll()
         transactionRepository.deleteAll()
+        transactionOutputRepository.deleteAll()
 
         voteRepository.deleteAll()
         // need to do it otherwise the same votes won't be processed

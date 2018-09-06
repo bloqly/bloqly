@@ -9,7 +9,6 @@ import org.bloqly.machine.model.InvocationResult
 import org.bloqly.machine.model.Properties
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
-import org.bloqly.machine.model.TransactionOutputId
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.BlockRepository
@@ -98,7 +97,9 @@ class BlockProcessor(
 
         evaluateBlock(block, propertyContext)
 
-        moveLIBIfNeeded(saveBlock(block))
+        val savedBlock = saveBlock(block)
+
+        moveLIBIfNeeded(savedBlock)
     }
 
     private fun saveBlock(block: Block): Block {
@@ -165,23 +166,10 @@ class BlockProcessor(
 
         block.transactions.forEach { tx ->
 
-            // already processed this transaction?
             val txOutput = transactionOutputRepository
-                .findById(TransactionOutputId(block.hash, tx.hash))
+                .getByBlockHashAndTransactionHash(block.hash, tx.hash)
 
-            val output = if (txOutput.isPresent) {
-                ObjectUtils.readProperties(txOutput.get().output)
-            } else {
-                val invocationResult = transactionProcessor.processTransaction(tx, propertyContext)
-
-                require(invocationResult.isOK()) {
-                    "Could not process transaction $tx"
-                }
-
-                saveTxOutputs(listOf(TransactionResult(tx, invocationResult)), block)
-
-                invocationResult.output
-            }
+            val output = ObjectUtils.readProperties(txOutput.output)
 
             propertyContext.updatePropertyValues(output)
         }
@@ -216,7 +204,12 @@ class BlockProcessor(
         // did I already create block in this round?
         // if yes - return it
         blockRepository.findBySpaceIdAndProducerIdAndRound(spaceId, producer.accountId, round)
-            ?.let { return BlockData(it) }
+            ?.let { block ->
+                return BlockData(
+                    block = block,
+                    transactionOutputs = transactionOutputRepository.findByBlockHash(block.hash)
+                )
+            }
 
         val newHeight = lastBlock.height + 1
 
@@ -252,10 +245,10 @@ class BlockProcessor(
             votes = votes
         )
 
-        // todo add tx output hash to block and signature
-        saveTxOutputs(txResults, newBlock)
-
-        val blockData = BlockData(saveBlock(newBlock))
+        val blockData = BlockData(
+            block = saveBlock(newBlock),
+            transactionOutputs = saveTxOutputs(txResults, newBlock)
+        )
 
         moveLIBIfNeeded(newBlock)
 
@@ -290,8 +283,7 @@ class BlockProcessor(
                     try {
 
                         val txOutput = transactionOutputRepository
-                            .findById(TransactionOutputId(block.hash, tx.hash))
-                            .orElseThrow()
+                            .getByBlockHashAndTransactionHash(block.hash, tx.hash)
 
                         val properties = ObjectUtils.readProperties(txOutput.output)
 
@@ -313,17 +305,18 @@ class BlockProcessor(
             }
     }
 
-    private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block) {
+    private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block): List<TransactionOutput> {
         val txOutputs = txResults.map {
             TransactionOutput(
-                TransactionOutputId(block.hash, it.transaction.hash),
-                ObjectUtils.writeValueAsString(
+                blockHash = block.hash,
+                transactionHash = it.transaction.hash,
+                output = ObjectUtils.writeValueAsString(
                     Properties(it.invocationResult.output)
                 )
             )
         }
 
-        transactionOutputRepository.saveAll(txOutputs)
+        return transactionOutputRepository.saveAll(txOutputs).toList()
     }
 
     private fun getTransactionResultsForNextBlock(

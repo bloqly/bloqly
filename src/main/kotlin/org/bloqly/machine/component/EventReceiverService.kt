@@ -108,6 +108,8 @@ class EventReceiverService(
                     receiveTransactions(blockData.transactions)
                     receiveVotes(blockData.votes)
 
+                    transactionService.saveTransactionOutputs(blockData.transactionOutputs)
+
                     eventProcessorService.onProposal(blockData)
                 }
 

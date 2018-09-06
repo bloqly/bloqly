@@ -5,7 +5,6 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
-import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
@@ -21,16 +20,12 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 
 @RunWith(SpringRunner::class)
 @SpringBootTest(classes = [Application::class])
 class BlockProcessorTest : BaseTest() {
-
-    @Autowired
-    private lateinit var transactionOutputRepository: TransactionOutputRepository
 
     private val blocks = mutableListOf<BlockData>()
 
