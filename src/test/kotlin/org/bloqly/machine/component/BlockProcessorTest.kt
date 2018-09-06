@@ -2,11 +2,14 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.lang.BInteger
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
+import org.bloqly.machine.util.ObjectUtils
+import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.TimeUtils.setTestTime
 import org.bloqly.machine.util.decode16
@@ -247,36 +250,43 @@ class BlockProcessorTest : BaseTest() {
         populateBlocks()
 
         eventReceiverService.onBlocks(listOf(blocks[0]))
+        assertTrue(blockService.existsByHash(blocks[0].block.hash))
 
         assertPropertyValueCandidate("1")
         assertNoPropertyValue()
 
         eventReceiverService.onBlocks(listOf(blocks[1]))
+        assertTrue(blockService.existsByHash(blocks[1].block.hash))
 
         assertPropertyValueCandidate("2")
         assertNoPropertyValue()
 
         eventReceiverService.onBlocks(listOf(blocks[2]))
+        assertTrue(blockService.existsByHash(blocks[2].block.hash))
 
         assertPropertyValueCandidate("3")
         assertNoPropertyValue()
 
         eventReceiverService.onBlocks(listOf(blocks[3]))
+        assertTrue(blockService.existsByHash(blocks[3].block.hash))
 
         assertPropertyValueCandidate("4")
         assertNoPropertyValue()
 
         eventReceiverService.onBlocks(listOf(blocks[4]))
+        assertTrue(blockService.existsByHash(blocks[4].block.hash))
 
         assertPropertyValueCandidate("5")
         assertNoPropertyValue()
 
         eventReceiverService.onBlocks(listOf(blocks[5]))
+        assertTrue(blockService.existsByHash(blocks[5].block.hash))
 
         assertPropertyValueCandidate("6")
         assertNoPropertyValue()
 
         eventReceiverService.onBlocks(listOf(blocks[6]))
+        assertTrue(blockService.existsByHash(blocks[6].block.hash))
 
         assertPropertyValueCandidate("7")
         assertPropertyValue("1")
@@ -292,6 +302,17 @@ class BlockProcessorTest : BaseTest() {
         val blockData = createNextBlock(DEFAULT_SPACE, validatorForRound(n), n)
         val block = blockData.block
 
+        assertEquals(1, blockData.transactionOutputs.size)
+        val properties = ObjectUtils.readProperties(blockData.transactionOutputs[0].output)
+
+        assertEquals(2, properties.size)
+
+        val value1 = getTxOutputValue(blockData, 0)
+        val value2 = getTxOutputValue(blockData, 1)
+
+        assertEquals(maxSupply.toLong() - n - 4, value1)
+        assertEquals(n, value2)
+
         assertEquals(tx.hash, blockData.transactions.first().hash)
         assertEquals(block.producerId, accountService.getProducerBySpace(space, n)!!.accountId)
         assertEquals(libHeight, block.libHeight)
@@ -302,6 +323,13 @@ class BlockProcessorTest : BaseTest() {
 
         blocks.add(blockData)
         txs.add(tx)
+    }
+
+    private fun getTxOutputValue(blockData: BlockData, n: Int): Long {
+        val properties = ObjectUtils.readProperties(blockData.transactionOutputs[0].output)
+
+        val bInt = ParameterUtils.readValue(properties[n].value) as BInteger
+        return bInt.value.toLong()
     }
 
     private fun populateBlocks(cleanup: Boolean = true) {

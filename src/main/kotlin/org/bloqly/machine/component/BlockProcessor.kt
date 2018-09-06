@@ -64,9 +64,9 @@ class BlockProcessor(
 
         log.info("Processing received block: ${blockData.block}")
 
-        val receivedBlock = blockData.block.toModel()
+        val block = blockData.block.toModel()
 
-        requireValid(receivedBlock)
+        requireValid(block)
 
         val votes = blockData.votes.map { vote ->
             try {
@@ -86,20 +86,21 @@ class BlockProcessor(
             }
         }
 
+        // on this step we have already checked that provided lib is correct
+        // see isAcceptable()
+        moveLIBIfNeeded(block)
+
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        evaluateFromLIB(receivedBlock, propertyContext)
+        // check that block transaction outputs are correct
+        evaluateFromLIB(block, propertyContext)
 
-        val block = receivedBlock.copy(
-            transactions = transactions,
-            votes = votes
+        saveBlock(
+            block.copy(
+                transactions = transactions,
+                votes = votes
+            )
         )
-
-        evaluateBlock(block, propertyContext)
-
-        val savedBlock = saveBlock(block)
-
-        moveLIBIfNeeded(savedBlock)
     }
 
     private fun saveBlock(block: Block): Block {
@@ -162,14 +163,29 @@ class BlockProcessor(
         return blocks.reversed()
     }
 
-    private fun evaluateBlock(block: Block, propertyContext: PropertyContext) {
+    @Transactional
+    fun evaluateBlock(block: Block, propertyContext: PropertyContext) {
 
         block.transactions.forEach { tx ->
+
+            val invocationResult = transactionProcessor.processTransaction(tx, propertyContext)
+
+            require(invocationResult.isOK()) {
+                "Could not process transaction $tx evaluating block ${block.header()}"
+            }
 
             val txOutput = transactionOutputRepository
                 .getByBlockHashAndTransactionHash(block.hash, tx.hash)
 
-            val output = ObjectUtils.readProperties(txOutput.output)
+            val output =
+                ObjectUtils.readProperties(txOutput.output)
+                    .sortedBy { it.id }
+
+            val checkOutput = invocationResult.output.sortedBy { it.id }
+
+            require(checkOutput == output) {
+                "Transaction output $output doesn't match the expected value ${invocationResult.output}"
+            }
 
             propertyContext.updatePropertyValues(output)
         }

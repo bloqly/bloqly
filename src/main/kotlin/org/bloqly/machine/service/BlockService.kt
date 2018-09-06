@@ -57,13 +57,7 @@ class BlockService(
         val proposer = accountRepository.findByAccountId(producerId)
             ?: throw IllegalArgumentException("Could not find producer: $producerId")
 
-        val txOutputHash = CryptoUtils.hash(
-            txOutputs
-                .map {
-                    CryptoUtils.hash(it.key + CryptoUtils.hash(it.value))
-                }
-                .joinToString()
-        )
+        val txOutputHash = CryptoUtils.hashTxOutputs(txOutputs)
 
         val newBlock = Block(
             spaceId = spaceId,

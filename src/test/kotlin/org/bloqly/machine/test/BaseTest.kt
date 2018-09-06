@@ -33,10 +33,11 @@ import org.junit.Assert
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigInteger
+import java.math.BigInteger.TEN
 
 open class BaseTest {
 
-    protected val maxSupply = BigInteger("1000000000").add(BigInteger.TEN.pow(8))
+    protected val maxSupply: BigInteger = BigInteger("1000000000").multiply(TEN.pow(8))
 
     @Autowired
     protected lateinit var blockchainService: BlockchainService

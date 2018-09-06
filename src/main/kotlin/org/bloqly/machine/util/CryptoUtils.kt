@@ -215,4 +215,14 @@ object CryptoUtils {
             publicKey
         )
     }
+
+    fun hashTxOutputs(txOutputs: Map<String, String>): ByteArray =
+        hash(
+            txOutputs
+                .toSortedMap()
+                .map {
+                    hash(it.key + hash(it.value))
+                }
+                .joinToString()
+        )
 }

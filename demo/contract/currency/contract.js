@@ -1,6 +1,6 @@
 
 const fractions = new Long('10').pow(8);
-const maxSupply = new Long('1_000_000_000').add(fractions);
+const maxSupply = new Long('1_000_000_000').multiply(fractions);
 
 function main(context, orig, dest, amount) {
 

@@ -109,7 +109,7 @@ class BInteger {
 
         ensureRange(result)
 
-        return BInteger(value)
+        return BInteger(result)
     }
 
     fun safeMultiply(another: BInteger, max: BInteger): BInteger {
