@@ -1,0 +1,13 @@
+{
+  "name": "bloqly-client",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bitcore-mnemonic": "^1.5.0",
+    "npm": "^6.4.1",
+    "to": "^0.2.9",
+    "update": "^0.7.4"
+  }
+}
