@@ -229,6 +229,13 @@ class BlockProcessor(
         val diff = votes.minus(prevVotes).size
         val weight = lastBlock.weight + votes.size
 
+        val txOutputs = txResults
+            .associateBy { it.transaction.hash }
+            .map { entry ->
+                entry.key to ObjectUtils.writeValueAsString(Properties(entry.value.invocationResult.output))
+            }
+            .toMap()
+
         val newBlock = blockService.newBlock(
             spaceId = spaceId,
             height = newHeight,
@@ -242,20 +249,17 @@ class BlockProcessor(
             validatorTxHash = CryptoUtils.hashVotes(votes),
             round = round,
             transactions = selectedTransactions,
-            votes = votes
-        )
-
-        val blockData = BlockData(
-            block = saveBlock(newBlock),
-            transactionOutputs = saveTxOutputs(txResults, newBlock)
+            votes = votes,
+            txOutputs = txOutputs
         )
 
         moveLIBIfNeeded(newBlock)
 
-        return blockData
+        return BlockData(
+            block = saveBlock(newBlock),
+            transactionOutputs = saveTxOutputs(txOutputs, newBlock)
+        )
     }
-
-    // TODO validate block
 
     /**
      * Apply transaction outputs if LIB moved forward
@@ -305,19 +309,14 @@ class BlockProcessor(
             }
     }
 
-    private fun saveTxOutputs(txResults: List<TransactionResult>, block: Block): List<TransactionOutput> {
-        val txOutputs = txResults.map {
+    private fun saveTxOutputs(txOutputs: Map<String, String>, block: Block): List<TransactionOutput> =
+        transactionOutputRepository.saveAll(txOutputs.map { entry ->
             TransactionOutput(
                 blockHash = block.hash,
-                transactionHash = it.transaction.hash,
-                output = ObjectUtils.writeValueAsString(
-                    Properties(it.invocationResult.output)
-                )
+                transactionHash = entry.key,
+                output = entry.value
             )
-        }
-
-        return transactionOutputRepository.saveAll(txOutputs).toList()
-    }
+        }).toList()
 
     private fun getTransactionResultsForNextBlock(
         transactions: List<Transaction>,

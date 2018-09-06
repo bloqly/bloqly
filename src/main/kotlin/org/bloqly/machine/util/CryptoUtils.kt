@@ -170,10 +170,11 @@ object CryptoUtils {
                 EncodingUtils.intToBytes(block.diff),
                 EncodingUtils.longToBytes(block.round),
                 EncodingUtils.longToBytes(block.timestamp),
-                block.parentHash.toByteArray(),
-                block.producerId.toByteArray(),
+                block.parentHash.decode16(),
+                block.producerId.decode16(),
                 txHash,
-                validatorTxHash
+                validatorTxHash,
+                block.txOutputHash.decode16()
             )
         )
     }

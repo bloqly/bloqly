@@ -17,7 +17,8 @@ data class BlockVO(
     val validatorTxHash: String,
     val signature: String,
     val hash: String,
-    val libHeight: Long
+    val libHeight: Long,
+    val txOutputHash: String
 ) {
 
     fun toModel(): Block {
@@ -35,7 +36,8 @@ data class BlockVO(
             validatorTxHash = validatorTxHash,
             signature = signature,
             hash = hash,
-            libHeight = libHeight
+            libHeight = libHeight,
+            txOutputHash = txOutputHash
         )
     }
 }

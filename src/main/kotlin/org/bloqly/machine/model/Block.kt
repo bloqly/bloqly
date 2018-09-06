@@ -85,7 +85,7 @@ data class Block(
     val validatorTxHash: String,
 
     @Column(nullable = false)
-    val signature: String = "",
+    val signature: String = "", // TODO nullable?
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -107,7 +107,10 @@ data class Block(
     var hash: String = "",
 
     @Column(nullable = false)
-    val libHeight: Long = 0
+    val libHeight: Long = 0,
+
+    @Column(nullable = false)
+    val txOutputHash: String
 ) {
 
     fun toVO(): BlockVO {
@@ -125,7 +128,8 @@ data class Block(
             validatorTxHash = validatorTxHash,
             signature = signature,
             hash = hash,
-            libHeight = libHeight
+            libHeight = libHeight,
+            txOutputHash = txOutputHash
         )
     }
 

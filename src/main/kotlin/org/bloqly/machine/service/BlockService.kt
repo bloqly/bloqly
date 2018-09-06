@@ -14,6 +14,7 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
+import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.block.BlockData
 import org.bloqly.machine.vo.block.BlockDataList
@@ -49,11 +50,20 @@ class BlockService(
         validatorTxHash: ByteArray,
         round: Long,
         transactions: List<Transaction> = listOf(),
-        votes: List<Vote> = listOf()
+        votes: List<Vote> = listOf(),
+        txOutputs: Map<String, String> = mapOf()
     ): Block {
 
         val proposer = accountRepository.findByAccountId(producerId)
             ?: throw IllegalArgumentException("Could not find producer: $producerId")
+
+        val txOutputHash = CryptoUtils.hash(
+            txOutputs
+                .map {
+                    CryptoUtils.hash(it.key + CryptoUtils.hash(it.value))
+                }
+                .joinToString()
+        )
 
         val newBlock = Block(
             spaceId = spaceId,
@@ -67,7 +77,8 @@ class BlockService(
             txHash = txHash?.encode16(),
             validatorTxHash = validatorTxHash.encode16(),
             transactions = transactions,
-            votes = votes
+            votes = votes,
+            txOutputHash = txOutputHash.encode16()
         )
 
         val libHeight = if (height > 0) {
@@ -84,10 +95,11 @@ class BlockService(
             EncodingUtils.intToBytes(diff),
             EncodingUtils.longToBytes(round),
             EncodingUtils.longToBytes(timestamp),
-            parentHash.toByteArray(),
-            producerId.toByteArray(),
+            parentHash.decode16(),
+            producerId.decode16(),
             txHash ?: ByteArray(0),
-            validatorTxHash
+            validatorTxHash,
+            txOutputHash
         )
 
         val signature = CryptoUtils.sign(
