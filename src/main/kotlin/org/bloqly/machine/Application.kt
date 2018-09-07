@@ -51,7 +51,7 @@ class Application {
         const val MAX_TRANSACTION_AGE = 3600 * 1000
 
         const val ROUND = 5000
-        const val BLOCK_TIMEOUT = ROUND / 3L
-        const val TX_TIMEOUT = BLOCK_TIMEOUT * 2 / 3L
+        const val TIMEOUT = ROUND / 3L
+        const val TX_TIMEOUT = TIMEOUT * 2 / 3L
     }
 }

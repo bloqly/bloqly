@@ -1,5 +1,6 @@
 package org.bloqly.machine.component
 
+import org.bloqly.machine.Application
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
@@ -160,7 +161,7 @@ class EventProcessorService(
 
     private fun <T> submitTask(task: () -> T): T {
 
-        lock.tryLock(10000000L, TimeUnit.MILLISECONDS)
+        lock.tryLock(Application.TIMEOUT, TimeUnit.MILLISECONDS)
 
         return try {
             task()
