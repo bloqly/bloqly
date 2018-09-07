@@ -10,7 +10,6 @@ import org.bloqly.machine.util.ParameterUtils;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -140,7 +139,7 @@ public class ContractExecutorService {
         );
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(readOnly = true, noRollbackFor = {RuntimeException.class, Error.class})
     public InvocationResult invokeContract(PropertyContext propertyContext, InvocationContext invocationContext, byte[] arg) {
         return new InvocationResult(SUCCESS, invokeFunction(propertyContext, invocationContext, arg));
     }

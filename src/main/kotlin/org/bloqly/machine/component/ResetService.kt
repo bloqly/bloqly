@@ -13,6 +13,7 @@ import org.bloqly.machine.repository.VoteRepository
 import org.bloqly.machine.util.TimeUtils
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import javax.persistence.EntityManager
 
 @Service
 class ResetService(
@@ -26,7 +27,8 @@ class ResetService(
     private val voteRepository: VoteRepository,
     private val transactionOutputRepository: TransactionOutputRepository,
     private val finalizedTransactionRepository: FinalizedTransactionRepository,
-    private val objectFilterService: ObjectFilterService
+    private val objectFilterService: ObjectFilterService,
+    private val entityManager: EntityManager
 ) {
 
     @Transactional
@@ -45,5 +47,7 @@ class ResetService(
         }
         TimeUtils.reset()
         objectFilterService.clear()
+        entityManager.flush()
+        entityManager.clear()
     }
 }

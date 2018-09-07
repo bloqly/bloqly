@@ -176,9 +176,8 @@ class BlockProcessor(
             val txOutput = transactionOutputRepository
                 .getByBlockHashAndTransactionHash(block.hash, tx.hash)
 
-            val output =
-                ObjectUtils.readProperties(txOutput.output)
-                    .sortedBy { it.id }
+            val output = ObjectUtils.readProperties(txOutput.output)
+                .sortedBy { it.id }
 
             val checkOutput = invocationResult.output.sortedBy { it.id }
 

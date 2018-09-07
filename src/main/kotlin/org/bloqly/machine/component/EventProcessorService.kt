@@ -15,9 +15,8 @@ import org.bloqly.machine.vo.block.BlockData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
-import java.util.concurrent.Callable
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Processes the most important events
@@ -42,7 +41,7 @@ class EventProcessorService(
 
     private val log: Logger = LoggerFactory.getLogger(EventProcessorService::class.simpleName)
 
-    private val executor = Executors.newSingleThreadExecutor()
+    private val lock = ReentrantLock()
 
     /**
      * Collecting transactions
@@ -160,13 +159,16 @@ class EventProcessorService(
     }
 
     private fun <T> submitTask(task: () -> T): T {
-        return executor.submit(Callable<T> {
-            try {
-                task()
-            } catch (e: Exception) {
-                log.error(e.message, e)
-                throw e
-            }
-        }).get(1000000L, TimeUnit.MILLISECONDS)
+
+        lock.tryLock(10000000L, TimeUnit.MILLISECONDS)
+
+        return try {
+            task()
+        } catch (e: Exception) {
+            log.error(e.message, e)
+            throw e
+        } finally {
+            lock.unlock()
+        }
     }
 }
