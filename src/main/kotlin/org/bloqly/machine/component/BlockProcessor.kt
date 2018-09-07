@@ -1,6 +1,8 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
@@ -142,6 +144,12 @@ class BlockProcessor(
 
         return propertyContext.getPropertyValue(spaceId, self, target, key)
     }
+
+    @Transactional(readOnly = true)
+    fun getLastPropertyValue(
+        target: String,
+        key: String
+    ): ByteArray? = getLastPropertyValue(DEFAULT_SPACE, DEFAULT_SELF, target, key)
 
     /**
      * Returns blocks range (afterBlock, toBlock]

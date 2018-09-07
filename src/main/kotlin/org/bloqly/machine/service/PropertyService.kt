@@ -1,5 +1,7 @@
 package org.bloqly.machine.service
 
+import org.bloqly.machine.Application.Companion.DEFAULT_SELF
+import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.PropertyResult
@@ -29,6 +31,12 @@ class PropertyService(
     @Transactional(readOnly = true)
     fun getPropertyValue(spaceId: String, self: String, target: String, key: String): ByteArray? {
         return propertyRepository.findById(PropertyId(spaceId, self, target, key))
+            .map { it.value }.orElse(null)
+    }
+
+    @Transactional(readOnly = true)
+    fun getPropertyValue(target: String, key: String): ByteArray? {
+        return propertyRepository.findById(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, target, key))
             .map { it.value }.orElse(null)
     }
 }

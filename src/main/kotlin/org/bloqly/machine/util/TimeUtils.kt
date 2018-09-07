@@ -29,4 +29,11 @@ object TimeUtils {
             TEST_TIME = time + 1
         }
     }
+
+    fun testTickRound() {
+        val time = TEST_TIME
+        if(time != null) {
+            TEST_TIME = time + ROUND
+        }
+    }
 }

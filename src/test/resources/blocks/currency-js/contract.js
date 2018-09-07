@@ -18,13 +18,5 @@ function main(context, orig, dest, amount) {
 
 function set(context, orig, dest, key, value) {
 
-    if (key == 'balance' || key == 'power') {
-        throw 'Illegal property access attempt: ' + key;
-    }
-
-    if (orig !=  dest) {
-        throw 'Origin and destination don\'t match: ' + orig + ', ' + dest
-    }
-
-    return [ { target: dest, key: value } ];
+    return [ property(dest, key, value) ];
 }

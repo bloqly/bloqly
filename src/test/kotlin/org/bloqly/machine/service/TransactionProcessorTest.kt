@@ -16,9 +16,12 @@ import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.ParameterUtils.writeBoolean
 import org.bloqly.machine.util.ParameterUtils.writeInteger
 import org.bloqly.machine.util.ParameterUtils.writeLong
+import org.bloqly.machine.util.ParameterUtils.writeParams
 import org.bloqly.machine.util.ParameterUtils.writeString
 import org.bloqly.machine.util.TimeUtils
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Ignore
 import org.junit.Test
@@ -79,6 +82,54 @@ class TransactionProcessorTest : BaseTest() {
 
         System.out.println("TIME: " + (timeEnd - timeStart))
     }
+
+    @Test
+    fun testSetValue() {
+        val originId = testService.getRoot().accountId
+
+        val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
+
+        TimeUtils.testTick()
+        val setValueTx = transactionService.createTransaction(
+            space = DEFAULT_SPACE,
+            originId = originId,
+            passphrase = passphrase(originId),
+            destinationId = callee,
+            self = DEFAULT_SELF,
+            key = "set",
+            value = writeParams(arrayOf("key1", "value")),
+            transactionType = TransactionType.CALL,
+            referencedBlockHash = lastBlock.hash
+        )
+
+        val blockData = eventProcessorService.onProduceBlock().first()
+        eventProcessorService.onGetVotes()
+
+        val blockTx = blockData.transactions.first()
+        assertEquals(setValueTx.toVO(), blockTx)
+
+        assertNull(propertyService.getPropertyValue(callee, "key1"))
+        assertEquals("value", getLastPropertyValue(callee, "key1"))
+
+        TimeUtils.testTickRound()
+        eventProcessorService.onProduceBlock()
+        eventProcessorService.onGetVotes()
+
+        assertNull(propertyService.getPropertyValue(callee, "key1"))
+        assertEquals("value", getLastPropertyValue(callee, "key1"))
+
+        TimeUtils.testTickRound()
+        eventProcessorService.onProduceBlock()
+        eventProcessorService.onGetVotes()
+
+        assertEquals("value", ParameterUtils.readValue(propertyService.getPropertyValue(callee, "key1")!!))
+        assertEquals("value", getLastPropertyValue(callee, "key1"))
+    }
+
+    private fun getLastPropertyValue(target: String, key: String): Any? =
+        blockProcessor.getLastPropertyValue(callee, "key1")?.let {
+            ParameterUtils.readValue(it)
+        }
 
     @Test
     fun testRunContractArgument() {
