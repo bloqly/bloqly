@@ -53,5 +53,10 @@ class Application {
         const val ROUND = 5000
         const val TIMEOUT = ROUND / 3L
         const val TX_TIMEOUT = TIMEOUT * 2 / 3L
+
+        const val MAX_DESTINATION_LENGTH = 256
+        const val MAX_SPACE_LENGTH =128
+        const val MAX_KEY_LENGTH = 32
+        const val MAX_VALUE_LENGTH = 50 * 1024
     }
 }

@@ -2,6 +2,10 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application.Companion.DEFAULT_FUNCTION
 import org.bloqly.machine.Application.Companion.INIT_FUNCTION
+import org.bloqly.machine.Application.Companion.MAX_DESTINATION_LENGTH
+import org.bloqly.machine.Application.Companion.MAX_KEY_LENGTH
+import org.bloqly.machine.Application.Companion.MAX_SPACE_LENGTH
+import org.bloqly.machine.Application.Companion.MAX_VALUE_LENGTH
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
@@ -106,6 +110,27 @@ class TransactionProcessor(
 
     @Transactional
     fun isTransactionAcceptable(tx: Transaction): Boolean {
+
+        if (tx.destination.length > MAX_DESTINATION_LENGTH / 2) {
+            log.warn("Transaction destination length is too big ${tx.toVO()}")
+            return false
+        }
+
+        if (tx.spaceId.length > MAX_SPACE_LENGTH / 2) {
+            log.warn("Transaction space length is too big ${tx.toVO()}")
+            return false
+        }
+
+        val key = tx.key
+        if (key != null && key.length > MAX_KEY_LENGTH / 2) {
+            log.warn("Transaction key length is too big ${tx.toVO()}")
+            return false
+        }
+
+        if (tx.value.length > MAX_VALUE_LENGTH / 2) {
+            log.warn("Transaction space length is too big ${tx.toVO()}")
+            return false
+        }
 
         if (tx.timestamp > TimeUtils.getCurrentTime()) {
             log.warn("Transaction is too old ${tx.toVO()}")

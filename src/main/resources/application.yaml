@@ -35,5 +35,5 @@ spring:
 
 server:
   port: ${port}
-
-# TODO sort out management context and port
+  undertow:
+    max-http-post-size: 1048576 # 1MiB
