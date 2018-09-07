@@ -44,5 +44,9 @@ class WebSecurityConfig(
             )
             .and()
             .httpBasic()
+            .and()
+            .headers()
+            .frameOptions()
+            .sameOrigin()
     }
 }
