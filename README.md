@@ -19,9 +19,7 @@ This is a work in progress/prototype, API and implementation details can change.
 
 ## What's this?
 
-Bloqly is a homegrown, written from the scratch smart contracts engine with JavaScript support.
-
-In other words  - yes, it is another blockchain.
+Bloqly is a written from the scratch smart contracts engine with JavaScript support.
 
 First, small contract code sample:
 
