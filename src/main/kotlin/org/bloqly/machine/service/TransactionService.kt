@@ -1,6 +1,6 @@
 package org.bloqly.machine.service
 
-import org.bloqly.machine.lang.BInteger
+import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.model.ValueType
@@ -37,7 +37,7 @@ class TransactionService(
                 when (ValueType.valueOf(it.type)) {
                     ValueType.STRING -> it.value
                     ValueType.INT -> it.value.toInt()
-                    ValueType.BIGINT -> BInteger(it.value)
+                    ValueType.BIGINT -> BLong(it.value)
                     ValueType.BOOLEAN -> it.value.toBoolean()
                 }
             }.toTypedArray()

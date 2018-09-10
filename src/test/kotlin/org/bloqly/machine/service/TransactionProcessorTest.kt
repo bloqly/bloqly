@@ -5,13 +5,14 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.PropertyContext
 import org.bloqly.machine.component.TransactionProcessor
-import org.bloqly.machine.lang.BInteger
+import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.test.BaseTest
+import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.ParameterUtils.writeBoolean
@@ -20,6 +21,8 @@ import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.ParameterUtils.writeParams
 import org.bloqly.machine.util.ParameterUtils.writeString
 import org.bloqly.machine.util.TimeUtils
+import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.encode16
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -155,6 +158,48 @@ class TransactionProcessorTest : BaseTest() {
         )
     }
 
+    @Test
+    fun testSetSignedValue() {
+
+        TimeUtils.testTickRound()
+        createSetSignedValueTx("value1")
+        eventProcessorService.onProduceBlock()
+        eventProcessorService.onGetVotes()
+
+        val publicKey = testService.getUser().publicKey
+
+        val key = "key1:$publicKey"
+
+        assertNull(propertyService.getPropertyValue(callee, key))
+        assertEquals("value1", getLastPropertyValue(callee, key))
+    }
+
+    private fun createSetSignedValueTx(value: String): Transaction {
+
+        val block = blockService.getLastBlockBySpace(DEFAULT_SPACE)
+
+        val originId = testService.getRoot().accountId
+
+        val privateKey = testService.getUser().privateKey
+        val publicKey = testService.getUser().publicKey
+
+        val message = CryptoUtils.hash(value)
+
+        val signature = CryptoUtils.sign(privateKey.decode16(), message)
+
+        return transactionService.createTransaction(
+            space = DEFAULT_SPACE,
+            originId = originId,
+            passphrase = passphrase(originId),
+            destinationId = callee,
+            self = DEFAULT_SELF,
+            key = "setSigned",
+            value = writeParams(arrayOf("key1", value, signature.encode16(), publicKey)),
+            transactionType = TransactionType.CALL,
+            referencedBlockHash = block.hash
+        )
+    }
+
     private fun getLastPropertyValue(target: String, key: String): Any? =
         blockProcessor.getLastPropertyValue(target, key)?.let {
             ParameterUtils.readValue(it)
@@ -200,7 +245,7 @@ class TransactionProcessorTest : BaseTest() {
         assertFalse(propertyRepository.existsById(propertyId1))
         assertFalse(propertyRepository.existsById(propertyId2))
 
-        val params = ParameterUtils.writeParams(arrayOf("test", 22, true, BInteger(123)))
+        val params = ParameterUtils.writeParams(arrayOf("test", 22, true, BLong(123)))
 
         TimeUtils.testTick()
 

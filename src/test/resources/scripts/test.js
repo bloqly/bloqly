@@ -1,4 +1,4 @@
-var Long = Java.type("org.bloqly.machine.lang.BInteger");
+var Long = Java.type("org.bloqly.machine.lang.BLong");
 
 const maxSupply = new Long('1000000');
 

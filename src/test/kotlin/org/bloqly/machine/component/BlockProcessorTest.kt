@@ -2,7 +2,7 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.lang.BInteger
+import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
@@ -328,7 +328,7 @@ class BlockProcessorTest : BaseTest() {
     private fun getTxOutputValue(blockData: BlockData, n: Int): Long {
         val properties = ObjectUtils.readProperties(blockData.transactionOutputs[0].output)
 
-        val bInt = ParameterUtils.readValue(properties[n].value) as BInteger
+        val bInt = ParameterUtils.readValue(properties[n].value) as BLong
         return bInt.value.toLong()
     }
 

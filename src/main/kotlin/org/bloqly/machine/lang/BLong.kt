@@ -4,7 +4,7 @@ import java.math.BigInteger
 import java.util.Objects
 
 @Suppress("unused")
-class BInteger {
+class BLong {
 
     private val maxValue = BigInteger.valueOf(Long.MAX_VALUE)
 
@@ -29,7 +29,7 @@ class BInteger {
         this.value = value
     }
 
-    fun pow(exponent: Int): BInteger {
+    fun pow(exponent: Int): BLong {
 
         require(exponent >= 0) {
             "Negative value: $exponent"
@@ -39,10 +39,10 @@ class BInteger {
 
         ensureRange(result)
 
-        return BInteger(result)
+        return BLong(result)
     }
 
-    fun safeAdd(another: BInteger, max: BInteger): BInteger {
+    fun safeAdd(another: BLong, max: BLong): BLong {
 
         require(another.value.signum() >= 0) {
             "Negative value: ${another.value}"
@@ -56,24 +56,24 @@ class BInteger {
             "The resulting value is too big $result > ${max.value}"
         }
 
-        return BInteger(result)
+        return BLong(result)
     }
 
-    fun safeAdd(another: Long, max: BInteger): BInteger =
-        safeAdd(BInteger(another), max)
+    fun safeAdd(another: Long, max: BLong): BLong =
+        safeAdd(BLong(another), max)
 
-    fun add(another: BInteger): BInteger {
+    fun add(another: BLong): BLong {
         val result = value.add(another.value)
 
         ensureRange(result)
 
-        return BInteger(result)
+        return BLong(result)
     }
 
-    fun add(another: Long): BInteger =
-        add(BInteger(another))
+    fun add(another: Long): BLong =
+        add(BLong(another))
 
-    fun safeSubtract(another: BInteger): BInteger {
+    fun safeSubtract(another: BLong): BLong {
 
         require(another.value.signum() >= 0) {
             "Negative value: ${another.value}"
@@ -87,32 +87,32 @@ class BInteger {
 
         ensureRange(result)
 
-        return BInteger(result)
+        return BLong(result)
     }
 
-    fun safeSubtract(another: Long): BInteger =
-        safeSubtract(BInteger(another))
+    fun safeSubtract(another: Long): BLong =
+        safeSubtract(BLong(another))
 
-    fun subtract(another: BInteger): BInteger {
+    fun subtract(another: BLong): BLong {
         val result = value.subtract(another.value)
 
         ensureRange(result)
 
-        return BInteger(result)
+        return BLong(result)
     }
 
-    fun subtract(another: Long): BInteger =
-        subtract(BInteger(another))
+    fun subtract(another: Long): BLong =
+        subtract(BLong(another))
 
-    fun multiply(another: BInteger): BInteger {
+    fun multiply(another: BLong): BLong {
         val result = value.multiply(another.value)
 
         ensureRange(result)
 
-        return BInteger(result)
+        return BLong(result)
     }
 
-    fun safeMultiply(another: BInteger, max: BInteger): BInteger {
+    fun safeMultiply(another: BLong, max: BLong): BLong {
 
         require(another.value.signum() >= 0) {
             "Negative value: ${another.value}"
@@ -126,13 +126,13 @@ class BInteger {
 
         ensureRange(result)
 
-        return BInteger(value)
+        return BLong(value)
     }
 
-    fun divide(another: BInteger): BInteger {
+    fun divide(another: BLong): BLong {
         val result = value.divide(another.value)
 
-        return BInteger(result)
+        return BLong(result)
     }
 
     private fun ensureRange(result: BigInteger) {
@@ -145,8 +145,8 @@ class BInteger {
 
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
-        val bInteger = other as BInteger?
-        return value == bInteger!!.value
+        val bLong = other as BLong?
+        return value == bLong!!.value
     }
 
     override fun hashCode(): Int {

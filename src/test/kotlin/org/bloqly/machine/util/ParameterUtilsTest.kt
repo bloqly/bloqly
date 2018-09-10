@@ -1,6 +1,6 @@
 package org.bloqly.machine.util
 
-import org.bloqly.machine.lang.BInteger
+import org.bloqly.machine.lang.BLong
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -13,6 +13,6 @@ class ParameterUtilsTest {
 
         val result = ParameterUtils.readValue(value)
 
-        assertTrue(result is BInteger)
+        assertTrue(result is BLong)
     }
 }

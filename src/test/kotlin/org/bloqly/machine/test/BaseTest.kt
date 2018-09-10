@@ -9,7 +9,7 @@ import org.bloqly.machine.component.EventReceiverService
 import org.bloqly.machine.component.GenesisService
 import org.bloqly.machine.component.ObjectFilterService
 import org.bloqly.machine.component.PassphraseService
-import org.bloqly.machine.lang.BInteger
+import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Property
@@ -126,12 +126,12 @@ open class BaseTest {
             DEFAULT_SPACE, DEFAULT_SELF, propertyId.target, propertyId.key
         )!!
 
-        assertEquals(BInteger(value), ParameterUtils.readValue(lastValue))
+        assertEquals(BLong(value), ParameterUtils.readValue(lastValue))
     }
 
     protected fun assertPropertyValue(value: String) {
         val property: Property = propertyService.findById(propertyId)!!
-        assertEquals(BInteger(value), ParameterUtils.readValue(property.value))
+        assertEquals(BLong(value), ParameterUtils.readValue(property.value))
     }
 
     protected fun assertNoPropertyValue() {

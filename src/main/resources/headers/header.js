@@ -1,6 +1,7 @@
 'use strict';
 
-var Long = Java.type('org.bloqly.machine.lang.BInteger');
+var Long = Java.type('org.bloqly.machine.lang.BLong');
+var Crypto = Java.type('org.bloqly.machine.lang.BCrypto');
 
 const ZERO = new Long('0');
 

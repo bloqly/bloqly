@@ -4,7 +4,7 @@ import com.google.common.primitives.UnsignedBytes
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.ArrayUtils
 import org.apache.commons.lang3.Validate
-import org.bloqly.machine.lang.BInteger
+import org.bloqly.machine.lang.BLong
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
@@ -72,11 +72,11 @@ object ParameterUtils {
         return ByteBuffer.wrap(bytes).int
     }
 
-    private fun readLong(bis: ByteArrayInputStream): BInteger {
+    private fun readLong(bis: ByteArrayInputStream): BLong {
 
         val bytes = IOUtils.readFully(bis, EncodingUtils.LONG_BYTES)
 
-        return BInteger(ByteBuffer.wrap(bytes).long)
+        return BLong(ByteBuffer.wrap(bytes).long)
     }
 
     private fun readBoolean(bis: ByteArrayInputStream): Boolean {
@@ -197,7 +197,7 @@ object ParameterUtils {
             is String ->
                 processString(input.toString())
             is Int -> writeInteger(input.toString())
-            is BInteger -> writeLong(input.value)
+            is BLong -> writeLong(input.value)
             is Boolean -> writeBoolean(input)
             else -> throw IllegalArgumentException(
                 "Unsupported input $input of type ${input.javaClass.canonicalName}"

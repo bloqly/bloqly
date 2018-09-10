@@ -3,7 +3,7 @@ package org.bloqly.machine.component
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
-import org.bloqly.machine.lang.BInteger
+import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.service.PropertyService
@@ -55,6 +55,6 @@ class PropertyContextTest {
 
         val property = propertyContext.properties.first()
 
-        assertEquals(BInteger("2"), ParameterUtils.readValue(property.value))
+        assertEquals(BLong("2"), ParameterUtils.readValue(property.value))
     }
 }

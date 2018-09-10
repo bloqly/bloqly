@@ -3,7 +3,6 @@ package org.bloqly.machine.service;
 import com.google.common.collect.Lists;
 import org.bloqly.machine.component.PropertyContext;
 import org.bloqly.machine.function.GetPropertyFunction;
-import org.bloqly.machine.function.VerifySchnorrFunction;
 import org.bloqly.machine.model.*;
 import org.bloqly.machine.util.CryptoUtils;
 import org.bloqly.machine.util.ParameterUtils;
@@ -61,14 +60,6 @@ public class ContractExecutorService {
         };
     }
 
-    private VerifySchnorrFunction getVerifySchnorrFunction() {
-        return CryptoUtils.INSTANCE::verifySchnorrHex;
-    }
-
-    private VerifySchnorrFunction getVerifyFunction() {
-        return CryptoUtils.INSTANCE::verifySchnorrHex;
-    }
-
     private Invocable getEngine(PropertyContext propertyContext, InvocationContext invocationContext) {
 
         var contract = propertyContext.getContract(invocationContext.getSelf());
@@ -99,9 +90,6 @@ public class ContractExecutorService {
                 compiled.eval();
 
                 var compiledEngine = compiled.getEngine();
-
-                compiledEngine.put("verifySchnorr", getVerifySchnorrFunction());
-                compiledEngine.put("verify", getVerifyFunction());
 
                 return compiledEngine;
             } catch (Exception e) {
