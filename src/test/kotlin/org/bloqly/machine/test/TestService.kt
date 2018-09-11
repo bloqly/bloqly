@@ -19,9 +19,9 @@ import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.TimeUtils
+import org.bloqly.machine.vo.property.Value
 import org.bloqly.machine.vo.vote.VoteVO
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -110,7 +110,7 @@ class TestService(
             passphrase = passphraseService.getPassphrase(root.accountId),
             destinationId = user.accountId,
             self = DEFAULT_SELF,
-            value = writeLong("1"),
+            value = Value.ofs(1L),
             transactionType = TransactionType.CALL,
             referencedBlockHash = libHash
         )
@@ -132,7 +132,7 @@ class TestService(
             destinationId = root.accountId,
             self = DEFAULT_SELF,
             // got no money
-            value = writeLong("100"),
+            value = Value.ofs(100L),
             transactionType = TransactionType.CALL,
             referencedBlockHash = lib.hash
         )

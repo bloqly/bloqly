@@ -6,16 +6,17 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
-import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
+import org.bloqly.machine.vo.property.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
@@ -71,7 +72,7 @@ class BlockchainService(
             destinationId = Application.DEFAULT_SELF,
             self = Application.DEFAULT_SELF,
             key = null,
-            value = contractBody.toByteArray(),
+            value = Value.ofs(contractBody),
             transactionType = TransactionType.CREATE,
             referencedBlockHash = "",
             timestamp = timestamp

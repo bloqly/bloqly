@@ -6,6 +6,7 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
+import org.bloqly.machine.vo.property.Value
 
 @ValueObject
 data class TransactionVO(
@@ -13,7 +14,7 @@ data class TransactionVO(
     val destination: String,
     val self: String,
     val key: String?,
-    val value: String,
+    val value: List<Value>,
     val transactionType: TransactionType,
     val referencedBlockHash: String,
     val timestamp: Long,

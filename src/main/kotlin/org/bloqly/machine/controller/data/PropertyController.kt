@@ -7,6 +7,7 @@ import org.bloqly.machine.controller.exception.NotFoundException
 import org.bloqly.machine.model.PropertyValue
 import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.vo.property.PropertyRequest
+import org.bloqly.machine.vo.property.Value
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -35,13 +36,11 @@ class PropertyController(
         response = PropertyValue::class
     )
     @PostMapping("/search")
-    fun getProperty(@RequestBody request: PropertyRequest): PropertyValue {
-        val value = if (request.finalized) {
+    fun getProperty(@RequestBody request: PropertyRequest): Value {
+        return if (request.finalized) {
             propertyService.getPropertyValue(request.space, request.self, request.target, request.key)
         } else {
             blockProcessor.getLastPropertyValue(request.space, request.self, request.target, request.key)
         } ?: throw NotFoundException()
-
-        return PropertyValue.of(value)
     }
 }

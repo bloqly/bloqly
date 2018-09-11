@@ -131,4 +131,6 @@ dependencies {
 
     compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 
+    compile group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.3.0'
+
 }

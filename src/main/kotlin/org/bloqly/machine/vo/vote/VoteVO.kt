@@ -1,5 +1,6 @@
 package org.bloqly.machine.vo.vote
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.decode16
@@ -14,6 +15,7 @@ data class VoteVO(
     val signature: String
 ) {
 
+    @JsonIgnore
     fun getUID(): String = "$publicKey:$blockHash:$spaceId:$height:$timestamp"
 
     fun toModel(): Vote {

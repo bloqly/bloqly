@@ -1,6 +1,11 @@
 package org.bloqly.machine.model
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import org.bloqly.machine.vo.property.Value
 import org.bloqly.machine.vo.transaction.TransactionVO
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
+import org.hibernate.annotations.TypeDefs
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -23,6 +28,7 @@ import javax.persistence.UniqueConstraint
         )
     ]
 )
+@TypeDefs(TypeDef(name = "jsonb", typeClass = JsonBinaryType::class))
 data class Transaction(
 
     @Id
@@ -44,8 +50,9 @@ data class Transaction(
     @Column(nullable = true)
     var key: String? = null,
 
-    @Column(nullable = false, columnDefinition = "text")
-    val value: String,
+    @Type(type = "jsonb")
+    @Column(nullable = false, columnDefinition = "jsonb")
+    val value: List<Value>,
 
     @Column(nullable = false)
     val transactionType: TransactionType,

@@ -5,7 +5,6 @@ import org.bloqly.machine.Application.Companion.INIT_FUNCTION
 import org.bloqly.machine.Application.Companion.MAX_DESTINATION_LENGTH
 import org.bloqly.machine.Application.Companion.MAX_KEY_LENGTH
 import org.bloqly.machine.Application.Companion.MAX_SPACE_LENGTH
-import org.bloqly.machine.Application.Companion.MAX_VALUE_LENGTH
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
@@ -17,7 +16,6 @@ import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.decode16
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -48,11 +46,11 @@ class TransactionProcessor(
                 id = tx.self,
                 space = tx.spaceId,
                 owner = tx.origin,
-                body = String(tx.value.decode16())
+                body = tx.value.first().value
             )
         )
 
-        return contractExecutorService.invokeContract(propertyContext, invocationContext, byteArrayOf())
+        return contractExecutorService.invokeContract(propertyContext, invocationContext, listOf())
     }
 
     private fun processCall(
@@ -72,7 +70,7 @@ class TransactionProcessor(
             callee = tx.destination
         )
 
-        return contractExecutorService.invokeContract(propertyContext, invocationContext, tx.value.decode16())
+        return contractExecutorService.invokeContract(propertyContext, invocationContext, tx.value)
     }
 
     @Transactional
@@ -124,11 +122,6 @@ class TransactionProcessor(
         val key = tx.key
         if (key != null && key.length > MAX_KEY_LENGTH / 2) {
             log.warn("Transaction key length is too big ${tx.toVO()}")
-            return false
-        }
-
-        if (tx.value.length > MAX_VALUE_LENGTH / 2) {
-            log.warn("Transaction space length is too big ${tx.toVO()}")
             return false
         }
 

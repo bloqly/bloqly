@@ -1,6 +1,6 @@
 package org.bloqly.machine.model
 
-import org.bloqly.machine.util.ParameterUtils
+import org.bloqly.machine.vo.property.Value
 
 data class PropertyResult(
     val target: String,
@@ -14,6 +14,6 @@ data class PropertyResult(
             target = target,
             key = key
         ),
-        value = ParameterUtils.writeValue(value)
+        value = Value.of(value)
     )
 }

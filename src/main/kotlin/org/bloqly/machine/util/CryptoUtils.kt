@@ -109,6 +109,8 @@ object CryptoUtils {
         BloqlySchnorr.sign(input, privateKey!!).toByteArray()
 
     fun hash(tx: Transaction): ByteArray {
+        val valueString = ObjectUtils.writeValueAsString(tx.value)
+
         return hash(
             Bytes.concat(
                 tx.spaceId.toByteArray(),
@@ -116,7 +118,7 @@ object CryptoUtils {
                 tx.destination.toByteArray(),
                 tx.self.toByteArray(),
                 tx.key?.toByteArray() ?: byteArrayOf(),
-                tx.value.decode16(),
+                valueString.toByteArray(),
                 tx.referencedBlockHash.decode16(),
                 tx.transactionType.name.toByteArray(),
                 EncodingUtils.longToBytes(tx.timestamp)

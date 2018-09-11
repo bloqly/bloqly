@@ -8,9 +8,9 @@ import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.encode16
+import org.bloqly.machine.vo.property.Value
 import org.bloqly.machine.vo.transaction.TransactionOutputVO
 import org.bloqly.machine.vo.transaction.TransactionRequest
 import org.springframework.stereotype.Service
@@ -34,19 +34,13 @@ class TransactionService(
         @Suppress("IMPLICIT_CAST_TO_ANY")
         val args: Array<Any> = transactionRequest.args
             .map {
-                when (ValueType.valueOf(it.type)) {
+                when (it.type) {
                     ValueType.STRING -> it.value
                     ValueType.INT -> it.value.toInt()
                     ValueType.BIGINT -> BLong(it.value)
                     ValueType.BOOLEAN -> it.value.toBoolean()
                 }
             }.toTypedArray()
-
-        val params = if (args.size > 1) {
-            ParameterUtils.writeParams(args)
-        } else {
-            ParameterUtils.writeValue(args.first())
-        }
 
         return createTransaction(
             space = transactionRequest.space,
@@ -55,7 +49,7 @@ class TransactionService(
             destinationId = transactionRequest.destination,
             self = transactionRequest.self,
             key = transactionRequest.key,
-            value = params,
+            value = Value.ofArray(args),
             transactionType = TransactionType.valueOf(transactionRequest.transactionType),
             referencedBlockHash = referencedBlockHash
         )
@@ -69,8 +63,7 @@ class TransactionService(
         destinationId: String,
         self: String,
         key: String? = null,
-        // TODO do we need byte-array here?
-        value: ByteArray,
+        value: List<Value>,
         transactionType: TransactionType,
         referencedBlockHash: String,
         timestamp: Long = TimeUtils.getCurrentTime()
@@ -88,7 +81,7 @@ class TransactionService(
             destination = destinationId,
             self = self,
             key = key,
-            value = value.encode16(),
+            value = value,
             transactionType = transactionType,
             referencedBlockHash = referencedBlockHash,
             timestamp = timestamp,
@@ -117,7 +110,7 @@ class TransactionService(
             return transactionRepository.getByHash(tx.hash)
         }
 
-        // TODO where to check nonce?
+        // TODO  check nonce
 
         require(CryptoUtils.verifyTransaction(tx)) {
             "Could not verify transaction $tx"

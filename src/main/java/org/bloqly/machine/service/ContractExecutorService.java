@@ -5,7 +5,7 @@ import org.bloqly.machine.component.PropertyContext;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.*;
 import org.bloqly.machine.util.CryptoUtils;
-import org.bloqly.machine.util.ParameterUtils;
+import org.bloqly.machine.vo.property.Value;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.script.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -53,7 +53,7 @@ public class ContractExecutorService {
             );
 
             if (propertyValue != null) {
-                return ParameterUtils.INSTANCE.readValue(propertyValue);
+                return propertyValue.toValue();
             } else {
                 return defaultValue;
             }
@@ -68,7 +68,7 @@ public class ContractExecutorService {
 
         invocationContext.setOwner(contract.getOwner());
 
-        var engine = getEngine(contract.getBody());
+        var engine = getEngine(new String(Hex.decode(contract.getBody())));
 
         engine.put("getProperty", getPropertyFunction(propertyContext, invocationContext));
 
@@ -89,9 +89,7 @@ public class ContractExecutorService {
 
                 compiled.eval();
 
-                var compiledEngine = compiled.getEngine();
-
-                return compiledEngine;
+                return compiled.getEngine();
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -123,26 +121,26 @@ public class ContractExecutorService {
                         requireNonNull(entry.getTarget()),
                         requireNonNull(entry.getKey())
                 ),
-                ParameterUtils.INSTANCE.writeValue(entry.getValue())
+                Value.Companion.of(entry.getValue())
         );
     }
 
     @Transactional(readOnly = true, noRollbackFor = {RuntimeException.class, Error.class})
-    public InvocationResult invokeContract(PropertyContext propertyContext, InvocationContext invocationContext, byte[] arg) {
-        return new InvocationResult(SUCCESS, invokeFunction(propertyContext, invocationContext, arg));
+    public InvocationResult invokeContract(
+            PropertyContext propertyContext, InvocationContext invocationContext, List<Value> params) {
+        return new InvocationResult(SUCCESS, invokeFunction(propertyContext, invocationContext, params));
     }
 
     @SuppressWarnings("unchecked")
-    private List<Property> invokeFunction(PropertyContext propertyContext, InvocationContext invocationContext, byte[] arg) {
+    private List<Property> invokeFunction(PropertyContext propertyContext, InvocationContext invocationContext, List<Value> params) {
 
         try {
 
-            var params = ParameterUtils.INSTANCE.readParams(arg);
-
-            List<Object> args = Lists.newArrayList(
+            var args = Lists.newArrayList(
                     invocationContext, invocationContext.getCaller(), invocationContext.getCallee());
 
-            args.addAll(Arrays.asList(params));
+            var paramValues = params.stream().map(Value::toValue).collect(Collectors.toList());
+            args.addAll(paramValues);
 
             var engine = getEngine(propertyContext, invocationContext);
 

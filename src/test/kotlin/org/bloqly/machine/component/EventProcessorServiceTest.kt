@@ -12,10 +12,9 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.ParameterUtils.writeLong
 import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.TimeUtils
-import org.junit.Assert.assertArrayEquals
+import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -99,7 +98,7 @@ class EventProcessorServiceTest : BaseTest() {
     @Test
     fun testInitDefaultContract() {
 
-        val balance = writeLong(maxSupply.minus(BigInteger("4")))
+        val balance = Value.of(maxSupply.minus(BigInteger("4")))
 
         assertTrue(
             Sets.newHashSet(propertyRepository.findAll()).contains(
@@ -117,7 +116,7 @@ class EventProcessorServiceTest : BaseTest() {
         val rootBalanceBefore = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceBefore = propertyRepository.findById(userBalanceId)
 
-        assertArrayEquals(writeLong(maxSupply.minus(BigInteger("4")).toString()), rootBalanceBefore.value)
+        assertEquals(Value.of(maxSupply.minus(BigInteger("4"))), rootBalanceBefore.value)
         assertFalse(userBalanceBefore.isPresent)
 
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
@@ -130,7 +129,7 @@ class EventProcessorServiceTest : BaseTest() {
             passphrase = passphrase(root.accountId),
             destinationId = user.accountId,
             self = DEFAULT_SELF,
-            value = writeLong("1"),
+            value = Value.ofs(1),
             transactionType = TransactionType.CALL,
             referencedBlockHash = lastBlock.hash
         )
@@ -144,8 +143,8 @@ class EventProcessorServiceTest : BaseTest() {
         val rootBalanceAfter = propertyRepository.findById(rootBalanceId).orElseThrow()
         val userBalanceAfter = propertyRepository.findById(userBalanceId).orElseThrow()
 
-        assertArrayEquals(writeLong(maxSupply.minus(BigInteger("5")).toString()), rootBalanceAfter.value)
-        assertArrayEquals(writeLong("1"), userBalanceAfter.value)
+        assertEquals(Value.of(maxSupply.minus(BigInteger("5"))), rootBalanceAfter.value)
+        assertEquals(Value.of(BigInteger("1")), userBalanceAfter.value)
     }
 
     @Test

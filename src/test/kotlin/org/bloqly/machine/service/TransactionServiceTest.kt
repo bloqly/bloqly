@@ -8,6 +8,7 @@ import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils.verifyTransaction
 import org.bloqly.machine.util.TestUtils.FAKE_DATA
+import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -54,7 +55,7 @@ class TransactionServiceTest : BaseTest() {
 
             key = null,
 
-            value = "function init() {return [];}".toByteArray(),
+            value = Value.ofs("function init() {return [];}"),
 
             transactionType = TransactionType.CREATE,
 
@@ -91,7 +92,6 @@ class TransactionServiceTest : BaseTest() {
         assertFalse(blockService.isActualTransaction(tx, 0))
         assertFalse(blockService.isActualTransaction(tx, 1))
         assertTrue(blockService.isActualTransaction(tx, 2))
-
     }
 
     @Test
@@ -139,7 +139,7 @@ class TransactionServiceTest : BaseTest() {
     fun testVerifyAmountWrong() {
         assertFalse(
             verifyTransaction(
-                transaction.copy(value = FAKE_DATA)
+                transaction.copy(value = listOf())
             )
         )
     }

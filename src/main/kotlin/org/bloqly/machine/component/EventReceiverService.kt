@@ -43,7 +43,7 @@ class EventReceiverService(
 
     fun receiveTransactions(transactionVOs: List<TransactionVO>) {
         transactionVOs.forEach { tx ->
-            if (!objectFilterService.mightContain(tx.hash)) {
+            if (!objectFilterService.contains(tx.hash)) {
                 eventProcessorService.onTransaction(tx.toModel())
                 objectFilterService.add(tx.hash)
             }
@@ -55,15 +55,15 @@ class EventReceiverService(
             .filter { spaceService.existsById(it.spaceId) }
             .forEach { voteVO ->
                 try {
-                    if (!objectFilterService.mightContain(voteVO.getUID())) {
+                    if (!objectFilterService.contains(voteVO.getUID())) {
+
+                        objectFilterService.add(voteVO.getUID())
 
                         val vote = voteVO.toModel()
 
                         if (voteService.isAcceptable(vote)) {
                             eventProcessorService.onVote(vote)
                         }
-
-                        objectFilterService.add(voteVO.getUID())
                     }
                 } catch (e: Exception) {
                     log.error(e.message, e)
@@ -84,8 +84,6 @@ class EventReceiverService(
 
                 val block = blockData.block
 
-                val isNotProcessed = !objectFilterService.mightContain(block.hash)
-
                 val isValidSpaceIds = block.spaceId in spaceIds
 
                 val isValidRound = block.round <= round
@@ -98,13 +96,21 @@ class EventReceiverService(
 
                 // TODO add TPOS check for better chain
 
-                isProducerValid && isNotProcessed && isValidSpaceIds && isValidRound
+                isProducerValid && isValidSpaceIds && isValidRound
             }
             .forEach { blockData ->
 
-                log.info("Start processing block ${blockData.block.hash}")
+                val block = blockData.block
 
-                if (blockService.isAcceptable(blockData.toModel())) {
+                log.info("Start processing block ${block.hash}")
+
+                val isProcessed = objectFilterService.contains(block.hash)
+                val isAcceptable = blockService.isAcceptable(blockData.toModel())
+
+                if (!isProcessed && isAcceptable) {
+
+                    objectFilterService.add(block.hash)
+
                     receiveTransactions(blockData.transactions)
                     receiveVotes(blockData.votes)
 
@@ -112,8 +118,6 @@ class EventReceiverService(
 
                     eventProcessorService.onProposal(blockData)
                 }
-
-                objectFilterService.add(blockData.block.hash)
 
             }
     }

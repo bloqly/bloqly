@@ -8,10 +8,10 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.FinalizedTransactionRepository
-import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.repository.TransactionRepository
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
@@ -91,9 +91,10 @@ class GenesisService(
 
         val transaction = genesis.transactions.first()
 
-        val contractBody = transaction.toModel().value
+        val contractBodyValue = transaction.toModel().value.first()
+        val contractBody = contractBodyValue.toValue() as String
 
-        val contractBodyHash = CryptoUtils.hash(contractBody.decode16()).encode16()
+        val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
 
         require(block.parentHash == contractBodyHash) {
             "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."

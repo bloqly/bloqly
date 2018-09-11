@@ -4,7 +4,7 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.ParameterUtils
+import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,7 +26,7 @@ class PropertyServiceTest : BaseTest() {
 
         val property = Property(
             id = id,
-            value = ParameterUtils.writeLong("1")
+            value = Value.of(1)
         )
 
         propertyService.updateProperties(listOf(property))
@@ -37,7 +37,7 @@ class PropertyServiceTest : BaseTest() {
 
         val newProperty = Property(
             id = id,
-            value = ParameterUtils.writeLong("2")
+            value = Value.of(2)
         )
 
         propertyService.updateProperties(listOf(newProperty))

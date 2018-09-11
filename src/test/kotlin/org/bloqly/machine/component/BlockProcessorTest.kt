@@ -9,7 +9,6 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.TimeUtils.setTestTime
 import org.bloqly.machine.util.decode16
@@ -328,7 +327,7 @@ class BlockProcessorTest : BaseTest() {
     private fun getTxOutputValue(blockData: BlockData, n: Int): Long {
         val properties = ObjectUtils.readProperties(blockData.transactionOutputs[0].output)
 
-        val bInt = ParameterUtils.readValue(properties[n].value) as BLong
+        val bInt = properties[n].toValue() as BLong
         return bInt.value.toLong()
     }
 

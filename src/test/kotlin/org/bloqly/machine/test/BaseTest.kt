@@ -26,7 +26,6 @@ import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
-import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.block.BlockData
 import org.junit.Assert.assertEquals
@@ -126,12 +125,12 @@ open class BaseTest {
             DEFAULT_SPACE, DEFAULT_SELF, propertyId.target, propertyId.key
         )!!
 
-        assertEquals(BLong(value), ParameterUtils.readValue(lastValue))
+        assertEquals(BLong(value), lastValue.toValue())
     }
 
     protected fun assertPropertyValue(value: String) {
         val property: Property = propertyService.findById(propertyId)!!
-        assertEquals(BLong(value), ParameterUtils.readValue(property.value))
+        assertEquals(BLong(value), property.toValue())
     }
 
     protected fun assertNoPropertyValue() {

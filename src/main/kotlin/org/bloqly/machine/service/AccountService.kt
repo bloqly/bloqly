@@ -14,7 +14,6 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
 import org.bloqly.machine.util.EncodingUtils.publicKeyToAddress
-import org.bloqly.machine.util.ParameterUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
 import org.springframework.stereotype.Service
@@ -110,7 +109,7 @@ class AccountService(
         )
 
         return propertyRepository.findById(propertyKey)
-            .map { ParameterUtils.readValue(it.value) as BLong }
+            .map { it.toValue() as BLong }
             .map { it.value }
             .orElseThrow()
     }

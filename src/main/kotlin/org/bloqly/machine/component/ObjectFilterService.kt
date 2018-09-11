@@ -1,38 +1,26 @@
 package org.bloqly.machine.component
 
-import com.google.common.hash.BloomFilter
-import com.google.common.hash.Funnels
+import com.google.common.cache.CacheBuilder
 import org.springframework.stereotype.Component
-import java.nio.charset.StandardCharsets
-import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.TimeUnit
 
 @Component
 class ObjectFilterService {
 
-    private val expectedInsertions = 1000000
+    private val maxElements = 1000000L
 
-    private val probability = 0.01
-
-    private val filter = AtomicReference(createFilter())
-
-    private fun createFilter(): BloomFilter<String> =
-        BloomFilter.create(
-            Funnels.stringFunnel(StandardCharsets.UTF_8),
-            expectedInsertions,
-            probability
-        )
+    private val elements = CacheBuilder.newBuilder()
+        .maximumSize(maxElements)
+        .expireAfterWrite(1, TimeUnit.MINUTES)
+        .build<String, Boolean>()
 
     fun add(key: String) {
-        if (filter.get().approximateElementCount() > expectedInsertions) {
-            filter.set(createFilter())
-        }
-        filter.get().put(key)
+        elements.put(key, true)
     }
 
-    fun mightContain(key: String): Boolean = filter.get().mightContain(key)
+    fun contains(key: String): Boolean = elements.getIfPresent(key) ?: false
 
-    // TODO make it work in 2 steps, so that there is no spike in load
     fun clear() {
-        filter.set(createFilter())
+        elements.invalidateAll()
     }
 }

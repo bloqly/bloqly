@@ -5,7 +5,6 @@ import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.PropertyRepositoryCustom
-import org.bloqly.machine.util.ParameterUtils
 import org.springframework.stereotype.Repository
 import javax.persistence.EntityManager
 
@@ -29,7 +28,7 @@ class PropertyRepositoryCustomImpl(
             )
         )
 
-        return ParameterUtils.readValue(quorumProperty.value) as Int
+        return (quorumProperty.toValue() as Long).toInt()
     }
 
     override fun getValidatorsCountSpaceId(spaceId: String): Int {
@@ -43,6 +42,6 @@ class PropertyRepositoryCustomImpl(
             )
         )
 
-        return ParameterUtils.readValue(validatorsCount.value) as Int
+        return (validatorsCount.toValue() as Long).toInt()
     }
 }

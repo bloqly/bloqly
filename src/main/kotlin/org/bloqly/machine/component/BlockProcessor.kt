@@ -30,6 +30,7 @@ import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.block.BlockData
+import org.bloqly.machine.vo.property.Value
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -135,7 +136,7 @@ class BlockProcessor(
         self: String,
         target: String,
         key: String
-    ): ByteArray? {
+    ): Value? {
         val lastBlock = blockService.getLastBlockBySpace(spaceId)
 
         val propertyContext = PropertyContext(propertyService, contractService)
@@ -149,7 +150,7 @@ class BlockProcessor(
     fun getLastPropertyValue(
         target: String,
         key: String
-    ): ByteArray? = getLastPropertyValue(DEFAULT_SPACE, DEFAULT_SELF, target, key)
+    ): Value? = getLastPropertyValue(DEFAULT_SPACE, DEFAULT_SELF, target, key)
 
     /**
      * Returns blocks range (afterBlock, toBlock]

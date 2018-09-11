@@ -6,6 +6,7 @@ import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.model.PropertyResult
 import org.bloqly.machine.repository.PropertyRepository
+import org.bloqly.machine.vo.property.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -29,13 +30,13 @@ class PropertyService(
     fun findById(propertyId: PropertyId): Property? = propertyRepository.findById(propertyId).orElse(null)
 
     @Transactional(readOnly = true)
-    fun getPropertyValue(spaceId: String, self: String, target: String, key: String): ByteArray? {
+    fun getPropertyValue(spaceId: String, self: String, target: String, key: String): Value? {
         return propertyRepository.findById(PropertyId(spaceId, self, target, key))
             .map { it.value }.orElse(null)
     }
 
     @Transactional(readOnly = true)
-    fun getPropertyValue(target: String, key: String): ByteArray? {
+    fun getPropertyValue(target: String, key: String): Value? {
         return propertyRepository.findById(PropertyId(DEFAULT_SPACE, DEFAULT_SELF, target, key))
             .map { it.value }.orElse(null)
     }

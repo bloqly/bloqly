@@ -3,8 +3,9 @@ package org.bloqly.machine.component
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
-import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.ContractService
+import org.bloqly.machine.service.PropertyService
+import org.bloqly.machine.vo.property.Value
 
 data class PropertyContext(
     val propertyService: PropertyService,
@@ -42,7 +43,7 @@ data class PropertyContext(
             key = key
         )
 
-    fun getPropertyValue(spaceId: String, self: String, target: String, key: String): ByteArray? {
+    fun getPropertyValue(spaceId: String, self: String, target: String, key: String): Value? {
 
         val propertyId = getPropertyId(spaceId, self, target, key)
 

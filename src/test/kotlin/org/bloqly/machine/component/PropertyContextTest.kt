@@ -6,9 +6,9 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
-import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.ContractService
-import org.bloqly.machine.util.ParameterUtils
+import org.bloqly.machine.service.PropertyService
+import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -42,19 +42,15 @@ class PropertyContextTest {
     fun testPropertyOverrides() {
 
         propertyContext.updatePropertyValues(
-            listOf(
-                Property(propertyId, ParameterUtils.writeValue("BigInteger(1)"))
-            )
+            listOf(Property(propertyId, Value.of(BLong("1"))))
         )
 
         propertyContext.updatePropertyValues(
-            listOf(
-                Property(propertyId, ParameterUtils.writeValue("BigInteger(2)"))
-            )
+            listOf(Property(propertyId, Value.of(BLong("2"))))
         )
 
         val property = propertyContext.properties.first()
 
-        assertEquals(BLong("2"), ParameterUtils.readValue(property.value))
+        assertEquals(BLong("2"), property.toValue())
     }
 }

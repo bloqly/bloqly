@@ -14,15 +14,10 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
-import org.bloqly.machine.util.ParameterUtils
-import org.bloqly.machine.util.ParameterUtils.writeBoolean
-import org.bloqly.machine.util.ParameterUtils.writeInteger
-import org.bloqly.machine.util.ParameterUtils.writeLong
-import org.bloqly.machine.util.ParameterUtils.writeParams
-import org.bloqly.machine.util.ParameterUtils.writeString
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.util.encode16
+import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -67,7 +62,7 @@ class TransactionProcessorTest : BaseTest() {
             passphrase = passphrase(originId),
             destinationId = callee,
             self = DEFAULT_SELF,
-            value = writeLong("1"),
+            value = Value.ofs(1),
             transactionType = TransactionType.CALL,
             referencedBlockHash = lastBlock.hash
         )
@@ -152,7 +147,7 @@ class TransactionProcessorTest : BaseTest() {
             destinationId = callee,
             self = DEFAULT_SELF,
             key = "set",
-            value = writeParams(arrayOf("key1", value)),
+            value = Value.of("key1", value),
             transactionType = TransactionType.CALL,
             referencedBlockHash = block.hash
         )
@@ -194,21 +189,17 @@ class TransactionProcessorTest : BaseTest() {
             destinationId = callee,
             self = DEFAULT_SELF,
             key = "setSigned",
-            value = writeParams(arrayOf("key1", value, signature.encode16(), publicKey)),
+            value = Value.of("key1", value, signature.encode16(), publicKey),
             transactionType = TransactionType.CALL,
             referencedBlockHash = block.hash
         )
     }
 
     private fun getLastPropertyValue(target: String, key: String): Any? =
-        blockProcessor.getLastPropertyValue(target, key)?.let {
-            ParameterUtils.readValue(it)
-        }
+        blockProcessor.getLastPropertyValue(target, key)?.toValue()
 
     private fun getPropertyValue(target: String, key: String): Any? =
-        propertyService.getPropertyValue(target, key)?.let {
-            ParameterUtils.readValue(it)
-        }
+        propertyService.getPropertyValue(target, key)?.toValue()
 
     @Test
     fun testRunContractArgument() {
@@ -228,7 +219,7 @@ class TransactionProcessorTest : BaseTest() {
             passphrase = passphrase(originId),
             destinationId = callee,
             self = self,
-            value = contractBody.toByteArray(),
+            value = Value.ofs(contractBody),
             transactionType = TransactionType.CREATE,
             referencedBlockHash = lastBlock.hash
         )
@@ -239,13 +230,13 @@ class TransactionProcessorTest : BaseTest() {
 
         val contractProperties = propertyContext.properties
 
-        assertTrue(Property(propertyId1, writeString("test1")) in contractProperties)
-        assertTrue(Property(propertyId2, writeBoolean("false")) in contractProperties)
+        assertTrue(Property(propertyId1, Value.of("test1")) in contractProperties)
+        assertTrue(Property(propertyId2, Value.of(false)) in contractProperties)
 
         assertFalse(propertyRepository.existsById(propertyId1))
         assertFalse(propertyRepository.existsById(propertyId2))
 
-        val params = ParameterUtils.writeParams(arrayOf("test", 22, true, BLong(123)))
+        val params = Value.of("test", 22, true, BLong(123))
 
         TimeUtils.testTick()
 
@@ -267,25 +258,25 @@ class TransactionProcessorTest : BaseTest() {
         assertTrue(
             Property(
                 PropertyId(DEFAULT_SPACE, self, originId, "value1"),
-                writeString("test")
+                Value.of("test")
             ) in propertiesAfter
         )
         assertTrue(
             Property(
                 PropertyId(DEFAULT_SPACE, self, callee, "value2"),
-                writeInteger("22")
+                Value.of(22)
             ) in propertiesAfter
         )
         assertTrue(
             Property(
                 PropertyId(DEFAULT_SPACE, self, self, "value3"),
-                writeBoolean("true")
+                Value.of(true)
             ) in propertiesAfter
         )
         assertTrue(
             Property(
                 PropertyId(DEFAULT_SPACE, self, self, "value4"),
-                writeLong("124")
+                Value.of(BLong("124"))
             ) in propertiesAfter
         )
     }
