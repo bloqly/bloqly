@@ -3,10 +3,10 @@ package org.bloqly.machine.controller.data
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.model.Account
-import org.bloqly.machine.model.PropertyValue
 import org.bloqly.machine.model.ValueType
 import org.bloqly.machine.test.BaseControllerTest
 import org.bloqly.machine.util.APIUtils
+import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,14 +32,14 @@ class PropertyControllerTest : BaseControllerTest() {
         val userEntity = HttpEntity(getBalanceRequestPayload(testService.getUser()), headers)
 
         val userValue =
-            restTemplate.postForObject(url, userEntity, PropertyValue::class.java)
+            restTemplate.postForObject(url, userEntity, Value::class.java)
 
         assertEquals("1", userValue.value)
         assertEquals(ValueType.BIGINT, userValue.type)
 
         val rootEntity = HttpEntity(getBalanceRequestPayload(testService.getRoot()), headers)
 
-        val rootValue = restTemplate.postForObject(url, rootEntity, PropertyValue::class.java)
+        val rootValue = restTemplate.postForObject(url, rootEntity, Value::class.java)
 
         assertEquals(maxSupply.minus(BigInteger("5")).toString(), rootValue.value)
         assertEquals(ValueType.BIGINT, rootValue.type)
@@ -62,7 +62,7 @@ class PropertyControllerTest : BaseControllerTest() {
 
         val rootEntity = HttpEntity(getFinalizedBalanceRequestPayload(testService.getRoot()), headers)
 
-        val rootValue = restTemplate.postForObject(url, rootEntity, PropertyValue::class.java)
+        val rootValue = restTemplate.postForObject(url, rootEntity, Value::class.java)
 
         assertEquals(maxSupply.minus(BigInteger("4")).toString(), rootValue.value)
         assertEquals(ValueType.BIGINT, rootValue.type)

@@ -42,11 +42,11 @@ class PropertyContextTest {
     fun testPropertyOverrides() {
 
         propertyContext.updatePropertyValues(
-            listOf(Property(propertyId, Value.of(BLong("1"))))
+            listOf(Property(propertyId, Value.of(BLong("1"))).toPropertyValue())
         )
 
         propertyContext.updatePropertyValues(
-            listOf(Property(propertyId, Value.of(BLong("2"))))
+            listOf(Property(propertyId, Value.of(BLong("2"))).toPropertyValue())
         )
 
         val property = propertyContext.properties.first()

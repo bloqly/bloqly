@@ -5,6 +5,7 @@ import org.bitcoinj.core.ECKey
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.Vote
+import org.bloqly.machine.vo.property.PropertyValue
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.util.BigIntegers
 import org.slf4j.LoggerFactory
@@ -218,12 +219,12 @@ object CryptoUtils {
         )
     }
 
-    fun hashTxOutputs(txOutputs: Map<String, String>): ByteArray =
+    fun hashTxOutputs(txOutputs: Map<String, List<PropertyValue>>): ByteArray =
         hash(
             txOutputs
                 .toSortedMap()
                 .map {
-                    hash(it.key + hash(it.value))
+                    hash(it.key + hash(ObjectUtils.writeValueAsString(it.value)))
                 }
                 .joinToString()
         )

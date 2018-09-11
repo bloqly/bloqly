@@ -196,7 +196,7 @@ class TransactionProcessorTest : BaseTest() {
     }
 
     private fun getLastPropertyValue(target: String, key: String): Any? =
-        blockProcessor.getLastPropertyValue(target, key)?.toValue()
+        blockProcessor.findLastPropertyValue(target, key)?.toValue()
 
     private fun getPropertyValue(target: String, key: String): Any? =
         propertyService.getPropertyValue(target, key)?.toValue()

@@ -1,8 +1,10 @@
 package org.bloqly.machine.model
 
+import org.bloqly.machine.vo.property.PropertyValue
+
 data class InvocationResult(
     val invocationResultType: InvocationResultType,
-    val output: List<Property> = listOf()
+    val output: List<PropertyValue> = listOf()
 ) {
     constructor(result: InvocationResultType) : this(result, listOf())
 

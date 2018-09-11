@@ -1,6 +1,11 @@
 package org.bloqly.machine.model
 
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import org.bloqly.machine.vo.property.PropertyValue
 import org.bloqly.machine.vo.transaction.TransactionOutputVO
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.TypeDef
+import org.hibernate.annotations.TypeDefs
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.GeneratedValue
@@ -19,6 +24,7 @@ import javax.persistence.UniqueConstraint
         )
     ]
 )
+@TypeDefs(TypeDef(name = "jsonb", typeClass = JsonBinaryType::class))
 data class TransactionOutput(
 
     @Id
@@ -31,8 +37,9 @@ data class TransactionOutput(
     @Column(nullable = false)
     val transactionHash: String,
 
-    @Column(nullable = false, columnDefinition = "text")
-    val output: String
+    @Type(type = "jsonb")
+    @Column(nullable = false, columnDefinition = "jsonb")
+    val output: List<PropertyValue>
 ) {
     fun toVO(): TransactionOutputVO =
         TransactionOutputVO(

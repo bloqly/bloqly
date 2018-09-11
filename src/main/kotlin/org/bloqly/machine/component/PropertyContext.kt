@@ -5,6 +5,7 @@ import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.PropertyService
+import org.bloqly.machine.vo.property.PropertyValue
 import org.bloqly.machine.vo.property.Value
 
 data class PropertyContext(
@@ -43,7 +44,7 @@ data class PropertyContext(
             key = key
         )
 
-    fun getPropertyValue(spaceId: String, self: String, target: String, key: String): Value? {
+    fun findPropertyValue(spaceId: String, self: String, target: String, key: String): Value? {
 
         val propertyId = getPropertyId(spaceId, self, target, key)
 
@@ -63,8 +64,14 @@ data class PropertyContext(
         _contracts[contract.id] = contract
     }
 
-    private fun updatePropertyValue(property: Property) {
-        _properties[property.id] = property
+    private fun updatePropertyValue(pv: PropertyValue) {
+        val id = PropertyId(
+            spaceId = pv.space,
+            self = pv.self,
+            target = pv.target,
+            key = pv.key
+        )
+        _properties[id] = Property(id, pv.value)
     }
 
     /**
@@ -75,7 +82,7 @@ data class PropertyContext(
         contractService.saveAll(_contracts.values.toList())
     }
 
-    fun updatePropertyValues(properties: List<Property>) =
+    fun updatePropertyValues(properties: List<PropertyValue>) =
         properties.forEach { updatePropertyValue(it) }
 
     fun merge(propertyContext: PropertyContext) {
@@ -86,7 +93,7 @@ data class PropertyContext(
     fun getLocalCopy(): PropertyContext {
         val propertyContext = PropertyContext(propertyService, contractService)
 
-        propertyContext.updatePropertyValues(_properties.values.toList())
+        propertyContext.updatePropertyValues(_properties.values.map { it.toPropertyValue() })
 
         _contracts.values.forEach { propertyContext.saveContract(it) }
 

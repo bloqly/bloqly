@@ -19,6 +19,7 @@ import org.bloqly.machine.util.encode16
 import org.bloqly.machine.vo.block.BlockData
 import org.bloqly.machine.vo.block.BlockDataList
 import org.bloqly.machine.vo.block.BlockRangeRequest
+import org.bloqly.machine.vo.property.PropertyValue
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -51,7 +52,7 @@ class BlockService(
         round: Long,
         transactions: List<Transaction> = listOf(),
         votes: List<Vote> = listOf(),
-        txOutputs: Map<String, String> = mapOf()
+        txOutputs: Map<String, List<PropertyValue> > = mapOf()
     ): Block {
 
         val proposer = accountRepository.findByAccountId(producerId)

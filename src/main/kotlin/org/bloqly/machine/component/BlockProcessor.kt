@@ -8,7 +8,6 @@ import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.FinalizedTransaction
 import org.bloqly.machine.model.InvocationResult
-import org.bloqly.machine.model.Properties
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionOutput
 import org.bloqly.machine.model.Vote
@@ -26,10 +25,10 @@ import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
 import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.decode16
 import org.bloqly.machine.vo.block.BlockData
+import org.bloqly.machine.vo.property.PropertyValue
 import org.bloqly.machine.vo.property.Value
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -131,7 +130,7 @@ class BlockProcessor(
     }
 
     @Transactional(readOnly = true)
-    fun getLastPropertyValue(
+    fun findLastPropertyValue(
         spaceId: String,
         self: String,
         target: String,
@@ -143,14 +142,14 @@ class BlockProcessor(
 
         evaluateFromLIB(lastBlock, propertyContext)
 
-        return propertyContext.getPropertyValue(spaceId, self, target, key)
+        return propertyContext.findPropertyValue(spaceId, self, target, key)
     }
 
     @Transactional(readOnly = true)
-    fun getLastPropertyValue(
+    fun findLastPropertyValue(
         target: String,
         key: String
-    ): Value? = getLastPropertyValue(DEFAULT_SPACE, DEFAULT_SELF, target, key)
+    ): Value? = findLastPropertyValue(DEFAULT_SPACE, DEFAULT_SELF, target, key)
 
     /**
      * Returns blocks range (afterBlock, toBlock]
@@ -185,10 +184,9 @@ class BlockProcessor(
             val txOutput = transactionOutputRepository
                 .getByBlockHashAndTransactionHash(block.hash, tx.hash)
 
-            val output = ObjectUtils.readProperties(txOutput.output)
-                .sortedBy { it.id }
+            val output = txOutput.output
 
-            val checkOutput = invocationResult.output.sortedBy { it.id }
+            val checkOutput = invocationResult.output
 
             require(checkOutput == output) {
                 "Transaction output $output doesn't match the expected value ${invocationResult.output}"
@@ -254,9 +252,7 @@ class BlockProcessor(
 
         val txOutputs = txResults
             .associateBy { it.transaction.hash }
-            .map { entry ->
-                entry.key to ObjectUtils.writeValueAsString(Properties(entry.value.invocationResult.output))
-            }
+            .map { it.key to it.value.invocationResult.output }
             .toMap()
 
         val newBlock = blockService.newBlock(
@@ -312,7 +308,7 @@ class BlockProcessor(
                     val txOutput = transactionOutputRepository
                         .getByBlockHashAndTransactionHash(block.hash, tx.hash)
 
-                    val properties = ObjectUtils.readProperties(txOutput.output)
+                    val properties = txOutput.output.map { it.toProperty() }
 
                     propertyService.updateProperties(properties)
 
@@ -332,7 +328,7 @@ class BlockProcessor(
         }
     }
 
-    private fun saveTxOutputs(txOutputs: Map<String, String>, block: Block): List<TransactionOutput> =
+    private fun saveTxOutputs(txOutputs: Map<String, List<PropertyValue>>, block: Block): List<TransactionOutput> =
         transactionOutputRepository.saveAll(txOutputs.map { entry ->
             TransactionOutput(
                 blockHash = block.hash,

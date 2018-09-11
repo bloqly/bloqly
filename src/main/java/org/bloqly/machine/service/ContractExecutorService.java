@@ -3,8 +3,12 @@ package org.bloqly.machine.service;
 import com.google.common.collect.Lists;
 import org.bloqly.machine.component.PropertyContext;
 import org.bloqly.machine.function.GetPropertyFunction;
-import org.bloqly.machine.model.*;
+import org.bloqly.machine.model.Contract;
+import org.bloqly.machine.model.InvocationContext;
+import org.bloqly.machine.model.InvocationResult;
+import org.bloqly.machine.model.PropertyResult;
 import org.bloqly.machine.util.CryptoUtils;
+import org.bloqly.machine.vo.property.PropertyValue;
 import org.bloqly.machine.vo.property.Value;
 import org.bouncycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +49,7 @@ public class ContractExecutorService {
 
         return (target, key, defaultValue) -> {
 
-            var propertyValue = propertyContext.getPropertyValue(
+            var propertyValue = propertyContext.findPropertyValue(
                     invocationContext.getSpace(),
                     invocationContext.getSelf(),
                     target,
@@ -109,18 +113,16 @@ public class ContractExecutorService {
         return new PropertyResult(target, command.getKey(), command.getValue());
     }
 
-    private Property prepareResults(Map<String, Object> item, InvocationContext invocationContext) {
+    private PropertyValue prepareResults(Map<String, Object> item, InvocationContext invocationContext) {
 
         var entry = getEntry(item);
 
         // TODO: check isolation
-        return new Property(
-                new PropertyId(
-                        requireNonNull(invocationContext.getSpace()),
-                        requireNonNull(invocationContext.getSelf()),
-                        requireNonNull(entry.getTarget()),
-                        requireNonNull(entry.getKey())
-                ),
+        return new PropertyValue(
+                requireNonNull(invocationContext.getSpace()),
+                requireNonNull(invocationContext.getSelf()),
+                requireNonNull(entry.getKey()),
+                requireNonNull(entry.getTarget()),
                 Value.Companion.of(entry.getValue())
         );
     }
@@ -132,7 +134,7 @@ public class ContractExecutorService {
     }
 
     @SuppressWarnings("unchecked")
-    private List<Property> invokeFunction(PropertyContext propertyContext, InvocationContext invocationContext, List<Value> params) {
+    private List<PropertyValue> invokeFunction(PropertyContext propertyContext, InvocationContext invocationContext, List<Value> params) {
 
         try {
 

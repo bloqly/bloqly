@@ -1,6 +1,7 @@
 package org.bloqly.machine.model
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType
+import org.bloqly.machine.vo.property.PropertyValue
 import org.bloqly.machine.vo.property.Value
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.TypeDef
@@ -21,4 +22,13 @@ data class Property(
     val value: Value
 ) {
     fun toValue(): Any = value.toValue()
+
+    fun toPropertyValue(): PropertyValue =
+        PropertyValue(
+            space = id.spaceId,
+            self = id.self,
+            target = id.target,
+            key = id.key,
+            value = value
+        )
 }

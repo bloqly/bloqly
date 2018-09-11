@@ -121,7 +121,7 @@ open class BaseTest {
 
     protected fun assertPropertyValueCandidate(value: String) {
 
-        val lastValue = blockProcessor.getLastPropertyValue(
+        val lastValue = blockProcessor.findLastPropertyValue(
             DEFAULT_SPACE, DEFAULT_SELF, propertyId.target, propertyId.key
         )!!
 
