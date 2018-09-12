@@ -1,8 +1,8 @@
 server:
-  port: 9900
+  port: 9901
 
 admin:
-  port: 9910
+  port: 9911
   username: admin
   password: admin
 

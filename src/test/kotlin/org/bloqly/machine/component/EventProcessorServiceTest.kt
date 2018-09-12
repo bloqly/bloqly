@@ -12,7 +12,7 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
+import org.bloqly.machine.test.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals

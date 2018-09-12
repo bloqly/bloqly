@@ -19,7 +19,7 @@ import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.util.TestUtils.TEST_BLOCK_BASE_DIR
+import org.bloqly.machine.test.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.property.Value
 import org.bloqly.machine.vo.vote.VoteVO

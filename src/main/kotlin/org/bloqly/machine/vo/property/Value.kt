@@ -5,8 +5,6 @@ import io.swagger.annotations.ApiModelProperty
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.ValueType
-import org.bloqly.machine.util.decode16
-import org.bloqly.machine.util.encode16
 import java.io.Serializable
 import java.math.BigInteger
 
@@ -25,7 +23,7 @@ data class Value(
             ValueType.BIGINT -> BLong(value)
             ValueType.INT -> value.toLong()
             ValueType.BOOLEAN -> value.toBoolean()
-            ValueType.STRING -> String(value.decode16())
+            ValueType.STRING -> value
         }
     }
 
@@ -39,7 +37,7 @@ data class Value(
 
         fun of(input: Any): Value =
             when (input) {
-                is String -> Value(ValueType.STRING, input.toByteArray().encode16())
+                is String -> Value(ValueType.STRING, input)
                 is Long -> Value(ValueType.INT, input.toString())
                 is Int -> Value(ValueType.INT, input.toString())
                 is BLong -> Value(ValueType.BIGINT, input.toString())

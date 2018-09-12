@@ -7,7 +7,7 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils.verifyTransaction
-import org.bloqly.machine.util.TestUtils.FAKE_DATA
+import org.bloqly.machine.test.TestUtils.FAKE_DATA
 import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

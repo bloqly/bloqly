@@ -7,7 +7,7 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.CryptoUtils.verifyVote
-import org.bloqly.machine.util.TestUtils.FAKE_DATA
+import org.bloqly.machine.test.TestUtils.FAKE_DATA
 import org.bloqly.machine.util.decode16
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals

@@ -62,7 +62,7 @@ curl -X POST -H "$JSON" \
 # init blockchain
 curl -X POST -H "$JSON" \
   -u main_admin:main_password \
-  -d "{\"space\":\"main\", \"path\": \"$(pwd)/src/test/resources/blocks/currency-js\", \"passphrase\":\"root password\"}" \
+  -d "{\"space\":\"main\", \"path\": \"$(pwd)/src/test/resources/blocks/currency\", \"passphrase\":\"root password\"}" \
   http://127.0.0.1:9911/api/v1/admin/blockchain
 
 # export genesis block
