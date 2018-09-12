@@ -20,3 +20,14 @@ function set(context, orig, dest, key, value) {
 
     return [ property(dest, key, value) ];
 }
+
+function setSigned(context, orig, dest, key, value, signature, publicKey) {
+
+    let message = Crypto.sha256(value)
+
+    if (!Crypto.verify(message, signature, publicKey)) {
+        throw "Invalid signature"
+    }
+
+    return [ property(dest, key + ":" + publicKey, value) ];
+}

@@ -24,20 +24,8 @@ Bloqly is a written from the scratch smart contracts engine with JavaScript supp
 First, small contract code sample:
 
 ```JavaScript
-
-/**
- * Move balance contract
- *
- * Simplified implementation of a cryptocurrency
- *
- * @param {Object}      ctx        Execution context
- * @param {BigInteger}  amount     Amount to move
- *
- * @return {Object}  Array of properties to set after function execution
- */
-
 const fractions = new Long('10').pow(8);
-const maxSupply = new Long('1_000_000_000').add(fractions);
+const maxSupply = new Long('1_000_000_000').multiply(fractions);
 
 function main(context, orig, dest, amount) {
 
@@ -51,6 +39,22 @@ function main(context, orig, dest, amount) {
         { target: orig, balance: newOrigBalance },
         { target: dest, balance: newDestBalance },
     ];
+}
+
+function set(context, orig, dest, key, value) {
+
+    return [ property(dest, key, value) ];
+}
+
+function setSigned(context, orig, dest, key, value, signature, publicKey) {
+
+    let message = Crypto.sha256(value)
+
+    if (!Crypto.verify(message, signature, publicKey)) {
+        throw "Invalid signature"
+    }
+
+    return [ property(dest, key + ":" + publicKey, value) ];
 }
 ```
 
