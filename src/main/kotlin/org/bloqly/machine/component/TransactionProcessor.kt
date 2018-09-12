@@ -16,6 +16,7 @@ import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
 import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
+import org.bloqly.machine.util.decode16
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -41,12 +42,14 @@ class TransactionProcessor(
             callee = tx.destination
         )
 
+        val contractBodyDecoded = String(tx.value.first().value.decode16())
+
         propertyContext.saveContract(
             Contract(
                 id = tx.self,
                 space = tx.spaceId,
                 owner = tx.origin,
-                body = tx.value.first().value
+                body = contractBodyDecoded
             )
         )
 

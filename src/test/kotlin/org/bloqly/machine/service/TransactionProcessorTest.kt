@@ -213,13 +213,15 @@ class TransactionProcessorTest : BaseTest() {
 
         val contractBody = FileUtils.getResourceAsString("/scripts/test.js")
 
+        val contractBodyEncoded = contractBody.toByteArray().encode16()
+
         val createContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,
             originId = originId,
             passphrase = passphrase(originId),
             destinationId = callee,
             self = self,
-            value = Value.ofs(contractBody),
+            value = Value.ofs(contractBodyEncoded),
             transactionType = TransactionType.CREATE,
             referencedBlockHash = lastBlock.hash
         )

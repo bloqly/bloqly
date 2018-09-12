@@ -92,7 +92,8 @@ class GenesisService(
         val transaction = genesis.transactions.first()
 
         val contractBodyValue = transaction.toModel().value.first()
-        val contractBody = contractBodyValue.toValue() as String
+        val contractBodyEncoded = contractBodyValue.toValue() as String
+        val contractBody = String(contractBodyEncoded.decode16())
 
         val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
 

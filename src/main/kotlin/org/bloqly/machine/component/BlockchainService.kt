@@ -72,7 +72,7 @@ class BlockchainService(
             destinationId = Application.DEFAULT_SELF,
             self = Application.DEFAULT_SELF,
             key = null,
-            value = Value.ofs(contractBody),
+            value = Value.ofs(contractBody.toByteArray().encode16()),
             transactionType = TransactionType.CREATE,
             referencedBlockHash = "",
             timestamp = timestamp

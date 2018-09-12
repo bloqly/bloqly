@@ -72,7 +72,7 @@ public class ContractExecutorService {
 
         invocationContext.setOwner(contract.getOwner());
 
-        var engine = getEngine(new String(Hex.decode(contract.getBody())));
+        var engine = getEngine(contract.getBody());
 
         engine.put("getProperty", getPropertyFunction(propertyContext, invocationContext));
 
