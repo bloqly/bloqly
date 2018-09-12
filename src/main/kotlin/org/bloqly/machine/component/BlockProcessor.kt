@@ -173,27 +173,29 @@ class BlockProcessor(
     @Transactional
     fun evaluateBlock(block: Block, propertyContext: PropertyContext) {
 
-        block.transactions.forEach { tx ->
+        block.transactions
+            .sortedWith(compareBy(Transaction::timestamp, Transaction::hash))
+            .forEach { tx ->
 
-            val invocationResult = transactionProcessor.processTransaction(tx, propertyContext)
+                val invocationResult = transactionProcessor.processTransaction(tx, propertyContext)
 
-            require(invocationResult.isOK()) {
-                "Could not process transaction $tx evaluating block ${block.header()}"
+                require(invocationResult.isOK()) {
+                    "Could not process transaction $tx evaluating block ${block.header()}"
+                }
+
+                val txOutput = transactionOutputRepository
+                    .getByBlockHashAndTransactionHash(block.hash, tx.hash)
+
+                val output = txOutput.output
+
+                val checkOutput = invocationResult.output
+
+                require(checkOutput == output) {
+                    "Transaction output $output doesn't match the expected value ${invocationResult.output}"
+                }
+
+                propertyContext.updatePropertyValues(output)
             }
-
-            val txOutput = transactionOutputRepository
-                .getByBlockHashAndTransactionHash(block.hash, tx.hash)
-
-            val output = txOutput.output
-
-            val checkOutput = invocationResult.output
-
-            require(checkOutput == output) {
-                "Transaction output $output doesn't match the expected value ${invocationResult.output}"
-            }
-
-            propertyContext.updatePropertyValues(output)
-        }
     }
 
     private fun requireValid(block: Block) {
@@ -352,22 +354,24 @@ class BlockProcessor(
         val txResults = mutableListOf<TransactionResult>()
 
         run txs@{
-            transactions.forEach { tx ->
-                val timeSpent = TimeUtils.getCurrentTime() - timeStart
-                if (timeSpent - timeStart > Application.TX_TIMEOUT) {
-                    log.warn("Finishing processing transactions as time spent is already over the limit: $timeSpent")
-                    return@txs
-                } else {
-                    val localPropertyContext = propertyContext.getLocalCopy()
+            transactions
+                .sortedWith(compareBy(Transaction::timestamp, Transaction::hash))
+                .forEach { tx ->
+                    val timeSpent = TimeUtils.getCurrentTime() - timeStart
+                    if (timeSpent - timeStart > Application.TX_TIMEOUT) {
+                        log.warn("Finishing processing transactions as time spent is already over the limit: $timeSpent")
+                        return@txs
+                    } else {
+                        val localPropertyContext = propertyContext.getLocalCopy()
 
-                    val result = transactionProcessor.processTransaction(tx, localPropertyContext)
+                        val result = transactionProcessor.processTransaction(tx, localPropertyContext)
 
-                    if (result.isOK()) {
-                        propertyContext.merge(localPropertyContext)
-                        txResults.add(TransactionResult(tx, result))
+                        if (result.isOK()) {
+                            propertyContext.merge(localPropertyContext)
+                            txResults.add(TransactionResult(tx, result))
+                        }
                     }
                 }
-            }
         }
 
         return txResults.toMutableList()
