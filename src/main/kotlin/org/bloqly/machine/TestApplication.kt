@@ -1,19 +1,23 @@
-package org.bloqly.machine.test
+package org.bloqly.machine
 
-import org.bloqly.machine.Application
 import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.component.PassphraseService
-import org.bloqly.machine.util.ApplicationUtils
+import org.bloqly.machine.test.TestService
+import org.bloqly.machine.test.TestUtils
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.AdviceMode
+import org.springframework.context.annotation.Profile
 import org.springframework.context.event.EventListener
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.scheduling.annotation.EnableScheduling
 
+// TODO remove this class from production classpath
+@Profile("test-node")
 @EnableScheduling
 @EnableCaching(mode = AdviceMode.ASPECTJ)
 @EnableJpaRepositories("org.bloqly.machine.repository")
@@ -50,7 +54,11 @@ class TestApplication(
 
         @JvmStatic
         fun main(args: Array<String>) {
-            ApplicationUtils.startServer()
+            SpringApplicationBuilder()
+                .profiles("server", "scheduler")
+                .sources(TestApplication::class.java)
+                .build()
+                .run()
         }
     }
 }

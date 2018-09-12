@@ -17,20 +17,22 @@ import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.service.AccountService
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.TransactionService
+import org.bloqly.machine.test.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.test.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.vo.property.Value
 import org.bloqly.machine.vo.vote.VoteVO
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
 import javax.annotation.PostConstruct
 import javax.persistence.EntityManager
 
+@Profile(value = ["test", "test-node"])
 @Component
 @Transactional
 class TestService(

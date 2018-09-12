@@ -85,12 +85,12 @@ jar {
 task testServer(dependsOn: 'classes', type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
 
-    main = 'org.bloqly.machine.test.TestApplication'
+    main = 'org.bloqly.machine.TestApplication'
 
     systemProperty 'BLOQLY_HOME', './demo/home/test'
-    systemProperty 'LOG_PATH', './demo/home/test/logs'
+    systemProperty 'LOG_PATH', './logs'
 
-    jvmArgs '-Dspring.config.location=./demo/home/test/config/bloqly-config.yaml,classpath:application.yaml'
+    jvmArgs '-Dspring.config.location=./demo/home/test/config/bloqly-config.yaml,classpath:application.yaml', '-Dspring.profiles.active=test-node'
 }
 
 defaultTasks 'testServer'

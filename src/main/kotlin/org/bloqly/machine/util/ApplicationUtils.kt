@@ -8,7 +8,7 @@ object ApplicationUtils {
 
     fun startServer() {
         val appBuilder = SpringApplicationBuilder()
-            .profiles("server", "scheduler")
+            .profiles("server", "scheduler", "production")
             .bannerMode(Banner.Mode.OFF)
             .sources(Application::class.java)
 
