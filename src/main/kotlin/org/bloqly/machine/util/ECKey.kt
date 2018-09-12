@@ -1,13 +1,7 @@
 package org.bloqly.machine.util
 
 import org.bouncycastle.asn1.sec.SECNamedCurves
-import org.bouncycastle.crypto.generators.ECKeyPairGenerator
 import org.bouncycastle.crypto.params.ECDomainParameters
-import org.bouncycastle.crypto.params.ECKeyGenerationParameters
-import org.bouncycastle.crypto.params.ECPrivateKeyParameters
-import org.bouncycastle.crypto.params.ECPublicKeyParameters
-import org.bouncycastle.math.ec.ECPoint
-import org.bouncycastle.util.BigIntegers
 import java.security.SecureRandom
 
 class ECKey(
@@ -19,6 +13,7 @@ class ECKey(
     private val curve = SECNamedCurves.getByName("secp256k1")
     private val domain = ECDomainParameters(curve.curve, curve.g, curve.n, curve.h)
 
+    /*
     fun newKey(): ECKey {
         val generator = ECKeyPairGenerator()
         val keygenParams = ECKeyGenerationParameters(domain, secureRandom)
@@ -37,4 +32,5 @@ class ECKey(
             privateKey = privateKey
         )
     }
+    */
 }
