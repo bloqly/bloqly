@@ -1,5 +1,5 @@
 database:
-  name: bloqly_main
+  name: bloqly_test
   username: postgres
   password:
 

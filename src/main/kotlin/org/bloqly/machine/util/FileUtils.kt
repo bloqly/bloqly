@@ -5,7 +5,8 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 object FileUtils {
 
-    fun getResourceAsString(path: String): String {
-        return IOUtils.toString(FileUtils::class.java.getResourceAsStream(path), UTF_8.name())
-    }
+    fun getResourceAsString(path: String): String? =
+        FileUtils::class.java.getResourceAsStream(path)?.let {
+            IOUtils.toString(it, UTF_8.name())
+        }
 }

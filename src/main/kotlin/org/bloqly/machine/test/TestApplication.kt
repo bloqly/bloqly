@@ -1,9 +1,8 @@
-package org.bloqly.machine
+package org.bloqly.machine.test
 
+import org.bloqly.machine.Application
 import org.bloqly.machine.component.BlockchainService
 import org.bloqly.machine.component.PassphraseService
-import org.bloqly.machine.test.TestService
-import org.bloqly.machine.test.TestUtils
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration

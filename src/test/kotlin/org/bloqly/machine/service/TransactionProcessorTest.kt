@@ -211,7 +211,7 @@ class TransactionProcessorTest : BaseTest() {
 
         val lastBlock = blockService.getLastBlockBySpace(DEFAULT_SPACE)
 
-        val contractBody = FileUtils.getResourceAsString("/scripts/test.js")
+        val contractBody = FileUtils.getResourceAsString("/scripts/test.js")!!
 
         val contractBodyEncoded = contractBody.toByteArray().encode16()
 

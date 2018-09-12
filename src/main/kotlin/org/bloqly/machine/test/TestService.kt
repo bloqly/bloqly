@@ -28,6 +28,7 @@ import org.junit.Assert.assertTrue
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.io.File
 import java.math.BigInteger
 import javax.annotation.PostConstruct
 import javax.persistence.EntityManager
@@ -54,9 +55,7 @@ class TestService(
     @PostConstruct
     @Suppress("unused")
     fun init() {
-        val accountsString = FileUtils.getResourceAsString("/accounts.json")
-
-        accounts = ObjectUtils.readValue(accountsString, Accounts::class.java).accounts
+        accounts = getAccounts().accounts
     }
 
     fun cleanup(deleteAccounts: Boolean = true) {
@@ -69,13 +68,14 @@ class TestService(
 
     fun getValidator(n: Int): Account = accounts[n + 1]
 
+    private fun getAccounts(): Accounts {
+        val accountsJson = FileUtils.getResourceAsString("/accounts.json")
+            ?: File("./src/test/resources/accounts.json").readText()
+        return ObjectUtils.readValue(accountsJson, Accounts::class.java)
+    }
+
     fun importAccounts() {
-
-        val accountsString = FileUtils.getResourceAsString("/accounts.json")
-
-        val accountsObject = ObjectUtils.readValue(accountsString, Accounts::class.java)
-
-        accountsObject.accounts.forEach { account ->
+        accounts.forEach { account ->
             val passphrase = passphraseService.getPassphrase(account.accountId)
             accountService.importAccount(account.privateKeyEncoded, passphrase)
         }

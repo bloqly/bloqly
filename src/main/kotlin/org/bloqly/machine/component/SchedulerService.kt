@@ -24,7 +24,7 @@ class SchedulerService(
         nodeQueryService.queryForNodes()
     }
 
-    @Scheduled(initialDelay = 500, fixedDelay = 1000)
+    @Scheduled(initialDelay = 500, fixedDelay = 2000)
     fun sendTransactions() {
 
         val transactions = blockProcessor.getPendingTransactions()
@@ -37,7 +37,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(initialDelay = 1000, fixedDelay = 1000)
+    @Scheduled(initialDelay = 1000, fixedDelay = 2000)
     fun sendVotes() {
         eventProcessorService.onGetVotes().takeIf { it.isNotEmpty() }?.let { votes ->
             log.info("Votes to send: ${votes.size}.")
@@ -46,7 +46,7 @@ class SchedulerService(
         }
     }
 
-    @Scheduled(initialDelay = 1500, fixedDelay = 1000)
+    @Scheduled(initialDelay = 1500, fixedDelay = 2000)
     fun sendProposals() {
 
         val proposals = eventProcessorService.onProduceBlock()

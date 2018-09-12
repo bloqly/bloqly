@@ -85,7 +85,7 @@ jar {
 task testServer(dependsOn: 'classes', type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
 
-    main = 'org.bloqly.machine.TestApplication'
+    main = 'org.bloqly.machine.test.TestApplication'
 
     systemProperty 'BLOQLY_HOME', './demo/home/test'
     systemProperty 'LOG_PATH', './logs'
