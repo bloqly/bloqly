@@ -64,4 +64,11 @@ data class Account(
             accountId = accountId,
             publicKey = publicKey
         )
+
+    fun toFullVO(): AccountVO =
+        AccountVO(
+            accountId = accountId,
+            publicKey = publicKey,
+            privateKeyEncoded = privateKeyEncoded.encode16()
+        )
 }

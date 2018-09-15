@@ -88,4 +88,13 @@ class AccountAdminController(
 
         return ResponseEntity(CREATED)
     }
+
+    @ApiOperation(
+        value = "Creates new account",
+        nickname = "createAccount"
+    )
+    @PostMapping("/new")
+    fun createAccount(@RequestParam("passphrase") passphrase: String): AccountVO {
+        return accountService.createAccount(passphrase).toFullVO()
+    }
 }

@@ -23,3 +23,10 @@ createdb bloqly
 psql -d bloqly -c "alter user bloqly_user with password 'password';"
 
 LOG_PATH=./logs BLOQLY_CONFIG=/home/slava/bloqly/bloqly.yaml ./dist/bq.sh
+
+
+curl -X POST \
+  http://127.0.0.1:9911/api/v1/admin/accounts/new \
+  -u admin:admin \
+  -H 'content-type: multipart/form-data' \
+  -F passphrase=test
