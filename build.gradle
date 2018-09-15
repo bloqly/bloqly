@@ -70,7 +70,7 @@ compileTestKotlin {
 
 bootJar {
     baseName = 'bloqly'
-    version = '0.1.4'
+    version = '0.1.5'
     mainClassName = 'org.bloqly.machine.Application'
 }
 
