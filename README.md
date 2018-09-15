@@ -16,6 +16,7 @@ This is a work in progress/prototype, API and implementation details can change.
 
 [Telegram](https://t.me/joinchat/B45otRIISgdmc6u2AwC9Cg)
 [Twitter](https://twitter.com/slava_snezhkov)
+[Slack](https://join.slack.com/t/bloqly/shared_invite/enQtNDM3MjkwNDQ5NzUxLTQ5YTIxZDAxNDRmNjg4NmYxNWU0OWQ4NjA3YmRkZGE5MzdjODc3Yjk2Y2M5OWY0NTliNzk1Nzc3ZDU4YjhmMTc)
 
 ## What's this?
 
