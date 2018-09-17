@@ -5,7 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.component.PassphraseService
 import org.bloqly.machine.crypto.CryptoUtils
-import org.bloqly.machine.helper.CryptoHelper
+import org.bloqly.machine.crypto.toAddress
 import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
@@ -67,7 +67,7 @@ class AccountService(
         val publicKey = CryptoUtils.getPublicFor(privateKey)
 
         val account = Account(
-            accountId = CryptoHelper.publicKeyToAddress(publicKey),
+            accountId = publicKey.toAddress(),
             publicKey = publicKey.toHex()
         )
 
@@ -116,7 +116,7 @@ class AccountService(
     @Transactional
     fun importAccountPublicKey(publicKey: String) {
 
-        val accountId = CryptoHelper.publicKeyToAddress(publicKey.fromHex())
+        val accountId = publicKey.toAddress()
 
         if (!accountRepository.existsByAccountId(accountId)) {
             accountRepository.save(
@@ -132,7 +132,7 @@ class AccountService(
     fun importAccount(privateKeyBytes: ByteArray?, passphrase: String) {
 
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
-        val accountId = CryptoHelper.publicKeyToAddress(publicKeyBytes)
+        val accountId = publicKeyBytes.toAddress()
 
         require(!accountRepository.existsByAccountId(accountId)) {
             "Account $accountId already exists"
@@ -151,7 +151,7 @@ class AccountService(
     fun ensureExistsAndGetByPublicKey(publicKey: String): Account {
         val publicKeyBytes = publicKey.fromHex()
 
-        val accountId = CryptoHelper.publicKeyToAddress(publicKeyBytes)
+        val accountId = publicKeyBytes.toAddress()
 
         return accountRepository.findByAccountId(accountId)
             ?: accountRepository.save(

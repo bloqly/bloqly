@@ -1,7 +1,6 @@
 package org.bloqly.machine.helper
 
 import com.google.common.primitives.Bytes
-import org.apache.commons.codec.binary.Hex
 import org.bloqly.machine.crypto.CryptoUtils
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Transaction
@@ -18,14 +17,6 @@ import java.io.ByteArrayOutputStream
 object CryptoHelper {
 
     private val log: Logger = LoggerFactory.getLogger(CryptoHelper::class.simpleName)
-
-    fun publicKeyToAddress(input: String): String =
-        publicKeyToAddress(Hex.decodeHex(input))
-
-    fun publicKeyToAddress(input: ByteArray): String {
-        val hash = CryptoUtils.hash(input)
-        return hash.toHex()
-    }
 
     fun hash(tx: Transaction): ByteArray {
         val valueString = ObjectUtils.writeValueAsString(tx.value)

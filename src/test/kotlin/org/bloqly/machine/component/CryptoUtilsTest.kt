@@ -3,6 +3,7 @@ package org.bloqly.machine.component
 import org.bitcoinj.core.ECKey
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.crypto.toAddress
 import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.util.toHex
@@ -33,7 +34,7 @@ class CryptoUtilsTest {
 
             val privateKey = key.privateKeyAsHex
             val publicKey = key.pubKey
-            val id = CryptoHelper.publicKeyToAddress(publicKey)
+            val id = publicKey.toAddress()
 
             println(
                 """

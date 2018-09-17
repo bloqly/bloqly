@@ -4,6 +4,7 @@ import com.google.common.primitives.Bytes
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
 import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.crypto.toAddress
 import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
@@ -211,7 +212,7 @@ class BlockService(
             }
 
             currentBlock.votes.forEach { vote ->
-                validatorVotesCount.compute(CryptoHelper.publicKeyToAddress(vote.publicKey)) { _, count ->
+                validatorVotesCount.compute(vote.publicKey.toAddress()) { _, count ->
                     calculateVotesCount(count)
                 }
             }

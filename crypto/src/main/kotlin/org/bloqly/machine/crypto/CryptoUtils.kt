@@ -18,6 +18,10 @@ fun ByteArray?.toHex(): String = String(Hex.encode(this!!)).toUpperCase()
 
 fun String.toHexBigInteger() = BigInteger(1, Hex.decode(this))
 
+fun ByteArray.toAddress(): String = CryptoUtils.hash(this).toHex()
+
+fun String.toAddress(): String = CryptoUtils.hash(this).toHex()
+
 object CryptoUtils {
 
     private const val SHA_256 = "SHA-256"
@@ -88,7 +92,7 @@ object CryptoUtils {
     }
 
     fun hash(input: String): ByteArray {
-        return hash(input.toByteArray())
+        return hash(input.fromHex())
     }
 
     fun sign(privateKey: ByteArray?, input: ByteArray): ByteArray =

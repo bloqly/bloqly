@@ -1,7 +1,7 @@
 package org.bloqly.machine.vo.transaction
 
 import org.bloqly.machine.annotation.ValueObject
-import org.bloqly.machine.helper.CryptoHelper
+import org.bloqly.machine.crypto.toAddress
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.vo.property.Value
@@ -22,7 +22,7 @@ data class TransactionVO(
 ) {
 
     fun toModel(): Transaction {
-        val origin = CryptoHelper.publicKeyToAddress(publicKey)
+        val origin = publicKey.toAddress()
 
         val transactionType = TransactionType.valueOf(transactionType.name)
 
