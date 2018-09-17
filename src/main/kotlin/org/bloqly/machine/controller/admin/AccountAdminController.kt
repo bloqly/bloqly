@@ -93,7 +93,7 @@ class AccountAdminController(
         value = "Creates new account",
         nickname = "createAccount"
     )
-    @PostMapping("/new")
+    @PostMapping
     fun createAccount(@RequestParam("passphrase") passphrase: String): AccountVO {
         return accountService.createAccount(passphrase).toFullVO()
     }

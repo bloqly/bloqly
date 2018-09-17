@@ -4,11 +4,14 @@ import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import org.bloqly.machine.component.BlockProcessor
 import org.bloqly.machine.component.EventReceiverService
+import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.vo.node.NodeList
 import org.bloqly.machine.vo.transaction.TransactionList
 import org.bloqly.machine.vo.transaction.TransactionRequest
 import org.bloqly.machine.vo.transaction.TransactionVO
 import org.springframework.context.annotation.Profile
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -26,7 +29,8 @@ import javax.servlet.http.HttpServletRequest
 @RequestMapping("/api/v1/data/transactions")
 class TransactionController(
     private val eventReceiverService: EventReceiverService,
-    private val blockProcessor: BlockProcessor
+    private val blockProcessor: BlockProcessor,
+    private val blockService: BlockService
 ) {
 
     @ApiOperation(
@@ -35,8 +39,14 @@ class TransactionController(
         response = NodeList::class
     )
     @PostMapping()
-    fun onCreateTransaction(@RequestBody transactionRequest: TransactionRequest): TransactionVO {
-        return eventReceiverService.receiveTransactionRequest(transactionRequest)
+    fun onCreateTransaction(@RequestBody transactionRequest: TransactionRequest): ResponseEntity<TransactionVO> {
+
+        return if (blockService.existsBySpaceId(transactionRequest.space)) {
+            val tx = eventReceiverService.receiveTransactionRequest(transactionRequest)
+            ResponseEntity(tx, HttpStatus.OK)
+        } else {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        }
     }
 
     @ApiOperation(
