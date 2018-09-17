@@ -29,11 +29,23 @@ data class Value(
 
     companion object {
 
-        fun of(vararg args: Any): List<Value> = args.map { Value.of(it) }
+        fun of(vararg args: Any): List<Value> = args.map {
+            of(
+                it
+            )
+        }
 
-        fun ofs(input: Any): List<Value> = listOf(of(input))
+        fun ofs(input: Any): List<Value> = listOf(
+            of(
+                input
+            )
+        )
 
-        fun ofArray(args: Array<Any>): List<Value> = args.map { Value.of(it) }
+        fun ofArray(args: Array<Any>): List<Value> = args.map {
+            of(
+                it
+            )
+        }
 
         fun of(input: Any): Value =
             when (input) {

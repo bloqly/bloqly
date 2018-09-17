@@ -4,6 +4,8 @@ import org.bitcoinj.core.ECKey
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.POWER_KEY
 import org.bloqly.machine.component.PassphraseService
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.PropertyId
@@ -11,11 +13,8 @@ import org.bloqly.machine.model.Space
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
-import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.EncodingUtils.publicKeyToAddress
-import org.bloqly.machine.util.decode16
-import org.bloqly.machine.util.encode16
+import org.bloqly.machine.util.fromHex
+import org.bloqly.machine.util.toHex
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigInteger
@@ -68,8 +67,8 @@ class AccountService(
         val publicKey = CryptoUtils.getPublicFor(privateKey)
 
         val account = Account(
-            accountId = publicKeyToAddress(publicKey),
-            publicKey = publicKey.encode16()
+            accountId = CryptoHelper.publicKeyToAddress(publicKey),
+            publicKey = publicKey.toHex()
         )
 
         account.privateKeyEncoded = CryptoUtils.encrypt(privateKey, passphrase)
@@ -117,7 +116,7 @@ class AccountService(
     @Transactional
     fun importAccountPublicKey(publicKey: String) {
 
-        val accountId = EncodingUtils.publicKeyToAddress(publicKey.decode16())
+        val accountId = CryptoHelper.publicKeyToAddress(publicKey.fromHex())
 
         if (!accountRepository.existsByAccountId(accountId)) {
             accountRepository.save(
@@ -133,7 +132,7 @@ class AccountService(
     fun importAccount(privateKeyBytes: ByteArray?, passphrase: String) {
 
         val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
-        val accountId = EncodingUtils.publicKeyToAddress(publicKeyBytes)
+        val accountId = CryptoHelper.publicKeyToAddress(publicKeyBytes)
 
         require(!accountRepository.existsByAccountId(accountId)) {
             "Account $accountId already exists"
@@ -142,7 +141,7 @@ class AccountService(
         accountRepository.save(
             Account(
                 accountId = accountId,
-                publicKey = publicKeyBytes.encode16(),
+                publicKey = publicKeyBytes.toHex(),
                 privateKeyEncoded = CryptoUtils.encrypt(privateKeyBytes, passphrase)
             )
         )
@@ -150,15 +149,15 @@ class AccountService(
 
     @Transactional
     fun ensureExistsAndGetByPublicKey(publicKey: String): Account {
-        val publicKeyBytes = publicKey.decode16()
+        val publicKeyBytes = publicKey.fromHex()
 
-        val accountId = EncodingUtils.publicKeyToAddress(publicKeyBytes)
+        val accountId = CryptoHelper.publicKeyToAddress(publicKeyBytes)
 
         return accountRepository.findByAccountId(accountId)
             ?: accountRepository.save(
                 Account(
                     accountId = accountId,
-                    publicKey = publicKeyBytes.encode16()
+                    publicKey = publicKeyBytes.toHex()
                 )
             )
     }

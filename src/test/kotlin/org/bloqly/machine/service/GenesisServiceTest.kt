@@ -3,7 +3,7 @@ package org.bloqly.machine.service
 import org.bloqly.machine.Application
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.fromHex
 import org.bloqly.machine.vo.genesis.Genesis
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -20,7 +20,7 @@ class GenesisServiceTest : BaseTest() {
         val genesisString = genesisService.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = ObjectUtils.readValue(
-            genesisString.decode16(),
+            genesisString.fromHex(),
             Genesis::class.java
         )
 
@@ -32,7 +32,7 @@ class GenesisServiceTest : BaseTest() {
         val genesisString = genesisService.exportFirst(Application.DEFAULT_SPACE)
 
         val genesis = ObjectUtils.readValue(
-            genesisString.decode16(),
+            genesisString.fromHex(),
             Genesis::class.java
         )
 

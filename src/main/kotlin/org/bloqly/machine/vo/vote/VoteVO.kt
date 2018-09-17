@@ -1,9 +1,9 @@
 package org.bloqly.machine.vo.vote
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.apache.commons.codec.binary.Hex
 import org.bloqly.machine.annotation.ValueObject
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.util.decode16
 
 @ValueObject
 data class VoteVO(
@@ -25,7 +25,7 @@ data class VoteVO(
             height = height,
             spaceId = spaceId,
             timestamp = timestamp,
-            signature = signature.decode16()
+            signature = Hex.decodeHex(signature)
         )
     }
 }

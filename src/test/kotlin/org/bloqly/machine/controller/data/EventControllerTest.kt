@@ -65,7 +65,7 @@ class EventControllerTest : BaseControllerTest() {
 
         val entity = HttpEntity(proposalsPayload, headers)
 
-        val url = APIUtils.getEventPath(node, "blocks")
+        val url = APIUtils.getEventPath(node.id.toString(), "blocks")
 
         restTemplate.postForObject(url, entity, String::class.java)
     }
@@ -83,7 +83,7 @@ class EventControllerTest : BaseControllerTest() {
 
         TimeUtils.setTestTime(Application.ROUND + 1L)
 
-        val url = APIUtils.getEventPath(node, "blocks")
+        val url = APIUtils.getEventPath(node.id.toString(), "blocks")
         restTemplate.postForObject(url, entity, String::class.java)
 
         assertEquals(1, blockRepository.count())
@@ -110,7 +110,7 @@ class EventControllerTest : BaseControllerTest() {
 
         Assert.assertFalse(voteRepository.existsById(vote.id!!))
 
-        val url = APIUtils.getEventPath(node, "votes")
+        val url = APIUtils.getEventPath(node.id.toString(), "votes")
 
         restTemplate.postForObject(url, entity, String::class.java)
 
@@ -133,7 +133,7 @@ class EventControllerTest : BaseControllerTest() {
 
         val entity = HttpEntity(transactionPayload, headers)
 
-        val url = APIUtils.getEventPath(node, "transactions")
+        val url = APIUtils.getEventPath(node.id.toString(), "transactions")
 
         restTemplate.postForObject(url, entity, String::class.java)
 

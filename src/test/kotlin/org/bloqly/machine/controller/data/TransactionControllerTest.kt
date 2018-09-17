@@ -20,7 +20,7 @@ class TransactionControllerTest : BaseControllerTest() {
 
     @Test
     fun testUserCreateTransaction() {
-        val url = APIUtils.getDataPath(node, "transactions")
+        val url = APIUtils.getDataPath(node.id.toString(), "transactions")
 
         val transactionRequestPayload = """
             {

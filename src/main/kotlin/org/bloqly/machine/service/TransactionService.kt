@@ -1,5 +1,7 @@
 package org.bloqly.machine.service
 
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
@@ -7,9 +9,8 @@ import org.bloqly.machine.model.ValueType
 import org.bloqly.machine.repository.AccountRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
 import org.bloqly.machine.repository.TransactionRepository
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.encode16
+import org.bloqly.machine.util.toHex
 import org.bloqly.machine.vo.property.Value
 import org.bloqly.machine.vo.transaction.TransactionOutputVO
 import org.bloqly.machine.vo.transaction.TransactionRequest
@@ -90,15 +91,15 @@ class TransactionService(
 
         val signature = CryptoUtils.sign(
             CryptoUtils.decrypt(origin.privateKeyEncoded, passphrase),
-            CryptoUtils.hash(tx)
+            CryptoHelper.hash(tx)
         )
 
         val hash = CryptoUtils.hash(signature)
 
         return transactionRepository.save(
             tx.copy(
-                signature = signature.encode16(),
-                hash = hash.encode16()
+                signature = signature.toHex(),
+                hash = hash.toHex()
             )
         )
     }
@@ -112,7 +113,7 @@ class TransactionService(
 
         // TODO  check nonce
 
-        require(CryptoUtils.verifyTransaction(tx)) {
+        require(CryptoHelper.verifyTransaction(tx)) {
             "Could not verify transaction $tx"
         }
 

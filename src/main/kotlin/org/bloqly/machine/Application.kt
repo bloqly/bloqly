@@ -1,9 +1,10 @@
 package org.bloqly.machine
 
-import org.bloqly.machine.util.ApplicationUtils
 import org.slf4j.LoggerFactory
+import org.springframework.boot.Banner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchAutoConfiguration
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.AdviceMode
@@ -31,7 +32,12 @@ class Application {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            ApplicationUtils.startServer()
+            SpringApplicationBuilder()
+                .profiles("server", "scheduler", "production")
+                .bannerMode(Banner.Mode.OFF)
+                .sources(Application::class.java)
+                .build()
+                .run()
         }
 
         const val REQUEST_THREADS = 5

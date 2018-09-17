@@ -27,7 +27,7 @@ class PropertyControllerTest : BaseControllerTest() {
 
         createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
-        val url = APIUtils.getDataPath(node, "properties/search")
+        val url = APIUtils.getDataPath(node.id.toString(), "properties/search")
 
         val userEntity = HttpEntity(getBalanceRequestPayload(testService.getUser()), headers)
 
@@ -51,7 +51,7 @@ class PropertyControllerTest : BaseControllerTest() {
 
         createNextBlock(DEFAULT_SPACE, validatorForRound(1), 1)
 
-        val url = APIUtils.getDataPath(node, "properties/search")
+        val url = APIUtils.getDataPath(node.id.toString(), "properties/search")
 
         val userEntity = HttpEntity(getFinalizedBalanceRequestPayload(testService.getUser()), headers)
 

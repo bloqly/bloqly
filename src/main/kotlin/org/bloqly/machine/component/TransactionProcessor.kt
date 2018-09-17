@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.INIT_FUNCTION
 import org.bloqly.machine.Application.Companion.MAX_DESTINATION_LENGTH
 import org.bloqly.machine.Application.Companion.MAX_KEY_LENGTH
 import org.bloqly.machine.Application.Companion.MAX_SPACE_LENGTH
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.Contract
 import org.bloqly.machine.model.InvocationContext
 import org.bloqly.machine.model.InvocationResult
@@ -14,9 +15,8 @@ import org.bloqly.machine.model.TransactionType.CALL
 import org.bloqly.machine.model.TransactionType.CREATE
 import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractExecutorService
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.fromHex
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -42,7 +42,7 @@ class TransactionProcessor(
             callee = tx.destination
         )
 
-        val contractBodyDecoded = String(tx.value.first().value.decode16())
+        val contractBodyDecoded = String(tx.value.first().value.fromHex())
 
         propertyContext.saveContract(
             Contract(
@@ -61,7 +61,7 @@ class TransactionProcessor(
         propertyContext: PropertyContext
     ): InvocationResult {
 
-        require(CryptoUtils.verifyTransaction(tx)) {
+        require(CryptoHelper.verifyTransaction(tx)) {
             "Could not verify transaction ${tx.toVO()}"
         }
 

@@ -3,6 +3,8 @@ package org.bloqly.machine.service
 import com.google.common.primitives.Bytes
 import org.bloqly.machine.Application.Companion.MAX_DELTA_SIZE
 import org.bloqly.machine.Application.Companion.MAX_REFERENCED_BLOCK_DEPTH
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
@@ -12,10 +14,9 @@ import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.repository.SpaceRepository
 import org.bloqly.machine.repository.TransactionOutputRepository
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.decode16
-import org.bloqly.machine.util.encode16
+import org.bloqly.machine.util.fromHex
+import org.bloqly.machine.util.toHex
 import org.bloqly.machine.vo.block.BlockData
 import org.bloqly.machine.vo.block.BlockDataList
 import org.bloqly.machine.vo.block.BlockRangeRequest
@@ -52,13 +53,13 @@ class BlockService(
         round: Long,
         transactions: List<Transaction> = listOf(),
         votes: List<Vote> = listOf(),
-        txOutputs: Map<String, List<PropertyValue> > = mapOf()
+        txOutputs: Map<String, List<PropertyValue>> = mapOf()
     ): Block {
 
         val proposer = accountRepository.findByAccountId(producerId)
             ?: throw IllegalArgumentException("Could not find producer: $producerId")
 
-        val txOutputHash = CryptoUtils.hashTxOutputs(txOutputs)
+        val txOutputHash = CryptoHelper.hashTxOutputs(txOutputs)
 
         val newBlock = Block(
             spaceId = spaceId,
@@ -69,11 +70,11 @@ class BlockService(
             timestamp = timestamp,
             parentHash = parentHash,
             producerId = producerId,
-            txHash = txHash?.encode16(),
-            validatorTxHash = validatorTxHash.encode16(),
+            txHash = txHash?.toHex(),
+            validatorTxHash = validatorTxHash.toHex(),
             transactions = transactions,
             votes = votes,
-            txOutputHash = txOutputHash.encode16()
+            txOutputHash = txOutputHash.toHex()
         )
 
         val libHeight = if (height > 0) {
@@ -90,8 +91,8 @@ class BlockService(
             EncodingUtils.intToBytes(diff),
             EncodingUtils.longToBytes(round),
             EncodingUtils.longToBytes(timestamp),
-            parentHash.decode16(),
-            producerId.decode16(),
+            parentHash.fromHex(),
+            producerId.fromHex(),
             txHash ?: ByteArray(0),
             validatorTxHash,
             txOutputHash
@@ -101,12 +102,12 @@ class BlockService(
             CryptoUtils.decrypt(proposer.privateKeyEncoded, passphrase),
             CryptoUtils.hash(dataToSign)
         )
-        val blockHash = CryptoUtils.hash(signature).encode16()
+        val blockHash = CryptoUtils.hash(signature).toHex()
 
         return newBlock.copy(
             hash = blockHash,
             libHeight = libHeight,
-            signature = signature.encode16()
+            signature = signature.toHex()
         )
     }
 
@@ -210,7 +211,7 @@ class BlockService(
             }
 
             currentBlock.votes.forEach { vote ->
-                validatorVotesCount.compute(EncodingUtils.publicKeyToAddress(vote.publicKey)) { _, count ->
+                validatorVotesCount.compute(CryptoHelper.publicKeyToAddress(vote.publicKey)) { _, count ->
                     calculateVotesCount(count)
                 }
             }

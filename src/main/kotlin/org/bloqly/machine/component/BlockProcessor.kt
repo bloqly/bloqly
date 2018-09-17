@@ -4,6 +4,7 @@ import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.Application.Companion.MAX_TRANSACTION_AGE
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.FinalizedTransaction
@@ -24,9 +25,8 @@ import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
 import org.bloqly.machine.service.VoteService
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.fromHex
 import org.bloqly.machine.vo.block.BlockData
 import org.bloqly.machine.vo.property.PropertyValue
 import org.bloqly.machine.vo.property.Value
@@ -202,7 +202,7 @@ class BlockProcessor(
 
         val producer = accountRepository.findByAccountId(block.producerId)!!
 
-        require(CryptoUtils.verifyBlock(block, producer.publicKey.decode16())) {
+        require(CryptoHelper.verifyBlock(block, producer.publicKey.fromHex())) {
             "Cold not verify block ${block.hash}"
         }
     }
@@ -266,8 +266,8 @@ class BlockProcessor(
             parentHash = lastBlock.hash,
             producerId = producer.accountId,
             passphrase = passphrase,
-            txHash = CryptoUtils.hashTransactions(selectedTransactions),
-            validatorTxHash = CryptoUtils.hashVotes(votes),
+            txHash = CryptoHelper.hashTransactions(selectedTransactions),
+            validatorTxHash = CryptoHelper.hashVotes(votes),
             round = round,
             transactions = selectedTransactions,
             votes = votes,

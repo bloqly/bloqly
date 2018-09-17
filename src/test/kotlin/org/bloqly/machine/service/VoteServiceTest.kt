@@ -2,13 +2,13 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.helper.CryptoHelper.verifyVote
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.CryptoUtils.verifyVote
 import org.bloqly.machine.test.TestUtils.FAKE_DATA
-import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.fromHex
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -44,7 +44,7 @@ class VoteServiceTest : BaseTest() {
 
         validator = validators.first()
 
-        publicKey = validator.publicKey.decode16()
+        publicKey = validator.publicKey.fromHex()
 
         vote = voteService.findOrCreateVote(space, validator, passphrase(validator))!!
     }

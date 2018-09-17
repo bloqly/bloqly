@@ -2,12 +2,12 @@ package org.bloqly.machine.service;
 
 import com.google.common.collect.Lists;
 import org.bloqly.machine.component.PropertyContext;
+import org.bloqly.machine.crypto.CryptoUtils;
 import org.bloqly.machine.function.GetPropertyFunction;
 import org.bloqly.machine.model.Contract;
 import org.bloqly.machine.model.InvocationContext;
 import org.bloqly.machine.model.InvocationResult;
 import org.bloqly.machine.model.PropertyResult;
-import org.bloqly.machine.util.CryptoUtils;
 import org.bloqly.machine.vo.property.PropertyValue;
 import org.bloqly.machine.vo.property.Value;
 import org.bouncycastle.util.encoders.Hex;

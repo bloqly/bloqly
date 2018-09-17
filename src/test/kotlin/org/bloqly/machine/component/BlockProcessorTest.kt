@@ -2,15 +2,15 @@ package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
 import org.bloqly.machine.util.TimeUtils.setTestTime
-import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.fromHex
 import org.bloqly.machine.vo.block.BlockData
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -173,7 +173,7 @@ class BlockProcessorTest : BaseTest() {
 
         val block = blockRepository.findByHash(blockData.block.hash)!!
 
-        assertTrue(CryptoUtils.verifyBlock(block, producer.publicKey.decode16()))
+        assertTrue(CryptoHelper.verifyBlock(block, producer.publicKey.fromHex()))
     }
 
     @Test

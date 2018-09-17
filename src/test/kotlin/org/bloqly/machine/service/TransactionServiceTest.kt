@@ -2,11 +2,11 @@ package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.helper.CryptoHelper.verifyTransaction
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.CryptoUtils.verifyTransaction
 import org.bloqly.machine.test.TestUtils.FAKE_DATA
 import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals

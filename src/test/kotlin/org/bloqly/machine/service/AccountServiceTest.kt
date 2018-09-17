@@ -1,10 +1,10 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.crypto.CryptoUtils
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.CryptoUtils
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull

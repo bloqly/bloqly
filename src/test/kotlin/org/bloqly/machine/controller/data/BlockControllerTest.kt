@@ -46,7 +46,7 @@ class BlockControllerTest : BaseControllerTest() {
 
         val entity = HttpEntity(deltaPayload, headers)
 
-        val url = APIUtils.getDataPath(node, "blocks/search")
+        val url = APIUtils.getDataPath(node.id.toString(), "blocks/search")
 
         val blockList = restTemplate.postForObject(url, entity, BlockDataList::class.java)
 
@@ -62,7 +62,7 @@ class BlockControllerTest : BaseControllerTest() {
 
         val entity = HttpEntity(lastPayload, headers)
 
-        val url = APIUtils.getDataPath(node, "blocks/last")
+        val url = APIUtils.getDataPath(node.id.toString(), "blocks/last")
 
         val block = restTemplate.postForObject(url, entity, BlockVO::class.java)
 
@@ -78,7 +78,7 @@ class BlockControllerTest : BaseControllerTest() {
 
         val entity = HttpEntity(libPayload, headers)
 
-        val url = APIUtils.getDataPath(node, "blocks/lib")
+        val url = APIUtils.getDataPath(node.id.toString(), "blocks/lib")
 
         val block = restTemplate.postForObject(url, entity, BlockVO::class.java)
 

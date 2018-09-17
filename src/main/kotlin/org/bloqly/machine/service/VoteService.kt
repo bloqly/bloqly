@@ -1,14 +1,15 @@
 package org.bloqly.machine.service
 
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.Vote
 import org.bloqly.machine.repository.BlockRepository
 import org.bloqly.machine.repository.VoteRepository
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.decode16
+import org.bloqly.machine.util.fromHex
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -69,7 +70,7 @@ class VoteService(
 
         val signature = CryptoUtils.sign(
             CryptoUtils.decrypt(validator.privateKeyEncoded, passphrase),
-            CryptoUtils.hash(vote)
+            CryptoHelper.hash(vote)
         )
 
         return vote.copy(signature = signature)
@@ -89,7 +90,7 @@ class VoteService(
 
     fun requireVoteValid(vote: Vote) {
 
-        require(CryptoUtils.verifyVote(vote, vote.publicKey.decode16())) {
+        require(CryptoHelper.verifyVote(vote, vote.publicKey.fromHex())) {
             "Could not verify vote."
         }
 

@@ -1,6 +1,8 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.FinalizedTransaction
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.model.TransactionType
@@ -12,10 +14,9 @@ import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.SpaceService
 import org.bloqly.machine.service.TransactionService
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.encode16
+import org.bloqly.machine.util.toHex
 import org.bloqly.machine.vo.property.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -63,7 +64,7 @@ class BlockchainService(
         val timestamp = TimeUtils.getCurrentTime()
 
         val validatorTxHash = ByteArray(0)
-        val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
+        val contractBodyHash = CryptoUtils.hash(contractBody).toHex()
 
         val tx = transactionService.createTransaction(
             space = spaceId,
@@ -72,7 +73,7 @@ class BlockchainService(
             destinationId = Application.DEFAULT_SELF,
             self = Application.DEFAULT_SELF,
             key = null,
-            value = Value.ofs(contractBody.toByteArray().encode16()),
+            value = Value.ofs(contractBody.toByteArray().toHex()),
             transactionType = TransactionType.CREATE,
             referencedBlockHash = "",
             timestamp = timestamp
@@ -102,7 +103,7 @@ class BlockchainService(
 
         propertyContext.commit()
 
-        firstBlock.txHash = CryptoUtils.hashTransactions(listOf(tx)).encode16()
+        firstBlock.txHash = CryptoHelper.hashTransactions(listOf(tx)).toHex()
         val savedFirstBlock = blockRepository.save(firstBlock)
 
         finalizedTransactionRepository.save(

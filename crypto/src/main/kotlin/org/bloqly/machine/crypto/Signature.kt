@@ -1,8 +1,9 @@
-package org.bloqly.machine.util
+package org.bloqly.machine.crypto
 
 import com.google.common.primitives.Bytes
 import org.bouncycastle.util.BigIntegers.asUnsignedByteArray
 import org.bouncycastle.util.BigIntegers.fromUnsignedByteArray
+import org.bouncycastle.util.encoders.Hex
 import java.math.BigInteger
 
 data class Signature(
@@ -12,12 +13,13 @@ data class Signature(
     fun getR(): ByteArray = asUnsignedByteArray(32, r)
     private fun getS(): ByteArray = asUnsignedByteArray(32, s)
 
-    override fun toString(): String = toByteArray().encode16()
+    override fun toString(): String = Hex.toHexString(toByteArray()).toUpperCase()
 
     fun toByteArray(): ByteArray = Bytes.concat(getR(), getS())
 
     companion object {
-        fun fromString(sigStr: String): Signature = fromByteArray(sigStr.decode16())
+
+        fun fromString(sigStr: String): Signature = fromByteArray(Hex.decode(sigStr))
 
         fun fromByteArray(sigBytes: ByteArray): Signature {
 

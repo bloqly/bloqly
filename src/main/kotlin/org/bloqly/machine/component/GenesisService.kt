@@ -1,6 +1,8 @@
 package org.bloqly.machine.component
 
 import org.bloqly.machine.Application
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.Block
 import org.bloqly.machine.model.FinalizedTransaction
 import org.bloqly.machine.model.Space
@@ -13,10 +15,9 @@ import org.bloqly.machine.service.BlockService
 import org.bloqly.machine.service.ContractService
 import org.bloqly.machine.service.PropertyService
 import org.bloqly.machine.service.SpaceService
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.ObjectUtils
-import org.bloqly.machine.util.decode16
-import org.bloqly.machine.util.encode16
+import org.bloqly.machine.util.fromHex
+import org.bloqly.machine.util.toHex
 import org.bloqly.machine.vo.genesis.Genesis
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -48,7 +49,7 @@ class GenesisService(
 
         val json = ObjectUtils.writeValueAsString(genesis)
 
-        return json.toByteArray().encode16()
+        return json.toByteArray().toHex()
     }
 
     @Transactional
@@ -56,7 +57,7 @@ class GenesisService(
 
         val now = Instant.now()
 
-        val json = genesisString.decode16()
+        val json = genesisString.fromHex()
 
         val genesis = ObjectUtils.readValue(json, Genesis::class.java)
 
@@ -93,9 +94,9 @@ class GenesisService(
 
         val contractBodyValue = transaction.toModel().value.first()
         val contractBodyEncoded = contractBodyValue.toValue() as String
-        val contractBody = String(contractBodyEncoded.decode16())
+        val contractBody = String(contractBodyEncoded.fromHex())
 
-        val contractBodyHash = CryptoUtils.hash(contractBody).encode16()
+        val contractBodyHash = CryptoUtils.hash(contractBody).toHex()
 
         require(block.parentHash == contractBodyHash) {
             "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."
@@ -139,7 +140,7 @@ class GenesisService(
     }
 
     private fun validateGenesisTransaction(transaction: Transaction, block: Block, now: Instant) {
-        require(CryptoUtils.verifyTransaction(transaction)) {
+        require(CryptoHelper.verifyTransaction(transaction)) {
             "Transaction in genesis is invalid."
         }
 

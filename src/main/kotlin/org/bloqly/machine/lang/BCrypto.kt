@@ -1,8 +1,8 @@
 package org.bloqly.machine.lang
 
-import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.decode16
-import org.bloqly.machine.util.encode16
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.util.fromHex
+import org.bloqly.machine.util.toHex
 
 class BCrypto {
 
@@ -10,14 +10,14 @@ class BCrypto {
 
         @JvmStatic
         fun sha256(input: String): String =
-            CryptoUtils.hash(input.toByteArray()).encode16()
+            CryptoUtils.hash(input.toByteArray()).toHex()
 
         @JvmStatic
         fun verify(message: String, signature: String, publicKey: String): Boolean =
             CryptoUtils.verify(
-                message = message.decode16(),
-                signature = signature.decode16(),
-                publicKey = publicKey.decode16()
+                message = message.fromHex(),
+                signature = signature.fromHex(),
+                publicKey = publicKey.fromHex()
             )
 
         @JvmStatic

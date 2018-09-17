@@ -1,4 +1,4 @@
-package org.bloqly.machine.util
+package org.bloqly.machine.crypto.impl
 
 import org.bouncycastle.asn1.sec.SECNamedCurves
 import org.bouncycastle.crypto.params.ECDomainParameters

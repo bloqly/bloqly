@@ -5,6 +5,7 @@ import org.bloqly.machine.Application.Companion.DEFAULT_SELF
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
 import org.bloqly.machine.component.PropertyContext
 import org.bloqly.machine.component.TransactionProcessor
+import org.bloqly.machine.crypto.CryptoUtils
 import org.bloqly.machine.lang.BLong
 import org.bloqly.machine.model.Property
 import org.bloqly.machine.model.PropertyId
@@ -12,11 +13,10 @@ import org.bloqly.machine.model.Transaction
 import org.bloqly.machine.model.TransactionType
 import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.test.BaseTest
-import org.bloqly.machine.util.CryptoUtils
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.decode16
-import org.bloqly.machine.util.encode16
+import org.bloqly.machine.util.fromHex
+import org.bloqly.machine.util.toHex
 import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -180,7 +180,7 @@ class TransactionProcessorTest : BaseTest() {
 
         val message = CryptoUtils.hash(value)
 
-        val signature = CryptoUtils.sign(privateKey.decode16(), message)
+        val signature = CryptoUtils.sign(privateKey.fromHex(), message)
 
         return transactionService.createTransaction(
             space = DEFAULT_SPACE,
@@ -189,7 +189,7 @@ class TransactionProcessorTest : BaseTest() {
             destinationId = callee,
             self = DEFAULT_SELF,
             key = "setSigned",
-            value = Value.of("key1", value, signature.encode16(), publicKey),
+            value = Value.of("key1", value, signature.toHex(), publicKey),
             transactionType = TransactionType.CALL,
             referencedBlockHash = block.hash
         )
@@ -213,7 +213,7 @@ class TransactionProcessorTest : BaseTest() {
 
         val contractBody = FileUtils.getResourceAsString("/scripts/test.js")!!
 
-        val contractBodyEncoded = contractBody.toByteArray().encode16()
+        val contractBodyEncoded = contractBody.toByteArray().toHex()
 
         val createContractTx = transactionService.createTransaction(
             space = DEFAULT_SPACE,

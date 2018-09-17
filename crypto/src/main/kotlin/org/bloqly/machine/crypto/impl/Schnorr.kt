@@ -1,7 +1,9 @@
-package org.bloqly.machine.util
+package org.bloqly.machine.crypto.impl
 
 import com.google.common.primitives.Bytes
-import org.bloqly.machine.util.CryptoUtils.CURVE_PARAMS
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.crypto.CryptoUtils.CURVE_PARAMS
+import org.bloqly.machine.crypto.Signature
 import org.bouncycastle.math.ec.ECCurve
 import org.bouncycastle.math.ec.ECPoint
 import org.bouncycastle.util.BigIntegers.asUnsignedByteArray
@@ -10,7 +12,7 @@ import java.math.BigInteger
 import java.math.BigInteger.ONE
 import java.math.BigInteger.TWO
 
-object BloqlySchnorr {
+object Schnorr {
 
     private fun getP(): BigInteger {
         return (CURVE_PARAMS.curve as ECCurve.Fp).q
@@ -36,7 +38,7 @@ object BloqlySchnorr {
         var k = fromUnsignedByteArray(
             CryptoUtils.hash(
                 Bytes.concat(
-                    asUnsignedByteArray(d).pad(),
+                    asUnsignedByteArray(32, d),
                     message
                 )
             )
@@ -51,7 +53,7 @@ object BloqlySchnorr {
         val e = fromUnsignedByteArray(
             CryptoUtils.hash(
                 Bytes.concat(
-                    asUnsignedByteArray(r.xCoord.toBigInteger()).pad(),
+                    asUnsignedByteArray(32, r.xCoord.toBigInteger()),
                     CURVE_PARAMS.g.multiply(d).encodePoint(),
                     message
                 )

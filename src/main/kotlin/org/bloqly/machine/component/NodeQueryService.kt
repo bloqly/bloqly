@@ -36,7 +36,7 @@ class NodeQueryService(
 
     private fun queryForNodes(node: Node) {
 
-        val path = APIUtils.getDataPath(node, "nodes")
+        val path = APIUtils.getDataPath(node.id.toString(), "nodes")
 
         log.debug("Query host $node for nodes")
 
@@ -56,7 +56,7 @@ class NodeQueryService(
 
     fun sendTransactions(node: Node, transactions: List<Transaction>) {
 
-        val path = APIUtils.getEventPath(node, "transactions")
+        val path = APIUtils.getEventPath(node.id.toString(), "transactions")
 
         val entity = HttpEntity(TransactionList.fromTransactions(transactions))
 
@@ -65,7 +65,7 @@ class NodeQueryService(
 
     fun sendVotes(node: Node, votes: List<Vote>) {
 
-        val path = APIUtils.getEventPath(node, "votes")
+        val path = APIUtils.getEventPath(node.id.toString(), "votes")
 
         val entity = HttpEntity(VoteList.fromVotes(votes))
 
@@ -74,7 +74,7 @@ class NodeQueryService(
 
     fun sendProposals(node: Node, proposals: List<BlockData>) {
 
-        val path = APIUtils.getEventPath(node, "blocks")
+        val path = APIUtils.getEventPath(node.id.toString(), "blocks")
 
         val entity = HttpEntity(BlockDataList(proposals))
 
@@ -89,7 +89,7 @@ class NodeQueryService(
 
     // TODO create test for deltas API
     fun requestDelta(node: Node, blockRangeRequest: BlockRangeRequest): List<BlockData>? {
-        val path = APIUtils.getDataPath(node, "blocks/search")
+        val path = APIUtils.getDataPath(node.id.toString(), "blocks/search")
 
         var result: List<BlockData>? = null
 

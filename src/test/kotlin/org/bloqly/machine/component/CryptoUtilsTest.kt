@@ -2,10 +2,10 @@ package org.bloqly.machine.component
 
 import org.bitcoinj.core.ECKey
 import org.bloqly.machine.Application.Companion.DEFAULT_SPACE
+import org.bloqly.machine.crypto.CryptoUtils
+import org.bloqly.machine.helper.CryptoHelper
 import org.bloqly.machine.model.Vote
-import org.bloqly.machine.util.CryptoUtils
-import org.bloqly.machine.util.EncodingUtils
-import org.bloqly.machine.util.encode16
+import org.bloqly.machine.util.toHex
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -33,12 +33,12 @@ class CryptoUtilsTest {
 
             val privateKey = key.privateKeyAsHex
             val publicKey = key.pubKey
-            val id = EncodingUtils.publicKeyToAddress(publicKey)
+            val id = CryptoHelper.publicKeyToAddress(publicKey)
 
             println(
                 """
                 id: $id
-                publicKey: ${publicKey.encode16()}
+                publicKey: ${publicKey.toHex()}
                 privateKey: $privateKey
             """.trimIndent()
             )
@@ -74,7 +74,7 @@ class CryptoUtilsTest {
         val pub = key.pubKey
 
         val vote = Vote(
-            publicKey = pub.encode16(),
+            publicKey = pub.toHex(),
             blockHash = "",
             height = 11,
             timestamp = 1,
@@ -83,11 +83,11 @@ class CryptoUtilsTest {
 
         val signature = CryptoUtils.sign(
             priv,
-            CryptoUtils.hash(vote)
+            CryptoHelper.hash(vote)
         )
 
         val signedVote = vote.copy(signature = signature)
 
-        assertTrue(CryptoUtils.verifyVote(signedVote, pub))
+        assertTrue(CryptoHelper.verifyVote(signedVote, pub))
     }
 }
