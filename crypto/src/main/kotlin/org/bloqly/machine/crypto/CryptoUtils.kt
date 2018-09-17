@@ -20,7 +20,7 @@ fun String.toHexBigInteger() = BigInteger(1, Hex.decode(this))
 
 fun ByteArray.toAddress(): String = CryptoUtils.hash(this).toHex()
 
-fun String.toAddress(): String = CryptoUtils.hash(this).toHex()
+fun String.toAddress(): String = CryptoUtils.hash(this.fromHex()).toHex()
 
 object CryptoUtils {
 
@@ -45,7 +45,7 @@ object CryptoUtils {
         val ivParameterSpec = IvParameterSpec(iv)
 
         val key = SecretKeySpec(
-            hash(passphrase),
+            hash(passphrase.toByteArray()),
             AES
         )
         val cipher = Cipher.getInstance(AES_PADDING)
@@ -60,6 +60,9 @@ object CryptoUtils {
         return encryptedIVAndText
     }
 
+    fun decrypt(input: String?, passphrase: String): ByteArray =
+        decrypt(input?.fromHex(), passphrase)
+
     fun decrypt(input: ByteArray?, passphrase: String): ByteArray {
         require(input != null)
 
@@ -72,7 +75,7 @@ object CryptoUtils {
         System.arraycopy(input, AES_IV_SIZE, encryptedBytes, 0, encryptedSize)
 
         val key = SecretKeySpec(
-            hash(passphrase),
+            hash(passphrase.toByteArray()),
             AES
         )
         val cipher = Cipher.getInstance(AES_PADDING)
@@ -87,13 +90,8 @@ object CryptoUtils {
         return ECKey.publicKeyFromPrivate(privateKey, true)
     }
 
-    fun hash(input: ByteArray): ByteArray {
-        return MessageDigest.getInstance(SHA_256).digest(input)
-    }
-
-    fun hash(input: String): ByteArray {
-        return hash(input.fromHex())
-    }
+    fun hash(input: ByteArray): ByteArray =
+        MessageDigest.getInstance(SHA_256).digest(input)
 
     fun sign(privateKey: ByteArray?, input: ByteArray): ByteArray =
         Schnorr.sign(input, privateKey!!).toByteArray()

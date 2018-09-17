@@ -1,7 +1,6 @@
 package org.bloqly.machine.service
 
 import org.bloqly.machine.Application
-import org.bloqly.machine.crypto.CryptoUtils
 import org.bloqly.machine.model.Account
 import org.bloqly.machine.model.Space
 import org.bloqly.machine.test.BaseTest
@@ -34,8 +33,8 @@ class AccountServiceTest : BaseTest() {
         space = testService.getDefaultSpace()
 
         accountService.importAccount(
-            CryptoUtils.decrypt(account.privateKeyEncoded, testPassphrase),
-            testPassphrase
+            account.publicKey,
+            account.privateKeyEncrypted!!
         )
     }
 
@@ -70,7 +69,7 @@ class AccountServiceTest : BaseTest() {
 
             println("id: ${account.id}")
             println("pub: ${account.publicKey.toLowerCase()}")
-            println("priv: ${account.privateKey}")
+            println("priv: ${account.privateKeyEncrypted}")
             println("pass: $passphrase")
         }
     }
@@ -78,10 +77,9 @@ class AccountServiceTest : BaseTest() {
     @Test
     fun testImportAccountTwiceFails() {
         try {
-            val passphrase = passphrase(account.accountId)
             accountService.importAccount(
-                CryptoUtils.decrypt(account.privateKeyEncoded, passphrase),
-                passphrase
+                account.publicKey,
+                account.privateKeyEncrypted!!
             )
             fail()
         } catch (e: Exception) {

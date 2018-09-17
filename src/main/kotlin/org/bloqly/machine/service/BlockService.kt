@@ -54,6 +54,7 @@ class BlockService(
         round: Long,
         transactions: List<Transaction> = listOf(),
         votes: List<Vote> = listOf(),
+        // txHash => list of results
         txOutputs: Map<String, List<PropertyValue>> = mapOf()
     ): Block {
 
@@ -100,7 +101,7 @@ class BlockService(
         )
 
         val signature = CryptoUtils.sign(
-            CryptoUtils.decrypt(proposer.privateKeyEncoded, passphrase),
+            CryptoUtils.decrypt(proposer.privateKeyEncrypted, passphrase),
             CryptoUtils.hash(dataToSign)
         )
         val blockHash = CryptoUtils.hash(signature).toHex()

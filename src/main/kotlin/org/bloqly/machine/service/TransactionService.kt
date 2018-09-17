@@ -90,7 +90,7 @@ class TransactionService(
         )
 
         val signature = CryptoUtils.sign(
-            CryptoUtils.decrypt(origin.privateKeyEncoded, passphrase),
+            CryptoUtils.decrypt(origin.privateKeyEncrypted, passphrase),
             CryptoHelper.hash(tx)
         )
 

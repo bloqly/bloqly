@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import io.swagger.annotations.Authorization
 import org.bloqly.machine.service.AccountService
-import org.bloqly.machine.util.fromHex
 import org.bloqly.machine.vo.account.AccountImportRequest
 import org.bloqly.machine.vo.account.AccountVO
 import org.bloqly.machine.vo.account.PublicKeysImportRequest
@@ -64,8 +63,8 @@ class AccountAdminController(
         require(request.localPort == adminPort)
 
         accountService.importAccount(
-            accountImportRequest.privateKey.fromHex(),
-            accountImportRequest.password
+            accountImportRequest.publicKey,
+            accountImportRequest.privateKeyEncrypted
         )
 
         return ResponseEntity(CREATED)

@@ -69,7 +69,7 @@ class VoteService(
         )
 
         val signature = CryptoUtils.sign(
-            CryptoUtils.decrypt(validator.privateKeyEncoded, passphrase),
+            CryptoUtils.decrypt(validator.privateKeyEncrypted, passphrase),
             CryptoHelper.hash(vote)
         )
 

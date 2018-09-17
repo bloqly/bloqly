@@ -141,12 +141,12 @@ object CryptoHelper {
             txOutputs
                 .toSortedMap()
                 .map {
-                    CryptoUtils.hash(
-                        it.key + CryptoUtils.hash(
-                            ObjectUtils.writeValueAsString(it.value)
-                        )
+                    val valueHash = CryptoUtils.hash(
+                        ObjectUtils.writeValueAsString(it.value).toByteArray()
                     )
+
+                    CryptoUtils.hash(Bytes.concat(it.key.fromHex(), valueHash)).toHex()
                 }
-                .joinToString()
+                .joinToString().toByteArray() // TODO replace with bytes array
         )
 }

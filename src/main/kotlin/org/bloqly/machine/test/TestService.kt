@@ -21,6 +21,7 @@ import org.bloqly.machine.test.TestUtils.TEST_BLOCK_BASE_DIR
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.ObjectUtils
 import org.bloqly.machine.util.TimeUtils
+import org.bloqly.machine.vo.account.AccountVO
 import org.bloqly.machine.vo.property.Value
 import org.bloqly.machine.vo.vote.VoteVO
 import org.junit.Assert.assertEquals
@@ -50,7 +51,7 @@ class TestService(
     private val passphraseService: PassphraseService
 ) {
 
-    private lateinit var accounts: List<Account>
+    private lateinit var accounts: List<AccountVO>
 
     @PostConstruct
     @Suppress("unused")
@@ -62,11 +63,11 @@ class TestService(
         resetService.reset(deleteAccounts = deleteAccounts)
     }
 
-    fun getRoot(): Account = accounts.first()
+    fun getRoot(): Account = accounts.first().toModel()
 
-    fun getUser(): Account = accounts.last()
+    fun getUser(): Account = accounts.last().toModel()
 
-    fun getValidator(n: Int): Account = accounts[n + 1]
+    fun getValidator(n: Int): Account = accounts[n + 1].toModel()
 
     private fun getAccounts(): Accounts {
         val accountsJson = FileUtils.getResourceAsString("/accounts.json")
@@ -76,8 +77,7 @@ class TestService(
 
     fun importAccounts() {
         accounts.forEach { account ->
-            val passphrase = passphraseService.getPassphrase(account.accountId)
-            accountService.importAccount(account.privateKeyEncoded, passphrase)
+            accountService.importAccount(account.publicKey, account.privateKeyEncrypted!!)
         }
     }
 

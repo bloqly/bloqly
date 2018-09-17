@@ -15,7 +15,7 @@ class CryptoUtilsTest {
 
     @Test
     fun testEncrypt() {
-        val secret = CryptoUtils.hash("a secret")
+        val secret = CryptoUtils.hash("a secret".toByteArray())
         val password = "a password"
 
         val encrypted = CryptoUtils.encrypt(secret, password)

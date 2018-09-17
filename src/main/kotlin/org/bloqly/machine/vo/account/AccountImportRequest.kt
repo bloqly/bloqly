@@ -7,8 +7,8 @@ import org.bloqly.machine.annotation.ValueObject
 @ApiModel
 @ValueObject
 data class AccountImportRequest(
-    @ApiModelProperty("Account private key in hex format")
-    val privateKey: String,
-    @ApiModelProperty("Password to encrypt private key before storing in database")
-    val password: String
+    @ApiModelProperty("Account public key")
+    val publicKey: String,
+    @ApiModelProperty("Encrypted account private key in hex format")
+    val privateKeyEncrypted: String
 )

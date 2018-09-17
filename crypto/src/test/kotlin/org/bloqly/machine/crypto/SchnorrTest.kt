@@ -12,6 +12,17 @@ import org.junit.Test
 class SchnorrTest {
 
     @Test
+    fun testEncrypt() {
+
+        val privateKey = "1B7B7B3967A819DF91C82F70D99F64143D0F1ACCEF1A4D19825DD09326F432BB"
+        val passphrase = "root password"
+
+        val privateKeyEncrypted = CryptoUtils.encrypt(privateKey.fromHex(), passphrase).toHex()
+
+        println(privateKeyEncrypted)
+    }
+
+    @Test
     fun testCompatibility() {
 
         val keyPair = ECKey()

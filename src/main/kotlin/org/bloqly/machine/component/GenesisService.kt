@@ -96,7 +96,7 @@ class GenesisService(
         val contractBodyEncoded = contractBodyValue.toValue() as String
         val contractBody = String(contractBodyEncoded.fromHex())
 
-        val contractBodyHash = CryptoUtils.hash(contractBody).toHex()
+        val contractBodyHash = CryptoUtils.hash(contractBody.toByteArray()).toHex()
 
         require(block.parentHash == contractBodyHash) {
             "Genesis block parentHash be set to the genesis parameters hash, found ${block.parentHash} instead."

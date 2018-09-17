@@ -15,7 +15,6 @@ import org.bloqly.machine.repository.PropertyRepository
 import org.bloqly.machine.test.BaseTest
 import org.bloqly.machine.util.FileUtils
 import org.bloqly.machine.util.TimeUtils
-import org.bloqly.machine.util.fromHex
 import org.bloqly.machine.util.toHex
 import org.bloqly.machine.vo.property.Value
 import org.junit.Assert.assertEquals
@@ -175,12 +174,15 @@ class TransactionProcessorTest : BaseTest() {
 
         val originId = testService.getRoot().accountId
 
-        val privateKey = testService.getUser().privateKey
+        val privateKey = CryptoUtils.decrypt(
+            testService.getUser().privateKeyEncrypted,
+            passphrase(testService.getUser().accountId)
+        )
         val publicKey = testService.getUser().publicKey
 
-        val message = CryptoUtils.hash(value)
+        val message = CryptoUtils.hash(value.toByteArray())
 
-        val signature = CryptoUtils.sign(privateKey.fromHex(), message)
+        val signature = CryptoUtils.sign(privateKey, message)
 
         return transactionService.createTransaction(
             space = DEFAULT_SPACE,

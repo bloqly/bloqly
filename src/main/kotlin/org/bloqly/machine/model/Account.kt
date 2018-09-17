@@ -1,6 +1,5 @@
 package org.bloqly.machine.model
 
-import org.apache.commons.codec.binary.Hex
 import org.bloqly.machine.vo.account.AccountVO
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -32,14 +31,8 @@ data class Account(
     var publicKey: String,
 
     @Column
-    var privateKeyEncoded: ByteArray? = null
+    var privateKeyEncrypted: String? = null
 ) {
-
-    var privateKey: String
-        get(): String = Hex.encodeHexString(privateKeyEncoded)
-        set(value) {
-            privateKeyEncoded = Hex.decodeHex(value)
-        }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -56,6 +49,7 @@ data class Account(
         return id?.hashCode() ?: 0
     }
 
+    // TODO sort out when it is used
     fun toVO(): AccountVO =
         AccountVO(
             accountId = accountId,
@@ -66,6 +60,6 @@ data class Account(
         AccountVO(
             accountId = accountId,
             publicKey = publicKey,
-            privateKeyEncoded = Hex.encodeHexString(privateKeyEncoded)
+            privateKeyEncrypted = privateKeyEncrypted
         )
 }

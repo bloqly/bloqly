@@ -86,7 +86,7 @@ class EventProcessorService(
     private fun getVotes(space: Space, validators: List<Account>): List<Vote> =
         validators
             .filter { passphraseService.hasPassphrase(it.accountId) }
-            .filter { it.privateKeyEncoded != null }
+            .filter { it.privateKeyEncrypted != null }
             .mapNotNull { producer ->
                 submitTask {
                     voteService.findOrCreateVote(space, producer, passphraseService.getPassphrase(producer.accountId))

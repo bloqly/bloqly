@@ -23,6 +23,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.bloqly.machine.model.InvocationResultType.SUCCESS;
@@ -81,7 +82,7 @@ public class ContractExecutorService {
 
     private ScriptEngine getEngine(String body) {
 
-        var key = Hex.toHexString(CryptoUtils.INSTANCE.hash(body));
+        var key = Hex.toHexString(CryptoUtils.INSTANCE.hash(body.getBytes(UTF_8)));
 
         engines.computeIfAbsent(key, (keyToCompute) -> {
             try {

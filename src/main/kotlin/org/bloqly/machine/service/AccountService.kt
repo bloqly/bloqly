@@ -71,7 +71,7 @@ class AccountService(
             publicKey = publicKey.toHex()
         )
 
-        account.privateKeyEncoded = CryptoUtils.encrypt(privateKey, passphrase)
+        account.privateKeyEncrypted = CryptoUtils.encrypt(privateKey, passphrase).toHex()
 
         return account
     }
@@ -129,9 +129,9 @@ class AccountService(
     }
 
     @Transactional
-    fun importAccount(privateKeyBytes: ByteArray?, passphrase: String) {
+    fun importAccount(publicKey: String, privateKeyEncrypted: String) {
 
-        val publicKeyBytes = CryptoUtils.getPublicFor(privateKeyBytes)
+        val publicKeyBytes = publicKey.fromHex()
         val accountId = publicKeyBytes.toAddress()
 
         require(!accountRepository.existsByAccountId(accountId)) {
@@ -142,7 +142,7 @@ class AccountService(
             Account(
                 accountId = accountId,
                 publicKey = publicKeyBytes.toHex(),
-                privateKeyEncoded = CryptoUtils.encrypt(privateKeyBytes, passphrase)
+                privateKeyEncrypted = privateKeyEncrypted
             )
         )
     }

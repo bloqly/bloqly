@@ -64,7 +64,7 @@ class BlockchainService(
         val timestamp = TimeUtils.getCurrentTime()
 
         val validatorTxHash = ByteArray(0)
-        val contractBodyHash = CryptoUtils.hash(contractBody).toHex()
+        val contractBodyHash = CryptoUtils.hash(contractBody.toByteArray()).toHex()
 
         val tx = transactionService.createTransaction(
             space = spaceId,
